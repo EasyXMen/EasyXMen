@@ -26,6 +26,7 @@
 #include "Dcm_Cfg.h"
 #if (STD_ON == DCM_UDS_0X11)
 #include "Dcm_Internal.h"
+#include "Rte.h"
 /* ===================================================== macros ===================================================== */
 /**
  * @brief The minimum request length of UDS 0x11
@@ -55,6 +56,8 @@ boolean Dcm_ResetProcessing;
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x11 to find the configured DcmReset index for the requested subfunction, this function
  *                is guaranteed to be successful as there will be configuration validation rules
@@ -66,6 +69,8 @@ boolean Dcm_ResetProcessing;
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DcmInternal_FindResetIndex(uint8 subFunction, uint8* resetIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -98,7 +103,7 @@ Std_ReturnType Dcm_UDS0x11(
 #ifdef DCM_UDS_0X11_0X4
         case DCM_UDS11_ENABLERAPIDPOWERSHUTDOWN:
         {
-            (void)Rte_Switch_ModeRapidPowerShutDownModeSwitchInterface_modeRapidPowerShutDown(
+            result = Rte_Switch_ModeRapidPowerShutDownModeSwitchInterface_modeRapidPowerShutDown(
                 RTE_MODE_DcmModeRapidPowerShutDown_DCM_ENABLE_RAPIDPOWERSHUTDOWN);
 #ifdef DCM_POWER_DOWN_TIME
             resData[1u] = DCM_POWER_DOWN_TIME;
@@ -113,48 +118,61 @@ Std_ReturnType Dcm_UDS0x11(
 #ifdef DCM_UDS_0X11_0X5
         case DCM_UDS11_DISABLERAPIDPOWERSHUTDOWN:
         {
-            (void)Rte_Switch_ModeRapidPowerShutDownModeSwitchInterface_modeRapidPowerShutDown(
+            result = Rte_Switch_ModeRapidPowerShutDownModeSwitchInterface_modeRapidPowerShutDown(
                 RTE_MODE_DcmModeRapidPowerShutDown_DCM_DISABLE_RAPIDPOWERSHUTDOWN);
             break;
         }
 #endif
         default:
         {
-            (void)Rte_Switch_EcuResetModeSwitchInterface_ecuReset(subFunction);
+            result = Rte_Switch_EcuResetModeSwitchInterface_ecuReset(subFunction);
             (void)SchM_Switch_Dcm_DcmEcuReset(subFunction);
             break;
         }
         }
 
-        if ((DCM_INITIAL == OpStatus) && (Dcm_DslProtocolRow[protocolId].SendRespPendOnRestart))
+        if ((result == RTE_E_TRANSMIT_ACK) || (result == E_OK))
         {
-            result = DCM_E_FORCE_RCRRP;
+            result = E_OK;
+            if ((DCM_INITIAL == OpStatus) && (Dcm_DslProtocolRow[protocolId].SendRespPendOnRestart))
+            {
+                result = DCM_E_FORCE_RCRRP;
+            }
+            else
+            {
+                uint8 resetIndex = 0u;
+                DcmInternal_FindResetIndex(subFunction, &resetIndex);
+                if (DCM_AFTER_RESET == Dcm_DspEcuResetRow[resetIndex].ResponseToEcuReset)
+                {
+                    if ((DCM_INITIAL != OpStatus) || (!Dcm_ProcessingSetProg))
+                    {
+                        Dcm_ProgConditions.ConnectionId = Dcm_DslMainConnection[connectionId].RxConnectionId;
+                        DcmInternal_GetMetaDataSATA(protocolId, &Dcm_ProgConditions.TesterAddress, NULL_PTR);
+                        Dcm_ProgConditions.Sid                 = DCM_UDS_ECURESET_SID;
+                        Dcm_ProgConditions.SubFncId            = subFunction;
+                        Dcm_ProgConditions.ReprogramingRequest = FALSE;
+                        Dcm_ProgConditions.ResponseRequired    = TRUE;
+                        result                                 = DcmInternal_SetProgConditions(OpStatus);
+                        if (E_OK == result)
+                        {
+                            Dcm_ResRejectedDueToAFTER_RESET = TRUE;
+                        }
+                    }
+                    else
+                    {
+                        result = DCM_E_PENDING;
+                    }
+                }
+            }
+        }
+        else if ((result == RTE_E_NO_DATA) || (result == DCM_E_PENDING))
+        {
+            result = DCM_E_PENDING;
         }
         else
         {
-            uint8 resetIndex = 0u;
-            DcmInternal_FindResetIndex(subFunction, &resetIndex);
-            if (DCM_AFTER_RESET == Dcm_DspEcuResetRow[resetIndex].ResponseToEcuReset)
-            {
-                if ((DCM_INITIAL != OpStatus) || (!Dcm_ProcessingSetProg))
-                {
-                    Dcm_ProgConditions.ConnectionId = Dcm_DslMainConnection[connectionId].RxConnectionId;
-                    DcmInternal_GetMetaDataSATA(protocolId, &Dcm_ProgConditions.TesterAddress, NULL_PTR);
-                    Dcm_ProgConditions.Sid                 = DCM_UDS_ECURESET_SID;
-                    Dcm_ProgConditions.SubFncId            = subFunction;
-                    Dcm_ProgConditions.ReprogramingRequest = FALSE;
-                    Dcm_ProgConditions.ResponseRequired    = TRUE;
-                    result                                 = DcmInternal_SetProgConditions(OpStatus);
-                    if (E_OK == result)
-                    {
-                        Dcm_ResRejectedDueToAFTER_RESET = TRUE;
-                    }
-                }
-                else
-                {
-                    result = DCM_E_PENDING;
-                }
-            }
+            result     = E_NOT_OK;
+            *ErrorCode = DCM_E_CONDITIONSNOTCORRECT;
         }
     }
 

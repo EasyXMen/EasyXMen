@@ -81,12 +81,22 @@
 #define TCPIP_VAR_UDP_PCBS(coreIndex)   g_udp_pcbs[(coreIndex)]
 
 /* last local UDP port */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_udp_port[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* The list of UDP PCBs */
 /* exported in udp.h (was static) */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct udp_pcb *g_udp_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Initialize this module.
  */
@@ -101,7 +111,11 @@ udp_init(void)
   TCPIP_VAR_UDP_PORT(coreIndex) = UDP_LOCAL_PORT_RANGE_START;
 #endif /* LWIP_RAND */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Allocate a new local UDP port.
  *
@@ -130,7 +144,11 @@ again:
   }
   return TCPIP_VAR_UDP_PORT(coreIndex);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Common code to see if the current input packet matches the pcb
  * (current input packet is accessed via ip(4/6)_current_* macros)
  *
@@ -192,7 +210,11 @@ udp_input_local_match(struct udp_pcb *pcb, struct netif *inp, u8_t broadcast)
 
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Process an incoming UDP datagram.
  *
@@ -458,7 +480,11 @@ chkerr:
   PERF_STOP("udp_input");
 #endif /* CHECKSUM_CHECK_UDP */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Sends the pbuf p using UDP. The pbuf is not deallocated.
@@ -493,8 +519,12 @@ udp_send(struct udp_pcb *pcb, struct pbuf *p)
   /* send to the packet using remote ip and port stored in the pcb */
   return udp_sendto(pcb, p, &pcb->remote_ip, pcb->remote_port);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup udp_raw
  * Same as udp_send() but with checksum
  */
@@ -513,8 +543,12 @@ udp_send_chksum(struct udp_pcb *pcb, struct pbuf *p,
   return udp_sendto_chksum(pcb, p, &pcb->remote_ip, pcb->remote_port,
                            have_chksum, chksum);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Send data to a specified address using UDP.
@@ -540,7 +574,11 @@ udp_sendto(struct udp_pcb *pcb, struct pbuf *p,
 #if LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP
   return udp_sendto_chksum(pcb, p, dst_ip, dst_port, 0, 0);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup udp_raw
  * Same as udp_sendto(), but with checksum */
 err_t
@@ -616,7 +654,11 @@ udp_sendto_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
   return udp_sendto_if(pcb, p, dst_ip, dst_port, netif);
 #endif /* LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Send data to a specified address using UDP.
@@ -644,7 +686,11 @@ udp_sendto_if(struct udp_pcb *pcb, struct pbuf *p,
 #if LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP
   return udp_sendto_if_chksum(pcb, p, dst_ip, dst_port, netif, 0, 0);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Same as udp_sendto_if(), but with checksum */
 err_t
 udp_sendto_if_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
@@ -714,7 +760,11 @@ udp_sendto_if_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_i
   return udp_sendto_if_src(pcb, p, dst_ip, dst_port, netif, src_ip);
 #endif /* LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup udp_raw
  * Same as @ref udp_sendto_if, but with source address */
 err_t
@@ -724,7 +774,11 @@ udp_sendto_if_src(struct udp_pcb *pcb, struct pbuf *p,
 #if LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP
   return udp_sendto_if_src_chksum(pcb, p, dst_ip, dst_port, netif, 0, 0, src_ip);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Same as udp_sendto_if_src(), but with checksum */
 err_t
 udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
@@ -929,7 +983,11 @@ udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *d
   UDP_STATS_INC(udp.xmit);
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Bind an UDP PCB.
@@ -1053,7 +1111,11 @@ udp_bind(struct udp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port)
   LWIP_DEBUGF(UDP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, (", port %"U16_F")\n", pcb->local_port));
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Bind an UDP PCB to a specific netif.
@@ -1077,7 +1139,11 @@ udp_bind_netif(struct udp_pcb *pcb, const struct netif *netif)
     pcb->netif_idx = NETIF_NO_INDEX;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Sets the remote end of the pcb. This function does not generate any
@@ -1144,7 +1210,11 @@ udp_connect(struct udp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port)
   TCPIP_VAR_UDP_PCBS(coreIndex) = pcb;
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Remove the remote end of the pcb. This function does not generate
@@ -1174,7 +1244,11 @@ udp_disconnect(struct udp_pcb *pcb)
   /* mark PCB as unconnected */
   udp_clear_flags(pcb, UDP_FLAGS_CONNECTED);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Set a receive callback for a UDP PCB.
@@ -1195,7 +1269,11 @@ udp_recv(struct udp_pcb *pcb, udp_recv_fn recv, void *recv_arg)
   pcb->recv = recv;
   pcb->recv_arg = recv_arg;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Removes and deallocates the pcb.
@@ -1234,7 +1312,11 @@ udp_remove(struct udp_pcb *pcb)
   }
   memp_free(MEMP_UDP_PCB, pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Creates a new UDP pcb which can be used for UDP communication. The
@@ -1270,7 +1352,11 @@ udp_new(void)
   }
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup udp_raw
  * Create a UDP PCB for specific IP type.
@@ -1304,7 +1390,11 @@ udp_new_ip_type(u8_t type)
 #endif /* LWIP_IPV4 && LWIP_IPV6 */
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** This function is called from netif.c when address is changed
  *
  * @param old_addr IP address of the netif before change
@@ -1327,6 +1417,8 @@ void udp_netif_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_a
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if UDP_DEBUG
 /**

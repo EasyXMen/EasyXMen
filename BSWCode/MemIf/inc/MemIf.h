@@ -33,12 +33,6 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_MemIf_0553
-      Reason:  the MemIf shall be implemented as a set of macros mapping the MemIf API to the API of the corresponding
-  memory abstraction module.
-      Risk: No risk.
-      Prevention: None.
-
     \li VL_MemIf_5004
       Reason: pointer type definition is essential
       Risk: No risk.
@@ -51,6 +45,11 @@
 
     \li VL_MemIf_1503
       Reason: external interface
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MemIf_0553
+      Reason: external interface design
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -77,6 +76,7 @@
  *  V02.00.02 2023-09-18  tao.yu        add type description
  *  V03.00.00 2024-09-19  tao.yu        ReWork and update to R23-11
  *  V03.00.01 2025-05-06  peng.wu       CPT-14238, Fix incorrect state when an invalid DeviceIndex is passed in
+*   V03.00.02 2026-06-05  tao.yu        add arti
  *
  ==================================================================================================================== */
 
@@ -95,7 +95,7 @@ extern "C" {
 #define MEMIF_AR_RELEASE_REVISION_VERSION (0u)  /** Value of Autosar patch version */
 #define MEMIF_SW_MAJOR_VERSION            (3u)  /** Value of module major version */
 #define MEMIF_SW_MINOR_VERSION            (0u)  /** Value of module minor version */
-#define MEMIF_SW_PATCH_VERSION            (1u)  /** Value of module patch version */
+#define MEMIF_SW_PATCH_VERSION            (2u)  /** Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
 #define MEMIF_BROADCAST_ID (0xFFu) /**< Value of broadcast in multiple device */
@@ -103,6 +103,8 @@ extern "C" {
 /* ========================================= external function declarations ========================================= */
 
 #if (MEMIF_DEV_ERROR_DETECT == STD_ON)
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief       Invokes the "Read" function of the underlying memory abstraction module selected by the parameter
  *              DeviceIndex.
@@ -120,6 +122,10 @@ extern "C" {
  */
 extern Std_ReturnType
     MemIf_Read(uint16 DeviceIndex, uint16 BlockNumber, uint16 BlockOffset, uint8* DataBufferPtr, uint16 Length);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 
 /**
  * @brief       Invokes the "Write" function of the underlying memory abstraction module selected by the parameter
@@ -135,6 +141,10 @@ extern Std_ReturnType
  * @trace       CPD-75682
  */
 extern Std_ReturnType MemIf_Write(uint16 DeviceIndex, uint16 BlockNumber, const uint8* DataBufferPtr);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 
 /**
  * @brief       Invokes the "Cancel" function of the underlying memory abstraction module selected by the parameter
@@ -145,6 +155,10 @@ extern Std_ReturnType MemIf_Write(uint16 DeviceIndex, uint16 BlockNumber, const 
  * @trace       CPD-75683
  */
 extern void MemIf_Cancel(uint16 DeviceIndex);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 
 /**
  * @brief       Invokes the "GetJobResult" function of the underlying memory abstraction module selected by the
@@ -164,6 +178,10 @@ extern void MemIf_Cancel(uint16 DeviceIndex);
  * @trace       CPD-75684
  */
 extern MemIf_JobResultType MemIf_GetJobResult(uint16 DeviceIndex);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 
 /**
  * @brief       Invokes the "InvalidateBlock" function of the underlying memory abstraction module selected by the
@@ -178,6 +196,10 @@ extern MemIf_JobResultType MemIf_GetJobResult(uint16 DeviceIndex);
  * @trace       CPD-75685
  */
 extern Std_ReturnType MemIf_InvalidateBlock(uint16 DeviceIndex, uint16 BlockNumber);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 
 /**
  * @brief       Invokes the "EraseImmediateBlock" function of the underlying memory abstraction module selected by the
@@ -192,9 +214,13 @@ extern Std_ReturnType MemIf_InvalidateBlock(uint16 DeviceIndex, uint16 BlockNumb
  * @trace       CPD-75686
  */
 extern Std_ReturnType MemIf_EraseImmediateBlock(uint16 DeviceIndex, uint16 BlockNumber);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
 #endif
 
 #if (MEMIF_DEV_ERROR_DETECT == STD_ON) || (MEMIF_NUMBER_OF_DEVICES > 1U)
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief       Invokes the "GetStatus" function of the underlying memory abstraction module selected by the parameter
  *              DeviceIndex.
@@ -210,9 +236,13 @@ extern Std_ReturnType MemIf_EraseImmediateBlock(uint16 DeviceIndex, uint16 Block
  * @trace       CPD-75687
  */
 extern MemIf_StatusType MemIf_GetStatus(uint16 DeviceIndex);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
 #endif
 
 #if (MEMIF_VERSION_INFO_API == STD_ON)
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief       Returns version information.
  * @param[out]  VersionInfoPtr: Pointer to standard version information structure.
@@ -221,6 +251,8 @@ extern MemIf_StatusType MemIf_GetStatus(uint16 DeviceIndex);
  * @trace       CPD-75688
  */
 extern void MemIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr);
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
 #endif
 
 #ifdef __cplusplus

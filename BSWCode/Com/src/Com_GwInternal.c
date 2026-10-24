@@ -40,8 +40,6 @@ COM_LOCAL boolean Com_GwDestinationRequest[COM_MAX_GW_DESTINATION_NUM];
 #include "Com_MemMap.h"
 
 /* ========================================== internal function declarations ======================================== */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /* PRQA S 5015 ++ */ /* VL_Com_UntrustedMethod */
 /**
  * @brief         Get the GW Signal's New value and Old value
@@ -55,12 +53,16 @@ COM_LOCAL boolean Com_GwDestinationRequest[COM_MAX_GW_DESTINATION_NUM];
  * @synchronous   TRUE
  * @trace         CPD-66533
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GwSignalNewOldValueGet(
     Com_SignalType SignalType,
     uint16         GWSignalBufferId,
     uint16         TxSignalValueId,
     uint64*        SourceSignalValue,
     uint16         PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Gateway pdu(which include gateway signal and group signal) handle
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -74,11 +76,15 @@ COM_LOCAL uint64 Com_GwSignalNewOldValueGet(
 #if (                                                                                    \
     ((0u < COM_MAX_TXSIGNAL_NUMBER) || (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)) \
     || ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwSignalOfPduHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     Com_TransferPropertyType    SignalTxProperty,
     uint16                      RptNum,
     boolean                     ValueChanged);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_GwUint8NDYNSignal.
@@ -92,11 +98,15 @@ COM_LOCAL void Com_GwSignalOfPduHandle(
  * @trace
  */
 #if (0u < COM_MAX_GW_DESTINATION_NDYN_SIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
     uint16           ComSignalLength,
     Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_GwUint8NDYNSignal.
@@ -110,11 +120,15 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
  * @trace
  */
 #if (COM_MAX_GW_DESTINATION_NDYN_GROUP_SIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
     uint16           ComSignalLength,
     Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_GwUint8NDYNSignal.
@@ -128,11 +142,15 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
  * @trace
  */
 #if (0u < COM_MAX_GW_DESTINATION_NDYN_DESCRIPTION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
     uint16           ComSignalLength,
     Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Gateway signal/group signal/description signal which signal type is COM_UINT8_DYN
@@ -148,12 +166,16 @@ COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
 #if (                                                                                                \
     (0u < COM_MAX_GW_SOURCE_NDYN_SIGNAL_NUMBER) || (0u < COM_MAX_GW_SOURCE_NDYN_GROUP_SIGNAL_NUMBER) \
     || (0u < COM_MAX_GW_SOURCE_NDYN_DESCRIPTION_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNSignal(
     Com_SignalType       SignalType,
     uint16               SignalBufferId,
     uint16               ComSignalLength,
     Com_SignalConfigType DestSignalType,
     Com_SignalIdType     DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Gateway signal which signal type is COM_UINT8_DYN,
@@ -166,8 +188,12 @@ COM_LOCAL void Com_GwUint8NDYNSignal(
  * @trace
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GwNotArrayTxSignalHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Gateway group signal which signal type is COM_UINT8_DYN,
@@ -180,8 +206,12 @@ COM_LOCAL void
  * @trace
  */
 #if ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GwNotArrayTxGrpSigHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Gateway description signal which signal type is COM_UINT8_DYN,
@@ -194,8 +224,12 @@ COM_LOCAL void
  * @trace
  */
 #if (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GwNotArrayDestSigHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Gateway signal/group signal/description signal which signal type is COM_UINT8_DYN
@@ -207,11 +241,15 @@ COM_LOCAL void
  * @synchronous   TRUE
  * @trace         CPD-66537
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwNotArraySignal(
     Com_SignalType       SignalType,
     uint16               GWSignalBufferId,
     Com_SignalConfigType DestSignalType,
     Com_SignalIdType     DestSignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Gateway signal/group signal/signal group/description signal
  * @param[in]     GwDestPtr:Pointer of signal gateway destination
@@ -221,13 +259,15 @@ COM_LOCAL void Com_GwNotArraySignal(
  * @synchronous   TRUE
  * @trace         CPD-66538
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwSignal(
     const Com_GwDestType* GwDestPtr,
     Com_SignalConfigType  GWSourceSignalType,
     Com_SignalIdType      GWSourceSignalId);
-/* PRQA S 5015 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+/* PRQA S 5015 -- */
 #endif
 /* ============================================ internal data definitions =========================================== */
 
@@ -266,14 +306,14 @@ void Com_MainFunctionRouteSignalsHandle(Com_MainFunctionIdType RouteSignalsMainF
 #endif
 /* ========================================== internal function definitions ========================================= */
 #if ((0u < COM_MAX_GWMAPPING_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER))
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /**
  * @brief Gateway signal which signal type is COM_UINT8_DYN,
  *        Called by Com_GwNotArraySignal.
  *
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GwNotArrayTxSignalHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId)
 {
@@ -344,6 +384,8 @@ COM_LOCAL void
     }
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Gateway group signal which signal type is COM_UINT8_DYN,
@@ -351,12 +393,13 @@ COM_LOCAL void
  *
  */
 #if ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_Com_STCAL */
 COM_LOCAL void
     Com_GwNotArrayTxGrpSigHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId)
 /* PRQA S 6070 -- */
 {
-    uint8*                       txIpduRuntimeBuffPtr;
     boolean                      valueChanged      = FALSE;
     uint64                       sourceSignalValue = 0u;
     uint16                       rptNum            = 1u;
@@ -367,16 +410,17 @@ COM_LOCAL void
     PduIdType                    txIpduId          = txSignalGroupPtr->IpduRefIndex;
     const Com_TxIPduType*        txIpduPtr         = &Com_CfgTxIPduPtr[txIpduId];
     Com_MainFunctionIdType       txMainfunctionId  = txIpduPtr->TxMainfunctionId;
-#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE) && (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType updateBitPosition = txSignalGroupPtr->UpdateLsbBytePos;
     uint8                  updateBitMask     = txSignalGroupPtr->UpdateBitMask;
 #endif
 
-    Com_TxIpduBufIdType      ipduBufferIndex  = txIpduPtr->TxIPduBufIndex;
-    Com_TransferPropertyType signalTxProperty = (COM_GROUPSIGNAL_TMC_NONE != txGroupSignalPtr->ComTransferProperty)
-                                                    ? txGroupSignalPtr->ComTransferProperty
-                                                    : txSignalGroupPtr->ComTransferProperty;
-    uint16                   partitionId      = txIpduPtr->IpduPartitionId;
+    Com_TxIpduBufIdType      ipduBufferIndex      = txIpduPtr->TxIPduBufIndex;
+    Com_TransferPropertyType signalTxProperty     = (COM_GROUPSIGNAL_TMC_NONE != txGroupSignalPtr->ComTransferProperty)
+                                                        ? txGroupSignalPtr->ComTransferProperty
+                                                        : txSignalGroupPtr->ComTransferProperty;
+    uint16                   partitionId          = txIpduPtr->IpduPartitionId;
+    uint8*                   txIpduRuntimeBuffPtr = Com_TxIPduRuntimeBuff[txMainfunctionId];
     SchM_Enter_Com_MultiCore_Lock();
     uint64 destSignalValue =
         Com_GwSignalNewOldValueGet(SignalType, GWSignalBufferId, txSignalValueId, &sourceSignalValue, partitionId);
@@ -386,7 +430,6 @@ COM_LOCAL void
         valueChanged = TRUE;
 /*pack the new value*/
 #if (0u < COM_MAX_TXIPDUBUFF_SIZE)
-        txIpduRuntimeBuffPtr = Com_TxIPduRuntimeBuff[txMainfunctionId];
         Com_TxSignalPackHandle(
             COM_TX_GROUP_SIGNAL,
             txGroupSignalPtr,
@@ -394,12 +437,9 @@ COM_LOCAL void
             &txIpduRuntimeBuffPtr[ipduBufferIndex]);
 #endif
     }
-#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE) && (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
     /*if configuration update bit,set update bit to 1*/
     Com_SetSignalUpdateBit(ipduBufferIndex, updateBitPosition, updateBitMask, txIpduRuntimeBuffPtr);
-#endif
-#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
-    boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[txMainfunctionId];
 #endif
     PduIdType                   ipduIdPerMainfunction = txIpduId - Com_GetStartOfMainFunctionTx(txMainfunctionId);
     Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[txMainfunctionId][ipduIdPerMainfunction];
@@ -407,6 +447,7 @@ COM_LOCAL void
 #if (COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
     if (COM_UNUSED_TXGRPSIGFILTERID != txGroupSignalPtr->FilterIndex) /* PRQA S 2895 */ /* VL_Com_NegtiveValueType */
     {
+        boolean* txSignalTMCRuntimePtr                       = Com_TxSignalTMCRunTime[txMainfunctionId];
         txSignalTMCRuntimePtr[txGroupSignalPtr->TMCBufferId] = Com_DestSignalTMCCalculate(
             SignalType,
             txGroupSignalPtr->FilterAlgorithm,
@@ -431,6 +472,8 @@ COM_LOCAL void
     }
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Gateway description signal which signal type is COM_UINT8_DYN,
@@ -438,10 +481,11 @@ COM_LOCAL void
  *
  */
 #if (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GwNotArrayDestSigHandle(Com_SignalType SignalType, uint16 GWSignalBufferId, Com_SignalIdType DestSignalId)
 {
-    uint8*                      txIpduRuntimeBuffPtr;
     boolean                     valueChanged      = FALSE;
     uint64                      sourceSignalValue = 0u;
     uint16                      rptNum            = 1u;
@@ -454,9 +498,10 @@ COM_LOCAL void
     Com_SignalPositionType updateBitPosition = gwDestSignalPtr->UpdateLsbBytePos;
     uint8                  updateBitMask     = gwDestSignalPtr->UpdateBitMask;
 #endif
-    Com_TransferPropertyType signalTxProperty = gwDestSignalPtr->ComTransferProperty;
-    Com_TxIpduBufIdType      ipduBufferIndex  = txIpduPtr->TxIPduBufIndex;
-    uint16                   partitionId      = txIpduPtr->IpduPartitionId;
+    Com_TransferPropertyType signalTxProperty     = gwDestSignalPtr->ComTransferProperty;
+    Com_TxIpduBufIdType      ipduBufferIndex      = txIpduPtr->TxIPduBufIndex;
+    uint16                   partitionId          = txIpduPtr->IpduPartitionId;
+    uint8*                   txIpduRuntimeBuffPtr = Com_TxIPduRuntimeBuff[txMainfunctionId];
     SchM_Enter_Com_MultiCore_Lock();
     uint64 destSignalValue =
         Com_GwSignalNewOldValueGet(SignalType, GWSignalBufferId, txSignalValueId, &sourceSignalValue, partitionId);
@@ -466,7 +511,7 @@ COM_LOCAL void
         valueChanged = TRUE;
 /*pack the new value*/
 #if (0u < COM_MAX_TXIPDUBUFF_SIZE)
-        txIpduRuntimeBuffPtr = Com_TxIPduRuntimeBuff[txMainfunctionId];
+
         Com_TxSignalPackHandle(
             COM_TX_DESCRIPTION,
             gwDestSignalPtr,
@@ -478,15 +523,13 @@ COM_LOCAL void
     /*if configuration update bit,set update bit to 1*/
     Com_SetSignalUpdateBit(ipduBufferIndex, updateBitPosition, updateBitMask, txIpduRuntimeBuffPtr);
 #endif
-#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
-    boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[txMainfunctionId];
-#endif
     PduIdType                   ipduIdPerMainfunction = txIpduId - Com_GetStartOfMainFunctionTx(txMainfunctionId);
     Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[txMainfunctionId][ipduIdPerMainfunction];
 
 #if (COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER > 0u)
     if (COM_UNUSED_DESTSIGNALFILTERID != gwDestSignalPtr->FilterIndex) /* PRQA S 2895 */ /* VL_Com_NegtiveValueType */
     {
+        boolean* txSignalTMCRuntimePtr                      = Com_TxSignalTMCRunTime[txMainfunctionId];
         txSignalTMCRuntimePtr[gwDestSignalPtr->TMCBufferId] = Com_DestSignalTMCCalculate(
             SignalType,
             gwDestSignalPtr->FilterAlgorithm,
@@ -503,12 +546,16 @@ COM_LOCAL void
     /*handle the tx pdu (which include the gateway signal) transmit parameter*/
     Com_GwSignalOfPduHandle(txIpduStatePtr, signalTxProperty, rptNum, valueChanged);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Called by Com_GwSignal.
  *        gateway signal/group signal/description signal which signal type isn't COM_UINT8_N and COM_UINT8_DYN
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwNotArraySignal(
     Com_SignalType       SignalType,
     uint16               GWSignalBufferId,
@@ -539,12 +586,16 @@ COM_LOCAL void Com_GwNotArraySignal(
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief Called by Com_GwUint8NDYNSignal.
  *        gateway signal which signal type is COM_UINT8_DYN,UINT8_N
  *
  */
 #if (0u < COM_MAX_GW_DESTINATION_NDYN_SIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -613,6 +664,8 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
 #endif
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Called by Com_GwUint8NDYNSignal.
@@ -620,6 +673,8 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
  *
  */
 #if (COM_MAX_GW_DESTINATION_NDYN_GROUP_SIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -693,6 +748,8 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
 #endif
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Called by Com_GwUint8NDYNSignal.
@@ -700,6 +757,8 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
  *
  */
 #if (0u < COM_MAX_GW_DESTINATION_NDYN_DESCRIPTION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -761,6 +820,8 @@ COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
     Com_GwSignalOfPduHandle(txIpduStatePtr, gwDestSignalPtr->ComTransferProperty, rptNum, valueChanged);
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Called by Com_GwSignal.
@@ -770,6 +831,8 @@ COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
 #if (                                                                                                \
     (0u < COM_MAX_GW_SOURCE_NDYN_SIGNAL_NUMBER) || (0u < COM_MAX_GW_SOURCE_NDYN_GROUP_SIGNAL_NUMBER) \
     || (0u < COM_MAX_GW_SOURCE_NDYN_DESCRIPTION_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwUint8NDYNSignal(
     Com_SignalType       SignalType,
     uint16               SignalBufferId,
@@ -800,7 +863,10 @@ COM_LOCAL void Com_GwUint8NDYNSignal(
     }
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief gateway pdu(which include gateway signal and group signal) handle
  *
@@ -808,6 +874,8 @@ COM_LOCAL void Com_GwUint8NDYNSignal(
 #if (                                                                                    \
     ((0u < COM_MAX_TXSIGNAL_NUMBER) || (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)) \
     || ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwSignalOfPduHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     Com_TransferPropertyType    SignalTxProperty,
@@ -863,12 +931,16 @@ COM_LOCAL void Com_GwSignalOfPduHandle(
     COM_NOUSED(ValueChanged);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
  * @brief Get the GW Signal's New value and Old value
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GwSignalNewOldValueGet(
     Com_SignalType SignalType,
     uint16         GWSignalBufferId,
@@ -946,11 +1018,15 @@ COM_LOCAL uint64 Com_GwSignalNewOldValueGet(
     COM_NOUSED(PartitionId);
     return destSignalValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief gateway signal/group signal/signal group/description signal
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_GwSignal(
     const Com_GwDestType* GwDestPtr,
     Com_SignalConfigType  GWSourceSignalType,
@@ -1031,20 +1107,28 @@ COM_LOCAL void Com_GwSignal(
     COM_NOUSED(GWSourceSignalId);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 #if COM_MAX_GWMAPPING_NUMBER > 0u
 /**
  * @brief Init every destination request flag in the Gateway
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_GwInitDestinationRequest(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     (void)IStdLib_MemSet(&Com_GwDestinationRequest[0], 0u, COM_MAX_GW_DESTINATION_NUM);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief Set every destination request flag in the Gateway
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_GwUpdateDestinationRequest(Com_GwMappingIdType gwMappingId, boolean request)
 {
     const Com_GwMappingType* gwMappingPtr = &Com_CfgGwMappingConfigPtr->GwMapping[gwMappingId];
@@ -1055,10 +1139,9 @@ void Com_GwUpdateDestinationRequest(Com_GwMappingIdType gwMappingId, boolean req
         Com_GwDestinationRequest[gwDestId] = request;
     }
 }
-#endif
-
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
 #endif
 /* PRQA S 0316,2844 -- */
 /* PRQA S 2814,2824 -- */

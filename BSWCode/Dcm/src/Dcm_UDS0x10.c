@@ -43,6 +43,8 @@ Dcm_SessionCtrlType Dcm_SessionCtrl;
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         handle session change related to boot
  * @param[in]     protocolId     : the current protocol Id
@@ -67,6 +69,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x10_HandleForBoot(
     uint8                         session,
     Dcm_DspSessionForBootType     sessionForBoot,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process setProgCondition
@@ -92,6 +98,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x10_ProcessSetProg(
     uint8                         session,
     Dcm_DspSessionForBootType     sessionForBoot,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -169,6 +177,10 @@ Std_ReturnType Dcm_UDS0x10(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 1532-- */ /* VL_QAC_OneFunRef */
 
 void Dcm_UDS0x10_CheckTimer(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
@@ -185,7 +197,10 @@ void Dcm_UDS0x10_CheckTimer(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 Std_ReturnType
     Dcm_UDS0x10_CheckSession(const Dcm_SesCtrlType* session, uint8 sessionNum, Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -214,7 +229,10 @@ Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* deal with session change, notify Dsp for session change */
 /* PRQA S 6070++ */ /* VL_MTR_Dcm_STCAL */
 void Dcm_UDS0x10_SessionChange(void)
@@ -284,7 +302,7 @@ void Dcm_UDS0x10_SessionChange(void)
     && ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0)))
         Dcm_UDS0x28_SessionChange();
 #endif
-#if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID) && (STD_ON == DCM_DDDID_CHECK_SOURCE))
+#if ((STD_ON == DCM_UDS_0X2A) && (DCM_DID_NUM > 0u))
         Dcm_UDS0x2A_StatusChangeHandle();
 #endif
 #if ((STD_ON == DCM_UDS_0X2F) && (DCM_DID_NUM > 0))
@@ -301,6 +319,8 @@ void Dcm_UDS0x10_SessionChange(void)
 #include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 /* notify via mode switch interface, calls SetProgConditions for programming session */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x10_HandleForBoot(
     uint8                         protocolId,
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -343,7 +363,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x10_HandleForBoot(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x10_ProcessSetProg(
     uint8                         protocolId,
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -399,3 +422,5 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x10_ProcessSetProg(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"

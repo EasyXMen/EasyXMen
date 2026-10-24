@@ -74,6 +74,8 @@
 
 /** This array contains all stack-internal cyclic timers. To get the number of
  * timers, use LWIP_ARRAYSIZE() */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const struct lwip_cyclic_timer lwip_cyclic_timers[] = {
 #if LWIP_TCP
   /* The TCP timer is a special case: it does not have to run always and
@@ -114,7 +116,14 @@ const struct lwip_cyclic_timer lwip_cyclic_timers[] = {
 #endif /* LWIP_IPV6_DHCP6 */
 #endif /* LWIP_IPV6 */
 };
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const int lwip_num_cyclic_timers = LWIP_ARRAYSIZE(lwip_cyclic_timers);
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TIMERS && !LWIP_TIMERS_CUSTOM
 
@@ -452,8 +461,12 @@ sys_timeouts_sleeptime(void)
 
 #else /* LWIP_TIMERS && !LWIP_TIMERS_CUSTOM */
 /* Satisfy the TCP code which calls this function */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void
 tcp_timer_needed(void)
 {
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TIMERS && !LWIP_TIMERS_CUSTOM */

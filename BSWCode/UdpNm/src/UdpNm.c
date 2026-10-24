@@ -34,6 +34,8 @@
 #include "PduR_UdpNm.h"
 #endif
 
+#include "UdpNm_Arti.h"
+
 /* ===================================================== macros ===================================================== */
 #define UDPNM_UNUSED(x) (void)(x)
 
@@ -45,106 +47,297 @@ typedef enum
 } UdpNm_InitStatusType;
 
 /* ========================================== internal function declarations ======================================== */
+UDPNM_LOCAL_INLINE boolean UdpNm_TestAndClear(boolean* flagPtr);
+
+#if (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON) || (UDPNM_GLOBAL_PN_ENABLED == STD_ON) \
+    || (UDPNM_NODE_DETECTION_ENABLED == STD_ON) || (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
 #define UDPNM_START_SEC_CODE
 #include "UdpNm_MemMap.h"
-
-#ifdef QAC_ANALYZE
-#pragma PRQA_NO_SIDE_EFFECTS UdpNm_TestAndClear
+UDPNM_LOCAL void UdpNm_SetTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
-UDPNM_LOCAL_INLINE boolean         UdpNm_TestAndClear(boolean* flagPtr);
-UDPNM_LOCAL void                   UdpNm_SetTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
-UDPNM_LOCAL void                   UdpNm_ClrTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
-UDPNM_LOCAL UdpNm_ChannelIndexType UdpNm_FindChannelIndex(NetworkHandleType nmChannelHandle);
 
+#if (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF) || (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON) \
+    || (UDPNM_NODE_DETECTION_ENABLED == STD_ON)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_ClrTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL UdpNm_ChannelIndexType UdpNm_FindChannelIndex(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  *  Function used to process the received data.
  *  */
-#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
 UDPNM_LOCAL void UdpNm_RxNodeDetectHandle(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_CAR_WAKEUP_RX_ENABLED == STD_ON
 #if UDPNM_CAR_WAKEUP_FILTER_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 UDPNM_LOCAL boolean UdpNm_RxCarWakeUpFilter(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 UDPNM_LOCAL void UdpNm_RxCarWakeUpHandle(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 UDPNM_LOCAL void UdpNm_CoordReadyToSleepIndHandle(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_GLOBAL_PN_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 UDPNM_LOCAL boolean UdpNm_RxPnFilter(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON) || (UDPNM_NODE_DETECTION_ENABLED == STD_ON) \
     || (UDPNM_CAR_WAKEUP_RX_ENABLED == STD_ON) || (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 UDPNM_LOCAL void UdpNm_RxDataMainHandle(UdpNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  *  Functions for all timers, including timing, reload, and timeout handling.
  *  */
 UDPNM_LOCAL void UdpNm_StateHoldTimeoutHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void UdpNm_NmTimeoutHandle(UdpNm_ChannelIndexType chIndex);
-#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
-UDPNM_LOCAL void UdpNm_MsgCycleTimeHandle(UdpNm_ChannelIndexType chIndex);
-#endif
-#if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
-UDPNM_LOCAL void UdpNm_RemoteSleepCancellHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void UdpNm_RemoteSleepTimeoutHandle(UdpNm_ChannelIndexType chIndex);
-#endif
-UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_NmTimeoutHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_MsgCycleTimeHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_RemoteSleepCancellHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_RemoteSleepTimeoutHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  *  Function to handle state machine switching.
  *  */
-UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState);
-#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
-#endif
-UDPNM_LOCAL void
-    UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest);
-UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chIndex);
-#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
-UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex);
-#endif
-UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_RepeatMessageStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_BusSleepStateHandle(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void    UdpNm_StateManagement(UdpNm_ChannelIndexType chIndex);
+UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmNewState);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_RepeatMessageStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_BusSleepStateHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_StateManagement(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  *  Function for sending periodic packets.
  *  */
-#if UDPNM_COM_USERDATA_SUPPORT == STD_ON
 UDPNM_LOCAL void UdpNm_WriteUserDataBytes(UdpNm_ChannelIndexType chIndex);
-#endif
-#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
-UDPNM_LOCAL Std_ReturnType UdpNm_SendNmPdu(UdpNm_ChannelIndexType chIndex);
-UDPNM_LOCAL void           UdpNm_SendMsgMainHandle(UdpNm_ChannelIndexType chIndex);
-#endif
-
-UDPNM_LOCAL uint16 UdpNm_GetPartitionIndex(void);
-#if UDPNM_DEV_ERROR_DETECT == STD_ON
-UDPNM_LOCAL boolean UdpNm_ValidatePartitionContext(uint8 apiId);
-UDPNM_LOCAL boolean UdpNm_ValidateInitStatus(uint8 apiId);
-UDPNM_LOCAL boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
-UDPNM_LOCAL boolean UdpNm_ValidatePointer(uint8 apiId, const void* pointer);
-UDPNM_LOCAL boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
-#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
-UDPNM_LOCAL boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
-#endif
-UDPNM_LOCAL boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
-UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
-#endif
 #define UDPNM_STOP_SEC_CODE
 #include "UdpNm_MemMap.h"
+#endif
+
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL Std_ReturnType UdpNm_SendNmPdu(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL void UdpNm_SendMsgMainHandle(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL uint16 UdpNm_GetPartitionIndex(void);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_DEV_ERROR_DETECT == STD_ON
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidatePartitionContext(uint8 apiId);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateInitStatus(uint8 apiId);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidatePointer(uint8 apiId, const void* pointer);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
+UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
+#endif
 
 /* ============================================ internal data definitions =========================================== */
 #define UDPNM_START_SEC_VAR_CLEARED_8
@@ -175,6 +368,7 @@ UDPNM_LOCAL const UdpNm_ConfigType* UdpNm_CfgPtr; /**< @range NA */
  */
 void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr)
 {
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_INIT, UdpNmConfigPtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_INIT) && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_INIT)
         && UdpNm_ValidatePointer(UDPNM_SERVICE_ID_INIT, UdpNmConfigPtr))
@@ -285,14 +479,20 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr)
         }
         UdpNm_InitStatus[UdpNm_GetPartitionIndex()] = UDPNM_INIT;
     }
+    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_INIT);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Passive startup of the AUTOSAR UdpNm.
  */
 Std_ReturnType UdpNm_PassiveStartUp(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_PASSIVESTARUP, nmChannelHandle);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_PASSIVESTARUP)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_PASSIVESTARUP)
@@ -312,16 +512,22 @@ Std_ReturnType UdpNm_PassiveStartUp(NetworkHandleType nmChannelHandle)
         SchM_Exit_UdpNm_Context();
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_PASSIVESTARUP, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Request the network, since ECU needs to communicate on the bus.
  */
 Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_NETWORKREQUEST, nmChannelHandle);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_NETWORKREQUEST)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_NETWORKREQUEST)
@@ -342,17 +548,23 @@ Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle)
 
         ret = E_OK;
     }
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_NETWORKREQUEST, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Release the network, since ECU doesn't have to communicate on the bus.
  */
 Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_NETWORKRELEASE, nmChannelHandle);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_NETWORKRELEASE)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_NETWORKRELEASE)
@@ -369,11 +581,16 @@ Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle)
 
         ret = E_OK;
     }
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_NETWORKRELEASE, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COM_CONTROL_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Disable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  */
@@ -381,7 +598,7 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
 
-/** SWS_UdpNm_00307 */
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_DISABLECOMMUNICATION, nmChannelHandle);
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_DISABLECOMMUNICATION)
@@ -417,18 +634,23 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle)
     UDPNM_UNUSED(nmChannelHandle);
 #endif
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_DISABLECOMMUNICATION, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COM_CONTROL_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Enable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  */
 Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
-/** SWS_UdpNm_00306 */
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_ENABLECOMMUNICATION, nmChannelHandle);
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_ENABLECOMMUNICATION)
@@ -467,18 +689,24 @@ Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle)
     UDPNM_UNUSED(nmChannelHandle);
 #endif
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_ENABLECOMMUNICATION, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_USER_DATA_ENABLED == STD_ON) && (UDPNM_COM_USERDATA_SUPPORT == STD_OFF) \
     && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Set user data for NM PDUs transmitted next on the bus.
  */
 Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_SETUSERDATA, nmChannelHandle, nmUserDataPtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_SETUSERDATA)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_SETUSERDATA)
@@ -501,17 +729,24 @@ Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
         ret = E_OK;
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_SETUSERDATA, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_USER_DATA_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Get user data out of the most recently received NM PDU.
  */
 Std_ReturnType UdpNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_GETUSERDATA, nmChannelHandle, nmUserDataPtr);
 
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_GETUSERDATA)
@@ -535,17 +770,23 @@ Std_ReturnType UdpNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUse
 
         ret = E_OK;
     }
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_GETUSERDATA, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Requests transmission of a PDU.
  */
 Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_TRANSMIT) && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_TRANSMIT)
         && UdpNm_ValidateUserDataPdu(UDPNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr))
@@ -572,16 +813,22 @@ Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
         }
     }
     UDPNM_UNUSED(PduInfoPtr);
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_TRANSMIT, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Get node identifier out of the most recently received NM PDU.
  */
 Std_ReturnType UdpNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_GETNODEIDENTIFIER, nmChannelHandle, nmNodeIdPtr);
 #if UDPNM_NODE_ID_ENABLED == STD_ON
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_GETNODEIDENTIFIER)
@@ -608,15 +855,21 @@ Std_ReturnType UdpNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8*
     UDPNM_UNUSED(nmChannelHandle);
     UDPNM_UNUSED(nmNodeIdPtr);
 #endif
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_GETNODEIDENTIFIER, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Get node identifier configured for the local node.
  */
 Std_ReturnType UdpNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER, nmChannelHandle, nmNodeIdPtr);
 #if UDPNM_NODE_ID_ENABLED == STD_ON
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER)
@@ -638,15 +891,21 @@ Std_ReturnType UdpNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, u
     UDPNM_UNUSED(nmChannelHandle);
     UDPNM_UNUSED(nmNodeIdPtr);
 #endif
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Set Repeat Message Request Bit for NM PDUs transmitted next on the bus.
  */
 Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_REPEATMESSAGEREQUEST, nmChannelHandle);
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_REPEATMESSAGEREQUEST)
@@ -674,15 +933,21 @@ Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
 #else
     UDPNM_UNUSED(nmChannelHandle);
 #endif
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_REPEATMESSAGEREQUEST, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Get the whole PDU data out of the most recently received NM PDU.
  */
 Std_ReturnType UdpNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_GETPDUDATA, nmChannelHandle, nmPduDataPtr);
 #if UDPNM_USER_DATA_ENABLED == STD_ON || UDPNM_NODE_ID_ENABLED == STD_ON || UDPNM_NODE_DETECTION_ENABLED == STD_ON
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_GETPDUDATA)
@@ -720,15 +985,21 @@ Std_ReturnType UdpNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduD
     UDPNM_UNUSED(nmChannelHandle);
     UDPNM_UNUSED(nmPduDataPtr);
 #endif
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_GETPDUDATA, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Returns the state and the mode of the network management.
  */
 Std_ReturnType UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(4, UDPNM_SERVICE_ID_GETSTATE, nmChannelHandle, nmStatePtr, nmModePtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_GETSTATE) && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_GETSTATE)
         && UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_GETSTATE, nmChannelHandle)
@@ -746,15 +1017,21 @@ Std_ReturnType UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* n
         ret = E_OK;
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_GETSTATE, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_VERSION_INFO_API == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * This service returns the version information of this module.
  */
 void UdpNm_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_GETVERSIONINFO, versioninfo);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePointer(UDPNM_SERVICE_ID_GETVERSIONINFO, versioninfo))
 #endif
@@ -765,16 +1042,22 @@ void UdpNm_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = UDPNM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = UDPNM_SW_PATCH_VERSION;
     }
+    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_GETVERSIONINFO);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_BUS_SYNCHRONIZATION_ENABLED == STD_ON) && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Request bus synchronization.
  */
 Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION, nmChannelHandle);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION)
@@ -799,17 +1082,23 @@ Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
         SchM_Exit_UdpNm_Context();
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Check if remote sleep indication takes place or not.
  */
 Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandle, boolean* nmRemoteSleepIndPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, nmChannelHandle, nmRemoteSleepIndPtr);
 #if (UDPNM_DEV_ERROR_DETECT == STD_ON)
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION)
@@ -830,17 +1119,23 @@ Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
         SchM_Exit_UdpNm_Context();
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Set the NM Coordinator Sleep Ready bit in the Control Bit Vector.
  */
 Std_ReturnType UdpNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean nmSleepReadyBit)
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_SETSLEEPREADYBIT, nmChannelHandle, nmSleepReadyBit);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_SETSLEEPREADYBIT)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_SETSLEEPREADYBIT)
@@ -861,15 +1156,21 @@ Std_ReturnType UdpNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
         ret                                                     = E_OK;
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_SETSLEEPREADYBIT, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * The lower layer communication interface module confirms the transmission of a PDU, or the failure to transmit a PDU.
  */
 void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_IFTXCONFIRMATION, TxPduId, result);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_IFTXCONFIRMATION)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_IFTXCONFIRMATION)
@@ -911,15 +1212,21 @@ void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             }
         }
     }
+    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_IFTXCONFIRMATION);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Indication of a received PDU from a lower layer communication interface module.
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 2889 -- */ /* VL_QAC_MultiReturn */
 {
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_RXINDICATION, RxPduId, PduInfoPtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_RXINDICATION)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_RXINDICATION)
@@ -958,25 +1265,32 @@ void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
                         Nm_PduRxIndication(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
 #endif
                     }
+                    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_RXINDICATION);
                     return;
                 }
             }
         }
     }
+    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_RXINDICATION);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Within this API, the upper layer module (called module) shall check whether the available data
  * fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
  * buffer provided by PduInfoPtr->SduDataPtr and update the length of the actual copied data in
  * PduInfoPtr->SduLength. If not, it returns E_NOT_OK without changing PduInfoPtr.
  */
-/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
     Std_ReturnType ret = E_NOT_OK;
+    UdpNm_ArtiApiStart(3, UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT, TxPduId, PduInfoPtr);
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
     if (UdpNm_ValidatePartitionContext(UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT)
         && UdpNm_ValidateInitStatus(UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT)
@@ -1009,15 +1323,21 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
         }
     }
 
+    UdpNm_ArtiApiReturn(2, UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT, ret);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * Main function of the UdpNm which processes the algorithm describes in that document.
  */
 void UdpNm_MainFunction(UdpNm_ChannelIndexType chIndex)
 {
+    UdpNm_ArtiApiStart(2, UDPNM_SERVICE_ID_MAINFUNCTION, chIndex);
     if (UdpNm_InitStatus[UdpNm_GetPartitionIndex()] == UDPNM_INIT)
     {
         UdpNm_TimerManagement(chIndex);
@@ -1029,7 +1349,10 @@ void UdpNm_MainFunction(UdpNm_ChannelIndexType chIndex)
         UdpNm_ChannelLCfgData[chIndex].RuntimePtr->RxPduExtFlg                         = FALSE;
         UdpNm_ChannelLCfgData[chIndex].RuntimePtr->TimeoutFlag[UDPNM_NM_TIMEOUT_TIMER] = FALSE;
     }
+    UdpNm_ArtiApiReturn(1, UDPNM_SERVICE_ID_MAINFUNCTION);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
 /**
@@ -1052,6 +1375,10 @@ UDPNM_LOCAL_INLINE boolean UdpNm_TestAndClear(boolean* flagPtr)
     return flag;
 }
 
+#if (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON) || (UDPNM_GLOBAL_PN_ENABLED == STD_ON) \
+    || (UDPNM_NODE_DETECTION_ENABLED == STD_ON) || (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Set the CBV bit to 1.
  * @param[in]   chIndex : Index value of the NM-channel.
@@ -1070,7 +1397,14 @@ UDPNM_LOCAL void UdpNm_SetTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask
         SchM_Exit_UdpNm_Context();
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
 
+#if (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF) || (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON) \
+    || (UDPNM_NODE_DETECTION_ENABLED == STD_ON)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Set the CBV bit to 0.
  * @param[in]   chIndex : Index value of the NM-channel.
@@ -1090,7 +1424,12 @@ UDPNM_LOCAL void UdpNm_ClrTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask
         SchM_Exit_UdpNm_Context();
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Check the index number of the channel identifier in the UdpNm.
  * @param[in]   nmChannelHandle : Identification of the NM-channel.
@@ -1111,8 +1450,12 @@ UDPNM_LOCAL UdpNm_ChannelIndexType UdpNm_FindChannelIndex(NetworkHandleType nmCh
     }
     return index;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_GLOBAL_PN_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Determine whether have relevant PN information to this channel according CBV data and channel config
  * data.
@@ -1157,9 +1500,13 @@ UDPNM_LOCAL boolean UdpNm_RxPnFilter(UdpNm_ChannelIndexType chIndex, const uint8
     }
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Detects if a node detection request has been received, and if so, processes the request.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1185,10 +1532,14 @@ UDPNM_LOCAL void UdpNm_RxNodeDetectHandle(UdpNm_ChannelIndexType chIndex, const 
 #endif
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_CAR_WAKEUP_RX_ENABLED == STD_ON
 #if UDPNM_CAR_WAKEUP_FILTER_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle of Car Wakeup filter.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1210,8 +1561,12 @@ UDPNM_LOCAL boolean UdpNm_RxCarWakeUpFilter(UdpNm_ChannelIndexType chIndex, cons
     }
     return filterRet;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle of Car Wakeup function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1238,9 +1593,13 @@ UDPNM_LOCAL void UdpNm_RxCarWakeUpHandle(UdpNm_ChannelIndexType chIndex, const u
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       NM Coordinator synchronization support handle.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1275,10 +1634,14 @@ UDPNM_LOCAL void UdpNm_CoordReadyToSleepIndHandle(UdpNm_ChannelIndexType chIndex
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON) || (UDPNM_NODE_DETECTION_ENABLED == STD_ON) \
     || (UDPNM_CAR_WAKEUP_RX_ENABLED == STD_ON) || (UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The state maintenance timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1321,8 +1684,12 @@ UDPNM_LOCAL void UdpNm_RxDataMainHandle(UdpNm_ChannelIndexType chIndex, const ui
     }
 #endif
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The state maintenance timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1334,7 +1701,11 @@ UDPNM_LOCAL void UdpNm_StateHoldTimeoutHandle(UdpNm_ChannelIndexType chIndex)
 {
     UdpNm_ChannelLCfgData[chIndex].RuntimePtr->TimeoutFlag[UDPNM_STATE_HOLE_TIMER] = TRUE;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The NM-Timeout timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1360,8 +1731,12 @@ UDPNM_LOCAL void UdpNm_NmTimeoutHandle(UdpNm_ChannelIndexType chIndex)
             UDPNM_E_NETWORK_TIMEOUT);
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The periodically send NM-Pdu timer timeout handling function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1383,9 +1758,13 @@ UDPNM_LOCAL void UdpNm_MsgCycleTimeHandle(UdpNm_ChannelIndexType chIndex)
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Remote node sleep cancell handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1404,7 +1783,11 @@ UDPNM_LOCAL void UdpNm_RemoteSleepCancellHandle(UdpNm_ChannelIndexType chIndex)
         Nm_RemoteSleepCancellation(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The remote node sleep status timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1420,8 +1803,12 @@ UDPNM_LOCAL void UdpNm_RemoteSleepTimeoutHandle(UdpNm_ChannelIndexType chIndex)
     chRTPtr->TimeoutFlag[UDPNM_REMOTE_SLEEP_TIMER] = TRUE;
     Nm_RemoteSleepIndication(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Process used timers in mainfunction.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1472,7 +1859,11 @@ UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex)
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Store new state and notify new state to NM module.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1481,21 +1872,25 @@ UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex)
  * @synchronous TRUE
  * @trace       CPD-71929
  */
-UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState)
+UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmNewState)
 {
+    UdpNm_InnerChannelType* chRTPtr = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
+
 /** SWS_UdpNm_00166 */
 #if UDPNM_STATE_CHANGE_IND_ENABLED == STD_ON
-    Nm_StateChangeNotification(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, nmOldState, nmNewState);
-#else
-    UDPNM_UNUSED(nmOldState);
+    Nm_StateChangeNotification(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, chRTPtr->UdpNmState, nmNewState);
 #endif
 
     SchM_Enter_UdpNm_Context();
-    UdpNm_ChannelLCfgData[chIndex].RuntimePtr->UdpNmState = nmNewState;
+    chRTPtr->UdpNmState = nmNewState;
     SchM_Exit_UdpNm_Context();
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       When entering repeate message state, the NM-Pdu sending capability is started
  *              by setting the NM-Pdu sending timer and flag.
@@ -1554,8 +1949,12 @@ UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, bo
     }
 #endif
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Process when enter from other state to repeat msg state.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1564,13 +1963,13 @@ UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, bo
  * @synchronous TRUE
  * @trace       CPD-71931
  */
-UDPNM_LOCAL void
-    UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest)
+UDPNM_LOCAL void UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest)
 {
     const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
     UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
-    chRTPtr->TickTimers[UDPNM_STATE_HOLE_TIMER]  = chCfgPtr->RepeatMessageTime;
+    chRTPtr->TickTimers[UDPNM_STATE_HOLE_TIMER] =
+        (chCfgPtr->RepeatMessageTime == 0u) ? 1u : chCfgPtr->RepeatMessageTime;
     chRTPtr->TimeoutFlag[UDPNM_STATE_HOLE_TIMER] = FALSE;
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
@@ -1599,9 +1998,17 @@ UDPNM_LOCAL void
         Nm_NetworkMode(chCfgPtr->ComMNetworkHandleRef);
     }
 
-    UdpNm_StateChange(chIndex, nmOldState, NM_STATE_REPEAT_MESSAGE);
-}
+    UdpNm_StateChange(chIndex, NM_STATE_REPEAT_MESSAGE);
 
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_ON
+    UDPNM_UNUSED(isNetWorkRequest);
+#endif
+}
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Processes when enter Bus-Sleep Mode from other state.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1614,7 +2021,7 @@ UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chI
     const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
     UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
-    UdpNm_StateChange(chIndex, NM_STATE_READY_SLEEP, NM_STATE_PREPARE_BUS_SLEEP);
+    UdpNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
     chRTPtr->UdpnmMode = NM_MODE_PREPARE_BUS_SLEEP;
 
     /** SWS_UdpNm_00114 */
@@ -1634,8 +2041,12 @@ UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chI
     }
 #endif
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       According to the current state and active or passive node detect flag to state change.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1657,6 +2068,7 @@ UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex)
     if ((chRTPtr->RepeatMessageRequest || chRTPtr->RepeatMessageDetected)
         && ((currState == NM_STATE_NORMAL_OPERATION) || (currState == NM_STATE_READY_SLEEP)))
     {
+        UdpNm_EnterRepeatMessageState(chIndex, FALSE);
         if (chRTPtr->RepeatMessageRequest)
         {
             UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_RMP_MASK);
@@ -1669,8 +2081,12 @@ UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex)
 
     return stateChanged;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Processing network requests for network mode.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1680,10 +2096,13 @@ UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex)
  */
 UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
 {
-    const UdpNm_ChannelLConfigType* chCfgPtr     = &UdpNm_ChannelLCfgData[chIndex];
-    UdpNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePtr;
-    boolean                         stateChanged = FALSE;
-    Nm_StateType                    currState    = chRTPtr->UdpNmState;
+    const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
+#if (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF) || (UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+    UdpNm_InnerChannelType* chRTPtr = chCfgPtr->RuntimePtr;
+#else
+    const UdpNm_InnerChannelType* chRTPtr = chCfgPtr->RuntimePtr;
+#endif
+    boolean stateChanged = FALSE;
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
     if (UdpNm_TestAndClear(&chRTPtr->NetRequestFlg))
@@ -1692,7 +2111,7 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
         /** SWS_UdpNm_00362 */
         if (chCfgPtr->PnHandleMultipleNetworkRequests)
         {
-            UdpNm_EnterRepeatMessageState(chIndex, currState, TRUE);
+            UdpNm_EnterRepeatMessageState(chIndex, TRUE);
             stateChanged = TRUE;
         }
 #endif
@@ -1703,9 +2122,10 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
     if (!stateChanged)
 #endif
     {
+        Nm_StateType currState = chRTPtr->UdpNmState;
         if ((chRTPtr->NetRequestStatus == UDPNM_NETWORK_REQUESTED) && (currState != NM_STATE_NORMAL_OPERATION))
         {
-            UdpNm_StateChange(chIndex, currState, NM_STATE_NORMAL_OPERATION);
+            UdpNm_StateChange(chIndex, NM_STATE_NORMAL_OPERATION);
 #if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
             /** SWS_UdpNm_00150 */
             chRTPtr->TickTimers[UDPNM_REMOTE_SLEEP_TIMER] = chCfgPtr->RemoteSleepIndTime;
@@ -1715,7 +2135,7 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
 
         if ((chRTPtr->NetRequestStatus == UDPNM_NETWORK_RELEASED) && (currState != NM_STATE_READY_SLEEP))
         {
-            UdpNm_StateChange(chIndex, currState, NM_STATE_READY_SLEEP);
+            UdpNm_StateChange(chIndex, NM_STATE_READY_SLEEP);
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
             chRTPtr->TickTimers[UDPNM_TXMSG_CYCLE_TIMER] = 0u;
 #if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
@@ -1728,7 +2148,11 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
 
     return stateChanged;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition in Repeat Message State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1767,7 +2191,11 @@ UDPNM_LOCAL void UdpNm_RepeatMessageStateHandle(UdpNm_ChannelIndexType chIndex)
 #endif
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition in Normal Operation State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1785,16 +2213,19 @@ UDPNM_LOCAL void UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
     if (!stateChanged && UdpNm_ChannelLCfgData[chIndex].NodeDetectionEnabled)
     {
-        if (UdpNm_NodeDetectStateHandle(chIndex))
-        {
-            UdpNm_EnterRepeatMessageState(chIndex, UdpNm_ChannelLCfgData[chIndex].RuntimePtr->UdpNmState, FALSE);
-        }
+        (void)UdpNm_NodeDetectStateHandle(chIndex);
     }
 #endif
     UDPNM_UNUSED(stateChanged);
+#else
+    UDPNM_UNUSED(chIndex);
 #endif
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition in Ready Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1804,8 +2235,9 @@ UDPNM_LOCAL void UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex
  */
 UDPNM_LOCAL void UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex)
 {
-    const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
-    UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
+    const UdpNm_ChannelLConfigType* chCfgPtr     = &UdpNm_ChannelLCfgData[chIndex];
+    UdpNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePtr;
+    boolean                         stateChanged = FALSE;
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
     if (chRTPtr->NetRequestFlg
@@ -1824,45 +2256,32 @@ UDPNM_LOCAL void UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex)
     }
 #endif
 
-    if (!UdpNm_NetworkStateHandle(chIndex))
-    {
-        SchM_Enter_UdpNm_Context();
+    stateChanged = UdpNm_NetworkStateHandle(chIndex);
+
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
-        if (chCfgPtr->NodeDetectionEnabled && UdpNm_NodeDetectStateHandle(chIndex))
-        {
-            chRTPtr->UdpNmState = NM_STATE_REPEAT_MESSAGE;
-        }
+    if (!stateChanged && chCfgPtr->NodeDetectionEnabled)
+    {
+        stateChanged = UdpNm_NodeDetectStateHandle(chIndex);
+    }
 #endif
 
-        /**
-         *  Depends on the Network Management PDU transmission ability is enabled,
-         *  because NM-Timeout will stop if function UdpNm_DisableCommunication has bean called.
-         *  */
-        if ((chRTPtr->UdpNmState == NM_STATE_READY_SLEEP)
-            && (UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_NM_TIMEOUT_TIMER])
-                || (chRTPtr->TickTimers[UDPNM_NM_TIMEOUT_TIMER] == 0u)))
-        {
-            chRTPtr->UdpNmState = NM_STATE_PREPARE_BUS_SLEEP;
-        }
-        SchM_Exit_UdpNm_Context();
-
-        switch (chRTPtr->UdpNmState)
-        {
-        case NM_STATE_REPEAT_MESSAGE:
-            UdpNm_EnterRepeatMessageState(chIndex, NM_STATE_READY_SLEEP, FALSE);
-            break;
-
-        case NM_STATE_PREPARE_BUS_SLEEP:
-            UdpNm_EnterPrepareBusSleepModeHandle(chIndex);
-            break;
-
-        default:
-            /*nothing*/
-            break;
-        }
+    /**
+     *  Depends on the Network Management PDU transmission ability is enabled,
+     *  because NM-Timeout will stop if function UdpNm_DisableCommunication has bean called.
+     *  */
+    boolean timeoutFlag = UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_NM_TIMEOUT_TIMER]);
+    if (!stateChanged && timeoutFlag)
+    {
+        UdpNm_EnterPrepareBusSleepModeHandle(chIndex);
+        stateChanged = TRUE;
     }
+    UDPNM_UNUSED(stateChanged);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Network wake up signal processing for Non-network mode.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1878,9 +2297,12 @@ UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex)
     boolean rxWakeup = (chRTPtr->RxPduExtFlg && (chRTPtr->UdpNmState == NM_STATE_PREPARE_BUS_SLEEP)) ? TRUE : FALSE;
 
     boolean isNetWorkRequest = FALSE;
-    boolean isPassiveStartUp = UdpNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup;
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
     isNetWorkRequest = UdpNm_TestAndClear(&chRTPtr->NetRequestFlg);
+    /**
+     *  TRUE only if network request and not passive startup.
+     *  */
+    boolean activeWakeUpBit = (isNetWorkRequest && !chRTPtr->PassiveStartUp) ? TRUE : FALSE;
 #endif
 
     /** SWS_UdpNm_00128 SWS_UdpNm_00129 SWS_UdpNm_00123 SWS_UdpNm_00124
@@ -1888,15 +2310,16 @@ UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex)
      *  2. if the network is requested in Bus-Sleep Mode or Prepare Bus-Sleep Mode
      *  3. At successful reception of a Network Management PDU in the Prepare Bus-Sleep Mode
      *  */
-    if (isNetWorkRequest || isPassiveStartUp)
+    if (UdpNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+        || isNetWorkRequest
+#endif
+    )
     {
-        UdpNm_EnterRepeatMessageState(chIndex, chRTPtr->UdpNmState, isNetWorkRequest);
+        UdpNm_EnterRepeatMessageState(chIndex, isNetWorkRequest);
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-        /**
-         *  Only if network request and not passive startup.
-         *  */
-        if (UdpNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && (isNetWorkRequest && !isPassiveStartUp))
+        if (UdpNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && activeWakeUpBit)
         {
             /** SWS_UdpNm_00366 */
             UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_AW_MASK);
@@ -1907,7 +2330,11 @@ UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex)
 
     return stateChanged;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition in Prepare Bus Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1921,17 +2348,21 @@ UDPNM_LOCAL void UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex
     UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
     boolean stateChanged = UdpNm_WakeUpSignalHandle(chIndex);
-
-    if (!stateChanged && UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_STATE_HOLE_TIMER]))
+    boolean timeoutFlag  = UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_STATE_HOLE_TIMER]);
+    if (!stateChanged && timeoutFlag)
     {
-        UdpNm_StateChange(chIndex, chRTPtr->UdpNmState, NM_STATE_BUS_SLEEP);
+        UdpNm_StateChange(chIndex, NM_STATE_BUS_SLEEP);
         chRTPtr->UdpnmMode = NM_MODE_BUS_SLEEP;
 
         /** SWS_UdpNm_00126 */
         Nm_BusSleepMode(chCfgPtr->ComMNetworkHandleRef);
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition in Bus Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1941,7 +2372,8 @@ UDPNM_LOCAL void UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex
  */
 UDPNM_LOCAL void UdpNm_BusSleepStateHandle(UdpNm_ChannelIndexType chIndex)
 {
-    const UdpNm_InnerChannelType* chRTPtr = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
+    const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
+    const UdpNm_InnerChannelType*   chRTPtr  = chCfgPtr->RuntimePtr;
     SchM_Enter_UdpNm_Context();
     if (!chRTPtr->PassiveStartUp
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
@@ -1950,15 +2382,17 @@ UDPNM_LOCAL void UdpNm_BusSleepStateHandle(UdpNm_ChannelIndexType chIndex)
         && chRTPtr->RxPduExtFlg)
     {
         /** SWS_UdpNm_00127 */
-        /** To prevent duplicate reporting of Nm_NetworkStartIndication, this function shall be executed exclusively
-         * with Nm_PassiveStartUp */
-        Nm_NetworkStartIndication(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
+        Nm_NetworkStartIndication(chCfgPtr->ComMNetworkHandleRef);
     }
     SchM_Exit_UdpNm_Context();
 
     (void)UdpNm_WakeUpSignalHandle(chIndex);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Handle state transition of UdpNm.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1998,8 +2432,12 @@ UDPNM_LOCAL void UdpNm_StateManagement(UdpNm_ChannelIndexType chIndex)
         break;
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Get the UserData and fill it into the UserData field of Tx buffer.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2032,9 +2470,13 @@ UDPNM_LOCAL void UdpNm_WriteUserDataBytes(UdpNm_ChannelIndexType chIndex)
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Assemble NM packets and send them.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2082,9 +2524,13 @@ UDPNM_LOCAL Std_ReturnType UdpNm_SendNmPdu(UdpNm_ChannelIndexType chIndex)
     }
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF && UDPNM_TX_PDU_NUMBER > 0u
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Send message in MainFunction.The purpose of this function is to aggregate multiple send requests,Only
  *              one frame will be sent out when there are multiple send requests in a MainFunction.
@@ -2150,8 +2596,12 @@ UDPNM_LOCAL void UdpNm_SendMsgMainHandle(UdpNm_ChannelIndexType chIndex)
         }
     }
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Returns the index of current partition in the ComM configuration.
  * @return      The index of current partition in the ComM configuration.
@@ -2174,8 +2624,12 @@ UDPNM_LOCAL uint16 UdpNm_GetPartitionIndex(void)
 #endif
     return index;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of invalid partition context.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2188,14 +2642,22 @@ UDPNM_LOCAL uint16 UdpNm_GetPartitionIndex(void)
 UDPNM_LOCAL boolean UdpNm_ValidatePartitionContext(uint8 apiId)
 {
     boolean ret = TRUE;
+#if UDPNM_MULTIPLE_PARTITION_USED == STD_ON
     if (UdpNm_GetPartitionIndex() >= UDPNM_NUMBER_OF_PARTITION)
     {
         (void)Det_ReportError(UDPNM_MODULE_ID, UDPNM_INSTANCE_ID, apiId, UDPNM_E_PARTITION);
         ret = FALSE;
     }
+#else
+    UDPNM_UNUSED(apiId);
+#endif
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of uninit.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2229,7 +2691,11 @@ UDPNM_LOCAL boolean UdpNm_ValidateInitStatus(uint8 apiId)
 
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of networkhandle.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2265,7 +2731,11 @@ UDPNM_LOCAL boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
     }
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of null pointer.
  * @param[in]   apiId   : ID of API service in which error is detected
@@ -2286,7 +2756,11 @@ UDPNM_LOCAL boolean UdpNm_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of tx PduId.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2307,8 +2781,12 @@ UDPNM_LOCAL boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
     }
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of Tx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2325,8 +2803,12 @@ UDPNM_LOCAL boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const Pd
     return UdpNm_ValidateTxPduId(apiId, txPduId) && UdpNm_ValidatePointer(apiId, pduInfoPtr)
            && UdpNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of Rx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2350,11 +2832,16 @@ UDPNM_LOCAL boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const Pd
     ret = ret && UdpNm_ValidatePointer(apiId, pduInfoPtr) && UdpNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Development error validation of UserDataTxPdu.
  * @param[in]   apiId : ID of API service in which error is detected
- * @param[in]   rxPduId : Identifier of the PDU to be transmitted
+ * @param[in]   txPduId : Identifier of the PDU to be transmitted
  * @param[in]   pduInfoPtr : Contains a pointer to a buffer about pduInfo
  * @retval      TRUE  : Development error not occurred
  * @retval      FALSE : Development error occurred
@@ -2362,10 +2849,10 @@ UDPNM_LOCAL boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const Pd
  * @synchronous TRUE
  * @trace       CPD-71953
  */
-UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr)
+UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr)
 {
     boolean ret = TRUE;
-    if (rxPduId >= UDPNM_USERDATA_TX_PDU_NUM)
+    if (txPduId >= UDPNM_USERDATA_TX_PDU_NUM)
     {
         (void)Det_ReportError(UDPNM_MODULE_ID, UDPNM_INSTANCE_ID, apiId, UDPNM_E_INVALID_PDUID);
         ret = FALSE;
@@ -2374,9 +2861,10 @@ UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, co
     ret = ret && UdpNm_ValidatePointer(apiId, pduInfoPtr) && UdpNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
     return ret;
 }
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+#endif
 
 #endif
 
-#define UDPNM_STOP_SEC_CODE
-#include "UdpNm_MemMap.h"
 /* PRQA S 1503, 1532 -- */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef */

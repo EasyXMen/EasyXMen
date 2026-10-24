@@ -52,6 +52,8 @@ typedef void * sio_fd_t;
    or be implemented in your custom sio.c file. */
 
 #ifndef sio_open
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Opens a serial device for communication.
  *
@@ -59,9 +61,13 @@ typedef void * sio_fd_t;
  * @return handle to serial device if successful, NULL otherwise
  */
 sio_fd_t sio_open(u8_t devnum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_send
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Sends a single character to the serial device.
  *
@@ -71,9 +77,13 @@ sio_fd_t sio_open(u8_t devnum);
  * @note This function will block until the character can be sent.
  */
 void sio_send(u8_t c, sio_fd_t fd);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_recv
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Receives a single character from the serial device.
  *
@@ -82,9 +92,13 @@ void sio_send(u8_t c, sio_fd_t fd);
  * @note This function will block until a character is received.
  */
 u8_t sio_recv(sio_fd_t fd);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_read
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Reads from the serial device.
  *
@@ -97,9 +111,13 @@ u8_t sio_recv(sio_fd_t fd);
  * can be cancelled by calling sio_read_abort().
  */
 u32_t sio_read(sio_fd_t fd, u8_t *data, u32_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_tryread
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Tries to read from the serial device. Same as sio_read but returns
  * immediately if no data is available and never blocks.
@@ -110,9 +128,13 @@ u32_t sio_read(sio_fd_t fd, u8_t *data, u32_t len);
  * @return number of bytes actually received
  */
 u32_t sio_tryread(sio_fd_t fd, u8_t *data, u32_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_write
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Writes to the serial device.
  *
@@ -124,15 +146,21 @@ u32_t sio_tryread(sio_fd_t fd, u8_t *data, u32_t len);
  * @note This function will block until all data can be sent.
  */
 u32_t sio_write(sio_fd_t fd, const u8_t *data, u32_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef sio_read_abort
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Aborts a blocking sio_read() call.
  *
  * @param fd serial device handle
  */
 void sio_read_abort(sio_fd_t fd);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

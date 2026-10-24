@@ -21,29 +21,18 @@
  **  @description        : Rebuid for Crypto
  **
  ***********************************************************************************************************************/
-
+/* PRQA S 0553 EOF */ /* VL_BswM_0553 */
 /* =================================================== inclusions =================================================== */
 
-/* PRQA S 0553 EOF */ /* VL_BswM_0553 */
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1842,1252,0842,0314,1253,1290,1338 ++ */                               /* VL_Crypto_62_General */
-/* PRQA S 3494,2743,2985,1505,3418,2463 ++ */                                    /* VL_Crypto_62_General */
-/* PRQA S 2784,3397,3400,4152,2742,2880 ++ */                                    /* VL_Crypto_62_General */
-
+/* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1842,1252,0842,0314,1253,1290,1338,2784,2889,2985,0686,1277,4152 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1843,2463,2742,2743,3494,3418,3400,3397,2880,1505 ++ */                /* VL_QAC_Crypto */
+/* PRQA S 6020 EOF */                                                            /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6080 EOF */                                                            /* VL_MTR_Crypto_62_STPTH */
+/* PRQA S 6050 EOF */                                                            /* VL_MTR_Crypto_62_STST3 */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_RIPEMD160 == STD_ON)
 #include "Crypto_62_Ripemd160.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /* ===================================================== macros ===================================================== */
 #define STATE_0 0x67452301U
 #define STATE_1 0xEFCDAB89U
@@ -69,15 +58,23 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void
     Crypto_Internal_Ripemd160_process(Crypto_Ripemd160_Context* ctx, const uint8 data[CRYPTO_CONST_64]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* ============================================ internal data definitions =========================================== */
-/* PRQA S 3218 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3218 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint8 Ripemd160_padding[CRYPTO_CONST_64] = {
     0x80U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
     0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
     0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
     0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 /* PRQA S 3218 -- */
 /* ============================================ external data definitions =========================================== */
 
@@ -93,6 +90,8 @@ CRYPTO_62_LOCAL const uint8 Ripemd160_padding[CRYPTO_CONST_64] = {
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Internal_Ripemd160_process(Crypto_Ripemd160_Context* ctx, const uint8 data[CRYPTO_CONST_64])
 {
     struct
@@ -256,13 +255,17 @@ CRYPTO_62_LOCAL void Crypto_Internal_Ripemd160_process(Crypto_Ripemd160_Context*
 #undef Kp
 #undef Fp
 
-    local.C       = ctx->state[1] + local.Dp + local.C;
-    ctx->state[4] = ctx->state[0] + local.Cp + local.B;
-    ctx->state[3] = ctx->state[4] + local.Bp + local.A;
-    ctx->state[2] = ctx->state[3] + local.Ap + local.E;
-    ctx->state[1] = ctx->state[2] + local.Ep + local.D;
+    local.C       = ctx->state[1] + local.C + local.Dp;
+    ctx->state[1] = ctx->state[2] + local.D + local.Ep;
+    ctx->state[2] = ctx->state[3] + local.E + local.Ap;
+    ctx->state[3] = ctx->state[4] + local.A + local.Bp;
+    ctx->state[4] = ctx->state[0] + local.B + local.Cp;
     ctx->state[0] = local.C;
+
+    (void)IStdLib_MemSet(&local, 0, sizeof(local));
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -275,6 +278,8 @@ CRYPTO_62_LOCAL void Crypto_Internal_Ripemd160_process(Crypto_Ripemd160_Context*
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, uint32 ilen)
 {
     uint32 pad;
@@ -293,9 +298,9 @@ void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, 
             ctx->total[1]++;
         }
 
-        /* PRQA S 4112,4115,4505,4558 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 4112,4115,4505,4558,3397,3400 ++ */ /* VL_QAC_Crypto */
         if (leave && ilen >= pad)
-        /* PRQA S 4112,4115,4505,4558 -- */
+        /* PRQA S 4112,4115,4505,4558,3397,3400 -- */
         {
             (void)IStdLib_MemCpy((void*)(ctx->buffer + leave), input, pad);
 
@@ -317,6 +322,22 @@ void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, 
         }
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_ripemd160_free(Crypto_Ripemd160_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Ripemd160_Context));
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -330,6 +351,8 @@ void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, 
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ripemd160(const uint8* input, uint32 ilen, uint8 output[CRYPTO_CONST_20])
 {
     Crypto_Ripemd160_Context ctx;
@@ -344,6 +367,8 @@ Std_ReturnType Crypto_Ripemd160(const uint8* input, uint32 ilen, uint8 output[CR
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -357,18 +382,21 @@ Std_ReturnType Crypto_Ripemd160(const uint8* input, uint32 ilen, uint8 output[CR
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ripemd160_Process(uint32 objectId)
 {
-    Std_ReturnType ret = E_NOT_OK;
-    uint8          output[CRYPTO_CONST_20];
+    Std_ReturnType ret                     = E_NOT_OK;
+    uint8          output[CRYPTO_CONST_20] = {0x00};
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    /* PRQA S 0311,3678 ++ */ /*VL_Crypto_62_General */
+
+    /* PRQA S 0311,3678 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311,3678 -- */
 
     ret = Crypto_Ripemd160(input, ilen, output);
-    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_20 && ret == E_OK)
+    if ((*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_20) && (ret == E_OK))
     {
         (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_20);
         *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_20;
@@ -383,6 +411,8 @@ Std_ReturnType Crypto_Ripemd160_Process(uint32 objectId)
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -394,6 +424,8 @@ Std_ReturnType Crypto_Ripemd160_Process(uint32 objectId)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Finish(Crypto_Ripemd160_Context* ctx, uint8 output[CRYPTO_CONST_20])
 {
     uint32 last;
@@ -430,7 +462,11 @@ void Crypto_Ripemd160_Finish(Crypto_Ripemd160_Context* ctx, uint8 output[CRYPTO_
     CRYPTO_PUT_UINT32_LE(ctx->state[2], output, 8);
     CRYPTO_PUT_UINT32_LE(ctx->state[3], output, 12);
     CRYPTO_PUT_UINT32_LE(ctx->state[4], output, 16);
+
+    Crypto_ripemd160_free(ctx);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -442,6 +478,8 @@ void Crypto_Ripemd160_Finish(Crypto_Ripemd160_Context* ctx, uint8 output[CRYPTO_
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Starts(Crypto_Ripemd160_Context* ctx)
 {
     ctx->state[0] = STATE_0;
@@ -452,13 +490,10 @@ void Crypto_Ripemd160_Starts(Crypto_Ripemd160_Context* ctx)
     ctx->total[0] = 0;
     ctx->total[1] = 0;
 }
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 
 #endif
-
 /* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 -- */
-/* PRQA S 1842,1252,0842,0314,1253,1290,1338 -- */
-/* PRQA S 3494,2743,2985,1505,3418,2463 -- */
-/* PRQA S 2784,3397,3400,4152,2742,2880 -- */
+/* PRQA S 1842,1252,0842,0314,1253,1290,1338,2784,2889,2985,0686,1277,4152 -- */
+/* PRQA S 1843,2463,2742,2743,3494,3418,3400,3397,2880,1505 -- */

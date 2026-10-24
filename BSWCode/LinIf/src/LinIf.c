@@ -22,7 +22,7 @@
  **
  ***********************************************************************************************************************/
 /* PRQA S 3415 EOF */ /* VL_LinIf_3415 */
-/* PRQA S 1756 EOF */ /* VL_LinIf_1756 */
+
 /* =================================================== inclusions =================================================== */
 #include "LinIf_Cfg.h"
 #include "LinIf_Cbk.h"
@@ -34,69 +34,113 @@
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
 #include "LinTp_Master.h"
 #endif
-#if ((LINIF_TP_SUPPORTED == STD_ON) && (STD_ON == LINTP_SLAVE_SUPPORT))
-#include "LinTp_Slave.h"
-#endif
 #endif
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 #include "LinIf_Slave.h"
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (STD_ON == LINTP_SLAVE_SUPPORT))
+#include "LinTp_Slave.h"
+#endif
 #endif
 #include "LinIf_PartitionVar.h"
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
 #include "ComM.h"
 #endif
 #include "LinIf.h"
+#include "LinIf_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
+
 LINIF_LOCAL_INLINE boolean LinIf_ValidateInitStatus(uint8 appId, ApplicationType applicationId);
+
+#if (LINIF_WAKEUP_SUPPORT == STD_ON)
+LINIF_LOCAL_INLINE boolean LinIf_ValidateWakeupSource(uint8 appId, EcuM_WakeupSourceType wakeupSource);
+#endif
+
 LINIF_LOCAL_INLINE boolean LinIf_ValidateChannelNum(uint8 appId, uint8 ch);
+
+#if (STD_ON == LINIF_MASTER_SUPPORT)
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateSchedulePbsIndex(uint8 appId, uint8 scheduleId);
+
+#endif
+
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
+
 LINIF_LOCAL_INLINE boolean LinIf_ValidateChannelPartition(uint8 appId, ApplicationType applicationId, uint8 ch);
-LINIF_LOCAL_INLINE boolean
-    LinIf_ValidateTxPduPartition(uint8 appId, ApplicationType applicationId, PduIdType LinTxPduId);
+
+LINIF_LOCAL_INLINE
+boolean LinIf_ValidateTxPduPartition(uint8 appId, ApplicationType applicationId, PduIdType LinTxPduId);
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_CheckTxPduPatition(PduIdType TxPduId, ApplicationType applicationId);
-#endif
-LINIF_LOCAL_INLINE boolean LinIf_ValidateConfigNad(uint8 appId, uint8 Nad);
-LINIF_LOCAL_INLINE boolean LinIf_ValidateLinTxPduId(uint8 appId, PduIdType LinTxPduId);
-#if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
-LINIF_LOCAL_INLINE boolean LinIf_ValidateTrcvMode(uint8 appId, LinTrcv_TrcvModeType TransceiverMode);
-LINIF_LOCAL_INLINE boolean LinIf_ValidateLinTrcvWakeupMode(uint8 appId, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
-LINIF_LOCAL_INLINE boolean LinIf_ValidateTrcvModeNormal(uint8 appId, uint8 ch);
-#endif
-LINIF_LOCAL_INLINE boolean LinIf_ValidatePidBufferLength(uint8 appId, uint8 PidBufferLength, uint8 ch);
-LINIF_LOCAL_INLINE boolean LinIf_ValidateGetPidBufferLength(uint8 appId, uint8 PidBufferLength, uint8 ch);
-LINIF_LOCAL_INLINE boolean LinIf_ValidatePointer(uint8 appId, const void* pointer);
-#endif
-
-LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetSubstitution(PduIdType TxPduId);
-
-LINIF_LOCAL NetworkHandleType LinIf_GetLinIfChannel(NetworkHandleType channel, ApplicationType applicationId);
-
-#if (STD_ON == LINIF_SLAVE_SUPPORT)
-LINIF_LOCAL
-NetworkHandleType LinIf_GetLinIfChannelByDriverChId(NetworkHandleType channel, ApplicationType applicationId);
-#endif
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 
+#endif
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateConfigNad(uint8 appId, uint8 Nad);
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateLinTxPduId(uint8 appId, PduIdType LinTxPduId);
+
+#if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateTrcvMode(uint8 appId, LinTrcv_TrcvModeType TransceiverMode);
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateLinTrcvWakeupMode(uint8 appId, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateTrcvModeNormal(uint8 appId, uint8 ch);
+
+#endif
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidatePidBufferLength(uint8 appId, uint8 PidBufferLength, uint8 ch);
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateGetPidBufferLength(uint8 appId, uint8 PidBufferLength, uint8 ch);
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidatePointer(uint8 appId, const void* pointer);
+#endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetSubstitution(PduIdType TxPduId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL NetworkHandleType LinIf_GetLinIfChannel(NetworkHandleType channel, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#if (STD_ON == LINIF_SLAVE_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL
+NetworkHandleType LinIf_GetLinIfChannelByDriverChId(NetworkHandleType channel, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
+
 /* ============================================ internal data definition ============================================ */
-#define LINIF_START_SEC_VAR_INIT_PTR
+#define LINIF_START_SEC_VAR_CLEARED_PTR
 #include "LinIf_MemMap.h"
 /**
  * @brief Global configuration pointer of LINIF
  */
-const LinIf_ConfigType*        LinIf_ConfigPtr = NULL_PTR;
-static const LinIf_PbsMapType* LinIf_PbsMapPtr = NULL_PTR;
-#define LINIF_STOP_SEC_VAR_INIT_PTR
+const LinIf_ConfigType* LinIf_ConfigPtr;
+#define LINIF_STOP_SEC_VAR_CLEARED_PTR
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_VAR_CLEARED_PTR
+#include "LinIf_MemMap.h"
+static const LinIf_PbsMapType* LinIf_PbsMapPtr;
+#define LINIF_STOP_SEC_VAR_CLEARED_PTR
 #include "LinIf_MemMap.h"
 
 /* PRQA S 2814,2824,2889 ++ */ /* VL_QAC_DerefNullPtr */
@@ -111,6 +155,8 @@ static const LinIf_PbsMapType* LinIf_PbsMapPtr = NULL_PTR;
  */
 void LinIf_Init(const LinIf_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x01, ConfigPtr);
+
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if (LinIf_ValidatePointer(LINIF_INIT_ID, ConfigPtr))
 #endif
@@ -144,15 +190,24 @@ void LinIf_Init(const LinIf_ConfigType* ConfigPtr)
         *LinIf_Status[applicationId] = LINIF_INIT;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x01);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Requests transmission of a PDU.
  */
-/* PRQA S 6030,6070 ++ */ /* VL_MTR_LinIf_STMIF,VL_MTR_LinIf_STCAL*/
+/* PRQA S 6030,6070,6060 ++ */ /* VL_MTR_LinIf_STMIF,VL_MTR_LinIf_STCAL,VL_MTR_LinIf_STM19*/
 Std_ReturnType LinIf_Transmit(PduIdType LinTxPduId, const PduInfoType* PduInfoPtr)
-/* PRQA S 6030,6070 -- */
+/* PRQA S 6030,6070,6060 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x04, LinTxPduId, PduInfoPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
@@ -169,7 +224,11 @@ Std_ReturnType LinIf_Transmit(PduIdType LinTxPduId, const PduInfoType* PduInfoPt
     {
         if (LinTxPduId < LinIf_ConfigPtr->PbsMap->TxPduMapLen)
         {
-            PduIdType txPduIdReal                      = (PduIdType)LinIf_ConfigPtr->PbsMap->TxPduMapList[LinTxPduId];
+            PduIdType txPduIdReal = (PduIdType)LinIf_ConfigPtr->PbsMap->TxPduMapList[LinTxPduId];
+            if (txPduIdReal == LINIF_PDU_ID_INVAILD)
+            {
+                return E_NOT_OK;
+            }
             const LinIf_SubstitutionFramesType* subPtr = LinIf_GetSubstitution(txPduIdReal);
 
             if (NULL_PTR == subPtr)
@@ -219,16 +278,26 @@ Std_ReturnType LinIf_Transmit(PduIdType LinTxPduId, const PduInfoType* PduInfoPt
     }
     LINIF_NOUSED(PduInfoPtr);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x04, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Requests a schedule table to be executed.Only used for LIN master nodes.
  */
 #if (STD_ON == LINIF_MASTER_SUPPORT)
 /* PRQA S 3334 ++ */ /* VL_LinIf_3334 */
-Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleType Schedule)
+Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleType ScheduleTableIdx)
+/* PRQA S 3334 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x05, Channel, ScheduleTableIdx);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -239,27 +308,24 @@ Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleT
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
         && LinIf_ValidateChannelPartition(LINIF_SCHEDULEREQUEST_ID, applicationId, ch)
 #endif
-    )
+        && LinIf_ValidateSchedulePbsIndex(LINIF_SCHEDULEREQUEST_ID, ScheduleTableIdx))
 #endif
     {
-        if (Schedule < LinIf_PbsMapPtr->ScheduleTableMapLen)
-        {
-            LinIf_SchHandleType actualSchedule = (LinIf_SchHandleType)LinIf_PbsMapPtr->ScheduleTableMapList[Schedule];
-            ret                                = LinIf_MasterScheduleRequest(ch, actualSchedule);
-        }
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
-        else
-        {
-            /*@req <SWS_LinIf_00567>*/
-            LinIf_DetReportError(LINIF_SCHEDULEREQUEST_ID, LINIF_E_SCHEDULE_REQUEST_ERROR);
-        }
-#endif
+        LinIf_SchHandleType actualSchedule =
+            (LinIf_SchHandleType)LinIf_PbsMapPtr->ScheduleTableMapList[ScheduleTableIdx];
+        ret = LinIf_MasterScheduleRequest(ch, actualSchedule);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x05, ret);
 
     return ret;
 }
-/* PRQA S 3334 -- */
 #endif
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Initiates a transition into the Sleep Mode on the selected channel.
@@ -268,6 +334,8 @@ Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleT
 Std_ReturnType LinIf_GotoSleep(NetworkHandleType Channel)
 /* PRQA S 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x06, Channel);
+
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
     Std_ReturnType    ret           = E_NOT_OK;
@@ -296,8 +364,15 @@ Std_ReturnType LinIf_GotoSleep(NetworkHandleType Channel)
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x06, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Initiates the wake up process.
@@ -306,6 +381,8 @@ Std_ReturnType LinIf_GotoSleep(NetworkHandleType Channel)
 Std_ReturnType LinIf_Wakeup(NetworkHandleType Channel)
 /* PRQA S 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x07, Channel);
+
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
     Std_ReturnType    ret           = E_NOT_OK;
@@ -332,15 +409,24 @@ Std_ReturnType LinIf_Wakeup(NetworkHandleType Channel)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x07, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+
 /**
  * Set the given LIN transceiver to the given mode.
  */
 Std_ReturnType LinIf_SetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType TransceiverMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x08, Channel, TransceiverMode);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -355,18 +441,33 @@ Std_ReturnType LinIf_SetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType
 #endif
     {
         /*@req <SWS_LinIf_00536>,<SWS_LinIf_00537>,<SWS_LinIf_00538>*/
-        uint8 linChannel = LinIf_GetLinChannelId(ch);
-        ret              = LinTrcv_SetOpMode(linChannel, TransceiverMode);
+        const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
+
+        if (chCfgPtr->TransceiverDrvConfig != NULL_PTR)
+        {
+            uint8 trcvDrvApiId = LinIf_GetLinTrcvDriverApiId(ch);
+            uint8 trcvChannel  = LinIf_GetLinTrcvChannelId(ch);
+            ret                = LinTrcv_DriverApi[trcvDrvApiId].LinTrcvSetOpMode(trcvChannel, TransceiverMode);
+        }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x08, ret);
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Returns the actual state of a LIN Transceiver Driver.
  */
 Std_ReturnType LinIf_GetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType* TransceiverModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x09, Channel, TransceiverModePtr);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -382,23 +483,36 @@ Std_ReturnType LinIf_GetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType
 #endif
     {
         /*@req <SWS_LinIf_00541>*/
-        uint8 linChannel = LinIf_GetLinChannelId(ch);
-        ret              = LinTrcv_GetOpMode(linChannel, TransceiverModePtr);
+        const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
+
+        if (chCfgPtr->TransceiverDrvConfig != NULL_PTR)
+        {
+            uint8 trcvDrvApiId = LinIf_GetLinTrcvDriverApiId(ch);
+            uint8 trcvChannel  = LinIf_GetLinTrcvChannelId(ch);
+            ret                = LinTrcv_DriverApi[trcvDrvApiId].LinTrcvGetOpMode(trcvChannel, TransceiverModePtr);
+        }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x09, ret);
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Returns the reason for the wake up that has been detected by the LIN Transceiver Driver.
  */
 Std_ReturnType LinIf_GetTrcvWakeupReason(NetworkHandleType Channel, LinTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr)
 {
-    Std_ReturnType       ret           = E_NOT_OK;
-    ApplicationType      applicationId = LinIf_GetApplicationID();
-    NetworkHandleType    ch            = LinIf_GetLinIfChannel(Channel, applicationId);
-    uint8                linChannel;
-    LinTrcv_TrcvModeType transceiverMode = LINTRCV_TRCV_MODE_SLEEP;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x0A, Channel, TrcvWuReasonPtr);
+
+    Std_ReturnType    ret           = E_NOT_OK;
+    ApplicationType   applicationId = LinIf_GetApplicationID();
+    NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if (LinIf_ValidateInitStatus(LINIF_GETTRCVWAKEUPREASON_ID, applicationId)
@@ -411,12 +525,25 @@ Std_ReturnType LinIf_GetTrcvWakeupReason(NetworkHandleType Channel, LinTrcv_Trcv
 #endif
     {
         /*@req <SWS_LinIf_00548>*/
-        linChannel = LinIf_GetLinChannelId(ch);
-        ret        = LinTrcv_GetBusWuReason(linChannel, TrcvWuReasonPtr);
+        const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
+
+        if (chCfgPtr->TransceiverDrvConfig != NULL_PTR)
+        {
+            uint8 trcvDrvApiId = LinIf_GetLinTrcvDriverApiId(ch);
+            uint8 trcvChannel  = LinIf_GetLinTrcvChannelId(ch);
+            ret                = LinTrcv_DriverApi[trcvDrvApiId].LinTrcvGetBusWuReason(trcvChannel, TrcvWuReasonPtr);
+        }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x0A, ret);
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * This API enables, disables and clears the notification for wakeup events on the addressed
@@ -424,6 +551,8 @@ Std_ReturnType LinIf_GetTrcvWakeupReason(NetworkHandleType Channel, LinTrcv_Trcv
  */
 Std_ReturnType LinIf_SetTrcvWakeupMode(NetworkHandleType Channel, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x0B, Channel, LinTrcvWakeupMode);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -438,19 +567,34 @@ Std_ReturnType LinIf_SetTrcvWakeupMode(NetworkHandleType Channel, LinTrcv_TrcvWa
 #endif
     {
         /*@req <SWS_LinIf_00551>*/
-        uint8 linChannel = LinIf_GetLinChannelId(ch);
-        ret              = LinTrcv_SetWakeupMode(linChannel, LinTrcvWakeupMode);
+        const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
+
+        if (chCfgPtr->TransceiverDrvConfig != NULL_PTR)
+        {
+            uint8 trcvDrvApiId = LinIf_GetLinTrcvDriverApiId(ch);
+            uint8 trcvChannel  = LinIf_GetLinTrcvChannelId(ch);
+            ret                = LinTrcv_DriverApi[trcvDrvApiId].LinTrcvSetWakeupMode(trcvChannel, LinTrcvWakeupMode);
+        }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x0B, ret);
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * The main processing function of the LIN Interface.
  */
 void LinIf_ChannelMainFunction(NetworkHandleType ch)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x80, ch);
+
     ApplicationType applicationId = LinIf_GetApplicationID();
     if ((LINIF_INIT == *LinIf_Status[applicationId])
 #if (LINIF_TP_SUPPORTED == STD_ON)
@@ -474,6 +618,8 @@ void LinIf_ChannelMainFunction(NetworkHandleType ch)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x80);
 }
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
@@ -487,32 +633,14 @@ void LinIf_ChannelMainFunction(NetworkHandleType ch)
  */
 Std_ReturnType LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x60, WakeupSource);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
-    boolean         customWakeupSource = FALSE;
-    boolean         detNoErr           = TRUE;
-    ApplicationType applicationId      = LinIf_GetApplicationID();
-    if (LinIf_ValidateInitStatus(LINIF_CHECKWAKEUP_ID, applicationId))
-    {
-        for (uint8 ch = 0u; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
-        {
-            if (WakeupSource == LinIf_GetLinDriverWakeupSource(ch))
-            {
-                customWakeupSource = TRUE;
-                break;
-            }
-        }
-    }
-    if ((!customWakeupSource) && (ECUM_WKSOURCE_POWER != WakeupSource) && (ECUM_WKSOURCE_RESET != WakeupSource)
-        && (ECUM_WKSOURCE_INTERNAL_RESET != WakeupSource) && (ECUM_WKSOURCE_INTERNAL_WDG != WakeupSource)
-        && (ECUM_WKSOURCE_EXTERNAL_WDG != WakeupSource))
-    {
-        /*@req <SWS_LinIf_00566>*/
-        LinIf_DetReportError(LINIF_CHECKWAKEUP_ID, LINIF_E_PARAM_WAKEUPSOURCE);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
+    ApplicationType applicationId = LinIf_GetApplicationID();
+    if (LinIf_ValidateInitStatus(LINIF_CHECKWAKEUP_ID, applicationId)
+        && LinIf_ValidateWakeupSource(LINIF_CHECKWAKEUP_ID, WakeupSource))
 #endif
     {
         EcuM_WakeupSourceType wakeupSource;
@@ -523,37 +651,73 @@ Std_ReturnType LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
         {
 #if (LINIF_LIN_TRCV_WAKEUP_SUPPORT == STD_ON)
             const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
-            if (NULL_PTR != chCfgPtr->TransceiverDrvConfig)
+#endif
+
+            wakeupSource = LinIf_GetLinDriverWakeupSource(ch);
+            if (0u != (WakeupSource & wakeupSource))
+            {
+                /*@req <SWS_LinIf_00503>*/
+                uint8 linDriver  = LinIf_GetLinDriverId(ch);
+                uint8 linChannel = LinIf_GetLinChannelId(ch);
+                ret              = Lin_DriverApi[linDriver].LinCheckWakeup(linChannel);
+                break;
+            }
+#if (LINIF_LIN_TRCV_WAKEUP_SUPPORT == STD_ON)
+            else if (NULL_PTR != chCfgPtr->TransceiverDrvConfig)
             {
                 wakeupSource = LinIf_GetLinTrcvWakeupSource(ch);
                 if (0u != (WakeupSource & wakeupSource))
                 {
                     /*@req <SWS_LinIf_00503>*/
-                    ret = LinTrcv_CheckWakeup(ch);
+                    uint8 trcvDrvApiId  = LinIf_GetLinTrcvDriverApiId(ch);
+                    uint8 trcvChannleId = LinIf_GetLinTrcvChannelId(ch);
+                    ret                 = LinTrcv_DriverApi[trcvDrvApiId].LinTrcvCheckWakeup(trcvChannleId);
                     break;
                 }
             }
-            else
 #endif
-            {
-                wakeupSource = LinIf_GetLinDriverWakeupSource(ch);
-                if (0u != (WakeupSource & wakeupSource))
-                {
-                    /*@req <SWS_LinIf_00503>*/
-                    uint8 linDriver  = LinIf_GetLinDriverId(ch);
-                    uint8 linChannel = LinIf_GetLinChannelId(ch);
-                    ret              = Lin_DriverApi[linDriver].LinCheckWakeup(linChannel);
-                    break;
-                }
-            }
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x60, ret);
 
     return ret;
 }
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
+
+/**
+ * The LIN Driver or LIN Transceiver Driver will call this function to report the wake up source after
+ * the successful wakeup detection during CheckWakeup or after power on by bus.
+ */
+void LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x61, WakeupSource);
+
+    ApplicationType applicationId = LinIf_GetApplicationID();
+#if (LINIF_DEV_ERROR_DETECT == STD_ON)
+    if (LinIf_ValidateInitStatus(LINIF_WAKEUPCONFIRMATION_ID, applicationId)
+        && LinIf_ValidateWakeupSource(LINIF_WAKEUPCONFIRMATION_ID, WakeupSource))
+#endif
+    {
+#if (STD_ON == LINIF_MASTER_SUPPORT)
+        LinIf_MasterWakeupConfirmation(WakeupSource, applicationId);
+#endif
+
+#if (STD_ON == LINIF_SLAVE_SUPPORT)
+        LinIf_SlaveWakeupConfirmation(WakeupSource, applicationId);
+#endif
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x61);
+}
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
+#endif
 
 #if (STD_ON == LINIF_VERSION_INFO_API)
 #define LINIF_START_SEC_CODE
@@ -561,6 +725,8 @@ Std_ReturnType LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 
 void LinIf_GetVersionInfo(Std_VersionInfoType* versionInfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x03, versionInfo);
+
 #if (STD_ON == LINIF_DEV_ERROR_DETECT)
     if (NULL_PTR == versionInfo)
     {
@@ -575,56 +741,55 @@ void LinIf_GetVersionInfo(Std_VersionInfoType* versionInfo)
         versionInfo->sw_minor_version = LINIF_SW_MINOR_VERSION;
         versionInfo->sw_patch_version = LINIF_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x03);
 }
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 #endif
 
-#define LINIF_START_SEC_CALLOUT_CODE
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
 #include "LinIf_MemMap.h"
 
-/**
- * The LIN Driver or LIN Transceiver Driver will call this function to report the wake up source after
- * the successful wakeup detection during CheckWakeup or after power on by bus.
- */
-void LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource)
+Std_ReturnType LinIf_EnableBusMirroring(NetworkHandleType Channel, boolean MirroringActive)
 {
-    ApplicationType applicationId = LinIf_GetApplicationID();
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
-    boolean detNoErr           = TRUE;
-    boolean customWakeupSource = FALSE;
-    if (LinIf_ValidateInitStatus(LINIF_WAKEUPCONFIRMATION_ID, applicationId))
-    {
-        for (uint8 ch = 0u; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
-        {
-            if (WakeupSource == LinIf_GetLinDriverWakeupSource(ch))
-            {
-                customWakeupSource = TRUE;
-                break;
-            }
-        }
-    }
-    if ((!customWakeupSource) && (ECUM_WKSOURCE_POWER != WakeupSource) && (ECUM_WKSOURCE_RESET != WakeupSource)
-        && (ECUM_WKSOURCE_INTERNAL_RESET != WakeupSource) && (ECUM_WKSOURCE_INTERNAL_WDG != WakeupSource)
-        && (ECUM_WKSOURCE_EXTERNAL_WDG != WakeupSource))
-    {
-        /*@req <SWS_LinIf_00717>*/
-        LinIf_DetReportError(LINIF_WAKEUPCONFIRMATION_ID, LINIF_E_PARAM_WAKEUPSOURCE);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
-#endif
-    {
-#if (STD_ON == LINIF_MASTER_SUPPORT)
-        LinIf_MasterWakeupConfirmation(WakeupSource, applicationId);
-#endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x7F, Channel, MirroringActive);
 
-#if (STD_ON == LINIF_SLAVE_SUPPORT)
-        LinIf_SlaveWakeupConfirmation(WakeupSource, applicationId);
+    ApplicationType   applicationId = LinIf_GetApplicationID();
+    NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
+    Std_ReturnType    result        = E_NOT_OK;
+
+#if (LINIF_DEV_ERROR_DETECT == STD_ON)
+    if (LinIf_ValidateInitStatus(LINIF_ENABLEBUSMIRRORING, applicationId)
+        && LinIf_ValidateChannelNum(LINIF_ENABLEBUSMIRRORING, ch)
+#if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
+        && LinIf_ValidateChannelPartition(LINIF_ENABLEBUSMIRRORING, applicationId, ch)
 #endif
+    )
+#endif
+    {
+        if (LINIF_MASTER == LinIf_GetNodeType(ch))
+        {
+#if (STD_ON == LINIF_MASTER_SUPPORT)
+            LinIf_MasterEnableBusMirror(ch, MirroringActive);
+#endif
+        }
+        else
+        {
+#if (STD_ON == LINIF_SLAVE_SUPPORT)
+            LinIf_SlaveEnableBusMirror(ch, MirroringActive);
+#endif
+        }
+        result = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x7F, ret);
+
+    return result;
 }
-#define LINIF_STOP_SEC_CALLOUT_CODE
+
+#define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 #endif
 
@@ -638,6 +803,8 @@ void LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource)
  */
 Std_ReturnType LinIf_GetPIDTable(NetworkHandleType Channel, Lin_FramePidType* PidBuffer, uint8* PidBufferLength)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 4, 0x72, Channel, PidBuffer, PidBufferLength);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -653,9 +820,15 @@ Std_ReturnType LinIf_GetPIDTable(NetworkHandleType Channel, Lin_FramePidType* Pi
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x72, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Sets all assigned PID values. The order is congruent to the LIN frame index.
  * Only applicable for LIN slave nodes.
@@ -663,6 +836,8 @@ Std_ReturnType LinIf_GetPIDTable(NetworkHandleType Channel, Lin_FramePidType* Pi
 /* PRQA S 3673,6070 ++ */ /* VL_QAC_3673,VL_MTR_LinIf_STCAL*/
 Std_ReturnType LinIf_SetPIDTable(NetworkHandleType Channel, Lin_FramePidType* PidBuffer, uint8 PidBufferLength)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 4, 0x73, Channel, PidBuffer, PidBufferLength);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -685,15 +860,23 @@ Std_ReturnType LinIf_SetPIDTable(NetworkHandleType Channel, Lin_FramePidType* Pi
     }
     LINIF_NOUSED(PidBufferLength);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x73, ret);
+
     return ret;
 }
 /* PRQA S 3673,6070 -- */
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Reports the current configured NAD.Only applicable for LIN slave nodes.
  */
 Std_ReturnType LinIf_GetConfiguredNAD(NetworkHandleType Channel, uint8* Nad)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x70, Channel, Nad);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -710,14 +893,22 @@ Std_ReturnType LinIf_GetConfiguredNAD(NetworkHandleType Channel, uint8* Nad)
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x70, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Sets the current configured NAD.Only applicable for LIN slave nodes.
  */
 Std_ReturnType LinIf_SetConfiguredNAD(NetworkHandleType Channel, uint8 Nad)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x71, Channel, Nad);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannel(Channel, applicationId);
@@ -733,13 +924,14 @@ Std_ReturnType LinIf_SetConfiguredNAD(NetworkHandleType Channel, uint8 Nad)
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x71, ret);
+
     return ret;
 }
-
-/* PRQA S 1503,1532 -- */
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
+
+/* PRQA S 1503,1532 -- */
 
 #define LINIF_START_SEC_CALLOUT_CODE
 #include "LinIf_MemMap.h"
@@ -751,6 +943,8 @@ Std_ReturnType LinIf_SetConfiguredNAD(NetworkHandleType Channel, uint8 Nad)
  */
 Std_ReturnType LinIf_HeaderIndication(NetworkHandleType Channel, Lin_PduType* PduPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x78, Channel, PduPtr);
+
     Std_ReturnType    ret           = E_NOT_OK;
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannelByDriverChId(Channel, applicationId);
@@ -768,9 +962,15 @@ Std_ReturnType LinIf_HeaderIndication(NetworkHandleType Channel, Lin_PduType* Pd
         ret = LinIf_SlaveHeaderIndication(ch, PduPtr);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 2, 0x78, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * The LIN Driver will call this function to report a successfully received response and provides the
  * reception data to the LIN Interface. This function is only applicable for LIN slave nodes
@@ -778,6 +978,8 @@ Std_ReturnType LinIf_HeaderIndication(NetworkHandleType Channel, Lin_PduType* Pd
  */
 void LinIf_RxIndication(NetworkHandleType Channel, uint8* Lin_SduPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x79, Channel, Lin_SduPtr);
+
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannelByDriverChId(Channel, applicationId);
 
@@ -793,14 +995,22 @@ void LinIf_RxIndication(NetworkHandleType Channel, uint8* Lin_SduPtr)
     {
         LinIf_SlaveRxIndication(ch, Lin_SduPtr);
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x79);
+}
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * The LIN Driver will call this function to report a successfully transmitted response. This function
  * is only applicable for LIN slave nodes (available only if the ECU has any LIN slave channel).
  */
 void LinIf_TxConfirmation(NetworkHandleType Channel)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 2, 0x7A, Channel);
+
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannelByDriverChId(Channel, applicationId);
 
@@ -815,7 +1025,14 @@ void LinIf_TxConfirmation(NetworkHandleType Channel)
     {
         LinIf_SlaveTxConfirmation(ch);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x7A);
 }
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * The LIN Driver will call this function to report a detected error event during header or response
@@ -824,6 +1041,8 @@ void LinIf_TxConfirmation(NetworkHandleType Channel)
  */
 void LinIf_LinErrorIndication(NetworkHandleType Channel, Lin_SlaveErrorType ErrorStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Start, 3, 0x7B, Channel, ErrorStatus);
+
     ApplicationType   applicationId = LinIf_GetApplicationID();
     NetworkHandleType ch            = LinIf_GetLinIfChannelByDriverChId(Channel, applicationId);
 
@@ -839,6 +1058,8 @@ void LinIf_LinErrorIndication(NetworkHandleType Channel, Lin_SlaveErrorType Erro
     {
         LinIf_SlaveLinErrorIndication(ch, ErrorStatus);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinIf, 0, Bsw_Return, 1, 0x7B);
 }
 /* PRQA S 1503 -- */
 #define LINIF_STOP_SEC_CALLOUT_CODE
@@ -880,11 +1101,8 @@ LINIF_LOCAL NetworkHandleType
 #endif
 
 /* ========================================== internal function definition ========================================== */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
-
 /**
  * @brief Validate linif init status
  * @param[in]    apiId  ID of API service in which error is detected
@@ -911,6 +1129,34 @@ LINIF_LOCAL_INLINE boolean LinIf_ValidateInitStatus(uint8 appId, ApplicationType
     return ret;
 }
 
+#if (LINIF_WAKEUP_SUPPORT == STD_ON)
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateWakeupSource(uint8 appId, EcuM_WakeupSourceType wakeupSource)
+{
+    boolean customWakeupSource = FALSE;
+    boolean result             = TRUE;
+    for (uint8 ch = 0u; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
+    {
+        if (wakeupSource == LinIf_GetLinDriverWakeupSource(ch))
+        {
+            customWakeupSource = TRUE;
+            break;
+        }
+    }
+
+    if ((!customWakeupSource) && (ECUM_WKSOURCE_POWER != wakeupSource) && (ECUM_WKSOURCE_RESET != wakeupSource)
+        && (ECUM_WKSOURCE_INTERNAL_RESET != wakeupSource) && (ECUM_WKSOURCE_INTERNAL_WDG != wakeupSource)
+        && (ECUM_WKSOURCE_EXTERNAL_WDG != wakeupSource))
+    {
+        /*@req <SWS_LinIf_00717>*/
+        LinIf_DetReportError(appId, LINIF_E_PARAM_WAKEUPSOURCE);
+        result = FALSE;
+    }
+
+    return result;
+}
+#endif
+
 /**
  * @brief Validate linif channel validity
  * @param[in]    apiId  ID of API service in which error is detected
@@ -933,7 +1179,23 @@ LINIF_LOCAL_INLINE boolean LinIf_ValidateChannelNum(uint8 appId, uint8 ch)
     return ret;
 }
 
+#if (STD_ON == LINIF_MASTER_SUPPORT)
+
+LINIF_LOCAL_INLINE boolean LinIf_ValidateSchedulePbsIndex(uint8 appId, uint8 scheduleId)
+{
+    boolean ret = TRUE;
+    if (scheduleId >= LinIf_PbsMapPtr->ScheduleTableMapLen)
+    {
+        LinIf_DetReportError(appId, LINIF_E_SCHEDULE_REQUEST_ERROR);
+        ret = FALSE;
+    }
+
+    return ret;
+}
+#endif
+
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
+
 /**
  * @brief Validate linif partition validity
  * @param[in]    apiId  ID of API service in which error is detected
@@ -1165,6 +1427,9 @@ LINIF_LOCAL_INLINE boolean LinIf_ValidatePointer(uint8 appId, const void* pointe
 }
 #endif
 
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief           Gets the frame reference by Tx PduId
  * @param[in]       TxPduId: LinIf tx pdu id
@@ -1191,9 +1456,10 @@ LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetSubstitution(PduIdType 
 
     return NULL_PTR;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
-
 /**
  * @brief           Validate tx pdu partition
  * @param[in]       TxPduId: LinIf tx pdu id
@@ -1205,6 +1471,8 @@ LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetSubstitution(PduIdType 
  * @trace        -
  */
 /* PRQA S 6060 ++ */ /* VL_MTR_LinIf_STM19*/
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_CheckTxPduPatition(PduIdType TxPduId, ApplicationType applicationId)
 /* PRQA S 6060 -- */
 {
@@ -1219,8 +1487,12 @@ LINIF_LOCAL Std_ReturnType LinIf_CheckTxPduPatition(PduIdType TxPduId, Applicati
 
     return E_NOT_OK;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief           Get LinIf channel id by network(ComM Channel id)
  * @param[in]       channel: Identification of the ComM channel
@@ -1253,8 +1525,6 @@ LINIF_LOCAL NetworkHandleType LinIf_GetLinIfChannel(NetworkHandleType channel, A
 
     return idx;
 }
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
-
 /* PRQA S 2814,2824,2889 -- */

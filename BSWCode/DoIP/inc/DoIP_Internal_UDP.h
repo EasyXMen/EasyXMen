@@ -56,22 +56,31 @@ typedef struct
 
 /* =========================================== external data declarations =========================================== */
 
+#define DOIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief Status of UDP connection
  *        @range NA
  */
 extern DoIP_UdpConnStatusType DoIP_UdpConnStatus[DOIP_UDP_MAX_CONNECTION];
+#define DOIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief Status of announcement connection
  *        @range NA
  */
 extern DoIP_VehicleAncConnStatusType DoIP_AncConnStatus[DOIP_ANNOUNCEMENT_MAX_CONNECTION]; /**<  */
+#define DOIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 
 /* connect & connect's status*/
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Open or close Udp connection.
  * @param[inout] active: Specifies open or close,and return status of connectin.
@@ -83,6 +92,10 @@ extern DoIP_VehicleAncConnStatusType DoIP_AncConnStatus[DOIP_ANNOUNCEMENT_MAX_CO
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_SwitchUdp(const boolean* active);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Open or close announcement connection.
@@ -95,6 +108,10 @@ boolean DoIP_SwitchUdp(const boolean* active);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_SwitchAnc(const boolean* active);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Notify status of UDP.
@@ -106,6 +123,10 @@ boolean DoIP_SwitchAnc(const boolean* active);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoConModeChgUdp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Notify status of announcement connection.
@@ -117,6 +138,10 @@ void DoIP_SoConModeChgUdp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoConModeChgAnc(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Reset of DoIP_UdpConnStatus.
@@ -127,6 +152,10 @@ void DoIP_SoConModeChgAnc(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ResetUdpConnStatus(uint8 index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* send & rcv*/
 
@@ -140,6 +169,10 @@ void DoIP_ResetUdpConnStatus(uint8 index);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SendUdpNack(PduIdType soadTxPduRef, uint8 nack);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get SoadTxPduRef and SoConId.
@@ -154,6 +187,10 @@ void DoIP_SendUdpNack(PduIdType soadTxPduRef, uint8 nack);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetSoAdTxPduRefAndSoConId(PduIdType soadRxPduId, uint16* soadTxPduRef, SoAd_SoConIdType* soConId);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get SoadTxPduRef and SoConId.
@@ -168,6 +205,10 @@ Std_ReturnType DoIP_GetSoAdTxPduRefAndSoConId(PduIdType soadRxPduId, uint16* soa
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_CheckUdpMsgPayload(const PduInfoType* pduInfoPtr, uint16 soadTxPduRef, SoAd_SoConIdType soConId);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle received IF message.
@@ -187,6 +228,10 @@ void DoIP_HandleIfMsg(
     SoAd_SoConIdType   soConId,
     uint32             payloadLen,
     const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* timer */
 
@@ -198,6 +243,8 @@ void DoIP_HandleIfMsg(
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandleVehicleAncTimeout(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 #ifdef __cplusplus
 }

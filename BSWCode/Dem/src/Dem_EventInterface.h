@@ -149,6 +149,8 @@ DEM_LOCAL_INLINE DemGetFaultDetectionCounterType Dem_GetDebounceGetFDC(Dem_Event
  */
 DEM_LOCAL_INLINE void Dem_EventPreInit(void);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Reset the Uds Status bit of the event
  * @param[in]     EventId: Event ID
@@ -158,6 +160,8 @@ DEM_LOCAL_INLINE void Dem_EventPreInit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventResetUdsStatus(Dem_EventIdType EventId, Dem_UdsStatusByteType UdsStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
 /**
@@ -176,6 +180,8 @@ DEM_LOCAL_INLINE boolean
 #endif
 
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Pre-initialization Combined event
  * @reentrant     FALSE
@@ -183,6 +189,8 @@ DEM_LOCAL_INLINE boolean
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_CombinedEventPreInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get Combined event internal status based on Group ID
@@ -204,6 +212,8 @@ DEM_LOCAL_INLINE Dem_EventInternalStatusType Dem_GetCombinedEventStatusByGroupId
  */
 DEM_LOCAL_INLINE void Dem_SetCombinedEventStatusByGroupId(Dem_CombinationNumType GroupId, uint8 Status);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initialization Combined event
  * @reentrant     FALSE
@@ -211,6 +221,8 @@ DEM_LOCAL_INLINE void Dem_SetCombinedEventStatusByGroupId(Dem_CombinationNumType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_CombinedEventInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /**
@@ -226,6 +238,8 @@ DEM_LOCAL void Dem_CombinedEventInit(void);
 DEM_LOCAL_INLINE boolean Dem_GetEventstored(Dem_EventIdType EventId);
 
 #if (DEM_GENERAL_DISPLACEMENT_NONE == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Updates an event's status due to displacement.Do not call this function directly, it is part of
  * Dem_DTCDisplaced
@@ -236,6 +250,8 @@ DEM_LOCAL_INLINE boolean Dem_GetEventstored(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventDisplaced(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /******************UDS Status*******************/
@@ -584,6 +600,8 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_GetMostRecentConfirmdEvent(uint8 ClientId);
  */
 DEM_LOCAL_INLINE void Dem_SetMostRecentConfirmdEvent(Dem_EventIdType EventId, uint8 ClientId);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         processes the stored triggers from debounce values passing the FDC trip threshold.
  * @param[in]     EventId: Event ID
@@ -594,7 +612,11 @@ DEM_LOCAL_INLINE void Dem_SetMostRecentConfirmdEvent(Dem_EventIdType EventId, ui
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventProcessFdc(Dem_EventIdType EventId, boolean FdcThrExceeded, boolean FdcMaximumExceeded);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process the event's queued qualified passed result
  * @param[in]     EventId: Event ID
@@ -603,6 +625,10 @@ DEM_LOCAL void Dem_EventProcessFdc(Dem_EventIdType EventId, boolean FdcThrExceed
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventPassed(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process the event's queued qualified failed result
@@ -612,6 +638,8 @@ DEM_LOCAL void Dem_EventPassed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventFailed(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         initialization event state
@@ -656,6 +684,8 @@ DEM_LOCAL_INLINE uint8 Dem_GetEventFailureCounter(Dem_EventIdType EventId);
 DEM_LOCAL_INLINE void Dem_SetEventFailureCounter(Dem_EventIdType EventId, uint8 FailureCounter);
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Event Data Changed notification
  * @param[in]     EventId: Event ID
@@ -664,8 +694,12 @@ DEM_LOCAL_INLINE void Dem_SetEventFailureCounter(Dem_EventIdType EventId, uint8 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NotiEventDataChanged(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #if (DEM_EVENT_CALLBACK_CLEAR_ALLOWED > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         If the out-parameter Allowed of the callback DemClearEventAllowed returns false and the configuration
  * parameter DemClearEventAllowedBehavior is set to DEM_ONLY_THIS_CYCLE_AND_READINESS, the related UDS status bits 1
@@ -677,8 +711,12 @@ DEM_LOCAL void Dem_NotiEventDataChanged(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventClearReset(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calls all configured 'init monitor for event' callbacks.
  * @param[in]     EventId: Event ID
@@ -688,6 +726,10 @@ DEM_LOCAL void Dem_EventClearReset(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NotiInitMonitorForEvent(Dem_EventIdType EventId, Dem_InitMonitorReasonType InitReason);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Clears an event's state in volatile RAM
@@ -698,8 +740,12 @@ DEM_LOCAL void Dem_NotiInitMonitorForEvent(Dem_EventIdType EventId, Dem_InitMoni
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventCleared(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Process queued event availability changes
  * @reentrant     FALSE
@@ -707,6 +753,10 @@ DEM_LOCAL void Dem_EventCleared(Dem_EventIdType EventId, const Dem_CombinedArgPt
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check precondition for event unavailable
@@ -719,6 +769,8 @@ DEM_LOCAL void Dem_EventTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_EventMayDisable(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /**

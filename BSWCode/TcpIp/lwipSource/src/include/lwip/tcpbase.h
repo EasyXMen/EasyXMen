@@ -77,7 +77,11 @@ enum tcp_state {
 #define TCP_PRIO_NORMAL 64
 #define TCP_PRIO_MAX    127
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 const char* tcp_debug_state_str(enum tcp_state s);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

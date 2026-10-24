@@ -58,7 +58,11 @@ extern "C" {
  * @synchronous    TRUE
  * @trace          CPD-71588
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 void CryIf_CallbackNotification(Crypto_JobType* job, Crypto_ResultType result);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 #ifdef __cplusplus
 }

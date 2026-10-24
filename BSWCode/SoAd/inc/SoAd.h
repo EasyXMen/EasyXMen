@@ -65,6 +65,10 @@
  *  V02.02.02 2025-10-24  fupeng.yu     1. Fix incorrect pduRouteDestId in SoAd_IfTransmit (CPT-16146).
  *                                      2. Fix update tcp windown for received Tp data when close socket (CPT-16242).
  *  V02.02.03 2026-01-19  fupeng.yu     Resolve the inconsistency between read and write positions in the rxbuffer.
+ *  V02.02.04 2026-07-28  fupeng.yu     Fix the issue of incorrect return values when sending by specifying SoConId
+ *                                      via Metadata in SoAd_IfTransmit.
+ *  V02.02.05 2026-07-30  fupeng.yu     Fix report det issue when received ACK of TCP in SoAd_TxConfirmation.
+ *  V02.02.06 2026-08-11  fupeng.yu     Fix compile issue when SOAD_SET_SOCKET_NEED_CLOSE_DEBUG is enabled.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -183,11 +187,11 @@ extern "C" {
 
 #define SOAD_SW_MAJOR_VERSION 2u /**< SoAd software major version*/
 #define SOAD_SW_MINOR_VERSION 2u /**< SoAd software minor version*/
-#define SOAD_SW_PATCH_VERSION 2u /**< SoAd software patch version*/
+#define SOAD_SW_PATCH_VERSION 6u /**< SoAd software patch version*/
 /* ===================================================== macros ===================================================== */
-#define SOAD_VENDOR_ID 62u /**< SoAd vendor id*/
-#define SOAD_MODULE_ID 56u /**< SoAd module id*/
-#define SOAD_INSTANCE  0u  /**< SoAd instance id*/
+#define SOAD_VENDOR_ID        62u /**< SoAd vendor id*/
+#define SOAD_MODULE_ID        56u /**< SoAd module id*/
+#define SOAD_INSTANCE         0u  /**< SoAd instance id*/
 /** @} */
 
 /**
@@ -268,7 +272,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes internal and external interfaces and variables of SoAd module.
  * @param[in]     SoAdConfigPtr: Pointer to the configuration data of the SoAd module.
@@ -277,8 +282,12 @@ extern "C" {
  * @trace         CPD-71954
  */
 void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_VERSION_INFO_API)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Returns the version information of SoAd module.
  * @param[out]    versioninfo: Pointer to where to store the version information of this module.
@@ -287,8 +296,12 @@ void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr);
  * @trace         CPD-71955
  */
 void SoAd_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Triggers the transmission of all If-TxPDUs identified by the parameter id after requesting the data
  *                from the related upper layer.
@@ -302,7 +315,11 @@ void SoAd_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace         CPD-71956
  */
 Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Triggers the transmission of all If-TxPDUs identified by the parameter id on the socket connection
  *                specified by SoConId after requesting the data from the related upper layer.
@@ -318,7 +335,11 @@ Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id);
  * @trace         CPD-71957
  */
 Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Returns socket connection index related to the specified TxPduId.
  * @param[in]     TxPduId: Transmit PduId specifying the SoAd socket connection for which the socket connection index
@@ -332,7 +353,11 @@ Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, S
  * @trace         CPD-71958
  */
 Std_ReturnType SoAd_GetSoConId(PduIdType TxPduId, SoAd_SoConIdType* SoConIdPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service opens the socket connection specified by SoConId
  * @param[in]     SoConId: socket connection index specifying the socket connection which shall be opened
@@ -344,7 +369,11 @@ Std_ReturnType SoAd_GetSoConId(PduIdType TxPduId, SoAd_SoConIdType* SoConIdPtr);
  * @trace         CPD-71959
  */
 Std_ReturnType SoAd_OpenSoCon(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service closes the socket connection specified by SoConId.
  * @param[in]     SoConId: socket connection index specifying the socket connection which shall be closed.
@@ -361,7 +390,11 @@ Std_ReturnType SoAd_OpenSoCon(SoAd_SoConIdType SoConId);
 /* PRQA S 4604 ++ */ /* VL_MTR_SoAd_STMIF */
 Std_ReturnType SoAd_CloseSoCon(SoAd_SoConIdType SoConId, boolean abort);
 /* PRQA S 4604 -- */
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service the local IP address assignment which shall be used for the socket connection
  *                specified by SoConId is initiated.
@@ -390,7 +423,11 @@ Std_ReturnType SoAd_RequestIpAddrAssignment(
     const TcpIp_SockAddrType*  LocalIpAddrPtr,
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service the local IP address assignment used for the socket connection specified by
  *                SoConId is released.
@@ -404,7 +441,11 @@ Std_ReturnType SoAd_RequestIpAddrAssignment(
  * @trace         CPD-71962
  */
 Std_ReturnType SoAd_ReleaseIpAddrAssignment(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the local address (IP address and port) actually used for the SoAd socket connection
  *                specified by SoConId, the netmask and default router
@@ -427,7 +468,11 @@ Std_ReturnType SoAd_GetLocalAddr(
     TcpIp_SockAddrType* LocalAddrPtr,
     uint8*              NetmaskPtr,
     TcpIp_SockAddrType* DefaultRouterPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the physical source address of the EthIf controller used by the SoAd socket connection
  *                specified by SoConId.
@@ -443,7 +488,11 @@ Std_ReturnType SoAd_GetLocalAddr(
  * @trace         CPD-71964
  */
 Std_ReturnType SoAd_GetPhysAddr(SoAd_SoConIdType SoConId, uint8* PhysAddrPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the remote address (IP address and port) actually used for the SoAd socket connection
  *                specified by SoConId
@@ -458,7 +507,11 @@ Std_ReturnType SoAd_GetPhysAddr(SoAd_SoConIdType SoConId, uint8* PhysAddrPtr);
  * @trace         CPD-71965
  */
 Std_ReturnType SoAd_GetRemoteAddr(SoAd_SoConIdType SoConId, TcpIp_SockAddrType* IpAddrPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Enables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter id.
  *                Routing of PDUs can be either forwarding of PDUs from the upper layer to a TCP or UDP socket of the
@@ -472,7 +525,11 @@ Std_ReturnType SoAd_GetRemoteAddr(SoAd_SoConIdType SoConId, TcpIp_SockAddrType* 
  * @trace         CPD-71966
  */
 Std_ReturnType SoAd_EnableRouting(SoAd_RoutingGroupIdType id);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Enables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter id
  *                only on the socket connection identified by SoConId.
@@ -487,7 +544,11 @@ Std_ReturnType SoAd_EnableRouting(SoAd_RoutingGroupIdType id);
  * @trace         CPD-71967
  */
 Std_ReturnType SoAd_EnableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Disables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter
  *                id. Routing of PDUs can be either forwarding of PDUs from the upper layer to a TCP or UDP socket of
@@ -501,7 +562,11 @@ Std_ReturnType SoAd_EnableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCon
  * @trace         CPD-71968
  */
 Std_ReturnType SoAd_DisableRouting(SoAd_RoutingGroupIdType id);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Disables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter
  *                id only on the socket connection identified by SoConId.
@@ -516,7 +581,11 @@ Std_ReturnType SoAd_DisableRouting(SoAd_RoutingGroupIdType id);
  * @trace         CPD-71969
  */
 Std_ReturnType SoAd_DisableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service the remote address (IP address and port) of the specified socket connection shall
  *                be set.
@@ -531,7 +600,11 @@ Std_ReturnType SoAd_DisableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCo
  * @trace         CPD-71970
  */
 Std_ReturnType SoAd_SetRemoteAddr(SoAd_SoConIdType SoConId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         This API service shall either return the socket connection index of the SoAdSocketConnection Group
  *                where the specified remote address (IP address and port) is set or assign the remote address to an
@@ -551,7 +624,11 @@ Std_ReturnType SoAd_SetUniqueRemoteAddr(
     SoAd_SoConIdType          SoConId,
     const TcpIp_SockAddrType* RemoteAddrPtr,
     SoAd_SoConIdType*         AssignedSoConIdPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service the remote address (IP address and port) of the specified socket connection shall
  *                be released, i.e. set back to the configured remote address setting.
@@ -564,7 +641,11 @@ Std_ReturnType SoAd_SetUniqueRemoteAddr(
  * @trace         CPD-71972
  */
 void SoAd_ReleaseRemoteAddr(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Request to change a specific transport protocol parameter (e.g. block size).
  * @param[in]     id: Identification of the PDU which the parameter change shall affect.
@@ -578,7 +659,11 @@ void SoAd_ReleaseRemoteAddr(SoAd_SoConIdType SoConId);
  * @trace         CPD-71973
  */
 Std_ReturnType SoAd_TpChangeParameter(PduIdType id, TPParameterType parameter, uint16 value);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service an upper layer of the SoAd can read the currently configured hostname, i.e. FQDN
  *                option in the DHCP submodule of the TCP/IP stack.
@@ -596,7 +681,11 @@ Std_ReturnType SoAd_TpChangeParameter(PduIdType id, TPParameterType parameter, u
  * @trace         CPD-71974
  */
 Std_ReturnType SoAd_ReadDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8* length, uint8* data);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         By this API service an upper layer of the SoAd can set the hostname, i.e. FQDN option in the DHCP
  *                submodule of the TCP/IP stack.
@@ -613,7 +702,11 @@ Std_ReturnType SoAd_ReadDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8* leng
  * @trace         CPD-71975
  */
 Std_ReturnType SoAd_WriteDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8 length, const uint8* data);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Returns current state of the socket connection specified by SoConId.
  * @param[in]     SoConId: socket connection index specifying the socket connection for which the state shall
@@ -624,7 +717,11 @@ Std_ReturnType SoAd_WriteDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8 leng
  * @trace         CPD-71976
  */
 void SoAd_GetSoConMode(SoAd_SoConIdType SoConId, SoAd_SoConModeType* ModePtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Requests transmission of a PDU.
  * @param[in]     TxPduId: Identifier of the PDU to be transmitted
@@ -637,7 +734,11 @@ void SoAd_GetSoConMode(SoAd_SoConIdType SoConId, SoAd_SoConModeType* ModePtr);
  * @trace         CPD-71977
  */
 Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Requests transmission of a PDU.
  * @param[in]     TxPduId: Identifier of the PDU to be transmitted
@@ -650,7 +751,11 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
  * @trace         CPD-71978
  */
 Std_ReturnType SoAd_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  * @param[in]     RxPduId: Identification of the PDU to be cancelled.
@@ -662,7 +767,11 @@ Std_ReturnType SoAd_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
  * @trace         CPD-71979
  */
 Std_ReturnType SoAd_TpCancelReceive(PduIdType RxPduId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Requests cancellation of an ongoing transmission of a PDU in a lower layer communication module.
  * @param[in]     TxPduId: Identification of the PDU to be cancelled.
@@ -674,11 +783,15 @@ Std_ReturnType SoAd_TpCancelReceive(PduIdType RxPduId);
  * @trace         CPD-71980
  */
 Std_ReturnType SoAd_TpCancelTransmit(PduIdType TxPduId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         API allows to check if a communication over this socket connection is possible for a dedicated remote
  *                address. It includes that the socket connection is bound to a socket, a physical address is available
- *                for the requested remote address and if a security association is configured that a ecured connection
+ *                for the requested remote address and if a security association is configured that a secured connection
  *                is already established.
  * @param[in]     SoConId: Socket connection index specifying the socket connection for the request.
  * @param[in]     RemoteAddrPtr: Pointer to the structure containing the requested remote IP address and port.
@@ -691,6 +804,8 @@ Std_ReturnType SoAd_TpCancelTransmit(PduIdType TxPduId);
  * @trace         CPD-71982
  */
 TcpIp_ReturnType SoAd_IsConnectionReady(SoAd_SoConIdType SoConId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #ifdef __cplusplus
 }

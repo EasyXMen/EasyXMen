@@ -51,9 +51,9 @@ extern "C" {
  *                  CRYPTO_ERR_ENTROPY_SOURCE_FAILED otherwise
  */
 /******************************************************************/
-/** @brief Entropy source callback function pointer */
+/** @brief Entropy source callback function pointer */ /* PRQA S 5209 ++ */ /* VL_QAC_Crypto */
 typedef int (*crypto_entropy_f_source_ptr)(void* data, unsigned char* output, uint32 len, uint32* olen);
-/** @brief Entropy Source State Structure*/
+/** @brief Entropy Source State Structure*/ /* PRQA S 5209 -- */
 typedef struct
 {
     crypto_entropy_f_source_ptr f_source;  /**< The entropy source callback */
@@ -68,7 +68,7 @@ typedef struct
 {
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
     Crypto_Sha512_Context accumulator;
-    uint32                accumulator_started; /* 0 after init.
+    sint32                accumulator_started; /* 0 after init.
                                                 * 1 after the first update.
                                                 * -1 after free. */
 #endif
@@ -93,7 +93,11 @@ typedef struct
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Initializes the entropy context.
@@ -102,7 +106,11 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len);
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_entropy_init(Crypto_entropy_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Polls the platform entropy source for entropy data.
@@ -116,7 +124,23 @@ void Crypto_entropy_init(Crypto_entropy_context* ctx);
  *          - 0: No critical failures occurred.
  *          - CRYPTO_ERR_ENTROPY_SOURCE_FAILED: Critical failure occurred.
  */
-int Crypto_platform_entropy_poll(void* data, unsigned char* output, uint32 len, uint32* olen);
+/* PRQA S 5209 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+int Crypto_platform_entropy_poll(void* data, uint8* output, uint32 len, uint32* olen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/* PRQA S 5209 -- */
+/**
+ * \brief           Free the data in the context
+ *
+ * \param ctx       Entropy context to free
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_entropy_free(Crypto_entropy_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

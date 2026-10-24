@@ -1,4 +1,3 @@
-/* PRQA S 3108++ */
 /**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception

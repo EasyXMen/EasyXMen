@@ -41,340 +41,350 @@
     \li VL_KeyM_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0779
       Reason: Configure tools to ensure the correctness of character matching.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3332
       Reason: The corresponding macro definition has been obtained through the header file inclusion.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0488
       Reason: Calculates the offset value of the array.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_4603
       Reason: Dereference pointer.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_4604
       Reason: A reserved identifier or reserved macro name shall not be declared.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3218
       Reason: Used to record global information, such as the timestamp of the first entry into the main function, the
     last access to the main function.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1252
       Reason: suffixed constant comparison is necessary.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2981
       Reason: Init may be necessary for return variant.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0311
       Reason: Compatible with different types of functions.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2109
       Reason: Boolean types need to be used as operands
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2991
       Reason: The control statement has no effect, but is reserved for better readability.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2995
       Reason: The control statement has no effect, but is reserved for better readability.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0771
       Reason: Ability to quickly jump out of loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3678
       Reason: non-const type declaration is necessary depends on the config.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2963
       Reason: Strong rotations between different pointer types have no effect.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2880
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2961
       Reason: Strong rotations between different pointer types have no effect.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
   stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_5017
       Reason: High cyclomatic complexity is reserved for better readability.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2001
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1258
       Reason: The cast conversion from a constant is safe.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2015
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1881
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3206
       Reason: Variables are used in different configurations due to complex precompilation logic.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3397
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0770
       Reason: Ability to quickly jump of next loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1822
       Reason: Pointers are compared with integers.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1852
       Reason: Pointers are compared with integers.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3440
       Reason: Floating-point numbers are used in the for loop
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3387
       Reason: The pointer increases or decreases by itself.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2911
       Reason: Confirmed: enclosed in unsigned arithmetic operations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0772
       Reason: The loop contains multiple statements to terminate the loop, including goto
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2743
       Reason: The macro defines format requirements.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2996
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0597
       Reason: Type of case label expression is not consistent with type of controlling expression
     in switch statement.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3123
       Reason: Hard-encoded string constants were used.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0432
       Reason: Function argument is not of compatible pointer type.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1891
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_4461
       Reason: Datatype conversion is necessary for functional usage
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1840
       Reason: A signed constant is implicitly converted to an unsigned type
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2992
       Reason: Different configurations will result in different values in the if logical expression.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1504
       Reason: Variables are used in different configurations due to complex precompilation logic.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3673
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3408
       Reason: Variables are provided externally and need to be declared externally.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_2877
       Reason: The usage of this file depends on the config.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0331
       Reason: A const pointer type is forcibly converted to a non-const pointer type.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1505
       Reason: External interface.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_0310
       Reason: Compatible with different types.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3305
       Reason: The code is designed so.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1312
       Reason: Only valid characters need to be saved, and no ending character is required
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1290
       Reason: Signed numbers need to be converted to unsigned numbers for use
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3122
       Reason: Hard-coded string constants were used.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_3232
       Reason: String constants are saved using arrays.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_KeyM_1257
       Reason: Shorter integers are used to save longer integers.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_KeyM_CONF
       Reason: Configuration files do not need particularly many useless comments.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_KeyM_1340
+      Reason: Store the address of the parameter in a constant pointer to avoid unexpected modifications.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_KeyM_1339
+      Reason: The evaluation of parameter address is safe.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
 
     \li VL_KeyM_0489
-      Reason: Use the pointer to shift back one unit.
-      Risk: No risk.
-      Prevention: None.
+      Reason: ConfigId needs to be stored in the next uint address.
+      Risk: The address of the operation is within the allowed range, no risk.
+      Prevention:Correctness and reliability have been guaranteed through unit and functional testing.
 
  */
 
@@ -382,6 +392,7 @@
 #define KEYM_H
 /* =================================================== inclusions =================================================== */
 #include "Std_Types.h"
+#include "KeyM_Cfg.h"
 #include "Rte_KeyM_Type.h"
 
 #ifdef __cplusplus
@@ -389,42 +400,41 @@ extern "C" {
 #endif
 
 /* =============================================== version information ============================================== */
-#define KEYM_MODULE_ID        115U /**< Module ID for KeyM @range 115U */
-#define KEYM_H_VENDOR_ID      62U  /**< Vendor ID for KeyM @range 62U */
-#define KEYM_INSTANCE_ID      7U   /**< Instance ID for KeyM @range 7U */
-#define KEYM_SW_MAJOR_VERSION 2U   /**< Major software version for KeyM @range 2U */
-#define KEYM_SW_MINOR_VERSION 2U   /**< Minor software version for KeyM @range 2U */
-#define KEYM_SW_PATCH_VERSION 0U   /**< Patch software version for KeyM @range 0U */
-#define KEYM_AR_MAJOR_VERSION 4U   /**< Major AUTOSAR version for KeyM @range 4U */
-#define KEYM_AR_MINOR_VERSION 9U   /**< Minor AUTOSAR version for KeyM @range 9U */
-#define KEYM_AR_PATCH_VERSION 0U   /**< Patch AUTOSAR version for KeyM @range 0U */
+#define KEYM_MODULE_ID                115U /**< Module ID for KeyM @range 115U */
+#define KEYM_VENDOR_ID                62U  /**< Vendor ID for KeyM @range 62U */
+#define KEYM_INSTANCE_ID              7U   /**< Instance ID for KeyM @range 7U */
+#define KEYM_AR_RELEASE_MAJOR_VERSION 4U   /**< Major AUTOSAR version for KeyM @range 4U */
+#define KEYM_AR_RELEASE_MINOR_VERSION 9U   /**< Minor AUTOSAR version for KeyM @range 9U */
+#define KEYM_AR_RELEASE_PATCH_VERSION 0U   /**< Patch AUTOSAR version for KeyM @range 0U */
+#define KEYM_SW_MAJOR_VERSION         2U   /**< Major software version for KeyM @range 2U */
+#define KEYM_SW_MINOR_VERSION         2U   /**< Minor software version for KeyM @range 2U */
+#define KEYM_SW_PATCH_VERSION         0U   /**< Patch software version for KeyM @range 0U */
 
 /* ===================================================== macros ===================================================== */
-#define KEYM_INIT_ID                ((uint8)0x01U) /**< API ID for KeyM_Init function @range 0x01U */
-#define KEYM_DEINIT_ID              ((uint8)0x02U) /**< API ID for KeyM_Deinit function @range 0x02U */
-#define KEYM_GETVERSIONINFO_ID      ((uint8)0x03U) /**< API ID for KeyM_GetVersionInfo function @range 0x03U */
-#define KEYM_START_ID               ((uint8)0x04U) /**< API ID for KeyM_Start function @range 0x04U */
-#define KEYM_PREPARE_ID             ((uint8)0x05U) /**< API ID for KeyM_Prepare function @range 0x05U */
-#define KEYM_UPDATE_ID              ((uint8)0x06U) /**< API ID for KeyM_Update function @range 0x06U */
-#define KEYM_FINAL_ID               ((uint8)0x07U) /**< API ID for KeyM_Final function @range 0x07U */
-#define KEYM_VERIFY_ID              ((uint8)0x08U) /**< API ID for KeyM_Verify function @range 0x08U */
-#define KEYM_SERV_CERTIFICATE_ID    ((uint8)0x09U) /**< API ID for KeyM_Serv_Certificate function @range 0x09U */
-#define KEYM_SET_CERTIFICATE_ID     ((uint8)0x0AU) /**< API ID for KeyM_Set_Certificate function @range 0x0AU */
-#define KEYM_GET_CERTIFICATE_ID     ((uint8)0x0BU) /**< API ID for KeyM_Get_Certificate function @range 0x0BU */
-#define KEYM_VERIFY_CERTIFICATES_ID ((uint8)0x0CU) /**< API ID for KeyM_Verify_Certificates function @range 0x0CU */
-#define KEYM_VERIFY_CERTIFICATE_ID  ((uint8)0x0DU) /**< API ID for KeyM_Verify_Certificate function @range 0x0DU */
-#define KEYM_VERIFY_CERTIFICATE_CHAIN_ID \
-    ((uint8)0x0EU)                              /**< API ID for KeyM_Verify_Certificate_Chain function @range 0x0EU */
-#define KEYM_CERT_ELEMENT_GET_ID ((uint8)0x0FU) /**< API ID for KeyM_Cert_Element_Get function @range 0x0FU */
-#define KEYM_CERT_ELEMENT_GET_FIRST_ID \
-    ((uint8)0x10U) /**< API ID for KeyM_Cert_Element_Get_First function @range 0x10U */
-#define KEYM_CERT_ELEMENT_GET_NEXT_ID                                                                           \
-    ((uint8)0x11U)                             /**< API ID for KeyM_Cert_Element_Get_Next function @range 0x11U \
-                                                */
-#define KEYM_CERT_GET_STATUS_ID ((uint8)0x12U) /**< API ID for KeyM_Cert_Get_Status function @range 0x12U */
-#define KEYM_CERT_ELEMENT_GET_BY_INDEX \
-    ((uint8)0x1BU) /**< API ID for KeyM_Cert_Element_Get_By_Index function @range 0x1BU */
-#define KeyM_CertElementGetCount_ID ((uint8)0x1CU) /**< API ID for KeyM_CertElementGetCount function @range 0x1CU */
+#define KEYM_INIT_ID                     0x01U /**< API ID for KeyM_Init function @range 0x01U */
+#define KEYM_DEINIT_ID                   0x02U /**< API ID for KeyM_Deinit function @range 0x02U */
+#define KEYM_GETVERSIONINFO_ID           0x03U /**< API ID for KeyM_GetVersionInfo function @range 0x03U */
+#define KEYM_START_ID                    0x04U /**< API ID for KeyM_Start function @range 0x04U */
+#define KEYM_PREPARE_ID                  0x05U /**< API ID for KeyM_Prepare function @range 0x05U */
+#define KEYM_UPDATE_ID                   0x06U /**< API ID for KeyM_Update function @range 0x06U */
+#define KEYM_FINAL_ID                    0x07U /**< API ID for KeyM_Final function @range 0x07U */
+#define KEYM_VERIFY_ID                   0x08U /**< API ID for KeyM_Verify function @range 0x08U */
+#define KEYM_SERV_CERTIFICATE_ID         0x09U /**< API ID for KeyM_Serv_Certificate function @range 0x09U */
+#define KEYM_SERV_CERTIFICATE_BY_CERT_ID 0x13U /**< API ID for ServiceCertificateByCertId function @range 0x13U */
+#define KEYM_SET_CERTIFICATE_ID          0x0AU /**< API ID for KeyM_Set_Certificate function @range 0x0AU */
+#define KEYM_GET_CERTIFICATE_ID          0x0BU /**< API ID for KeyM_Get_Certificate function @range 0x0BU */
+#define KEYM_VERIFY_CERTIFICATES_ID      0x0CU /**< API ID for KeyM_Verify_Certificates function @range 0x0CU */
+#define KEYM_VERIFY_CERTIFICATE_ID       0x0DU /**< API ID for KeyM_Verify_Certificate function @range 0x0DU */
+#define KEYM_VERIFY_CERTIFICATE_CHAIN_ID 0x0EU /**< API ID for KeyM_Verify_Certificate_Chain function @range 0x0EU */
+#define KEYM_CERT_ELEMENT_GET_ID         0x0FU /**< API ID for KeyM_Cert_Element_Get function @range 0x0FU */
+#define KEYM_CERT_ELEMENT_GET_FIRST_ID   0x10U /**< API ID for KeyM_Cert_Element_Get_First function @range 0x10U */
+#define KEYM_CERT_ELEMENT_GET_NEXT_ID                                                                         \
+    0x11U                                    /**< API ID for KeyM_Cert_Element_Get_Next function @range 0x11U \
+                                              */
+#define KEYM_CERT_GET_STATUS_ID        0x12U /**< API ID for KeyM_Cert_Get_Status function @range 0x12U */
+#define KEYM_MAINFUNCTION_ID           0x19U /**< API ID for KeyM_MainFunction function @range 0x19U */
+#define KEYM_CERT_ELEMENT_GET_BY_INDEX 0x1BU /**< API ID for KeyM_Cert_Element_Get_By_Index function @range 0x1BU */
+#define KeyM_CertElementGetCount_ID    0x1CU /**< API ID for KeyM_CertElementGetCount function @range 0x1CU */
 
 #define KEYM_E_PARAM_POINTER  ((uint8)0x01U) /**< Error code for parameter pointer error @range 0x01U */
 #define KEYM_E_SMALL_BUFFER   ((uint8)0x02U) /**< Error code for small buffer error @range 0x02U */
@@ -515,7 +525,11 @@ typedef uint8* KeyM_CertDataPointerType; /**< Certificate data pointer type @ran
  * @synchronous    TRUE
  * @trace       CPD-71402
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_Init(const KeyM_ConfigType* ConfigPtr);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Deinitializes the Key Management module.
@@ -523,7 +537,11 @@ void KeyM_Init(const KeyM_ConfigType* ConfigPtr);
  * @synchronous    TRUE
  * @trace       CPD-71403
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_Deinit(void);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves version information for the Key Management module.
@@ -533,7 +551,11 @@ void KeyM_Deinit(void);
  * @synchronous    TRUE
  * @trace       CPD-71404
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /*Key*/
 
@@ -552,12 +574,16 @@ void KeyM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @trace       CPD-71405
  */
 #if (KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED == STD_ON) /* PRQA S 3332 */ /* VL_KeyM_3332 */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_Start(
     KeyM_StartType StartType,
     const uint8*   RequestData,
     uint16         RequestDataLength,
     uint8*         ResponseData,
     uint16*        ResponseDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Finalizes the Key Management module.
@@ -572,11 +598,15 @@ Std_ReturnType KeyM_Start(
  * @synchronous    TRUE
  * @trace       CPD-71406
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_Finalize(
     const uint8* RequestDataPtr,
     uint16       RequestDataLength,
     uint8*       ResponseDataPtr,
     uint16       ResponseMaxDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif
 
 #if (STD_ON == KEYM_CRYPTO_KEY_PREPARE_FUNCTION_ENABLED) /* PRQA S 3332 */ /* VL_KeyM_3332 */
@@ -593,8 +623,12 @@ Std_ReturnType KeyM_Finalize(
  * @synchronous    TRUE
  * @trace       CPD-71407
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType
     KeyM_Prepare(const uint8* RequestData, uint16 RequestDataLength, uint8* ResponseData, uint16* ResponseDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif
 /**
  * @brief          Updates a key in the Key Management module.
@@ -611,6 +645,8 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71408
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_Update(
     const uint8* KeyNamePtr,
     uint16       KeyNameLength,
@@ -618,6 +654,8 @@ Std_ReturnType KeyM_Update(
     uint16       RequestDataLength,
     uint8*       ResultDataPtr,
     uint16       ResultDataMaxLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 #if (KEYM_CRYPTO_KEY_VERIFY_FUNCTION_ENABLED == STD_ON) /* PRQA S 3332 */ /* VL_KeyM_3332 */
 /**
@@ -636,6 +674,8 @@ Std_ReturnType KeyM_Update(
  * @synchronous    TRUE
  * @trace       CPD-71409
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_Verify(
     const uint8* KeyNamePtr,
     uint16       KeyNameLength,
@@ -643,7 +683,10 @@ Std_ReturnType KeyM_Verify(
     uint16       RequestDataLength,
     uint8*       ResponseData,
     uint16*      ResponseDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif
+#if (KEYM_SERVICE_CERTIFICATE_FUNCTION_ENABLED == STD_ON)
 /*Certificate*/
 /**
  * @brief          Performs a certificate service operation in the Key Management module.
@@ -661,6 +704,8 @@ Std_ReturnType KeyM_Verify(
  * @synchronous    TRUE
  * @trace       CPD-71410
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_ServiceCertificate(
     KeyM_ServiceCertificateType Service,
     const uint8*                CertNamePtr,
@@ -669,6 +714,9 @@ Std_ReturnType KeyM_ServiceCertificate(
     uint32                      RequestDataLength,
     uint8*                      ResponseData,
     uint32*                     ResponseDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
 /**
  * @brief          Performs a certificate service operation in the Key Management module.
  * @param[in]      Service : Type of certificate service operation.
@@ -684,6 +732,8 @@ Std_ReturnType KeyM_ServiceCertificate(
  * @synchronous    TRUE
  * @trace       CPD-59104
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_ServiceCertificateByCertId(
     KeyM_CertificateIdType      CertId,
     KeyM_ServiceCertificateType Service,
@@ -691,6 +741,9 @@ Std_ReturnType KeyM_ServiceCertificateByCertId(
     uint32                      RequestDataLength,
     uint8*                      ResponseData,
     uint32*                     ResponseDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+#endif /*KEYM_SERVICE_CERTIFICATE_FUNCTION_ENABLED == STD_ON*/
 
 /**
  * @brief          Sets a certificate in the Key Management module.
@@ -703,7 +756,11 @@ Std_ReturnType KeyM_ServiceCertificateByCertId(
  * @synchronous    TRUE
  * @trace       CPD-71411
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_CertDataType* CertificateDataPtr);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves a certificate from the Key Management module.
@@ -718,7 +775,11 @@ Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_Cer
  * @synchronous    TRUE
  * @trace       CPD-71412
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataType* CertificateDataPtr);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Verifies a certificate chain in the Key Management module.
@@ -733,7 +794,11 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
  * @synchronous    TRUE
  * @trace       CPD-71413
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_CertificateIdType CertUpperId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Verifies a certificate in the Key Management module.
@@ -747,7 +812,11 @@ Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_Certi
  * @synchronous    TRUE
  * @trace       CPD-71414
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Verifies a certificate chain in the Key Management module.
@@ -761,10 +830,14 @@ Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId);
  * @synchronous    TRUE
  * @trace       CPD-71415
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_VerifyCertificateChain(
     KeyM_CertificateIdType  CertId,
     const KeyM_CertDataType certChainData[],
     uint8                   NumberOfCertificates);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves a certificate element from the Key Management module.
@@ -779,11 +852,15 @@ Std_ReturnType KeyM_VerifyCertificateChain(
  * @synchronous    TRUE
  * @trace       CPD-71416
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertElementGet(
     KeyM_CertificateIdType CertId,
     KeyM_CertElementIdType CertElementId,
     uint8*                 CertElementData,
     uint32*                CertElementDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves a certificate element by index from the Key Management module.
@@ -799,12 +876,16 @@ Std_ReturnType KeyM_CertElementGet(
  * @synchronous    TRUE
  * @trace       CPD-71417
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertificateElementGetByIndex(
     KeyM_CertificateIdType CertId,
     KeyM_CertElementIdType CertElementId,
     uint32                 Index,
     uint8*                 CertElementDataPtr,
     uint32*                CertElementDataLengthPtr);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the count of a specific certificate element in the Key Management module.
@@ -818,10 +899,14 @@ Std_ReturnType KeyM_CertificateElementGetByIndex(
  * @synchronous    TRUE
  * @trace       CPD-71418
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertificateElementGetCount(
     KeyM_CertificateIdType CertId,
     KeyM_CertElementIdType CertElementId,
     uint16*                CountPtr);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the first occurrence of a certificate element and initializes an iterator.
@@ -838,12 +923,16 @@ Std_ReturnType KeyM_CertificateElementGetCount(
  * @synchronous    TRUE
  * @trace       CPD-71419
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertElementGetFirst(
     KeyM_CertificateIdType        CertId,
     KeyM_CertElementIdType        CertElementId,
     KeyM_CertElementIteratorType* CertElementIterator,
     uint8*                        CertElementData,
     uint32*                       CertElementDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the next occurrence of a certificate element using an iterator.
@@ -857,10 +946,14 @@ Std_ReturnType KeyM_CertElementGetFirst(
  * @synchronous    TRUE
  * @trace       CPD-71420
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertElementGetNext(
     KeyM_CertElementIteratorType* CertElementIterator,
     uint8*                        CertElementData,
     uint32*                       CertElementDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the status of a certificate in the Key Management module.
@@ -873,7 +966,11 @@ Std_ReturnType KeyM_CertElementGetNext(
  * @synchronous    TRUE
  * @trace       CPD-71421
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertGetStatus(KeyM_CertificateIdType CertId, KeyM_CertificateStatusType* Status);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 #ifdef __cplusplus
 }

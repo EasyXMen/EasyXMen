@@ -18,7 +18,7 @@
  **  @author             : darren.zhang,QinmeiChen
  **  @date               : 2024/09/09
  **  @vendor             : isoft
- **  @description        : stand lib source code
+ **  @description        : standard lib source code
  **
  ***********************************************************************************************************************/
 
@@ -30,69 +30,92 @@
 /* ================================================== version check ================================================= */
 /* ===================================================== macros ===================================================== */
 #if ISTDLIB_BSW_NOT_USED_STDLIB == STD_ON
-/* paltform used value */
+/* platform used value */
 #if (CPU_TYPE == CPU_TYPE_64)
 /* pc environment 64bit */
-#define ISTDLIB_SUFFIX_BIT_LEN   3u
-#define ISTDLIB_IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 61uL) == 0uL)
-#define ISTDLIB_SUFFIX_VLU(x)    (((uintptr_t)(x) << 61uL) >> 61uL)
+#define ISTDLIB_SUFFIX_BIT_LEN  3u
+#define ISTDLIB_IS_ALIGN_ADR(x) (((uintptr_t)(x) << 61uL) == 0uL)
+#define ISTDLIB_SUFFIX_VLU(x)   (((uintptr_t)(x) << 61uL) >> 61uL)
+/* Explicit uintptr_t max for this CPU_TYPE (64-bit): avoids relying on
+ * <stdint.h>'s UINTPTR_MAX under ISTDLIB_BSW_NOT_USED_STDLIB mode. */
+#define ISTDLIB_UINTPTR_MAX     0xFFFFFFFFFFFFFFFFuL
 
 #elif (CPU_TYPE == CPU_TYPE_32)
 /* normal 32-bit mcu */
 /* PRQA S 0750,3472 ++ */ /* VL_IStdLib_MacroFunc */
 #if (CPU_32_WITH_16_ADR == TRUE)
-#define ISTDLIB_SUFFIX_BIT_LEN   1u
-#define ISTDLIB_IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 31uL) == 0uL)
-#define ISTDLIB_SUFFIX_VLU(x)    (((uintptr_t)(x) << 31uL) >> 31uL)
+#define ISTDLIB_SUFFIX_BIT_LEN  1u
+#define ISTDLIB_IS_ALIGN_ADR(x) (((uintptr_t)(x) << 31uL) == 0uL)
+#define ISTDLIB_SUFFIX_VLU(x)   (((uintptr_t)(x) << 31uL) >> 31uL)
+/* 32-bit CPU with 16-bit address bus: uintptr_t is still 32-bit wide
+ * (the shift by 31 requires >=32 bits), so the max is 2^32 - 1. */
+#define ISTDLIB_UINTPTR_MAX     0xFFFFFFFFuL
 #else
-#define ISTDLIB_SUFFIX_BIT_LEN   2u
-#define ISTDLIB_IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 30uL) == 0uL)
-#define ISTDLIB_SUFFIX_VLU(x)    (((uintptr_t)(x) << 30uL) >> 30uL)
+#define ISTDLIB_SUFFIX_BIT_LEN  2u
+#define ISTDLIB_IS_ALIGN_ADR(x) (((uintptr_t)(x) << 30uL) == 0uL)
+#define ISTDLIB_SUFFIX_VLU(x)   (((uintptr_t)(x) << 30uL) >> 30uL)
+/* Explicit uintptr_t max for this CPU_TYPE (32-bit): 2^32 - 1. */
+#define ISTDLIB_UINTPTR_MAX     0xFFFFFFFFuL
 #endif
 
 #elif (CPU_TYPE == CPU_TYPE_16)
 /*  16-bit mcu */
-#define ISTDLIB_SUFFIX_BIT_LEN   1u
-#define ISTDLIB_IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 15uL) == 0uL)
-#define ISTDLIB_SUFFIX_VLU(x)    ((((uintptr_t)x) << 15uL) >> 15uL)
+#define ISTDLIB_SUFFIX_BIT_LEN  1u
+#define ISTDLIB_IS_ALIGN_ADR(x) (((uintptr_t)(x) << 15uL) == 0uL)
+#define ISTDLIB_SUFFIX_VLU(x)   ((((uintptr_t)x) << 15uL) >> 15uL)
+/* Explicit uintptr_t max for this CPU_TYPE (16-bit): 2^16 - 1. */
+#define ISTDLIB_UINTPTR_MAX     0xFFFFuL
 #else
 /* default 32-bit mcu */
-#define ISTDLIB_SUFFIX_BIT_LEN   2u
-#define ISTDLIB_IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 30uL) == 0uL)
-#define ISTDLIB_SUFFIX_VLU(x)    (((uintptr_t)(x) << 30uL) >> 30uL)
+#define ISTDLIB_SUFFIX_BIT_LEN  2u
+#define ISTDLIB_IS_ALIGN_ADR(x) (((uintptr_t)(x) << 30uL) == 0uL)
+#define ISTDLIB_SUFFIX_VLU(x)   (((uintptr_t)(x) << 30uL) >> 30uL)
+/* Explicit uintptr_t max for this CPU_TYPE (default 32-bit): 2^32 - 1. */
+#define ISTDLIB_UINTPTR_MAX     0xFFFFFFFFuL
 #endif /* SIZE_MAX */
 #if (CPU_TYPE != CPU_TYPE_8)
 /* Gets the forward-aligned address of the current address */
-#define ISTDLIB_GET_ALIGEN_FORWARD_ADR(x) (((uintptr_t)(x) >> ISTDLIB_SUFFIX_BIT_LEN) << ISTDLIB_SUFFIX_BIT_LEN)
-/* Gets the 128-bit forward-aligned address of the current address */
-#define ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(x) \
-    (((uintptr_t)(x) > (sizeof(uintptr_t) << 2uL)) ? ((uintptr_t)(x) - (sizeof(uintptr_t) << 2uL)) : 0uL)
+#define ISTDLIB_GET_ALIGN_FORWARD_ADR(x) (((uintptr_t)(x) >> ISTDLIB_SUFFIX_BIT_LEN) << ISTDLIB_SUFFIX_BIT_LEN)
+/* 4-uptr block size = 4 * sizeof(uintptr_t) bytes (loop unroll factor) */
+#define ISTDLIB_4UPTR_BLOCK_SIZE         (sizeof(uintptr_t) << 2uL)
+/* 4-uptr loop read reach = 5 * sizeof(uintptr_t) bytes (4-uptr block + 1-uptr read-ahead).
+ * Bounds the unaligned 4-uptr loop so src[0..4] never passes source_end. */
+#define ISTDLIB_5UPTR_REACH_SIZE         (ISTDLIB_4UPTR_BLOCK_SIZE + sizeof(uintptr_t))
+/* Gets the 4-uptr-boundary forward-aligned address of the current address */
+#define ISTDLIB_GET_ALIGN_4UPTR_FORWARD_ADR(x) \
+    (((uintptr_t)(x) > ISTDLIB_4UPTR_BLOCK_SIZE) ? ((uintptr_t)(x) - ISTDLIB_4UPTR_BLOCK_SIZE) : 0uL)
+/* 4-uptr block-loop safe boundary for unaligned src: the loop reads src[0..4]
+ * (5*W reach) per iteration; src tracks dst 1:1, so source_end maps to
+ * (dstLast + offsetVlu). Pull the dst boundary back by ISTDLIB_5UPTR_REACH_SIZE
+ * so src + 5*W <= source_end on every iteration. When the buffer is too small
+ * (dstAtSrcEnd <= 5*W), return fallback so the block loop is skipped. Ternary
+ * lowers to a cmov; the compiler CSEs (dstLast + offsetVlu) to one add. */
+#define ISTDLIB_GET_4UPTR_LOOP_SAFE_ADR(dstLast, offsetVlu, fallback)                      \
+    ((((uintptr_t)(dstLast) + (offsetVlu)) > ISTDLIB_5UPTR_REACH_SIZE)                     \
+         ? (const uint8*)(((uintptr_t)(dstLast) + (offsetVlu)) - ISTDLIB_5UPTR_REACH_SIZE) \
+         : (const uint8*)(fallback))
+/* Tail word-loop safe boundary: pulls the aligned boundary back by one word
+ * when (offsetVlu + misalign) < W, so the tail loop's 2-word read-ahead
+ * stays within source_end. Wraparound-safe: only pulls back when
+ * aligned >= W to avoid unsigned underflow. (See definition below.) */
 /* Gets the backward aligned address of the current address */
-#define GET_ALIGN_NEXT_ADR(x) ISTDLIB_GET_ALIGEN_FORWARD_ADR(((uintptr_t)(x) + sizeof(uintptr_t) - 1uL))
+#define GET_ALIGN_NEXT_ADR(x) ISTDLIB_GET_ALIGN_FORWARD_ADR(((uintptr_t)(x) + sizeof(uintptr_t) - 1uL))
 /*Gets shift bit for unaligned address*/
 #if (CPU_32_WITH_16_ADR == TRUE)
-#define ISTDLIB_GET_ALIGN_RIGNT_SHIFT(x) (ISTDLIB_SUFFIX_VLU(x) << 4uL)
+#define ISTDLIB_GET_ALIGN_RIGHT_SHIFT(x) (ISTDLIB_SUFFIX_VLU(x) << 4uL)
 #define ISTDLIB_GET_ALIGN_LEFT_SHIFT(x)  ((sizeof(uintptr_t) - (ISTDLIB_SUFFIX_VLU(x))) << 4uL)
 #else
-#define ISTDLIB_GET_ALIGN_RIGNT_SHIFT(x) (ISTDLIB_SUFFIX_VLU(x) << 3uL)
+#define ISTDLIB_GET_ALIGN_RIGHT_SHIFT(x) (ISTDLIB_SUFFIX_VLU(x) << 3uL)
 #define ISTDLIB_GET_ALIGN_LEFT_SHIFT(x)  ((sizeof(uintptr_t) - (ISTDLIB_SUFFIX_VLU(x))) << 3uL)
 #endif
 #endif
 /* PRQA S 0750,3472 -- */
 
-#if !defined(ISTDLIB_MEM_USED_ASAN_SUPPRESSION)
-/* Detection is turned on only for specific unit tests to avoid false positives */
-#define ISTDLIB_MEM_USED_ASAN_SUPPRESSION 1
-#endif
-
-#if (defined(__clang__) || defined(__GNUC__)) && (ISTDLIB_MEM_USED_ASAN_SUPPRESSION)
-#define ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
-#else
-#define ATTRIBUTE_NO_SANITIZE_ADDRESS
-#endif
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        handle tail unaligned data of memcmp
  * @param[in]    dst     : Points to the array str1
@@ -103,6 +126,11 @@
  * @trace         -
  */
 ISTDLIB_LOCAL StatusType IStdLib_endMemcmp(const void* dst, const void* src, const void* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        handle tail unaligned data of memcpy
  * @param[inout] dst     : Points to the array str1
@@ -113,6 +141,11 @@ ISTDLIB_LOCAL StatusType IStdLib_endMemcmp(const void* dst, const void* src, con
  * @trace         -
  */
 ISTDLIB_LOCAL void IStdLib_endMemcpy(void* dst, const void* src, const void* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        handle tail unaligned data of memcpy
  * @param[inout] dst     : Points to the array str1
@@ -123,6 +156,11 @@ ISTDLIB_LOCAL void IStdLib_endMemcpy(void* dst, const void* src, const void* dst
  * @trace         -
  */
 ISTDLIB_LOCAL void IStdLib_endMemset(void* dst, uintptr_t vlu, const void* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief     Helper function to handle unaligned start of memCmp
  * @param[in] dst     : Points to the array str1
@@ -137,6 +175,11 @@ ISTDLIB_LOCAL void IStdLib_endMemset(void* dst, uintptr_t vlu, const void* dstLa
  */
 ISTDLIB_LOCAL StatusType
     IStdLib_handleUnalignedStart(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief     Helper function to handle aligned middle of memCmp
  * @param[in] dst     : Points to the array str1
@@ -151,6 +194,11 @@ ISTDLIB_LOCAL StatusType
  */
 ISTDLIB_LOCAL StatusType
     IStdLib_handleAlignedMiddle(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief     Helper function to handle unaligned middle of memCmp
  * @param[in] dst     : Points to the array str1
@@ -165,15 +213,33 @@ ISTDLIB_LOCAL StatusType
  */
 ISTDLIB_LOCAL StatusType
     IStdLib_handleUnalignedMiddle(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+/* ============================================ inline function definitions ========================================= */
+/* Tail word-loop safe boundary: pulls the aligned boundary back by one word
+ * when (offsetVlu + misalign) < W, so the tail loop's 2-word read-ahead
+ * stays within source_end. Wraparound-safe: only pulls back when
+ * aligned >= W to avoid unsigned underflow. */
+ISTDLIB_LOCAL_INLINE const uint8* IStdLib_GetTailSafeAdr(uintptr_t dstLast, uintptr_t offsetVlu)
+{
+    uintptr_t aligned = ISTDLIB_GET_ALIGN_FORWARD_ADR(dstLast);
+    /* Pull back one word when tail read-ahead would exceed source_end.
+     * Guard aligned >= W to prevent unsigned underflow on the subtraction. */
+    if (((offsetVlu + ISTDLIB_SUFFIX_VLU(dstLast)) < sizeof(uintptr_t)) && (aligned >= sizeof(uintptr_t)))
+    {
+        aligned -= sizeof(uintptr_t);
+    }
+    /*PRQA S 0306 ++ */ /*VL_IStdLib_0306*/
+    return (const uint8*)aligned;
+    /*PRQA S 0306 -- */
+}
 /* ============================================ internal data definitions =========================================== */
 /* ============================================ external data definitions =========================================== */
 /* ========================================== external function definitions ========================================= */
 #define ISTDLIB_START_SEC_CODE
 #include "IStdLib_MemMap.h"
-
 /*PRQA S 0306 ++ */ /*VL_IStdLib_0306*/ /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
-ATTRIBUTE_NO_SANITIZE_ADDRESS
 void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT srcptr, uint32 length)
 /*PRQA S 2889,6060 -- */
 {
@@ -183,7 +249,7 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
 #if (CPU_TYPE != CPU_TYPE_8)
     const uint8* dstTmp;
     /* Handles parts of the destination address that are not aligned */
-    if (!ISTDLIB_IS_ALIGEN_ADR(dst))
+    if (!ISTDLIB_IS_ALIGN_ADR(dst))
     {
         dstTmp = (const uint8*)GET_ALIGN_NEXT_ADR(dst);
         if ((uintptr_t)dstTmp > (uintptr_t)dstLast)
@@ -199,9 +265,9 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
         }
     }
     /* Deal with the middle */
-    if (ISTDLIB_IS_ALIGEN_ADR(src))
+    if (ISTDLIB_IS_ALIGN_ADR(src))
     {
-        dstTmp = (uint8*)ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(dstLast);
+        dstTmp = (uint8*)ISTDLIB_GET_ALIGN_4UPTR_FORWARD_ADR(dstLast);
         while ((uintptr_t)dst < (uintptr_t)dstTmp)
         {
             dst[0] = src[0];
@@ -211,7 +277,7 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
             src    = &src[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
             dst    = &dst[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
         }
-        dstTmp = (const uint8*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(dstLast);
+        dstTmp = (const uint8*)ISTDLIB_GET_ALIGN_FORWARD_ADR(dstLast);
         while ((uintptr_t)dst < (uintptr_t)dstTmp)
         {
             *dst = *src;
@@ -222,10 +288,11 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
     else
     {
         uintptr_t offsetVlu  = ISTDLIB_SUFFIX_VLU(src);
-        uintptr_t rightShift = ISTDLIB_GET_ALIGN_RIGNT_SHIFT(src);
+        uintptr_t rightShift = ISTDLIB_GET_ALIGN_RIGHT_SHIFT(src);
         uintptr_t leftShift  = ISTDLIB_GET_ALIGN_LEFT_SHIFT(src);
-        dstTmp               = (const uint8*)ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(dstLast);
-        src                  = (const uintptr_t*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(src);
+        /* Bound the 4-uptr block loop so src + 5*W <= source_end on every iteration. */
+        dstTmp = ISTDLIB_GET_4UPTR_LOOP_SAFE_ADR(dstLast, offsetVlu, dst);
+        src    = (const uintptr_t*)ISTDLIB_GET_ALIGN_FORWARD_ADR(src);
         while ((uintptr_t)dst < (uintptr_t)dstTmp)
         {
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
@@ -235,15 +302,17 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
             dst[3] = (src[3] >> rightShift) | (src[4] << leftShift); /* PRQA S 3120 */ /* VL_QAC_MagicNum */
 #else
             dst[0] = (src[0] << rightShift) | (src[1] >> leftShift);
-            dst[1] = (src[1] << rightShift) | (src[2] >> leftShift);
-            dst[2] = (src[2] << rightShift) | (src[3] >> leftShift);
-            dst[3] = (src[3] << rightShift) | (src[4] >> leftShift);
+            dst[1] = (src[1] << rightShift) | (src[2] >> leftShift); /* PRQA S 3120 */ /* VL_QAC_MagicNum */
+            dst[2] = (src[2] << rightShift) | (src[3] >> leftShift); /* PRQA S 3120 */ /* VL_QAC_MagicNum */
+            dst[3] = (src[3] << rightShift) | (src[4] >> leftShift); /* PRQA S 3120 */ /* VL_QAC_MagicNum */
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
 
             src = &src[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
             dst = &dst[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
         }
-        dstTmp = (const uint8*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(dstLast);
+        /* Tail word loop reads src[1] (2*W read-ahead); shrink the boundary by one
+         * word when unsafe so endMemcpy's byte-by-byte handler covers the tail. */
+        dstTmp = IStdLib_GetTailSafeAdr((uintptr_t)dstLast, offsetVlu);
         for (; (uintptr_t)dst < (uintptr_t)dstTmp; dst++)
         {
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
@@ -260,9 +329,11 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
     IStdLib_endMemcpy(dst, src, dstLast);
     return dstptr;
 }
-
-ATTRIBUTE_NO_SANITIZE_ADDRESS
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n)
 /* PRQA S 2889,6060 -- */
 {
@@ -284,7 +355,7 @@ void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n)
             vlu |= (uintptr_t)val;
         }
     }
-    if (!ISTDLIB_IS_ALIGEN_ADR(dst))
+    if (!ISTDLIB_IS_ALIGN_ADR(dst))
     {
         /* start address unaligned processing */
         dstTmp = (uint8*)GET_ALIGN_NEXT_ADR(dst);
@@ -300,7 +371,7 @@ void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n)
         }
     }
     /* Deal with the middle */
-    dstTmp = (uint8*)ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(dstLast);
+    dstTmp = (uint8*)ISTDLIB_GET_ALIGN_4UPTR_FORWARD_ADR(dstLast);
     while ((uintptr_t)dst < (uintptr_t)dstTmp)
     {
         dst[0] = vlu;
@@ -309,7 +380,7 @@ void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n)
         dst[3] = vlu; /* PRQA S 3120 */       /* VL_QAC_MagicNum */
         dst    = &dst[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
     }
-    dstTmp = (uint8*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(dstLast);
+    dstTmp = (uint8*)ISTDLIB_GET_ALIGN_FORWARD_ADR(dstLast);
     while ((uintptr_t)dst < (uintptr_t)dstTmp)
     {
         *dst = vlu;
@@ -319,8 +390,11 @@ void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n)
     IStdLib_endMemset(dst, vlu, dstLast);
     return dstptr;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
-ATTRIBUTE_NO_SANITIZE_ADDRESS
 StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTDLIB_RESTRICT str2ptr, uint32 n)
 /*PRQA S 2889,6060 -- */
 {
@@ -332,7 +406,7 @@ StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTD
     StatusType Ret = 0u;
 
     // Handle unaligned start
-    if (!ISTDLIB_IS_ALIGEN_ADR(dst))
+    if (!ISTDLIB_IS_ALIGN_ADR(dst))
     {
         Ret = IStdLib_handleUnalignedStart(&dst, &src, dstLast);
         if (Ret != 0u)
@@ -342,7 +416,7 @@ StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTD
     }
 
     // Handle aligned middle
-    if (ISTDLIB_IS_ALIGEN_ADR(src))
+    if (ISTDLIB_IS_ALIGN_ADR(src))
     {
         Ret = IStdLib_handleAlignedMiddle(&dst, &src, dstLast);
     }
@@ -360,7 +434,11 @@ StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTD
     // Handle remaining bytes
     return IStdLib_endMemcmp(dst, src, dstLast);
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 ISTDLIB_LOCAL StatusType
     IStdLib_handleUnalignedStart(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast)
@@ -384,11 +462,16 @@ ISTDLIB_LOCAL StatusType
 
     return 0u;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 ISTDLIB_LOCAL StatusType IStdLib_handleAlignedMiddle(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast)
 /*PRQA S 2889,6060 -- */
 {
-    const uint8* dstTmp = (const uint8*)ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(dstLast);
+    const uint8* dstTmp = (const uint8*)ISTDLIB_GET_ALIGN_4UPTR_FORWARD_ADR(dstLast);
     while ((uintptr_t)*dst < (uintptr_t)dstTmp)
     {
         /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
@@ -402,7 +485,7 @@ ISTDLIB_LOCAL StatusType IStdLib_handleAlignedMiddle(const uintptr_t** dst, cons
         /* PRQA S 3120 -- */
     }
 
-    dstTmp = (const uint8*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(dstLast);
+    dstTmp = (const uint8*)ISTDLIB_GET_ALIGN_FORWARD_ADR(dstLast);
     while ((uintptr_t)*dst < (uintptr_t)dstTmp)
     {
         if (*(*dst) != *(*src))
@@ -415,16 +498,23 @@ ISTDLIB_LOCAL StatusType IStdLib_handleAlignedMiddle(const uintptr_t** dst, cons
 
     return 0u;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 ISTDLIB_LOCAL StatusType
     IStdLib_handleUnalignedMiddle(const uintptr_t** dst, const uintptr_t** src, const uint8* dstLast)
 /*PRQA S 2889,6060 -- */
 {
     uintptr_t    offsetVlu  = ISTDLIB_SUFFIX_VLU(*src);
-    uintptr_t    rightShift = ISTDLIB_GET_ALIGN_RIGNT_SHIFT(*src);
+    uintptr_t    rightShift = ISTDLIB_GET_ALIGN_RIGHT_SHIFT(*src);
     uintptr_t    leftShift  = ISTDLIB_GET_ALIGN_LEFT_SHIFT(*src);
-    const uint8* dstTmp     = (const uint8*)ISTDLIB_GET_ALIGEN_128_FORWARD_ADR(dstLast);
-    *src                    = (const uintptr_t*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(*src);
+    const uint8* dstTmp;
+    /* Bound the 4-uptr block loop so (*src) + 5*W <= source_end on every iteration. */
+    dstTmp = ISTDLIB_GET_4UPTR_LOOP_SAFE_ADR(dstLast, offsetVlu, *dst);
+    *src   = (const uintptr_t*)ISTDLIB_GET_ALIGN_FORWARD_ADR(*src);
 
     while ((uintptr_t)*dst < (uintptr_t)dstTmp)
     {
@@ -450,7 +540,9 @@ ISTDLIB_LOCAL StatusType
         *dst = &(*dst)[4uL]; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
     }
 
-    dstTmp = (const uint8*)ISTDLIB_GET_ALIGEN_FORWARD_ADR(dstLast);
+    /* Tail word loop reads (*src)[1] (2*W read-ahead); shrink the boundary by one
+     * word when unsafe so endMemcmp's byte-by-byte handler covers the tail. */
+    dstTmp = IStdLib_GetTailSafeAdr((uintptr_t)dstLast, offsetVlu);
     for (; (uintptr_t)*dst < (uintptr_t)dstTmp; (*dst)++)
     {
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
@@ -467,6 +559,11 @@ ISTDLIB_LOCAL StatusType
     *src = (const uintptr_t*)((uintptr_t)*src + offsetVlu);
     return 0u;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL StatusType IStdLib_endMemcmp(const void* dst, const void* src, const void* dstLast)
 {
     StatusType       Ret      = 0u;
@@ -487,6 +584,11 @@ ISTDLIB_LOCAL StatusType IStdLib_endMemcmp(const void* dst, const void* src, con
 
     return Ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_endMemcpy(void* dst, const void* src, const void* dstLast)
 {
     uintptr_t*       pDst     = (uintptr_t*)dst; /* PRQA S 0316 */       /* VL_QAC_0316 */
@@ -500,7 +602,11 @@ ISTDLIB_LOCAL void IStdLib_endMemcpy(void* dst, const void* src, const void* dst
         pSrc          = (const uintptr_t*)((uintptr_t)pSrc + 1uL);
     }
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_endMemset(void* dst, uintptr_t vlu, const void* dstLast)
 {
     uintptr_t*   pDst     = (uintptr_t*)dst; /* PRQA S 0316 */       /* VL_QAC_0316 */
@@ -512,8 +618,7 @@ ISTDLIB_LOCAL void IStdLib_endMemset(void* dst, uintptr_t vlu, const void* dstLa
         pDst          = (uintptr_t*)((uintptr_t)pDst + 1uL);
     }
 }
-
-/*PRQA S 0306 -- */
 #define ISTDLIB_STOP_SEC_CODE
 #include "IStdLib_MemMap.h"
+/*PRQA S 0306 -- */
 #endif

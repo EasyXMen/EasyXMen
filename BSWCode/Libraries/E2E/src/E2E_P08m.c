@@ -45,6 +45,11 @@ E2E_LOCAL void E2E_P08mCheck_Seqence(
     const E2E_P08mConfigType* ConfigPtr,
     E2E_P08mCheckStateType*   StatePtr,
     uint32                    ReceivedCounter);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of check()
  * @param[in]    ConfigPtr     : Pointer to static configuration.
@@ -163,6 +168,11 @@ Std_ReturnType E2E_P08mProtect(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -182,6 +192,11 @@ Std_ReturnType E2E_P08mProtectInit(E2E_P08mProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 8m for client.
  */
@@ -277,6 +292,11 @@ Std_ReturnType E2E_P08mSourceCheck(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 8m for server.
  */
@@ -373,6 +393,11 @@ Std_ReturnType E2E_P08mSinkCheck(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -393,6 +418,11 @@ Std_ReturnType E2E_P08mCheckInit(E2E_P08mCheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 8m to a generic check status.
  */
@@ -431,8 +461,12 @@ E2E_PCheckStatusType E2E_P08mMapStatusToSM(Std_ReturnType CheckReturn, E2E_P08mC
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_P08mCheck_Seqence(const E2E_P08mConfigType* ConfigPtr, E2E_P08mCheckStateType* StatePtr, uint32 ReceivedCounter)
 {
@@ -466,6 +500,11 @@ E2E_LOCAL void
     }
     StatePtr->Counter = ReceivedCounter;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 6040 ++ */ /*VL_MTR_E2E_STPAR*/
 E2E_LOCAL Std_ReturnType E2E_P08mCheckVerifyInputs(
     /*PRQA S 6040 -- */

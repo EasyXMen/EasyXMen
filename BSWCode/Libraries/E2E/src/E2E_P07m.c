@@ -1,12 +1,17 @@
-/***********************************************************************************************************************
-**
-** Copyright (C) iSOFT
-**
-** All rights reserved.
-**
-** This document contains proprietary information belonging to iSOFT.Passing on and copying of this document, and
-** communication of its contents is not permitted without prior written authorization.
-**
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
 ************************************************************************************************************************
 **
 **  @file               : E2E_P07m.c
@@ -40,6 +45,11 @@ E2E_LOCAL void E2E_P07mCheck_Seqence(
     const E2E_P07mConfigType* ConfigPtr,
     E2E_P07mCheckStateType*   StatePtr,
     uint32                    ReceivedCounter);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of check()
  * @param[in]    ConfigPtr     : Pointer to static configuration.
@@ -164,6 +174,11 @@ Std_ReturnType E2E_P07mProtect(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -183,6 +198,11 @@ Std_ReturnType E2E_P07mProtectInit(E2E_P07mProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 7m for client.
  */
@@ -289,6 +309,11 @@ Std_ReturnType E2E_P07mSourceCheck(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 7m for server.
  */
@@ -393,6 +418,11 @@ Std_ReturnType E2E_P07mSinkCheck(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -413,6 +443,11 @@ Std_ReturnType E2E_P07mCheckInit(E2E_P07mCheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 7m to a generic check status.
  */
@@ -451,8 +486,12 @@ E2E_PCheckStatusType E2E_P07mMapStatusToSM(Std_ReturnType CheckReturn, E2E_P07mC
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_P07mCheck_Seqence(const E2E_P07mConfigType* ConfigPtr, E2E_P07mCheckStateType* StatePtr, uint32 ReceivedCounter)
 {
@@ -486,6 +525,11 @@ E2E_LOCAL void
     }
     StatePtr->Counter = ReceivedCounter;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 6040 ++ */ /*VL_MTR_E2E_STPAR*/
 E2E_LOCAL Std_ReturnType E2E_P07mCheckVerifyInputs(
     /*PRQA S 6040 -- */

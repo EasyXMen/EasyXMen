@@ -25,9 +25,6 @@
 #ifndef BSWM_INTERNAL_H
 #define BSWM_INTERNAL_H
 
-/* PRQA S 1501 EOF */ /* VL_BswM_1501 */
-/* PRQA S 1753 EOF */ /* VL_BswM_1753 */
-
 /* =================================================== inclusions =================================================== */
 #include "BswM.h"
 #include "BswM_Cfg.h"
@@ -35,6 +32,7 @@
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
 #include "Det.h"
 #endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#include "BswM_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +43,10 @@ extern "C" {
 /** clear set request state */
 #define BSWM_EVENT_RQST_STATE_CLEARED 0x00u
 /** set request state */
-#define BSWM_EVENT_RQST_STATE_SET 0x01u
+#define BSWM_EVENT_RQST_STATE_SET     0x01u
 
 /** u8 invalid value definition */
-#define BSWM_INVALID_U8 (uint8)(0xffu)
+#define BSWM_INVALID_U8  (uint8)(0xffu)
 /** u16 invalid value definition */
 #define BSWM_INVALID_U16 (uint16)(0xffffu)
 /** u32 invalid value definition */
@@ -160,11 +158,6 @@ typedef struct
     NetworkHandleType                 numOfEthSMInd;  /**> BswMEthSMIndication. @range 0~0xFFFF */
     const EthSM_NetworkModeStateType* ethsmInitState; /**> BswMEthSMIndication. @range None */
 #endif                                                /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
-
-#if (BSWM_FRSMINDICATION_ENABLED == STD_ON)
-    NetworkHandleType          numOfFrSMInd;  /**> BswMFrSMIndication. @range 0~0xFFFF */
-    const FrSM_BswM_StateType* frsmInitState; /**> BswMFrSMIndication. @range None */
-#endif                                        /*BSWM_FRSMINDICATION_ENABLED == STD_ON*/
 
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
     BswM_UserType numOfGenericReq; /**> BswMGenericRequest. @range 0~0xFF */
@@ -294,11 +287,6 @@ typedef struct
     EthSM_NetworkModeStateType* ethSMIndiStatus;
 #endif /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
 
-#if (BSWM_FRSMINDICATION_ENABLED == STD_ON)
-    /**> BswMFrSMIndication. @range None */
-    FrSM_BswM_StateType* frSMIndiStatus;
-#endif /*BSWM_FRSMINDICATION_ENABLED == STD_ON*/
-
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
     /**> BswMGenericRequest. @range None */
     uint16* genericReqStatus;
@@ -421,9 +409,17 @@ typedef struct
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+#define BSWM_START_SEC_VAR_CLONE_UNSPECIFIED
+#include "BswM_MemMap.h"
+extern BswM_RuntimeStatusType BswM_RuntimeStatus;
+#define BSWM_STOP_SEC_VAR_CLONE_UNSPECIFIED
+#include "BswM_MemMap.h"
+#endif /*BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON*/
 
 /* ========================================= external function declarations ========================================= */
 
+#if (BSWM_DEV_ERROR_DETECT == STD_ON)
 /**
  * @brief Checks the initialization status of the BswM core.
  * @param[in] sid : Service ID for the DET error reporting.
@@ -434,7 +430,11 @@ typedef struct
  * @synchronous TRUE
  * @trace       CPD-66256
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_ChkBswMInitStatus(uint8 sid);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
 /**
@@ -446,7 +446,11 @@ Std_ReturnType BswM_ChkBswMInitStatus(uint8 sid);
  * @synchronous TRUE
  * @trace       CPD-66257
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkParRestart(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
 
 #if (BSWM_CANSM_ENABLED == STD_ON)
@@ -460,7 +464,11 @@ Std_ReturnType BswM_DetChkParRestart(void);
  * @synchronous TRUE
  * @trace       CPD-66258
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkCanSMInd(CanSM_BswMCurrentStateType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_CANSM_ENABLED == STD_ON*/
 
@@ -475,7 +483,11 @@ Std_ReturnType BswM_DetChkCanSMInd(CanSM_BswMCurrentStateType CurrentState);
  * @synchronous TRUE
  * @trace       CPD-66259
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkComMInd(ComM_ModeType RequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_COMM_PNC_ENABLED == STD_ON)
 /**
@@ -488,7 +500,11 @@ Std_ReturnType BswM_DetChkComMInd(ComM_ModeType RequestedMode);
  * @synchronous TRUE
  * @trace       CPD-66261
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkComMPnc(ComM_PncModeType CurrentPncMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_PNC_ENABLED == STD_ON*/
 
 /**
@@ -500,7 +516,11 @@ Std_ReturnType BswM_DetChkComMPnc(ComM_PncModeType CurrentPncMode);
  * @synchronous TRUE
  * @trace       CPD-66263
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkComMInitRst(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_DCM_ENABLED == STD_ON)
@@ -513,7 +533,11 @@ Std_ReturnType BswM_DetChkComMInitRst(void);
  * @synchronous TRUE
  * @trace       CPD-66264
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkDcmUpdate(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the current communication mode state of DCM and validates the requested mode.
@@ -525,7 +549,11 @@ Std_ReturnType BswM_DetChkDcmUpdate(void);
  * @synchronous TRUE
  * @trace       CPD-66265
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkDcmModeCurState(Dcm_CommunicationModeType RequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_DCM_ENABLED == STD_ON*/
 
 #if (BSWM_ECUM_ENABLED == STD_ON)
@@ -539,7 +567,11 @@ Std_ReturnType BswM_DetChkDcmModeCurState(Dcm_CommunicationModeType RequestedMod
  * @synchronous TRUE
  * @trace       CPD-66266
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEcuMCurWakeUp(EcuM_WakeupStatusType state);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Validates the requested EcuM state and the current run status.
@@ -553,7 +585,11 @@ Std_ReturnType BswM_DetChkEcuMCurWakeUp(EcuM_WakeupStatusType state);
  * @synchronous TRUE
  * @trace       CPD-66267
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkRequestedState(EcuM_StateType State, EcuM_RunStatusType CurrentStatus);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the initialization status of BswM for the current EcuM state.
@@ -564,7 +600,11 @@ Std_ReturnType BswM_DetChkRequestedState(EcuM_StateType State, EcuM_RunStatusTyp
  * @synchronous TRUE
  * @trace       CPD-66269
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEcuMCurState(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ECUM_ENABLED == STD_ON*/
 
 #if (BSWM_ETHIF_ENABLED == STD_ON)
@@ -578,7 +618,11 @@ Std_ReturnType BswM_DetChkEcuMCurState(void);
  * @synchronous TRUE
  * @trace       CPD-66270
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEthIfPortGru(EthTrcv_LinkStateType PortGroupState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHIF_ENABLED == STD_ON*/
 
 #if (BSWM_ETHSM_ENABLED == STD_ON)
@@ -592,22 +636,12 @@ Std_ReturnType BswM_DetChkEthIfPortGru(EthTrcv_LinkStateType PortGroupState);
  * @synchronous TRUE
  * @trace       CPD-66271
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEthSMInd(EthSM_NetworkModeStateType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHSM_ENABLED == STD_ON*/
-
-#if (BSWM_FRSM_ENABLED == STD_ON)
-/**
- * @brief Validates the current state of the FlexRay State Machine (FrSM).
- * @param[in] CurrentState : The current state of the FrSM.
- * @return Std_ReturnType
- * @retval E_OK : The BswM core is initialized and the current state is valid.
- * @retval E_NOT_OK : The BswM core is not initialized or the current state is out of range.
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-66272
- */
-Std_ReturnType BswM_DetChkFrSMInd(FrSM_BswM_StateType CurrentState);
-#endif /*BSWM_FRSM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939DCM_ENABLED == STD_ON)
 /**
@@ -619,12 +653,17 @@ Std_ReturnType BswM_DetChkFrSMInd(FrSM_BswM_StateType CurrentState);
  * @synchronous TRUE
  * @trace       CPD-66273
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkJ1939DcmBroad(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_J1939DCM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939NM_ENABLED == STD_ON)
 /**
  * @brief Checks the initialization status of the J1939 Network Management (Nm) state change notification.
+ * @param[in] NmState : The state for the NetWork Management Protocol.
  * @return Std_ReturnType
  * @retval E_OK : The BswM core is initialized and the J1939 Nm state change notification is ready.
  * @retval E_NOT_OK : The BswM core is not initialized.
@@ -632,7 +671,11 @@ Std_ReturnType BswM_DetChkJ1939DcmBroad(void);
  * @synchronous TRUE
  * @trace       CPD-66274
  */
-Std_ReturnType BswM_DetChkJ1939NmInd(void);
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+Std_ReturnType BswM_DetChkJ1939NmInd(Nm_StateType NmState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_J1939NM_ENABLED == STD_ON*/
 
 #if (BSWM_LINSM_ENABLED == STD_ON)
@@ -645,7 +688,11 @@ Std_ReturnType BswM_DetChkJ1939NmInd(void);
  * @synchronous TRUE
  * @trace       CPD-66275
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkLinSMCurSch(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the initialization status and validity of the LIN State Machine (LinSM) current state.
@@ -657,7 +704,11 @@ Std_ReturnType BswM_DetChkLinSMCurSch(void);
  * @synchronous TRUE
  * @trace       CPD-66276
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkLinSMInd(LinSM_ModeType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINSM_ENABLED == STD_ON*/
 
 #if (BSWM_LINTP_ENABLED == STD_ON)
@@ -671,7 +722,11 @@ Std_ReturnType BswM_DetChkLinSMInd(LinSM_ModeType CurrentState);
  * @synchronous TRUE
  * @trace       CPD-66277
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkLinTpRqst(LinTp_Mode LinTpRequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINTP_ENABLED == STD_ON*/
 
 #if (BSWM_NM_ENABLED == STD_ON)
@@ -684,10 +739,15 @@ Std_ReturnType BswM_DetChkLinTpRqst(LinTp_Mode LinTpRequestedMode);
  * @synchronous TRUE
  * @trace       CPD-66278
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkNmCarWkUp(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the initialization status for the Network Management (Nm) State Change Notification.
+ * @param[in] currentState : The current state of Network Management.
  * @return Std_ReturnType
  * @retval E_OK : The BswM core is initialized and the State Change Notification can proceed.
  * @retval E_NOT_OK : The BswM core is not initialized.
@@ -695,7 +755,11 @@ Std_ReturnType BswM_DetChkNmCarWkUp(void);
  * @synchronous TRUE
  * @trace       CPD-66279
  */
-Std_ReturnType BswM_DetChkNmStateChange(void);
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+Std_ReturnType BswM_DetChkNmStateChange(Nm_StateType currentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NM_ENABLED == STD_ON*/
 
 #if (BSWM_NVM_ENABLED == STD_ON)
@@ -709,7 +773,11 @@ Std_ReturnType BswM_DetChkNmStateChange(void);
  * @synchronous TRUE
  * @trace       CPD-66280
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkCurNvmBlockMode(NvM_RequestResultType CurrentBlockMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the current NvM job mode.
@@ -721,7 +789,11 @@ Std_ReturnType BswM_DetChkCurNvmBlockMode(NvM_RequestResultType CurrentBlockMode
  * @synchronous TRUE
  * @trace       CPD-66281
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkCurNvmJobMode(NvM_MultiBlockRequestType MultiBlockRequest);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NVM_ENABLED == STD_ON*/
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
@@ -736,7 +808,11 @@ Std_ReturnType BswM_DetChkCurNvmJobMode(NvM_MultiBlockRequestType MultiBlockRequ
  * @synchronous TRUE
  * @trace       CPD-66282
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkGenericRqst(BswM_UserType requestingUser);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_SD_ENABLED == STD_ON)
@@ -750,7 +826,11 @@ Std_ReturnType BswM_DetChkGenericRqst(BswM_UserType requestingUser);
  * @synchronous TRUE
  * @trace       CPD-66283
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkClientCurState(Sd_ClientServiceCurrentStateType CurrentClientState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the validity of the current state of a consumed event group.
@@ -762,7 +842,11 @@ Std_ReturnType BswM_DetChkClientCurState(Sd_ClientServiceCurrentStateType Curren
  * @synchronous TRUE
  * @trace       CPD-66284
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEvGruCurState(Sd_ConsumedEventGroupCurrentStateType ConsumedEventGroupState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Checks the validity of the current state of an event handler.
@@ -774,7 +858,11 @@ Std_ReturnType BswM_DetChkEvGruCurState(Sd_ConsumedEventGroupCurrentStateType Co
  * @synchronous TRUE
  * @trace       CPD-66285
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkEvHandlerCurState(Sd_EventHandlerCurrentStateType EventHandlerStatus);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SD_ENABLED == STD_ON*/
 
 #if (BSWM_SOAD_ENABLED == STD_ON)
@@ -787,8 +875,13 @@ Std_ReturnType BswM_DetChkEvHandlerCurState(Sd_EventHandlerCurrentStateType Even
  * @synchronous TRUE
  * @trace       CPD-66286
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Std_ReturnType BswM_DetChkSoAdSoConModeChg(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SOAD_ENABLED == STD_ON*/
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 
 #if (BSWM_CANSM_ENABLED == STD_ON)
 /**
@@ -801,7 +894,11 @@ Std_ReturnType BswM_DetChkSoAdSoConModeChg(void);
  * @synchronous TRUE
  * @trace       CPD-66229
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 CanSM_BswMCurrentStateType BswM_GetCanSmIndStatus(NetworkHandleType cansmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Initializes the request ports for the CanSM module.
@@ -809,7 +906,11 @@ CanSM_BswMCurrentStateType BswM_GetCanSmIndStatus(NetworkHandleType cansmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66228
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitCanSMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_CANSM_ENABLED == STD_ON*/
 
 #if (BSWM_COMM_ENABLED == STD_ON)
@@ -819,7 +920,11 @@ void BswM_InitCanSMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66235
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitComMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the ComM reset initialization status.
@@ -829,7 +934,11 @@ void BswM_InitComMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66241
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetComMResetInitStatus(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_COMM_PNC_ENABLED == STD_ON)
 /**
@@ -841,7 +950,11 @@ BswM_EventRquestPortRuntimeType BswM_GetComMResetInitStatus(void);
  * @synchronous TRUE
  * @trace       CPD-66240
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 ComM_PncModeType BswM_GetComMPncStatus(PNCHandleType pncIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_PNC_ENABLED == STD_ON*/
 
 /**
@@ -853,7 +966,11 @@ ComM_PncModeType BswM_GetComMPncStatus(PNCHandleType pncIdx);
  * @synchronous TRUE
  * @trace       CPD-66242
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 ComM_ModeType BswM_GetComMIndStatus(NetworkHandleType comChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_DCM_ENABLED == STD_ON)
@@ -864,8 +981,11 @@ ComM_ModeType BswM_GetComMIndStatus(NetworkHandleType comChIdx);
  * @synchronous TRUE
  * @trace       CPD-66243
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitDcmRequestPorts(void);
-#endif /*BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON*/
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the updated status of the DCM application.
@@ -875,9 +995,12 @@ void BswM_InitDcmRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66254
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetDcmAppUpdatedStatus(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
-#if (BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON)
 /**
  * @brief Gets the current communication mode status of a DCM channel.
  * @param[in] dcmChIdx : The index of the DCM channel for which the current mode status is requested.
@@ -887,7 +1010,11 @@ BswM_EventRquestPortRuntimeType BswM_GetDcmAppUpdatedStatus(void);
  * @synchronous TRUE
  * @trace       CPD-66252
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Dcm_CommunicationModeType BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON*/
 #endif /*BSWM_DCM_ENABLED == STD_ON*/
 
@@ -898,7 +1025,11 @@ Dcm_CommunicationModeType BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66287
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitEcuMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the status of a specified EcuM wakeup source.
@@ -910,7 +1041,11 @@ void BswM_InitEcuMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66289
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 EcuM_WakeupStatusType BswM_GetEcuMWakeSrcStatus(EcuM_WakeupSourceType wkSrcIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the run request status of a specified EcuM state.
@@ -922,7 +1057,11 @@ EcuM_WakeupStatusType BswM_GetEcuMWakeSrcStatus(EcuM_WakeupSourceType wkSrcIdx);
  * @synchronous TRUE
  * @trace       CPD-66291
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 EcuM_RunStatusType BswM_GetEcuMRunRqstStatus(EcuM_StateType rqstIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the current state of the EcuM.
@@ -933,7 +1072,11 @@ EcuM_RunStatusType BswM_GetEcuMRunRqstStatus(EcuM_StateType rqstIdx);
  * @synchronous TRUE
  * @trace       CPD-66293
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 EcuM_StateType BswM_GetEcuMState(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ECUM_ENABLED == STD_ON*/
 
 #if (BSWM_ETHIF_ENABLED == STD_ON)
@@ -946,7 +1089,11 @@ EcuM_StateType BswM_GetEcuMState(void);
  * @synchronous TRUE
  * @trace       CPD-66294
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitEthIfRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the link state status of an Ethernet Interface port group.
@@ -958,7 +1105,11 @@ void BswM_InitEthIfRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66295
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 EthTrcv_LinkStateType BswM_GetEthIfGruStateStatus(EthIf_SwitchPortGroupIdxType ethIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHIF_ENABLED == STD_ON*/
 
 #if (BSWM_ETHSM_ENABLED == STD_ON)
@@ -969,7 +1120,11 @@ EthTrcv_LinkStateType BswM_GetEthIfGruStateStatus(EthIf_SwitchPortGroupIdxType e
  * @synchronous TRUE
  * @trace       CPD-66297
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitEthSMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the current state of an Ethernet State Machine (EthSM) channel.
@@ -981,33 +1136,15 @@ void BswM_InitEthSMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66298
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 EthSM_NetworkModeStateType BswM_GetEthSmIndStatus(NetworkHandleType ethsmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHSM_ENABLED == STD_ON*/
 
-#if (BSWM_FRSM_ENABLED == STD_ON)
-/**
- * @brief This function initializes the FrSM request ports by setting their initial states based on the configuration.
- * @return None
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-66303
- */
-void BswM_InitFrSMRequestPorts(void);
-
-/**
- * @brief Gets the current state of a FlexRay State Machine (FrSM) channel.
- * @param[in] frsmChIdx : Index of the FrSM channel.
- * @return FrSM_BswM_StateType
- * @retval FRSM_BSWM_READY : The FrSM channel is in the ready state.
- * @retval Other values : The current state of the FrSM channel.
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-66304
- */
-FrSM_BswM_StateType BswM_GetFrSmIndStatus(NetworkHandleType frsmChIdx);
-#endif /*BSWM_FRSM_ENABLED == STD_ON*/
-
 #if (BSWM_J1939DCM_ENABLED == STD_ON)
+#if (BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON)
 /**
  * @brief This function initializes the J1939 DCM broadcast status based on the initial configuration.
  * @return None
@@ -1015,7 +1152,11 @@ FrSM_BswM_StateType BswM_GetFrSmIndStatus(NetworkHandleType frsmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66310
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitJ1939DcmRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the broadcast status of a J1939 channel.
@@ -1027,10 +1168,16 @@ void BswM_InitJ1939DcmRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66311
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 boolean BswM_GetJ1939ChBroadStatus(NetworkHandleType j1939ChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON*/
 #endif /*BSWM_J1939DCM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939NM_ENABLED == STD_ON)
+#if (BSWM_J1939NMINDICATION_ENABLED == STD_ON)
 /**
  * @brief This function initializes the J1939 Network Management request ports by setting the initial states.
  * @return None
@@ -1038,7 +1185,11 @@ boolean BswM_GetJ1939ChBroadStatus(NetworkHandleType j1939ChIdx);
  * @synchronous TRUE
  * @trace       CPD-66314
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitJ1939NmRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the J1939 Network Management status.
@@ -1050,19 +1201,15 @@ void BswM_InitJ1939NmRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66315
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Nm_StateType BswM_GetJ1939NmStatus(NetworkHandleType j1939ChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_J1939NMINDICATION_ENABLED == STD_ON*/
 #endif /*BSWM_J1939NM_ENABLED == STD_ON*/
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
-/**
- * @brief This function initializes the generic request ports by setting their initial status based on configuration.
- * @return None
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-66221
- */
-void BswM_InitGenericRequestPorts(void);
-
 /**
  * @brief Gets the status of a generic request port.
  * @param[in] userIdx : Index of the user for which the generic request status is to be retrieved.
@@ -1073,7 +1220,11 @@ void BswM_InitGenericRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66222
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 uint16 BswM_GetGeneRqstStatus(BswM_UserType userIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_LINSM_ENABLED == STD_ON)
@@ -1084,7 +1235,11 @@ uint16 BswM_GetGeneRqstStatus(BswM_UserType userIdx);
  * @synchronous TRUE
  * @trace       CPD-66317
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitLinSMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the status of the LIN State Machine indication.
@@ -1096,7 +1251,11 @@ void BswM_InitLinSMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66318
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 LinSM_ModeType BswM_GetLinSmIndStatus(NetworkHandleType linsmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the current schedule of the LIN State Machine.
@@ -1108,10 +1267,15 @@ LinSM_ModeType BswM_GetLinSmIndStatus(NetworkHandleType linsmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66321
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 LinIf_SchHandleType BswM_GetLinSmCurSchedule(NetworkHandleType linsmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINSM_ENABLED == STD_ON*/
 
 #if (BSWM_LINTP_ENABLED == STD_ON)
+#if (BSWM_LINTPMODEREQUEST_ENABLED == STD_ON)
 /**
  * @brief This function initializes the LIN TP request ports by setting their initial modes based on the configuration.
  * @return void
@@ -1119,7 +1283,11 @@ LinIf_SchHandleType BswM_GetLinSmCurSchedule(NetworkHandleType linsmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66322
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitLinTpRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the requested mode of the LIN TP channel.
@@ -1131,10 +1299,16 @@ void BswM_InitLinTpRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66323
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 LinTp_Mode BswM_GetLinTpRqstMode(NetworkHandleType linTpChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_LINTPMODEREQUEST_ENABLED == STD_ON*/
 #endif /*BSWM_LINTP_ENABLED == STD_ON*/
 
 #if (BSWM_NM_ENABLED == STD_ON)
+#if (BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON)
 /**
  * @brief This function initializes the NM request ports by setting the initial status of each NM channel.
  * @return None
@@ -1142,7 +1316,27 @@ LinTp_Mode BswM_GetLinTpRqstMode(NetworkHandleType linTpChIdx);
  * @synchronous TRUE
  * @trace       CPD-66326
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitNmRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+/**
+ * @brief Gets the current Network Management (NM) state for a given NM channel index.
+ * @param[in] nmChIdx : Index of the NM channel.
+ * @return Nm_StateType
+ * @retval NM_STATE_UNINIT : If the partition configuration pointer is invalid.
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-66327
+ */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+Nm_StateType BswM_GetCurNmState(uint8 nmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON*/
 
 /**
  * @brief Gets the Network Management (NM) wakeup indication event request port runtime type.
@@ -1154,18 +1348,11 @@ void BswM_InitNmRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66329
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetNmWkInd(NetworkHandleType nmIdx);
-
-/**
- * @brief Gets the current Network Management (NM) state for a given NM channel index.
- * @param[in] nmChIdx : Index of the NM channel.
- * @return Nm_StateType
- * @retval NM_STATE_UNINIT : If the partition configuration pointer is invalid.
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-66327
- */
-Nm_StateType BswM_GetCurNmState(uint8 nmChIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NM_ENABLED == STD_ON*/
 
 #if (BSWM_NVM_ENABLED == STD_ON)
@@ -1180,8 +1367,13 @@ Nm_StateType BswM_GetCurNmState(uint8 nmChIdx);
  * @synchronous TRUE
  * @trace       CPD-66330
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitNvMRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#if (BSWM_NVMREQUEST_ENABLED == STD_ON)
 /**
  * @brief Gets the current mode of an NvM block.
  * @param[in] blockIdx : The ID of the NvM block whose mode is to be retrieved.
@@ -1192,7 +1384,12 @@ void BswM_InitNvMRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66334
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 NvM_RequestResultType BswM_GetCurNvmBlockMode(NvM_BlockIdType blockIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_NVMREQUEST_ENABLED == STD_ON*/
 
 /**
  * @brief Gets the current mode of an NvM job.
@@ -1204,7 +1401,11 @@ NvM_RequestResultType BswM_GetCurNvmBlockMode(NvM_BlockIdType blockIdx);
  * @synchronous TRUE
  * @trace       CPD-66332
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 NvM_RequestResultType BswM_GetCurNvmJobMode(uint16 jobIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NVM_ENABLED == STD_ON*/
 
 #if (BSWM_SD_ENABLED == STD_ON)
@@ -1217,8 +1418,13 @@ NvM_RequestResultType BswM_GetCurNvmJobMode(uint16 jobIdx);
  * @synchronous TRUE
  * @trace       CPD-66335
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitSDRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#if (BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON)
 /**
  * @brief Retrieves the current state of a client service.
  * @param[in] cliIdx : Index of the client service whose current state is to be retrieved.
@@ -1229,8 +1435,14 @@ void BswM_InitSDRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66337
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Sd_ClientServiceCurrentStateType BswM_GetClientServiceCurState(uint16 cliIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON*/
 
+#if (BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON)
 /**
  * @brief Retrieves the current state of a consumed event group.
  * @param[in] evIdx : Index of the consumed event group whose current state is to be retrieved.
@@ -1241,8 +1453,14 @@ Sd_ClientServiceCurrentStateType BswM_GetClientServiceCurState(uint16 cliIdx);
  * @synchronous TRUE
  * @trace       CPD-66339
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Sd_ConsumedEventGroupCurrentStateType BswM_GetEvGruCurState(uint16 evIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON*/
 
+#if (BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON)
 /**
  * @brief Retrieves the current state of an event handler.
  * @param[in] handlerIdx : Index of the event handler whose current state is to be retrieved.
@@ -1253,7 +1471,12 @@ Sd_ConsumedEventGroupCurrentStateType BswM_GetEvGruCurState(uint16 evIdx);
  * @synchronous TRUE
  * @trace       CPD-66341
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 Sd_EventHandlerCurrentStateType BswM_GetEvHandlerCurState(uint16 handlerIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON*/
 #endif /*BSWM_SD_ENABLED == STD_ON*/
 
 #if (BSWM_SOAD_ENABLED == STD_ON)
@@ -1265,7 +1488,11 @@ Sd_EventHandlerCurrentStateType BswM_GetEvHandlerCurState(uint16 handlerIdx);
  * @synchronous TRUE
  * @trace       CPD-66342
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitSoAdRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the current state of a SoAd communication mode.
@@ -1277,7 +1504,11 @@ void BswM_InitSoAdRequestPorts(void);
  * @synchronous TRUE
  * @trace       CPD-66343
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 SoAd_SoConModeType BswM_GetSoComModeCurState(uint16 SoConIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SOAD_ENABLED == STD_ON*/
 
 #if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
@@ -1292,7 +1523,11 @@ SoAd_SoConModeType BswM_GetSoComModeCurState(uint16 SoConIdx);
  * @synchronous TRUE
  * @trace       CPD-66349
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetModeSwiErrNoti(uint16 portId);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
 
 #if (BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON)
@@ -1307,10 +1542,14 @@ BswM_EventRquestPortRuntimeType BswM_GetModeSwiErrNoti(uint16 portId);
  * @synchronous TRUE
  * @trace       CPD-66350
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetModeSwiAckNoti(uint16 portId);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON*/
 
-#if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
+#if ((BSWM_MULTI_PARTITION_ENABLED == STD_ON) && (BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON))
 /**
  * @brief Gets the partition restart status.
  * @return BswM_EventRquestPortRuntimeType
@@ -1320,8 +1559,12 @@ BswM_EventRquestPortRuntimeType BswM_GetModeSwiAckNoti(uint16 portId);
  * @synchronous TRUE
  * @trace       CPD-66225
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_EventRquestPortRuntimeType BswM_GetParRestartStatus(void);
-#endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON && BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON*/
 
 #if (BSWM_TIMER_ENABLED == STD_ON)
 /**
@@ -1330,7 +1573,11 @@ BswM_EventRquestPortRuntimeType BswM_GetParRestartStatus(void);
  * @synchronous TRUE
  * @trace       CPD-66351
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_InitBswMTimer(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Gets the status of a specific BswM timer.
@@ -1343,8 +1590,29 @@ void BswM_InitBswMTimer(void);
  * @synchronous TRUE
  * @trace       CPD-66352
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BswM_TimerEnumType BswM_GerTimerStatus(BswM_TimerIdxType timerIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_TIMER_ENABLED == STD_ON*/
+
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
+/**
+ * @brief This function clears the event request port for a specific event source and index.
+ * @param evRqstLcCfgPtr The Lcfg point of event source for which the request port is to be cleared.
+ * @param index The index of the event request port to be cleared.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-XXXX
+ */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+void BswM_ClearEventRequestPort(const BswM_RqstPortLcCfgType* evRqstLcCfgPtr, BswM_EventRqstPortIdxType evIdx);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif
 
 /**
  * @brief Retrieves the configuration pointers for a specific partition.
@@ -1357,12 +1625,16 @@ BswM_TimerEnumType BswM_GerTimerStatus(BswM_TimerIdxType timerIdx);
  * @synchronous TRUE
  * @trace       CPD-66353
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 boolean BswM_GetPartitionLcPCCfgPtr(
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType** bswmPartPBCfg,
 #endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
     const BswM_PartitionPCCfgType** bswmPartPCCfg,
     const BswM_PartitionLCfgType**  bswmPartLCfg);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Retrieves the configuration pointer for a specific partition.
@@ -1374,8 +1646,13 @@ boolean BswM_GetPartitionLcPCCfgPtr(
  * @synchronous TRUE
  * @trace       CPD-66354
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 boolean BswM_GetPartitionPCCfgPtr(const BswM_PartitionPCCfgType** bswmPartPCCfg);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF)
 /**
  * @brief Retrieves the configuration pointer for a specific core.
  * @param[out] bswmCorePCCfgPtr : Pointer to the BswM Core PC configuration.
@@ -1386,7 +1663,12 @@ boolean BswM_GetPartitionPCCfgPtr(const BswM_PartitionPCCfgType** bswmPartPCCfg)
  * @synchronous TRUE
  * @trace       CPD-66355
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 boolean BswM_GetCorePCCfgPtr(const BswM_PCCfgType** bswmCorePCCfgPtr);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
 
 /**
  * @brief Checks the initialization status of the current core.
@@ -1397,7 +1679,11 @@ boolean BswM_GetCorePCCfgPtr(const BswM_PCCfgType** bswmCorePCCfgPtr);
  * @synchronous TRUE
  * @trace       CPD-69360
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 boolean BswM_GetCoreInitStatus(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief Executes the arbitration rule for a given partition and rule index.
@@ -1409,7 +1695,11 @@ boolean BswM_GetCoreInitStatus(void);
  * @synchronous TRUE
  * @trace       CPD-66226
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_ArbitrateRule(const BswM_PartitionLCfgType* bswmPartLCfgPtr, BswM_RuleIndexType ruleIdx, boolean nestedTag);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
 /**
@@ -1419,7 +1709,11 @@ void BswM_ArbitrateRule(const BswM_PartitionLCfgType* bswmPartLCfgPtr, BswM_Rule
  * @synchronous TRUE
  * @trace       CPD-69361
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 uint8 BswM_GetPBConfigTags(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_PB_CONFIG_ENABLED == STD_ON*/
 
 #ifdef __cplusplus

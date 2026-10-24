@@ -1,0 +1,145 @@
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_ReadyQue.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for ReadyQue api declarations
+ **
+ ***********************************************************************************************************************/
+
+#ifndef OS_READYQUE_H
+#define OS_READYQUE_H
+
+/* =================================================== inclusions =================================================== */
+#include "Os_ReadyQue_CfgData.h"
+
+/* ===================================================== macros ===================================================== */
+
+/* PRQA S 3472 ++ */ /* VL_Os_3472 */
+#define READY_MAP_SIZE(CFG_PRIORITY_MAX) ((((CFG_PRIORITY_MAX) - 1U) / (sizeof(Os_PriorityType) * 8U)) + 1U)
+/* PRQA S 3472 -- */
+
+/* ========================================== external function definitions ========================================= */
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Init priority ready map.
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void Os_InitReadyTable(void);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Clear priority ready map.
+ * @param[in]          queueMg: Points to queueMg.
+ * @param[in]          prio: The priority of the task.
+ * @synchronous        TRUE
+ * @reentrant          TRUE
+ * @trace              -
+ */
+extern void Os_ClearPrioReadyMap(const Os_ReadyQueueManageType* queueMg, Os_PriorityType prio);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              get the highest priority.
+ * @param[in]          queueMg: Points to queueMg.
+ * @return             Os_PriorityType
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern Os_PriorityType Os_GetHighPrio(const Os_ReadyQueueManageType* queueMg);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              get the first task of a ready queue that the value of
+ *                     priority is equal to prio.
+ * @param[in]          queueMg: Points to queueMg.
+ * @param[in]          prio: The priority of the task.
+ * @return             Os_TaskType
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern Os_TaskType Os_ReadyQueueGetFirst(const Os_ReadyQueueManageType* queueMg, Os_PriorityType prio);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              insert a priority to ready queue.
+ * @param[in]          queueMg: Points to queueMg.
+ * @param[in]          object: the ID of task or resource.
+ * @param[in]          level: the call level.
+ * @param[in]          prio: inserted priority.
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void Os_ReadyQueueInsert(
+    const Os_ReadyQueueManageType* queueMg,
+    Os_TaskType                    object,
+    Os_CallLevelType               level,
+    Os_PriorityType                prio);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              remove a priority from ready queue.
+ * @param[in]          queueMg: Points to queueMg.
+ * @param[in]          prio: removed priority.
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void Os_ReadyQueueRemove(const Os_ReadyQueueManageType* queueMg, Os_PriorityType prio);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Removing task_node from ready_queue in TerminateApplication.
+ * @param[in]          queueMg: Points to queueMg.
+ * @param[in]          taskId: Task Id.
+ * @param[in]          queuePriority: Removed priority.
+ * @synchronous        TRUE
+ * @reentrant          TRUE
+ * @trace              -
+ */
+extern void
+    Os_ApplReadyQueueRemove(const Os_ReadyQueueManageType* queueMg, Os_TaskType taskId, Os_PriorityType queuePriority);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+/*=======[E N D   O F   F I L E]==============================================*/

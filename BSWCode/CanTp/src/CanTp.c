@@ -30,6 +30,7 @@
 #include "CanTp.h"
 #include "CanTp_Internal.h"
 #include "CanTp_Lcfg.h"
+#include "CanTp_Arti.h"
 #if (CANTP_DEM_PRODUCTION_ERROR_DETECT == STD_ON)
 #include "Dem.h"
 #endif
@@ -63,6 +64,8 @@ CANTP_LOCAL CanTp_StateType CanTp_ModuleState; /* PRQA S 1504 */ /* VL_CanTp_150
 /* ============================================ external data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       This function reset Rx channel status.
  * @param[in]   rxState        : pointer to the received N-PDU status
@@ -72,6 +75,10 @@ CANTP_LOCAL CanTp_StateType CanTp_ModuleState; /* PRQA S 1504 */ /* VL_CanTp_150
  * @trace       CPD-73122
  */
 CANTP_LOCAL void CanTp_InitRxChannel(CanTp_RxStatusType* rxState);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       This function reset Tx channel status.
  * @param[in]   txState        : pointer to the transmitted N-PDU status
@@ -81,6 +88,10 @@ CANTP_LOCAL void CanTp_InitRxChannel(CanTp_RxStatusType* rxState);
  * @trace       CPD-73123
  */
 CANTP_LOCAL void CanTp_InitTxChannel(CanTp_TxStatusType* txState);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Further processing of the CanTp_RxIndication()
  * @param[in]     rxPduId       : received N-PDU Id
@@ -91,7 +102,11 @@ CANTP_LOCAL void CanTp_InitTxChannel(CanTp_TxStatusType* txState);
  * @trace       CPD-73124
  */
 CANTP_LOCAL void CanTp_RxSubDeal(PduIdType rxPduId, const PduInfoType* pduInfoPtr, CanTp_FramePCIType FramePCIType);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Handles reception of a single frame
  * @param[in]     pduInfoPtr      : pointer to received N-PDU data
@@ -105,7 +120,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithSF(
     const PduInfoType*      pduInfoPtr,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Setup a new unsegmented connection and inform PduR
  * @param[in]     rxStatus        : pointer to  the received N-PDU status
@@ -121,7 +140,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithSFToUp(
     const CanTp_RxNSduType* rxNSduCfgPtr,
     PduInfoType*            upperpduInfoPtr,
     PduLengthType           receivedLength);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Handles reception of a first frame
  * @param[in]     pduInfoPtr      : pointer to received N-PDU data
@@ -135,7 +158,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
     const PduInfoType*      pduInfoPtr,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Setup a new segmented connection and inform PduR
  * @param[in]     globalInfo      : pointer to the received N-PDU runtime variable
@@ -151,7 +178,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithFFTOUP(
     CanTp_RxStatusType*  rxStatus,
     PduInfoType*         upperpduInfoPtr,
     PduLengthType        receivedLength);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Handles reception of a consecutive frame
  * @param[in]     pduInfoPtr      : pointer to received N-PDU data
@@ -165,7 +196,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithCF(
     const PduInfoType*      pduInfoPtr,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Check the received N-PDU data
  * @param[in]     rxStatus        : pointer to the received N-PDU status
@@ -181,7 +216,11 @@ CANTP_LOCAL Std_ReturnType CanTp_RxSubDealWithCFCheck(
     const CanTp_RxNSduType* rxNSduCfgPtr,
     const PduInfoType*      pduInfoPtr,
     boolean*                isLastCF);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Handles reception of a flow control frame
  * @param[in]     pduInfoPtr      : pointer to received N-PDU data
@@ -195,7 +234,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
     const PduInfoType*      pduInfoPtr,
     const CanTp_TxNSduType* txNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Timer process of pre Rx connections
  * @param[in]     rxStatus        : pointer to the received N-PDU status
@@ -209,7 +252,11 @@ CANTP_LOCAL void CanTp_HandleRxTimerProcess(
     CanTp_RxStatusType*     rxStatus,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         The rxchannels handle for scheduling the CanTp.
  * @reentrant     No-Reentrant.
@@ -217,6 +264,11 @@ CANTP_LOCAL void CanTp_HandleRxTimerProcess(
  * @trace       CPD-73133
  */
 CANTP_LOCAL void CanTp_HandleRxChannels(void);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief         The txchannels handle for scheduling the CanTp.
@@ -225,6 +277,11 @@ CANTP_LOCAL void CanTp_HandleRxChannels(void);
  * @trace       CPD-73134
  */
 CANTP_LOCAL void CanTp_HandleTxChannels(void);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief         Timer process of pre Tx connections
@@ -239,6 +296,11 @@ CANTP_LOCAL void CanTp_HandleTxTimeoutProcess(
     CanTp_TxStatusType*     txStatus,
     const CanTp_TxNSduType* txNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief         Handles confirmation of a transmitted CanTp frame(SF,FF,CF)
@@ -253,6 +315,11 @@ CANTP_LOCAL void CanTp_TxConfirmationTx(
     CanTp_ConfirmDirectionType* txDirection,
     CanTp_GPartInfoType*        globalInfo,
     Std_ReturnType              result);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief         Handles confirmation of a transmitted CanTp frame(FC)
@@ -263,6 +330,11 @@ CANTP_LOCAL void CanTp_TxConfirmationTx(
  * @trace       CPD-73137
  */
 CANTP_LOCAL void CanTp_TxFCConfirmation(CanTp_RxStatusType* rxStatus, Std_ReturnType result);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief         Check parameter(Bs,STmin) value
@@ -273,6 +345,11 @@ CANTP_LOCAL void CanTp_TxFCConfirmation(CanTp_RxStatusType* rxStatus, Std_Return
  * @trace       CPD-73138
  */
 CANTP_LOCAL boolean CanTP_CheckRxChangeParameter(TPParameterType canTpParam, uint16 value);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Get Tx buffer provided by the upper layer
  * @param[in]   txStatus           : pointer to the transmitted N-PDU status
@@ -291,6 +368,11 @@ CANTP_LOCAL BufReq_ReturnType CanTp_GetTxBuffer(
     CanTp_TxStatusType*     txStatus,
     const CanTp_TxNSduType* txNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief       Get available Rx buffer size provided by the upper layer
@@ -303,6 +385,11 @@ CANTP_LOCAL BufReq_ReturnType CanTp_GetTxBuffer(
  * @trace       CPD-73140
  */
 CANTP_LOCAL Std_ReturnType CanTp_GetRxBuffer(const CanTp_RxStatusType* rxStatus);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief       Send FC during the receiving process
@@ -315,6 +402,11 @@ CANTP_LOCAL Std_ReturnType CanTp_GetRxBuffer(const CanTp_RxStatusType* rxStatus)
  */
 CANTP_LOCAL void
     CanTp_SendFC(const CanTp_RxNSduType* rxNSduCfgPtr, CanTp_RxStatusType* rxStatus, CanTp_GPartInfoType* globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief       Set up a new transmission session.
@@ -334,6 +426,11 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
     const CanTp_TxNSduType* txNSduCfgPtr,
     const PduInfoType*      pduInfoPtr,
     CanTp_GPartInfoType*    globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief       Send SF,FF,CF Frame during the Transmitting process
@@ -356,6 +453,11 @@ CANTP_LOCAL void CanTp_TxTransmit(
     const CanTp_GPartInfoType* globalInfo
 #endif
 );
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /**
  * @brief       This function get internal STmin timer value.
@@ -366,11 +468,12 @@ CANTP_LOCAL void CanTp_TxTransmit(
  * @trace       CPD-79943
  */
 CANTP_LOCAL uint8 CanTp_CalculateSTMin(uint8 STminValue);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
 /* ========================================= internal function definition ========================================= */
 #define CANTP_START_SEC_CODE
 #include "CanTp_MemMap.h"
-
 /* PRQA S 4464,4461,2995,2991,2992 ++ */ /* VL_CanTp_4464,VL_CanTp_4461,VL_CanTp_2995,VL_CanTp_2991,VL_CanTp_2992 */
 /**
  *@brief  This function get internal STmin timer value.
@@ -386,11 +489,14 @@ CANTP_LOCAL uint8 CanTp_CalculateSTMin(uint8 STminValue)
 
         STminStamp = isMicrosec ? CANTP_MAIN_FUNCTION_PERIOD : CANTP_MAX_SEPARATE_TIME;
     }
-    STminStamp = CEIL_DIV(STminStamp, CANTP_MAIN_FUNCTION_PERIOD);
+    STminStamp = CEIL_DIV(STminStamp, CANTP_MAIN_FUNCTION_PERIOD) + 1U;
 
     return STminStamp;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  *@brief  This function reset Rx channel status.
  */
@@ -431,6 +537,10 @@ CANTP_LOCAL void CanTp_InitRxChannel(CanTp_RxStatusType* rxState)
 #endif
     SchM_Exit_CanTp_ExclusiveArea();
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  This function reset Tx channel status.
  */
@@ -464,7 +574,10 @@ CANTP_LOCAL void CanTp_InitTxChannel(CanTp_TxStatusType* txState)
 #endif
     SchM_Exit_CanTp_ExclusiveArea();
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Send FC during the receiving process
  */
@@ -579,7 +692,10 @@ CANTP_LOCAL void CanTp_SendFC(
         SchM_Exit_CanTp_ExclusiveArea();
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  Get Tx buffer provided by the upper layer
  */
@@ -668,6 +784,10 @@ CANTP_LOCAL BufReq_ReturnType CanTp_GetTxBuffer(
     }
     return bufRslt;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  *   get rxbuffer during each processing of the MainFunction.
  */
@@ -692,7 +812,10 @@ CANTP_LOCAL Std_ReturnType CanTp_GetRxBuffer(const CanTp_RxStatusType* rxStatus)
     }
     return ret;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Send SF,FF,CF Frame during the Transmitting process
  */
@@ -738,32 +861,27 @@ CANTP_LOCAL void CanTp_TxTransmit(
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
     CanTp_ConstructTxMetaDataInfo(txStatus, txNSduCfgPtr, txpduInfo);
 #endif
+    switch (txStatus->ChannelState)
+    {
+    case CANTP_TX_TRANSMIT_SF:
+        txStatus->ChannelState = CANTP_TX_WAIT_SFCONF;
+        break;
+    case CANTP_TX_TRANSMIT_FF:
+        txStatus->ChannelState = CANTP_TX_WAIT_FFCONF;
+        break;
+    case CANTP_TX_TRANSMIT_CF:
+        txStatus->ChannelState = CANTP_TX_WAIT_CFCONF;
+        break;
+    default:
+        /* idle */
+        break;
+    }
+    txStatus->Timer = txNSduCfgPtr->N_As;
     SchM_Exit_CanTp_ExclusiveArea();
     Std_ReturnType rslt = CanIf_Transmit(txNSduCfgPtr->TxLPduId, txpduInfo);
-    SchM_Enter_CanTp_ExclusiveArea();
-    if (E_OK == rslt)
+    if (E_NOT_OK == rslt)
     {
-        switch (txStatus->ChannelState)
-        {
-        case CANTP_TX_TRANSMIT_SF:
-            txStatus->ChannelState = CANTP_TX_WAIT_SFCONF;
-            break;
-        case CANTP_TX_TRANSMIT_FF:
-            txStatus->ChannelState = CANTP_TX_WAIT_FFCONF;
-            break;
-        case CANTP_TX_TRANSMIT_CF:
-            txStatus->ChannelState = CANTP_TX_WAIT_CFCONF;
-            break;
-        default:
-            /* idle */
-            break;
-        }
-        /* As Timer */
-        txStatus->Timer = txNSduCfgPtr->N_As;
-        SchM_Exit_CanTp_ExclusiveArea();
-    }
-    else
-    {
+        SchM_Enter_CanTp_ExclusiveArea();
         txDirection->TxDirection  = CANTP_DIR_IDLE;
         txDirection->ConnectionId = CANTP_INVALID_U16;
         CanTp_InitTxChannel(txStatus);
@@ -772,6 +890,10 @@ CANTP_LOCAL void CanTp_TxTransmit(
         PduR_CanTpTxConfirmation(txNSduCfgPtr->TxIPduId, E_NOT_OK);
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -874,7 +996,10 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
     }
     return ret;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Comfirm after FC Frame has been transmitted.
  */
@@ -923,6 +1048,10 @@ CANTP_LOCAL void CanTp_TxFCConfirmation(CanTp_RxStatusType* rxStatus, Std_Return
         PduR_CanTpRxIndication(rxNSduCfgPtr->RxIPduId, E_NOT_OK);
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 5017,6010 ++ */ /* VL_CanTp_5017,VL_MTR_CanTp_STCYC */
 /**
  *  @brief The rxchannels timeout handle for scheduling the CAN TP.
@@ -1032,6 +1161,10 @@ CANTP_LOCAL void CanTp_HandleRxTimerProcess(
         }
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 3415 -- */
 /* PRQA S 5017,6010 -- */
 
@@ -1095,6 +1228,10 @@ CANTP_LOCAL void CanTp_HandleRxChannels(void)
         }
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6030 -- */
 
 /**
@@ -1158,7 +1295,10 @@ CANTP_LOCAL void CanTp_HandleTxTimeoutProcess(
 #endif
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  The txchannels handle for scheduling the CAN TP.
  */
@@ -1212,7 +1352,10 @@ CANTP_LOCAL void CanTp_HandleTxChannels(void)
         }
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  process received FC and switch TxConnection status
  */
@@ -1265,10 +1408,9 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
                     /* PRQA S 3120 ++*/ /* VL_QAC_MagicNum */
                     /** When BS is set to zero by the receiver, the sender is not waiting for an authorization to
                      * continue the transmission. */
-                    txStatus->ExpectdCfSn  = 0x01u;
-                    uint8 blocksizeCounter = pduInfoPtr->SduDataPtr[pciOffset + 1u];
-                    txStatus->FcBs         = (blocksizeCounter > 0u) ? blocksizeCounter : CANTP_INVALID_U8;
-                    txStatus->FcSTmin      = CanTp_CalculateSTMin(pduInfoPtr->SduDataPtr[pciOffset + 2u]);
+                    txStatus->ExpectdCfSn = 0x01u;
+                    txStatus->FcBs        = pduInfoPtr->SduDataPtr[pciOffset + 1u];
+                    txStatus->FcSTmin     = CanTp_CalculateSTMin(pduInfoPtr->SduDataPtr[pciOffset + 2u]);
                 }
                 txStatus->ChannelState = CANTP_TX_TRANSMIT_CF;
                 txStatus->Timer        = txNSduCfgPtr->N_Cs;
@@ -1292,6 +1434,10 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
         }
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6030 -- */
 
 /**
@@ -1392,6 +1538,10 @@ CANTP_LOCAL Std_ReturnType CanTp_RxSubDealWithCFCheck(
     }
     return ret;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  process received CF and notify upper to copy
  */
@@ -1504,8 +1654,11 @@ CANTP_LOCAL void CanTp_RxSubDealWithCF(
         /* idle */
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Check Rx ChangeParameter range.
  */
@@ -1543,9 +1696,13 @@ CANTP_LOCAL boolean CanTP_CheckRxChangeParameter(TPParameterType canTpParam, uin
 #endif
     return paramValid;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6030,6070 -- */
 
 #endif
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  *  @brief process received FF and notify upper
  */
@@ -1625,6 +1782,10 @@ CANTP_LOCAL void CanTp_RxSubDealWithFFTOUP(
         break;
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -1764,6 +1925,10 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
     }
 #endif
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6030 -- */
 
 /**
@@ -1851,6 +2016,10 @@ CANTP_LOCAL void CanTp_RxSubDealWithSFToUp(
         break;
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  process received SF and notify upper to copy
  */
@@ -1930,13 +2099,18 @@ CANTP_LOCAL void CanTp_RxSubDealWithSF(
                     upperpduInfo.MetaDataPtr         = data;
                 }
 #endif
+#endif
+                CanTp_RxSubDealWithSFToUp(rxStatus, rxNSduCfgPtr, &upperpduInfo, receivedLength);
+#if (CANTP_DYN_ID_SUPPORT == STD_ON)
             }
 #endif
-            CanTp_RxSubDealWithSFToUp(rxStatus, rxNSduCfgPtr, &upperpduInfo, receivedLength);
         }
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  process received SF/FF/CF/FC frame
  */
@@ -2003,6 +2177,10 @@ CANTP_LOCAL void CanTp_RxSubDeal(PduIdType rxPduId, const PduInfoType* pduInfoPt
         }
     }
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2044,7 +2222,7 @@ CANTP_LOCAL void CanTp_TxConfirmationTx(
             {
                 txStatus->HandledCfCount++;
                 txStatus->ExpectdCfSn++;
-                if (txStatus->HandledCfCount == txStatus->FcBs)
+                if ((txStatus->FcBs != 0u) && (txStatus->HandledCfCount == txStatus->FcBs))
                 {
                     /* wait FC */
                     txStatus->HandledCfCount = 0u;
@@ -2091,14 +2269,15 @@ CANTP_LOCAL void CanTp_TxConfirmationTx(
 #define CANTP_STOP_SEC_CODE
 #include "CanTp_MemMap.h"
 /* ========================================== external function definitions ========================================= */
+#if (CANTP_TC == STD_ON)
 #define CANTP_START_SEC_CODE
 #include "CanTp_MemMap.h"
-#if (CANTP_TC == STD_ON)
 /**
  * @brief Requests cancellation of an ongoing transmission of a PDU in a lower layer communication module.
  */
 Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 2, 0x4A, TxPduId);
     Std_ReturnType result = E_NOT_OK;
     /*check module state, handle the request only when module started*/
     if (CANTP_ON != CanTp_ModuleState)
@@ -2174,18 +2353,24 @@ Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 2, 0x4A, result);
     return result;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
 /* PRQA S 6030 -- */
 
 #if (CANTP_RC == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_CanTp_STCAL */
 Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 2, 0x4C, RxPduId);
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
@@ -2254,17 +2439,22 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 2, 0x4C, result);
     return result;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
-
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Request to change a specific transport protocol parameter (e.g. block size).
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_CanTp_STMIF */
 Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 4, 0x4B, id, parameter, value);
     Std_ReturnType result = E_NOT_OK;
     /**check module state, handle only when module started*/
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
@@ -2327,17 +2517,23 @@ Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, ui
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 2, 0x4B, result);
     return result;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
 /* PRQA S 6030 -- */
 /* PRQA S 6070 -- */
 #if (CANTP_READ_PARAMETER == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  This service is used to read the current value of reception parameters BS and STmin for a specified
  */
 Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 4, 0x0B, id, parameter, value);
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
@@ -2407,16 +2603,21 @@ Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 2, 0x0B, result);
     return result;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
-
 #if (CANTP_VERSION_INFO_API == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  This function returns the version information of the CanTp module.
  */
 void CanTp_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 2, 0x07, versioninfo);
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
     {
@@ -2433,23 +2634,34 @@ void CanTp_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_patch_version = CANTP_SW_PATCH_VERSION;
         versioninfo->vendorID         = CANTP_VENDOR_ID;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x07);
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief  This function is called to shutdown the CanTp module.
  */
 void CanTp_Shutdown(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 1, 0x02);
     /*CanTp stops working*/
     CanTp_ModuleState = CANTP_OFF;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x02);
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 5017,6010,6080 ++ */ /* VL_CanTp_5017,VL_MTR_CanTp_STCYC,VL_MTR_CanTp_STPTH */
 /**
  * @brief This function initializes the CanTp module.
  */
 void CanTp_Init(const CanTp_ConfigType* CfgPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 2, 0x01, CfgPtr);
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     if (NULL_PTR == CfgPtr)
     {
@@ -2466,7 +2678,7 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
 #endif
     {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
-        uint8 appId = GetApplicationID();
+        ApplicationType appId = GetApplicationID();
         if ((INVALID_OSAPPLICATION != appId)
             && (CANTP_INVALID_U8 != CanTp_ApplicationMap[appId])) /*check if the application is valid*/
 #endif
@@ -2489,7 +2701,7 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
                 if (globalInfo->CanTpRxConnectionStatus != NULL_PTR)
                 {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
-                    uint8 iloop = index + CANTP_GETRXNSDUEND(globalInfo->index);
+                    uint8 iloop = index + CANTP_GETRXNSDUSTART(globalInfo->index);
 #else
                     uint8 iloop = index;
 #endif
@@ -2538,7 +2750,12 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
             CanTp_ModuleState = CANTP_ON;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x01);
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 5017,6010,6080 -- */
 
 /**
@@ -2546,12 +2763,14 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
  */
 void CanTp_MainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 1, 0x06);
     /**check module state, handle only when module started*/
     if (CANTP_ON == CanTp_ModuleState)
     {
         CanTp_HandleRxChannels();
         CanTp_HandleTxChannels();
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x06);
 }
 #define CANTP_STOP_SEC_CODE
 #include "CanTp_MemMap.h"
@@ -2563,6 +2782,7 @@ void CanTp_MainFunction(void)
  */
 void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     /**check module state, handle the reception indication only when module started*/
     if (CANTP_ON != CanTp_ModuleState)
@@ -2589,12 +2809,18 @@ void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
             CanTp_RxSubDeal(RxPduId, PduInfoPtr, FramePCIType);
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x42);
 }
+#define CANTP_STOP_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 /**
  * @brief Confirmation SF/FF/CF/FC frame
  */
 void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 3, 0x40, TxPduId, result);
     /**check module state, handle the reception indication only when module started*/
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     if (CANTP_ON != CanTp_ModuleState)
@@ -2651,13 +2877,18 @@ void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 1, 0x40);
 }
-
+#define CANTP_STOP_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 /**
  * @brief  Start transmission of SF/FF/CF/FC frame
  */
 Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Start, 3, 0x49, TxPduId, PduInfoPtr);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     /**check module state, handle the request only when module started*/
@@ -2706,6 +2937,7 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanTp, 0, Bsw_Return, 2, 0x49, ret);
     return ret;
 }
 #define CANTP_STOP_SEC_CODE_FAST

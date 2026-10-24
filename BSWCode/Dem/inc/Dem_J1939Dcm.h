@@ -36,6 +36,8 @@ extern "C" {
 
 /* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 #if (DEM_J1939_READING_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         The function sets the DTC filter for a specific node and returns the composite lamp status of
  *                the filtered DTCs.
@@ -60,6 +62,10 @@ extern Std_ReturnType Dem_J1939DcmSetDTCFilter(
     Dem_DTCOriginType               DTCOrigin,
     uint8                           ClientId,
     Dem_J1939DcmLampStatusType*     LampStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the number of currently filtered DTCs set by the function Dem_J1939DcmSetDTCFilter.
@@ -73,6 +79,10 @@ extern Std_ReturnType Dem_J1939DcmSetDTCFilter(
  * @trace         CPD-61079
  */
 extern Std_ReturnType Dem_J1939DcmGetNumberOfFilteredDTC(uint16* NumberOfFilteredDTC, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the next filtered J1939 DTC.
@@ -92,9 +102,13 @@ extern Std_ReturnType Dem_J1939DcmGetNumberOfFilteredDTC(uint16* NumberOfFiltere
  * @trace         CPD-61081
  */
 extern Std_ReturnType Dem_J1939DcmGetNextFilteredDTC(uint32* J1939DTC, uint8* OccurenceCounter, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         The function sets the filter to the first applicable DTC for the DM31 response for a specific node.
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -103,6 +117,10 @@ extern Std_ReturnType Dem_J1939DcmGetNextFilteredDTC(uint32* J1939DTC, uint8* Oc
  * @trace         CPD-61078
  */
 extern void Dem_J1939DcmFirstDTCwithLampStatus(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the next filtered J1939 DTC for DM31 including current LampStatus.
@@ -128,9 +146,13 @@ extern Std_ReturnType Dem_J1939DcmGetNextDTCwithLampStatus(
     uint32*                     J1939DTC,
     uint8*                      OccurenceCounter,
     uint8                       ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clears the status of all event(s) related to the specified DTC(s), as well as all associated
                   event memory entries for these event(s).
@@ -156,9 +178,13 @@ extern Std_ReturnType Dem_J1939DcmGetNextDTCwithLampStatus(
  */
 extern Std_ReturnType
     Dem_J1939DcmClearDTC(Dem_J1939DcmSetClearFilterType DTCTypeFilter, Dem_DTCOriginType DTCOrigin, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1753,1501 ++ */ /* VL_Dem_1753,VL_Dem_1501 */
 /**
  * @brief         The function sets the FreezeFrame filter for a specific node.
@@ -174,6 +200,10 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_J1939DcmSetFreezeFrameFilter(Dem_J1939DcmSetFreezeFrameFilterType FreezeFrameKind, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets next freeze frame data. The function stores the data in the provided DestBuffer.
@@ -203,6 +233,10 @@ extern Std_ReturnType Dem_J1939DcmGetNextFreezeFrame(
     uint8*  DestBuffer,
     uint16* BufSize,
     uint8   ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets next SPN.
@@ -218,10 +252,14 @@ extern Std_ReturnType Dem_J1939DcmGetNextFreezeFrame(
  * @trace         CPD-61073
  */
 extern Std_ReturnType Dem_J1939DcmGetNextSPNInFreezeFrame(uint32* SPNSupported, uint8* SPNDataLength, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1753,1501 -- */
 #endif
 
 #if (DEM_J1939_RATIO_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         The function sets the Ratio filter for a specific node and returns the corresponding
  *                Ignition Cycle Counter and General Denominator.
@@ -239,6 +277,10 @@ extern Std_ReturnType Dem_J1939DcmSetRatioFilter(
     uint16* IgnitionCycleCounter,
     uint16* OBDMonitoringConditionsEncountered,
     uint8   ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the next filtered Ratio.
@@ -261,9 +303,13 @@ extern Std_ReturnType Dem_J1939DcmSetRatioFilter(
  */
 extern Std_ReturnType
     Dem_J1939DcmGetNextFilteredRatio(uint32* SPN, uint16* Numerator, uint16* Denominator, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_READINESS1_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of Diagnostic Readiness 1 (DM05) computed by the Dem.
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -278,9 +324,13 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_J1939DcmReadDiagnosticReadiness1(Dem_J1939DcmDiagnosticReadiness1Type* DataValue, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_READINESS2_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of Diagnostic Readiness 2 (DM21) computed by the Dem.
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -295,9 +345,13 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_J1939DcmReadDiagnosticReadiness2(Dem_J1939DcmDiagnosticReadiness2Type* DataValue, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_READINESS3_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of Diagnostic Readiness 3 (DM26) computed by the Dem.
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -312,6 +366,8 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_J1939DcmReadDiagnosticReadiness3(Dem_J1939DcmDiagnosticReadiness3Type* DataValue, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #ifdef __cplusplus

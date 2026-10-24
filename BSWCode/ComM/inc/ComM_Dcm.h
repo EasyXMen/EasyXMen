@@ -42,6 +42,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Indication of active diagnostic by the DCM.
  * @param[in]     Channel  Channel needed for Diagnostic communication
@@ -50,7 +52,11 @@ extern "C" {
  * @trace         CPD-59640
  */
 void ComM_DCM_ActiveDiagnostic(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Indication of inactive diagnostic by the DCM.
  * @param[in]     Channel  Channel no longer needed for Diagnostic communication
@@ -59,6 +65,8 @@ void ComM_DCM_ActiveDiagnostic(NetworkHandleType Channel);
  * @trace         CPD-59641
  */
 void ComM_DCM_InactiveDiagnostic(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef __cplusplus
 }

@@ -22,16 +22,8 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0342,2743,2889,2784,1532 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 6050,6060,6070,6080,6010,6040,0342,2743,2889,2784,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6030 EOF */                                                  /* VL_MTR_Crypto_62_STMIF */
 /* =================================================== inclusions =================================================== */
 
 #include "Crypto_62_Internal.h"
@@ -44,11 +36,9 @@
 #include "Crypto_62_Sha1.h"
 #include "Crypto_62_Sha3.h"
 #include "Crypto_62_Sm3.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3410 ++ */ /* VL_QAC_Crypto */
 #define MD_INFO(type, out_size, block_size) type, out_size, block_size,
 /* PRQA S 3410 -- */
 
@@ -71,29 +61,73 @@
 /* ========================================== internal function declarations ======================================== */
 
 /* ============================================ internal data definitions =========================================== */
-/* PRQA S 1290,3432,3418,3218,3412 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1290,3432,3418,3218,3412 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_ripemd160_info = {MD_INFO(CRYPTO_ALGOFAM_RIPEMD160, 20, 64)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha1_info = {MD_INFO(CRYPTO_ALGOFAM_SHA1, 20, 64)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha224_info = {MD_INFO(CRYPTO_ALGOFAM_SHA2_224, 28, 64)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha256_info = {MD_INFO(CRYPTO_ALGOFAM_SHA2_256, 32, 64)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha384_info = {MD_INFO(CRYPTO_ALGOFAM_SHA2_384, 48, 128)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha512_info = {MD_INFO(CRYPTO_ALGOFAM_SHA2_512, 64, 128)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha3_224_info = {MD_INFO(CRYPTO_ALGOFAM_SHA3_224, 28, 144)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha3_256_info = {MD_INFO(CRYPTO_ALGOFAM_SHA3_256, 32, 136)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha3_384_info = {MD_INFO(CRYPTO_ALGOFAM_SHA3_384, 48, 104)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha3_512_info = {MD_INFO(CRYPTO_ALGOFAM_SHA3_512, 64, 72)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_ALGORITHMFAM_SM3 == STD_ON)
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sm3_info = {MD_INFO(CRYPTO_ALGOFAM_SM3, 32, 64)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 #endif
 /* PRQA S 1290,3432,3418,3218,3412 -- */
 /* ============================================ external data definitions =========================================== */
@@ -112,7 +146,9 @@ CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sm3_info = {MD_INFO(CRYPTO_ALGOFAM
  *                                              associated with algorithmfamily.
  */
 /******************************************************************************/
-/* PRQA S 2023,2024++ */ /* VL_Crypto_62_General */
+/* PRQA S 2023,2024++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algorithmfamily)
 {
     switch (algorithmfamily)
@@ -155,6 +191,8 @@ const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algo
         return NULL_PTR;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* PRQA S 2023,2024 -- */
 /******************************************************************************/
 /*
@@ -168,6 +206,8 @@ const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algo
  * Return              unsigned char: The size of the message-digest output in Bytes.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 uint8 Crypto_md_get_size(const Crypto_Md_Info_t* md_info)
 {
     if (md_info == NULL_PTR)
@@ -177,6 +217,8 @@ uint8 Crypto_md_get_size(const Crypto_Md_Info_t* md_info)
 
     return md_info->size;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -190,7 +232,9 @@ uint8 Crypto_md_get_size(const Crypto_Md_Info_t* md_info)
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType Crypto_md_setup(Crypto_Md_Context_t* ctx, const Crypto_Md_Info_t* md_info)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_md_setup(Crypto_Md_Context_t* ctx, const Crypto_Md_Info_t* md_info, uint8 hmac)
 {
     Std_ReturnType ret = E_OK;
     if (ctx == NULL_PTR)
@@ -205,7 +249,7 @@ Std_ReturnType Crypto_md_setup(Crypto_Md_Context_t* ctx, const Crypto_Md_Info_t*
 
     ctx->md_info  = md_info;
     ctx->md_ctx   = NULL_PTR;
-    ctx->hmac_ctx = IStdLib_MemHeapCalloc(Crypto_62_MemPool, CRYPTO_CONST_2, md_info->block_size);
+    ctx->hmac_ctx = NULL_PTR;
 
     switch (md_info->algorithmfamily)
     {
@@ -263,19 +307,24 @@ Std_ReturnType Crypto_md_setup(Crypto_Md_Context_t* ctx, const Crypto_Md_Info_t*
         break;
     }
 
+    if (hmac != 0)
+    {
+        ctx->hmac_ctx = IStdLib_MemHeapCalloc(Crypto_62_MemPool, 2, md_info->block_size);
+        if (ctx->hmac_ctx == NULL_PTR)
+        {
+            Crypto_md_free(ctx);
+            ret = E_NOT_OK;
+        }
+    }
+
     return ret;
 }
-/******************************************************************************/
-/*
- * Brief               This function frees and clears the internal message-digest context.
- *
- * Param-Name[in]      ctx: Pointer to the generic message-digest context structure.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              void
- */
-/******************************************************************************/
-void Crypto_Md_Free(Crypto_Md_Context_t* ctx)
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_md_free(Crypto_Md_Context_t* ctx)
 {
     if (ctx == NULL_PTR || ctx->md_info == NULL_PTR)
     {
@@ -286,60 +335,67 @@ void Crypto_Md_Free(Crypto_Md_Context_t* ctx)
     {
         switch (ctx->md_info->algorithmfamily)
         {
-        case CRYPTO_ALGOFAM_RIPEMD160:
-#if (CRYPTO_ALGORITHMFAM_RIPEMD160 == STD_ON)
-            FREE(Ripemd160);
-#endif
+#if defined(CRYPTO_MD5_C)
+        case CRYPTO_MD_MD5:
+            Crypto_md5_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA1:
-#if (CRYPTO_ALGORITHMFAM_SHA1 == STD_ON)
-            FREE(Sha1);
 #endif
+#if defined(CRYPTO_RIPEMD160_C)
+        case CRYPTO_MD_RIPEMD160:
+            Crypto_ripemd160_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA2_224:
-#if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
-            FREE(Sha256);
 #endif
+#if defined(CRYPTO_SHA1_C)
+        case CRYPTO_MD_SHA1:
+            Crypto_sha1_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA2_256:
-#if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
-            FREE(Sha256);
 #endif
+#if defined(CRYPTO_SHA224_C)
+        case CRYPTO_MD_SHA224:
+            Crypto_sha256_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA2_384:
-#if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
-            FREE(Sha512);
 #endif
+#if defined(CRYPTO_SHA256_C)
+        case CRYPTO_MD_SHA256:
+            Crypto_sha256_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA2_512:
-#if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
-            FREE(Sha512);
 #endif
+#if defined(CRYPTO_SHA384_C)
+        case CRYPTO_MD_SHA384:
+            Crypto_sha512_free(ctx->md_ctx);
             break;
-
-        case CRYPTO_ALGOFAM_SHA3_224:
-        case CRYPTO_ALGOFAM_SHA3_256:
-        case CRYPTO_ALGOFAM_SHA3_384:
-        case CRYPTO_ALGOFAM_SHA3_512:
-#if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-            FREE(Sha3);
 #endif
+#if defined(CRYPTO_SHA512_C)
+        case CRYPTO_MD_SHA512:
+            Crypto_sha512_free(ctx->md_ctx);
             break;
-        case CRYPTO_ALGOFAM_SM3:
-#if (CRYPTO_ALGORITHMFAM_SM3 == STD_ON)
-            FREE(SM3);
 #endif
+#if defined(CRYPTO_SHA3_C)
+        case CRYPTO_MD_SHA3_224:
+        case CRYPTO_MD_SHA3_256:
+        case CRYPTO_MD_SHA3_384:
+        case CRYPTO_MD_SHA3_512:
+            Crypto_sha3_free(ctx->md_ctx);
             break;
+#endif
         default:
+            /* Shouldn't happen */
             break;
         }
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx->md_ctx);
     }
+
+    if (ctx->hmac_ctx != NULL_PTR)
+    {
+        (void)IStdLib_MemSet(ctx->hmac_ctx, 0, 2 * ctx->md_info->block_size);
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx->hmac_ctx);
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Md_Context_t));
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function starts a message-digest computation.
@@ -351,7 +407,9 @@ void Crypto_Md_Free(Crypto_Md_Context_t* ctx)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-/* PRQA S 3673,0317,1294 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3673,0317,1294 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Md_Start(Crypto_Md_Context_t* ctx)
 {
     Std_ReturnType result = E_OK;
@@ -422,6 +480,8 @@ Std_ReturnType Crypto_Md_Start(Crypto_Md_Context_t* ctx)
     }
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* PRQA S 3673,0317,1294 -- */
 
 /******************************************************************************/
@@ -437,7 +497,9 @@ Std_ReturnType Crypto_Md_Start(Crypto_Md_Context_t* ctx)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const unsigned char* input, uint32 ilen)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const uint8* input, uint32 ilen)
 {
     Std_ReturnType result = E_NOT_OK;
     if ((ctx != NULL_PTR) && (ctx->md_info != NULL_PTR))
@@ -496,6 +558,8 @@ Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const unsigned char* i
     }
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -510,6 +574,8 @@ Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const unsigned char* i
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Md_Finish(Crypto_Md_Context_t* ctx, uint8* output)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -571,6 +637,8 @@ Std_ReturnType Crypto_Md_Finish(Crypto_Md_Context_t* ctx, uint8* output)
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -589,11 +657,11 @@ Std_ReturnType Crypto_Md_Finish(Crypto_Md_Context_t* ctx, uint8* output)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType
-    Crypto_md(const Crypto_Md_Info_t* md_info, const unsigned char* input, uint32 ilen, unsigned char* output)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_md(const Crypto_Md_Info_t* md_info, const uint8* input, uint32 ilen, uint8* output)
 {
-    Std_ReturnType ret       = E_NOT_OK;
-    uint32         outputLen = md_info->size;
+    Std_ReturnType ret = E_NOT_OK;
     if (md_info == NULL_PTR)
     {
         return E_NOT_OK;
@@ -612,51 +680,57 @@ Std_ReturnType
         break;
     case CRYPTO_ALGOFAM_SHA2_224:
 #if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
-        ret = Crypto_Sha256(input, ilen, output, true);
+        ret = Crypto_Sha256(input, ilen, output, TRUE);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA2_256:
 #if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
-        ret = Crypto_Sha256(input, ilen, output, false);
+        ret = Crypto_Sha256(input, ilen, output, FALSE);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA2_384:
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
-        ret = Crypto_Sha512(input, ilen, output, true);
+        ret = Crypto_Sha512(input, ilen, output, TRUE);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA2_512:
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
-        ret = Crypto_Sha512(input, ilen, output, false);
+        ret = Crypto_Sha512(input, ilen, output, FALSE);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_224:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_224, input, ilen, output, &outputLen);
+        ret = Crypto_Sha3(CRYPTO_SHA3_224, input, ilen, output, (uint32*)&md_info->size);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_256:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_256, input, ilen, output, &outputLen);
+        ret = Crypto_Sha3(CRYPTO_SHA3_256, input, ilen, output, (uint32*)&md_info->size);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_384:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_384, input, ilen, output, &outputLen);
+        ret = Crypto_Sha3(CRYPTO_SHA3_384, input, ilen, output, (uint32*)&md_info->size);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_512:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_512, input, ilen, output, &outputLen);
+        ret = Crypto_Sha3(CRYPTO_SHA3_512, input, ilen, output, (uint32*)&md_info->size);
 #endif
         break;
-
+    case CRYPTO_ALGOFAM_SM3:
+#if (CRYPTO_ALGORITHMFAM_SM3 == STD_ON)
+        ret = Crypto_Sm3(input, ilen, output);
+#endif
+        break;
     default:
         ret = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
         break;
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -672,6 +746,8 @@ Std_ReturnType
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_Hash_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -783,4 +859,4 @@ Std_ReturnType Crypto_62_Hash_Process(
 #include "Crypto_62_MemMap.h"
 #endif
 
-/* PRQA S 0342,2743,2889,2784,1532 -- */
+/* PRQA S 6050,6060,6070,6080,6010,6040,0342,2743,2889,2784,1532 -- */

@@ -90,12 +90,16 @@
  * @synchronous    TRUE
  * @trace       CPD-71436
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
     KeyM_CertificateIdType CertId,
     KeyM_CertElementIdType CertElementId,
     const uint8*           CertElementData,
     const uint32*          CertElementDataLength,
     uint8                  ApiId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 /**
  * @brief          Checks if a specific certificate element exists for a given certificate.
  *                 This function iterates through the certificate elements configured for the specified certificate
@@ -111,8 +115,12 @@ KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
  * @synchronous    TRUE
  * @trace       CPD-71437
  */
-KEYM_LOCAL Std_ReturnType
-    KeyM_IsCertExist(KeyM_CertificateIdType certId, KeyM_CertEleStructType certStr, uint16* cfgId);
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
+KEYM_LOCAL
+Std_ReturnType KeyM_IsCertExist(KeyM_CertificateIdType certId, KeyM_CertEleStructType certStr, uint16* cfgId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Finds a specific certificate element within a certificate configuration.
@@ -131,8 +139,12 @@ KEYM_LOCAL Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71438
  */
-KEYM_LOCAL Std_ReturnType
-    KeyM_FindCertElement(KeyM_CertificateIdType certId, const KeyM_CertEleType* certEle, uint16* eleIdx);
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
+KEYM_LOCAL
+Std_ReturnType KeyM_FindCertElement(KeyM_CertificateIdType certId, const KeyM_CertEleType* certEle, uint16* eleIdx);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles the processing of a certificate element.
@@ -150,11 +162,15 @@ KEYM_LOCAL Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71439
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertEleHandle(
     KeyM_CertificateIdType  certId,
     const KeyM_CertEleType* certEle,
     const uint8*            eleData,
     uint32                  tag);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the ASN.1 tag from a certificate and verifies its type.
@@ -174,7 +190,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertEleHandle(
  * @synchronous    TRUE
  * @trace       CPD-71440
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Tag(uint8** cerS, const uint8* cerE, uint32* cerLenPtr, uint8 tag);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the ASN.1 length from a certificate byte array.
@@ -188,7 +208,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Tag(uint8** cerS, const uint8* cerE, u
  * @synchronous    TRUE
  * @trace       CPD-71441
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, uint32* cerLen);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves an ASN.1 integer tag from a certificate byte array and extracts its value.
@@ -205,7 +229,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
  * @synchronous    TRUE
  * @trace       CPD-71442
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1TagInt(uint8** cerS, const uint8* cerE, uint8* intVal, uint32* cerLen);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the version number of a certificate.
@@ -220,7 +248,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1TagInt(uint8** cerS, const uint8* cerE
  * @synchronous    TRUE
  * @trace       CPD-71443
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetVersion(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves the serial number version of a certificate.
@@ -235,7 +267,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetVersion(KeyM_CertificateIdType certId, uin
  * @synchronous    TRUE
  * @trace       CPD-71444
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetSerialVersion(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 /**
  * @brief          Retrieves the signature algorithm identifier from a certificate.
  * @param[in]      certId : The ID of the certificate.
@@ -251,11 +287,15 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSerialVersion(KeyM_CertificateIdType certI
  * @synchronous    TRUE
  * @trace       CPD-71445
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetSigAlgorithmId(
     KeyM_CertificateIdType certId,
     uint8**                cerS,
     const uint8*           cerE,
     KeyM_Asn1DesType*      sigPar);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles the name information in a certificate, extracting the issuer name and its OID.
@@ -272,8 +312,12 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSigAlgorithmId(
  * @synchronous    TRUE
  * @trace       CPD-71446
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType
     KeyM_CertHandleName(uint8** cerS, const uint8* cerE, KeyM_Asn1DesType* isuName, KeyM_Asn1DesType* isuNameOid);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves and processes the name information (such as issuer or subject name) from a certificate.
@@ -291,12 +335,16 @@ KEYM_LOCAL Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71447
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetName(
     KeyM_CertificateIdType certId,
     uint8**                cerS,
     const uint8*           cerE,
     KeyM_CertEleStructType eleNameType,
     KeyM_CertEleStructType eleNameOidType);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Parses a time element from a given byte array and converts it to a numerical value.
@@ -310,7 +358,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetName(
  * @synchronous    TRUE
  * @trace       CPD-71448
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32* time);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Validates the date components of a certificate time structure.
@@ -323,7 +375,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32*
  * @synchronous    TRUE
  * @trace       CPD-71449
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertCheckDate(const KeyM_CertTimeType* time);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Parses a time string from a certificate and converts it to a structured time format.
@@ -340,7 +396,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertCheckDate(const KeyM_CertTimeType* time);
  * @synchronous    TRUE
  * @trace       CPD-71450
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertParseTime(uint32 len, uint32 yearLen, uint8** cerS, KeyM_CertTimeType* time);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles and parses the time information from a certificate.
@@ -358,12 +418,16 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTime(uint32 len, uint32 yearLen, uint8**
  * @synchronous    TRUE
  * @trace       CPD-71451
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetTime(
     KeyM_CertificateIdType certId,
     uint8**                cerS,
     const uint8*           cerE,
     KeyM_CertTimeType*     time,
     KeyM_CertEleStructType eleStrut);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves and processes the validity period (notBefore and notAfter times) from a certificate.
@@ -378,7 +442,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetTime(
  * @synchronous    TRUE
  * @trace       CPD-71452
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetTime(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles and retrieves the public key algorithm information from a certificate.
@@ -395,7 +463,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetTime(KeyM_CertificateIdType certId, uint8*
  * @synchronous    TRUE
  * @trace       CPD-71453
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetPubKeyAlgo(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves and processes the public key information from a certificate.
@@ -410,7 +482,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetPubKeyAlgo(KeyM_CertificateIdType ce
  * @synchronous    TRUE
  * @trace       CPD-71454
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetPubKeyInfo(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Skips a specific field in a certificate byte array based on the given type.
@@ -423,7 +499,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetPubKeyInfo(KeyM_CertificateIdType certId, 
  * @synchronous    TRUE
  * @trace       CPD-71455
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL void KeyM_CertSkipField(uint8** cerS, const uint8* cerE, uint8 type);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves and processes the extension information from a certificate.
@@ -438,7 +518,11 @@ KEYM_LOCAL void KeyM_CertSkipField(uint8** cerS, const uint8* cerE, uint8 type);
  * @synchronous    TRUE
  * @trace       CPD-71456
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetExtention(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves and processes the signature from a certificate.
@@ -453,7 +537,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetExtention(KeyM_CertificateIdType certId, u
  * @synchronous    TRUE
  * @trace       CPD-71457
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetSignature(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Retrieves a specific certificate element based on the certificate ID and element structure type.
@@ -468,7 +556,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSignature(KeyM_CertificateIdType certId, u
  * @trace       CPD-71458
  */
 /* PRQA S 5016 ++ */ /* VL_KeyM_5016 */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL KeyM_Asn1DesType* KeyM_GetCertEle(KeyM_CertificateIdType certId, KeyM_CertEleStructType certEleStru);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 5016 -- */
 
 /**
@@ -482,7 +574,11 @@ KEYM_LOCAL KeyM_Asn1DesType* KeyM_GetCertEle(KeyM_CertificateIdType certId, KeyM
  * @synchronous    TRUE
  * @trace       CPD-71459
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CmpCertEle(KeyM_Asn1DesType* certEleBuf, KeyM_Asn1DesType* upCertEleBuf);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Checks if the current time is within the validity period of a certificate.
@@ -495,7 +591,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CmpCertEle(KeyM_Asn1DesType* certEleBuf, KeyM_Asn
  * @synchronous    TRUE
  * @trace       CPD-71460
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_GlobalTimeCheck(KeyM_CertificateIdType certId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Determines whether a given year is a leap year.
@@ -507,7 +607,11 @@ KEYM_LOCAL Std_ReturnType KeyM_GlobalTimeCheck(KeyM_CertificateIdType certId);
  * @synchronous    TRUE
  * @trace       CPD-71461
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL uint8 KeyM_IsLeapYear(uint16 year);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Converts a Beijing time to a Unix timestamp.
@@ -520,10 +624,32 @@ KEYM_LOCAL uint8 KeyM_IsLeapYear(uint16 year);
  * @synchronous    TRUE
  * @trace       CPD-71462
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL uint32 KeyM_ConvertTime_BeijingToUnix(const KeyM_CertTimeType* bjTime);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+/**
+ * @brief          Map the certElementId to key element index.
+ * @param[in]      CertId : Identifier of the certificate where the element shall be read from.
+ * @param[in]      CertElementId : Specifies the ElementId where the data shall be mapping from.
+ * @return         uint32
+ * @retval         The key element index.
+ * @note           This function mapping key element index from the certElementId.
+ * @reentrant      Reentrant
+ * @synchronous    TRUE
+ * @trace       CPD-xxx
+ */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
+KEYM_LOCAL
+uint32 KeyM_CertEleMap2KeyEle(const KeyM_CertificateIdType CertId, const KeyM_CertElementIdType CertElementId);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+#endif
 /* ============================================ internal data definitions =========================================== */
-/* PRQA S 3218 ++*/ /* VL_KeyM_3218 */
 #if (KEYM_NVM_BLOCK_NUM > 0)
 /**
  * @brief          Array to store the block write delay run status for each NVM block.
@@ -531,9 +657,15 @@ KEYM_LOCAL uint32 KeyM_ConvertTime_BeijingToUnix(const KeyM_CertTimeType* bjTime
  * with the required delays.
  * @range         KEYM_NVM_BLOCK_NUM
  */
+/* PRQA S 3218 ++*/ /* VL_KeyM_3218 */
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 KEYM_LOCAL KeyM_BlkWriType KeyM_BlkWriDelayRun[KEYM_NVM_BLOCK_NUM];
-#endif
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 /* PRQA S 3218 --*/
+#endif
+
 #define KEYM_START_SEC_CONST_UNSPECIFIED
 #include "KeyM_MemMap.h"
 /* PRQA S 3218,3132 ++*/ /* VL_KeyM_3218,VL_QAC_MagicNum */
@@ -544,12 +676,18 @@ KEYM_LOCAL KeyM_BlkWriType KeyM_BlkWriDelayRun[KEYM_NVM_BLOCK_NUM];
  * @range         12
  */
 KEYM_LOCAL const uint8 KeyM_ComMonthDay[12] = {31u, 28u, 31u, 30u, 31u, 30u, 31u, 31u, 30u, 31u, 30u, 31u};
+/* PRQA S 3218,3132 --*/
+#define KEYM_STOP_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 /**
  * @brief          Array representing the number of days in each month for a leap year.
  * @details        This array contains the number of days in each month for a leap year, used for date calculations.
  * @range         12
  */
+/* PRQA S 3218,3132 ++*/ /* VL_KeyM_3218,VL_QAC_MagicNum */
 KEYM_LOCAL const uint8 KeyM_LeapMonthDay[12] = {31u, 29u, 31u, 30u, 31u, 30u, 31u, 31u, 30u, 31u, 30u, 31u};
 /* PRQA S 3218,3132 --*/
 #define KEYM_STOP_SEC_CONST_UNSPECIFIED
@@ -557,7 +695,6 @@ KEYM_LOCAL const uint8 KeyM_LeapMonthDay[12] = {31u, 29u, 31u, 30u, 31u, 30u, 31
 
 #define KEYM_START_SEC_VAR_CLEARED_8
 #include "KeyM_MemMap.h"
-
 /**
  * @brief          Array to store the status of each certificate.
  * @details        This array contains the status of each certificate, indicating whether it is valid, expired, or has
@@ -580,7 +717,11 @@ KEYM_LOCAL KeyM_CertificateStatusType KeyM_CertStatus[KEYM_CERT_NUM];
 /* PRQA S 1504 ++ */ /* VL_QAC_OneRefSymbol */
 KeyM_CertTimeType KeyM_CertStartTime[KEYM_CERT_NUM];
 /* PRQA S 1504 -- */
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 /**
  * @brief          Array to store the end time of each certificate.
  * @details        This array contains the end times for each certificate, indicating when the certificate expires.
@@ -589,7 +730,11 @@ KeyM_CertTimeType KeyM_CertStartTime[KEYM_CERT_NUM];
 /* PRQA S 1504 ++ */ /* VL_QAC_OneRefSymbol */
 KeyM_CertTimeType KeyM_CertEndTime[KEYM_CERT_NUM];
 /* PRQA S 1504 -- */
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 /**
  * @brief          Array to store the version of each certificate.
  * @details        This array contains the version numbers for each certificate, which can be used to identify different
@@ -603,9 +748,9 @@ uint32 KeyM_CertVersion[KEYM_CERT_NUM];
 #include "KeyM_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
+#if (KEYM_SERVICE_CERTIFICATE_FUNCTION_ENABLED == STD_ON)
 #define KEYM_START_SEC_CODE
 #include "KeyM_MemMap.h"
-#if (KEYM_SERVICE_CERTIFICATE_FUNCTION_ENABLED == STD_ON)
 /*************************************************************************/
 /*
  * @Brief  The key server requests an operation from the key client.
@@ -620,11 +765,24 @@ Std_ReturnType KeyM_ServiceCertificate(
     uint8*                      ResponseData,
     uint32*                     ResponseDataLength)
 {
+    KeyM_ArtiApiStart(
+        8,
+        KEYM_SERV_CERTIFICATE_ID,
+        Service,
+        CertNamePtr,
+        CertNameLength,
+        RequestData,
+        RequestDataLength,
+        ResponseData,
+        ResponseDataLength);
+
     const KeyM_CertPCfgType* certCfgPtr;
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_OFF)
     const KeyM_CertPCfgType* certUpperHierRef;
     uint32                   jobId;
-    uint16                   certIdx;
-    Std_ReturnType           ret = E_OK;
+#endif
+    uint16         certIdx;
+    Std_ReturnType ret = E_OK;
 
     if (!KeyM_InitStatus)
     {
@@ -675,6 +833,24 @@ Std_ReturnType KeyM_ServiceCertificate(
             }
             else
             {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+                ret = Csm_CustomService(
+                    certCfgPtr->customJobRef,        /*jobId*/
+                    CRYPTO_OPERATIONMODE_SINGLECALL, /*mode*/
+                    KEYM_SERV_CERTIFICATE_ID,        /*targetKeyId*/
+                    (uint8*)&Service,                /*inputPtr*/
+                    1u,                              /*inputLength*/
+                    RequestData,                     /*secondaryInputPtr*/
+                    RequestDataLength,               /*secondaryInputLength*/
+                    NULL_PTR,                        /*tertiaryInputPtr*/
+                    0U,                              /*tertiaryInputLength*/
+                    ResponseData,                    /*outputPtr*/
+                    ResponseDataLength,              /*outputLengthPtr*/
+                    NULL_PTR,                        /*secondaryOutputPtr*/
+                    NULL_PTR,                        /*secondaryOutputLengthPtr*/
+                    NULL_PTR                         /*verifyPtr*/
+                );
+#else
                 switch (Service)
                 {
                 case KEYM_SERVICE_CERT_REQUEST_CSR:
@@ -750,14 +926,21 @@ Std_ReturnType KeyM_ServiceCertificate(
                     ret = E_NOT_OK;
                     break;
                 }
+#endif /* KEYM_CUSTOM_SERV_ENABLE == STD_ON */
             }
 #endif /*KEYM_CRYPTO_KEYHANDLER_SERVICE_CERTIFICATE_ENABLED == STD_ON*/
         }
     }
 
-SERV_CERT_EXIT:
+    KeyM_ArtiApiStop(2, KEYM_SERV_CERTIFICATE_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_ServiceCertificateByCertId(
     KeyM_CertificateIdType      CertId,
     KeyM_ServiceCertificateType Service,
@@ -766,22 +949,34 @@ Std_ReturnType KeyM_ServiceCertificateByCertId(
     uint8*                      ResponseData,
     uint32*                     ResponseDataLength)
 {
+    KeyM_ArtiApiStart(
+        7,
+        KEYM_SERV_CERTIFICATE_BY_CERT_ID,
+        CertId,
+        Service,
+        RequestData,
+        RequestDataLength,
+        ResponseData,
+        ResponseDataLength);
+
     const KeyM_CertPCfgType* certCfgPtr;
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_OFF)
     const KeyM_CertPCfgType* certUpperHierRef;
     uint32                   jobId;
-    Std_ReturnType           ret = E_OK;
+#endif
+    Std_ReturnType ret = E_OK;
 
     if (!KeyM_InitStatus)
     {
 #if (KEYM_DEVERROR_DETECT == STD_ON)
-        KEYM_DET_REPORT(KEYM_SERV_CERTIFICATE_ID, KEYM_E_UNINIT);
+        KEYM_DET_REPORT(KEYM_SERV_CERTIFICATE_BY_CERT_ID, KEYM_E_UNINIT);
 #endif
         ret = E_NOT_OK;
     }
     else if ((RequestData == NULL_PTR) || (ResponseData == NULL_PTR))
     {
 #if (KEYM_DEVERROR_DETECT == STD_ON)
-        KEYM_DET_REPORT(KEYM_SERV_CERTIFICATE_ID, KEYM_E_PARAM_POINTER);
+        KEYM_DET_REPORT(KEYM_SERV_CERTIFICATE_BY_CERT_ID, KEYM_E_PARAM_POINTER);
 #endif
         ret = E_NOT_OK;
     }
@@ -812,6 +1007,24 @@ Std_ReturnType KeyM_ServiceCertificateByCertId(
             else
             {
                 certCfgPtr = &KeyM_CertPCfg[CertId];
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+                ret = Csm_CustomService(
+                    certCfgPtr->customJobRef,         /*jobId*/
+                    CRYPTO_OPERATIONMODE_SINGLECALL,  /*mode*/
+                    KEYM_SERV_CERTIFICATE_BY_CERT_ID, /*targetKeyId*/
+                    (uint8*)&Service,                 /*inputPtr*/
+                    1u,                               /*inputLength*/
+                    RequestData,                      /*secondaryInputPtr*/
+                    RequestDataLength,                /*secondaryInputLength*/
+                    NULL_PTR,                         /*tertiaryInputPtr*/
+                    0U,                               /*tertiaryInputLength*/
+                    ResponseData,                     /*outputPtr*/
+                    ResponseDataLength,               /*outputLengthPtr*/
+                    NULL_PTR,                         /*secondaryOutputPtr*/
+                    NULL_PTR,                         /*secondaryOutputLengthPtr*/
+                    NULL_PTR                          /*verifyPtr*/
+                );
+#else
                 switch (Service)
                 {
                 case KEYM_SERVICE_CERT_REQUEST_CSR:
@@ -887,15 +1100,22 @@ Std_ReturnType KeyM_ServiceCertificateByCertId(
                     ret = E_NOT_OK;
                     break;
                 }
+#endif /* KEYM_CUSTOM_SERV_ENABLE == STD_ON */
             }
 #endif /*KEYM_CRYPTO_KEYHANDLER_SERVICE_CERTIFICATE_ENABLED == STD_ON*/
         }
     }
 
-SERV_CERT_EXIT:
+    KeyM_ArtiApiStop(2, KEYM_SERV_CERTIFICATE_BY_CERT_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif /*KEYM_SERVICE_CERTIFICATE_FUNCTION_ENABLED == STD_ON*/
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /**
  * @Brief  This function provides the certificate data to the key management module to
@@ -903,6 +1123,8 @@ SERV_CERT_EXIT:
 /*************************************************************************/
 Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_CertDataType* CertificateDataPtr)
 {
+    KeyM_ArtiApiStart(3, KEYM_SET_CERTIFICATE_ID, CertId, CertificateDataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == KEYM_DEVERROR_DETECT)
@@ -917,6 +1139,25 @@ Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_Cer
     else
 #endif /*STD_ON == KEYM_DEVERROR_DETECT*/
     {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        Std_ReturnType keyMRet;
+        uint32         keyMRetLen = sizeof(keyMRet);
+        ret                       = Csm_CustomSync(
+            KEYM_SET_CERT_DSPID,                  /*dispatchId*/
+            *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+            KEYM_INVALID_U32,                     /*keyElementId*/
+            KEYM_INVALID_U32,                     /*targetKeyId*/
+            KEYM_INVALID_U32,                     /*targetKeyElementId*/
+            /* PRQA S 0317 ++ */                  /* VL_QAC_0317 */
+            CertificateDataPtr->certData,         /*inputPtr*/
+            /* PRQA S 0317 -- */
+            CertificateDataPtr->certDataLength, /*inputLength*/
+            NULL_PTR,                           /*outputPtr*/
+            NULL_PTR,                           /*outputLengthPtr*/
+            &keyMRet,                           /*secondaryOutputPtr*/
+            &keyMRetLen                         /*secondaryOutputLengthPtr*/
+        );
+#else
         /* PRQA S 1252 ++ */ /* VL_KeyM_1252 */
         if (CertificateDataPtr->certDataLength == 0u)
         /* PRQA S 1252 -- */
@@ -942,21 +1183,20 @@ Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_Cer
                 /* PRQA S 0317 ++ */ /* VL_QAC_0317 */
                 ret = KeyM_HandleParseCert(CertId, CertificateDataPtr->certData, CertificateDataPtr->certDataLength);
                 /* PRQA S 0317 -- */
-                if (ret != E_OK)
-                {
-                    KeyM_CertStatus[CertId] = KEYM_E_CERTIFICATE_INVALID_FORMAT;
-                }
-                else
-                {
-                    /*do nothing*/
-                }
             }
         }
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
     }
+
+    KeyM_ArtiApiStop(2, KEYM_SET_CERTIFICATE_ID, ret);
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function provides the certificate data
@@ -964,6 +1204,8 @@ Std_ReturnType KeyM_SetCertificate(KeyM_CertificateIdType CertId, const KeyM_Cer
 /*************************************************************************/
 Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataType* CertificateDataPtr)
 {
+    KeyM_ArtiApiStart(3, KEYM_GET_CERTIFICATE_ID, CertId, CertificateDataPtr);
+
     const KeyM_CertPCfgType* certCfgPtr;
     /* PRQA S 2981 ++*/ /* VL_KeyM_2981 */
     Std_ReturnType ret = E_NOT_OK;
@@ -985,14 +1227,35 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
         {
             ret = KEYM_E_KEY_CERT_SIZE_MISMATCH;
         }
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_OFF)
         /* PRQA S 1252 ++ */ /* VL_KeyM_1252 */
         else if (certCfgPtr->CertData->len == 0u)
         /* PRQA S 1252 -- */
         {
             ret = KEYM_E_KEY_CERT_EMPTY;
         }
+#endif
         else
         {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+            Std_ReturnType keyMRet;
+            uint32         keyMRetLen = sizeof(keyMRet);
+            ret                       = Csm_CustomSync(
+                KEYM_GET_CERT_DSPID,                  /*dispatchId*/
+                *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+                KEYM_INVALID_U32,                     /*keyElementId*/
+                KEYM_INVALID_U32,                     /*targetKeyId*/
+                KEYM_INVALID_U32,                     /*targetKeyElementId*/
+                NULL_PTR,                             /*inputPtr*/
+                0u,                                   /*inputLength*/
+                /* PRQA S 0317 ++ */                  /* VL_QAC_0317 */
+                CertificateDataPtr->certData,         /*outputPtr*/
+                /* PRQA S 0317 -- */
+                &CertificateDataPtr->certDataLength, /*outputLengthPtr*/
+                &keyMRet,                            /*secondaryOutputPtr*/
+                &keyMRetLen                          /*secondaryOutputLengthPtr*/
+            );
+#else
             /* PRQA S 0311 ++*/ /* VL_KeyM_0311 */
             KeyM_CopyData(
                 (void*)CertificateDataPtr->certData,
@@ -1001,12 +1264,19 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
             /* PRQA S 0311 --*/
             CertificateDataPtr->certDataLength = certCfgPtr->CertData->len;
             ret                                = E_OK;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
         }
     }
 
+    KeyM_ArtiApiStop(2, KEYM_GET_CERTIFICATE_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function provides the certificate data to the key management module to
@@ -1014,6 +1284,8 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
 /*************************************************************************/
 Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_CertificateIdType CertUpperId)
 {
+    KeyM_ArtiApiStart(3, KEYM_VERIFY_CERTIFICATES_ID, CertId, CertUpperId);
+
     Std_ReturnType ret;
 
     if (!KeyM_InitStatus) /* PRQA S 2109 */ /* VL_KeyM_2109 */
@@ -1027,6 +1299,7 @@ Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_Certi
     {
         ret = KEYM_E_PARAMETER_MISMATCH;
     }
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_OFF)
     /*[SWS_KeyM_00118]:The certificate referenced by CertUpperId shall have been validated before.*/
     else if (
         (KeyM_CertStatus[CertUpperId] != KEYM_CERTIFICATE_VALID)
@@ -1041,14 +1314,42 @@ Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_Certi
         /*SWS_KeyM_00028*/
         ret = E_NOT_OK;
     }
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_OFF*/
     else
     {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        ret = Csm_CustomService(
+            KeyM_CertPCfg[CertId].customJobRef, /*jobId*/
+            CRYPTO_OPERATIONMODE_SINGLECALL,    /*mode*/
+            KEYM_VERIFY_CERTIFICATES_ID,        /*targetKeyId*/
+            /* PRQA S 1339 ++ */                /* VL_KeyM_1339 */
+            (uint8*)&CertUpperId,               /*inputPtr*/
+            /* PRQA S 1339 -- */
+            KEYM_CONST_2, /*inputLength*/
+            NULL_PTR,     /*secondaryInputPtr*/
+            0u,           /*secondaryInputLength*/
+            NULL_PTR,     /*tertiaryInputPtr*/
+            0U,           /*tertiaryInputLength*/
+            NULL_PTR,     /*outputPtr*/
+            NULL_PTR,     /*outputLengthPtr*/
+            NULL_PTR,     /*secondaryOutputPtr*/
+            NULL_PTR,     /*secondaryOutputLengthPtr*/
+            NULL_PTR      /*verifyPtr*/
+        );
+#else
         ret = E_OK;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
     }
+
+    KeyM_ArtiApiStop(2, KEYM_VERIFY_CERTIFICATES_ID, ret);
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function verifies a certificate that was previously provided with
@@ -1058,8 +1359,9 @@ Std_ReturnType KeyM_VerifyCertificates(KeyM_CertificateIdType CertId, KeyM_Certi
 Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId)
 /* PRQA S 6030 -- */
 {
+    KeyM_ArtiApiStart(2, KEYM_VERIFY_CERTIFICATE_ID, CertId);
+
     const KeyM_CertPCfgType* certCfgPtr;
-    const KeyM_CertPCfgType* certUpperHierRef;
     Std_ReturnType           ret;
 
     if (!KeyM_InitStatus) /* PRQA S 2109 */ /* VL_KeyM_2109 */
@@ -1077,6 +1379,24 @@ Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId)
     {
         certCfgPtr = &KeyM_CertPCfg[CertId];
 
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        ret = Csm_CustomService(
+            certCfgPtr->customJobRef,        /*jobId*/
+            CRYPTO_OPERATIONMODE_SINGLECALL, /*mode*/
+            KEYM_VERIFY_CERTIFICATE_ID,      /*targetKeyId*/
+            NULL_PTR,                        /*inputPtr*/
+            0u,                              /*inputLength*/
+            NULL_PTR,                        /*secondaryInputPtr*/
+            0u,                              /*secondaryInputLength*/
+            NULL_PTR,                        /*tertiaryInputPtr*/
+            0U,                              /*tertiaryInputLength*/
+            NULL_PTR,                        /*outputPtr*/
+            NULL_PTR,                        /*outputLengthPtr*/
+            NULL_PTR,                        /*secondaryOutputPtr*/
+            NULL_PTR,                        /*secondaryOutputLengthPtr*/
+            NULL_PTR                         /*verifyPtr*/
+        );
+#else
         /*SWS_KeyM_00028: A verification of a certificate shall only be started if the certificate is
          * in the status KEYM_CERTIFICATE_PARSED_NOT_VALIDATED*/
         if (KeyM_CertStatus[CertId] != KEYM_CERTIFICATE_PARSED_NOT_VALIDATED)
@@ -1085,14 +1405,10 @@ Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId)
         }
         else
         {
-            certUpperHierRef = certCfgPtr;
-            ret              = E_OK;
+            const KeyM_CertPCfgType* certUpperHierRef = certCfgPtr;
+            ret                                       = E_OK;
             /*Verification shall be done from the top of the certificate hierarchy to the bottom.*/
-            if (certUpperHierRef->selfSignedCert) /* PRQA S 2109 */ /* VL_KeyM_2109 */
-            {
-                /*do nothing*/
-            }
-            else
+            if (certUpperHierRef->selfSignedCert == FALSE) /* PRQA S 2109 */ /* VL_KeyM_2109 */
             {
                 do /* PRQA S 0771 */ /* VL_KeyM_0771 */
                 {
@@ -1110,11 +1426,23 @@ Std_ReturnType KeyM_VerifyCertificate(KeyM_CertificateIdType CertId)
                     }
                 } while (!certUpperHierRef->selfSignedCert); /* PRQA S 2109 */ /* VL_KeyM_2109 */
             }
+            if (ret == E_OK)
+            {
+                KeyM_CertSetStatus(CertId, KEYM_CERTIFICATE_PARSED_NOT_VALIDATED);
+            }
         }
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
     }
+
+    KeyM_ArtiApiStop(2, KEYM_VERIFY_CERTIFICATE_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function performs a certificate verification against a list of
@@ -1125,8 +1453,9 @@ Std_ReturnType KeyM_VerifyCertificateChain(
     const KeyM_CertDataType certChainData[],
     uint8                   NumberOfCertificates)
 {
+    KeyM_ArtiApiStart(4, KEYM_VERIFY_CERTIFICATE_CHAIN_ID, CertId, certChainData, NumberOfCertificates);
+
     Std_ReturnType ret = E_NOT_OK;
-    uint8          certCnt;
 
     if (!KeyM_InitStatus) /* PRQA S 2109 */ /* VL_KeyM_2109 */
     {
@@ -1147,19 +1476,48 @@ Std_ReturnType KeyM_VerifyCertificateChain(
     }
     else
     {
+        const KeyM_CertPCfgType* certCfgPtr = &KeyM_CertPCfg[CertId];
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        ret = Csm_CustomService(
+            certCfgPtr->customJobRef,         /*jobId*/
+            CRYPTO_OPERATIONMODE_SINGLECALL,  /*mode*/
+            KEYM_VERIFY_CERTIFICATE_CHAIN_ID, /*targetKeyId*/
+            /* PRQA S 1340 ++ */              /* VL_KeyM_1340 */
+            &NumberOfCertificates,            /*inputPtr*/
+            /* PRQA S 1340 -- */
+            1u,                                               /*inputLength*/
+            (const uint8*)certChainData,                      /*secondaryInputPtr*/
+            NumberOfCertificates * sizeof(KeyM_CertDataType), /*secondaryInputLength*/
+            NULL_PTR,                                         /*tertiaryInputPtr*/
+            0U,                                               /*tertiaryInputLength*/
+            NULL_PTR,                                         /*outputPtr*/
+            NULL_PTR,                                         /*outputLengthPtr*/
+            NULL_PTR,                                         /*secondaryOutputPtr*/
+            NULL_PTR,                                         /*secondaryOutputLengthPtr*/
+            NULL_PTR                                          /*verifyPtr*/
+        );
+#else
         /*TODO*/
-        for (certCnt = 0u; certCnt < NumberOfCertificates; certCnt++)
+        for (uint8 certCnt = 0u; certCnt < NumberOfCertificates; certCnt++)
         {
             const KeyM_CertDataType* currentCertData = &(certChainData[certCnt]);
             const KeyM_CertDataType* nextCertData    = &(certChainData[certCnt + 1u]);
             (void)currentCertData;
             (void)nextCertData;
         }
+        (void)(certCfgPtr);
+#endif
     }
+
+    KeyM_ArtiApiStop(2, KEYM_VERIFY_CERTIFICATE_CHAIN_ID, ret);
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief Provides the content of a specific certificate element.
@@ -1171,22 +1529,49 @@ Std_ReturnType KeyM_CertElementGet(
     uint8*                 CertElementData,
     uint32*                CertElementDataLength)
 {
+    KeyM_ArtiApiStart(5, KEYM_CERT_ELEMENT_GET_ID, CertId, CertElementId, CertElementData, CertElementDataLength);
+
     Std_ReturnType ret;
 
     ret =
         KeyM_CheckGeneralParam(CertId, CertElementId, CertElementData, CertElementDataLength, KEYM_CERT_ELEMENT_GET_ID);
     if (ret == (Std_ReturnType)E_OK)
     {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        uint32         keyEleIdx = KeyM_CertEleMap2KeyEle(CertId, CertElementId);
+        Std_ReturnType keyMRet;
+        uint32         keyMRetLen = sizeof(keyMRet);
+        ret                       = Csm_CustomSync(
+            KEYM_CERT_ELE_GET_DSPID,              /*dispatchId*/
+            *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+            keyEleIdx,                            /*keyElementId*/
+            KEYM_INVALID_U32,                     /*targetKeyId*/
+            KEYM_INVALID_U32,                     /*targetKeyElementId*/
+            NULL_PTR,                             /*inputPtr*/
+            0u,                                   /*inputLength*/
+            CertElementData,                      /*outputPtr*/
+            CertElementDataLength,                /*outputLengthPtr*/
+            &keyMRet,                             /*secondaryOutputPtr*/
+            &keyMRetLen                           /*secondaryOutputLengthPtr*/
+        );
+#else
         KeyM_CopyData(
             CertElementData,
             KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf->dataEle,
             KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf->len);
         *CertElementDataLength = KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf->len;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
     }
+
+    KeyM_ArtiApiStop(2, KEYM_CERT_ELEMENT_GET_ID, ret);
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief This function provides the element data of a certificate.
@@ -1199,12 +1584,15 @@ Std_ReturnType KeyM_CertificateElementGetByIndex(
     uint8*                 CertElementDataPtr,
     uint32*                CertElementDataLengthPtr)
 {
-    const KeyM_CertEleType* certElePCfgPtr;
-    /* PRQA S 3678 ++ */ /* VL_KeyM_3678 */
-    KeyM_Asn1DesType* certEleBufPtr;
-    /* PRQA S 3678 -- */
-    uint32         idx;
-    uint32         certElenum;
+    KeyM_ArtiApiStart(
+        6,
+        KEYM_CERT_ELEMENT_GET_BY_INDEX,
+        CertId,
+        CertElementId,
+        Index,
+        CertElementDataPtr,
+        CertElementDataLengthPtr);
+
     Std_ReturnType ret;
 
     ret = KeyM_CheckGeneralParam(
@@ -1215,6 +1603,30 @@ Std_ReturnType KeyM_CertificateElementGetByIndex(
         KEYM_CERT_ELEMENT_GET_BY_INDEX);
     if (ret == (Std_ReturnType)E_OK)
     {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+        uint32         keyEleIdx = KeyM_CertEleMap2KeyEle(CertId, CertElementId);
+        Std_ReturnType keyMRet;
+        uint32         keyMRetLen = sizeof(keyMRet);
+        ret                       = Csm_CustomSync(
+            KEYM_CERT_ELE_GETBYIDX_DSPID,         /*dispatchId*/
+            *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+            keyEleIdx,                            /*keyElementId*/
+            Index,                                /*targetKeyId*/
+            KEYM_INVALID_U32,                     /*targetKeyElementId*/
+            NULL_PTR,                             /*inputPtr*/
+            0u,                                   /*inputLength*/
+            CertElementDataPtr,                   /*outputPtr*/
+            CertElementDataLengthPtr,             /*outputLengthPtr*/
+            &keyMRet,                             /*secondaryOutputPtr*/
+            &keyMRetLen                           /*secondaryOutputLengthPtr*/
+        );
+#else
+        const KeyM_CertEleType* certElePCfgPtr;
+        /* PRQA S 3678 ++ */ /* VL_KeyM_3678 */
+        KeyM_Asn1DesType* certEleBufPtr;
+        /* PRQA S 3678 -- */ /* VL_KeyM_3678 */
+        uint32 idx;
+        uint32 certElenum;
         /*Index from 0..N*/
         certElenum     = Index + 1u; /* PRQA S 1252 */ /* VL_KeyM_1252 */
         certElePCfgPtr = &KeyM_CertPCfg[CertId].certEleRef[CertElementId];
@@ -1241,25 +1653,32 @@ Std_ReturnType KeyM_CertificateElementGetByIndex(
             /* PRQA S 2963 --*/
             *CertElementDataLengthPtr = certEleBufPtr->len;
         }
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
     }
+
+    KeyM_ArtiApiStop(2, KEYM_CERT_ELEMENT_GET_BY_INDEX, ret);
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function provides the total number of data
  */
 /*************************************************************************/
+/* PRQA S 3673 ++ */ /* VL_KeyM_3673 */
 Std_ReturnType KeyM_CertificateElementGetCount(
     KeyM_CertificateIdType CertId,
     KeyM_CertElementIdType CertElementId,
     uint16*                CountPtr)
+/* PRQA S 3673 -- */
 {
-    /* PRQA S 3678 ++ */ /* VL_KeyM_3678 */
-    KeyM_Asn1DesType* certEleBufPtr;
-    /* PRQA S 3678 -- */
-    uint16 cnt = 0u;
+    KeyM_ArtiApiStart(4, KeyM_CertElementGetCount_ID, CertId, CertElementId, CountPtr);
+
     /* PRQA S 2981 ++ */ /* VL_KeyM_2981 */
     Std_ReturnType ret = E_NOT_OK;
     /* PRQA S 2981 -- */
@@ -1281,7 +1700,27 @@ Std_ReturnType KeyM_CertificateElementGetCount(
         }
         else
         {
-            certEleBufPtr = KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf;
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+            uint32         keyEleIdx = KeyM_CertEleMap2KeyEle(CertId, CertElementId);
+            Std_ReturnType keyMRet;
+            uint32         keyMRetLen = sizeof(keyMRet);
+            ret                       = Csm_CustomSync(
+                KEYM_CERT_ELE_GETCNT_DSPID,           /*dispatchId*/
+                *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+                keyEleIdx,                            /*keyElementId*/
+                KEYM_INVALID_U32,                     /*targetKeyId*/
+                KEYM_INVALID_U32,                     /*targetKeyElementId*/
+                NULL_PTR,                             /*inputPtr*/
+                0u,                                   /*inputLength*/
+                NULL_PTR,                             /*outputPtr*/
+                NULL_PTR,                             /*outputLengthPtr*/
+                &keyMRet,                             /*secondaryOutputPtr*/
+                &keyMRetLen                           /*secondaryOutputLengthPtr*/
+            );
+            (void)CountPtr;
+#else
+            KeyM_Asn1DesType* certEleBufPtr = KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf;
+            uint16            cnt           = 0u;
 
             while (certEleBufPtr != NULL_PTR)
             {
@@ -1291,11 +1730,19 @@ Std_ReturnType KeyM_CertificateElementGetCount(
 
             *CountPtr = cnt;
             ret       = E_OK;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
         }
     }
+
+    KeyM_ArtiApiStop(2, KeyM_CertElementGetCount_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function is used to initialize the interative extraction of a
@@ -1308,6 +1755,15 @@ Std_ReturnType KeyM_CertElementGetFirst(
     uint8*                        CertElementData,
     uint32*                       CertElementDataLength)
 {
+    KeyM_ArtiApiStart(
+        6,
+        KEYM_CERT_ELEMENT_GET_FIRST_ID,
+        CertId,
+        CertElementId,
+        CertElementIterator,
+        CertElementData,
+        CertElementDataLength);
+
     Std_ReturnType ret;
 
     ret = KeyM_CheckGeneralParam(
@@ -1340,9 +1796,16 @@ Std_ReturnType KeyM_CertElementGetFirst(
             CertElementIterator->eleItrator = CertElementIterator->eleItrator->next;
         }
     }
+
+    KeyM_ArtiApiStop(2, KEYM_CERT_ELEMENT_GET_FIRST_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function provides further data from a certificate element.
@@ -1353,6 +1816,8 @@ Std_ReturnType KeyM_CertElementGetNext(
     uint8*                        CertElementData,
     uint32*                       CertElementDataLength)
 {
+    KeyM_ArtiApiStart(4, KEYM_CERT_ELEMENT_GET_NEXT_ID, CertElementIterator, CertElementData, CertElementDataLength);
+
     const KeyM_CertEleType* certElePCfgPtr;
     Std_ReturnType          ret = E_NOT_OK;
 #if (STD_ON == KEYM_DEVERROR_DETECT)
@@ -1400,9 +1865,15 @@ Std_ReturnType KeyM_CertElementGetNext(
         }
     }
 
+    KeyM_ArtiApiStop(2, KEYM_CERT_ELEMENT_GET_NEXT_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * @Brief  This function provides the status of a certificate.
@@ -1414,6 +1885,8 @@ Std_ReturnType KeyM_CertGetStatus(
     KeyM_CertificateIdType      CertId,
     KeyM_CertificateStatusType* Status)
 {
+    KeyM_ArtiApiStart(3, KEYM_CERT_GET_STATUS_ID, CertId, Status);
+
     /* PRQA S 2981 ++ */ /* VL_KeyM_2981 */
     Std_ReturnType ret = E_NOT_OK;
     /* PRQA S 2981 -- */
@@ -1435,13 +1908,39 @@ Std_ReturnType KeyM_CertGetStatus(
         }
         else
         {
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+            Std_ReturnType keyMRet;
+            uint32         keyMRetLen = sizeof(keyMRet);
+            uint32         outlen     = sizeof(Status);
+            ret                       = Csm_CustomSync(
+                KEYM_CERT_GET_STATUS_DSPID,           /*dispatchId*/
+                *KeyM_CertPCfg[CertId].certKeyTarRef, /*keyId*/
+                KEYM_INVALID_U32,                     /*keyElementId*/
+                KEYM_INVALID_U32,                     /*targetKeyId*/
+                KEYM_INVALID_U32,                     /*targetKeyElementId*/
+                NULL_PTR,                             /*inputPtr*/
+                0u,                                   /*inputLength*/
+                (uint8*)Status,                       /*outputPtr*/
+                &outlen,                              /*outputLengthPtr*/
+                &keyMRet,                             /*secondaryOutputPtr*/
+                &keyMRetLen                           /*secondaryOutputLengthPtr*/
+            );
+#else
             *Status = KeyM_CertStatus[CertId];
             ret     = E_OK;
+#endif
         }
     }
+
+    KeyM_ArtiApiStop(2, KEYM_CERT_GET_STATUS_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertSetStatus(KeyM_CertificateIdType CertId, KeyM_CertificateStatusType Status)
 {
     Std_ReturnType ret = E_OK;
@@ -1457,7 +1956,11 @@ Std_ReturnType KeyM_CertSetStatus(KeyM_CertificateIdType CertId, KeyM_Certificat
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void KeyM_CertStoreNvmHandle(void)
 /* PRQA S 1532 -- */
@@ -1485,7 +1988,11 @@ void KeyM_CertStoreNvmHandle(void)
     }
 #endif
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6080,6070,6010 ++ */ /* VL_MTR_KeyM_STPTH,VL_MTR_KeyM_STCAL,VL_MTR_KeyM_STCYC */
 /* PRQA S 6050,6020,5017 ++ */ /* VL_MTR_KeyM_STST3,VL_MTR_KeyM_STLIN,VL_KeyM_5017 */
 Std_ReturnType KeyM_HandleParseCert(KeyM_CertificateIdType CertId, const uint8* certDataPtr, uint32 certDataLength)
@@ -1710,13 +2217,17 @@ PARSE_CERT_EXIT: /* PRQA S 2015 */ /* VL_KeyM_2015 */
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*keySet = TRUE:Storrage KeyElement.
  * keySet = FALSE:Get KeyElement.
  * */
-/* PRQA S 6010,5017 ++ */ /* VL_MTR_KeyM_STCYC,VL_KeyM_5017 */
+/* PRQA S 6010,5017,1505 ++ */ /* VL_MTR_KeyM_STCYC,VL_KeyM_5017,VL_KeyM_1505 */
 void KeyM_HandleCsmKeyStorage(uint32 keyId, uint16 certId, boolean keySet)
-/* PRQA S 6010,5017 -- */
+/* PRQA S 6010,5017,1505 -- */
 {
     const KeyM_CertPCfgType* certCfgPtr;
     const KeyM_CertEleType*  certEleRef;
@@ -1789,6 +2300,8 @@ void KeyM_HandleCsmKeyStorage(uint32 keyId, uint16 certId, boolean keySet)
 #define KEYM_STOP_SEC_CODE
 #include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 /* PRQA S 6030,3206 ++ */ /* VL_MTR_KeyM_STMIF,VL_KeyM_3206 */
 KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
@@ -1833,12 +2346,14 @@ KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
         {
             ret = KEYM_E_KEY_CERT_INVALID;
         }
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_OFF)
         /* PRQA S 1252 ++ */ /* VL_KeyM_1252 */
         else if (KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleBuf->len == 0U)
         /* PRQA S 1252 -- */
         {
             ret = KEYM_E_KEY_CERT_EMPTY;
         }
+#endif
         else
         {
             ret = E_OK;
@@ -1846,7 +2361,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_IsCertExist(KeyM_CertificateIdType certId, KeyM_CertEleStructType certStr, uint16* cfgId)
 {
     const KeyM_CertEleType* certEleCfgPtr;
@@ -1868,7 +2387,11 @@ KEYM_LOCAL Std_ReturnType KeyM_IsCertExist(KeyM_CertificateIdType certId, KeyM_C
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030,6010,5017 ++ */ /* VL_MTR_KeyM_STMIF,VL_MTR_KeyM_STCYC,VL_KeyM_5017  */
 KEYM_LOCAL Std_ReturnType
     KeyM_FindCertElement(KeyM_CertificateIdType certId, const KeyM_CertEleType* certEle, uint16* eleIdx)
@@ -1937,7 +2460,11 @@ KEYM_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType
     KeyM_CertEleHandle(KeyM_CertificateIdType certId, const KeyM_CertEleType* certEle, const uint8* eleData, uint32 tag)
 {
@@ -1957,7 +2484,11 @@ KEYM_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Tag(uint8** cerS, const uint8* cerE, uint32* cerLenPtr, uint8 tag)
 {
     Std_ReturnType ret;
@@ -1976,7 +2507,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Tag(uint8** cerS, const uint8* cerE, u
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6010,5017 ++ */ /* VL_MTR_KeyM_STCYC,VL_KeyM_5017 */
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, uint32* cerLen)
 /* PRQA S 6010,5017 -- */
@@ -2007,7 +2542,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
         case KEYM_CONST_2:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_3)
-            /* PRQA S 1822,1852 -- */
+            /* PRQA S 1822,1852 --*/
             {
                 ret = E_NOT_OK;
             }
@@ -2022,7 +2557,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
         case KEYM_CONST_3:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_4)
-            /* PRQA S 1822,1852 -- */
+            /* PRQA S 1822,1852 --*/
             {
                 ret = E_NOT_OK;
             }
@@ -2061,7 +2596,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1TagInt(uint8** cerS, const uint8* cerE, uint8* intVal, uint32* cerLen)
 {
     uint32         len;
@@ -2094,7 +2633,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1TagInt(uint8** cerS, const uint8* cerE
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetVersion(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 {
     uint32         cerLen;
@@ -2124,7 +2667,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetVersion(KeyM_CertificateIdType certId, uin
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetSerialVersion(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 {
     uint32           tag;
@@ -2156,7 +2703,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSerialVersion(KeyM_CertificateIdType certI
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_KeyM_STMIF */
 KEYM_LOCAL Std_ReturnType
     KeyM_CertGetSigAlgorithmId(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE, KeyM_Asn1DesType* sigPar)
@@ -2206,7 +2757,11 @@ KEYM_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_KeyM_STMIF */
 KEYM_LOCAL Std_ReturnType
     KeyM_CertHandleName(uint8** cerS, const uint8* cerE, KeyM_Asn1DesType* isuName, KeyM_Asn1DesType* isuNameOid)
@@ -2264,7 +2819,11 @@ KEYM_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6080 ++ */ /* VL_MTR_KeyM_STPTH */
 KEYM_LOCAL Std_ReturnType KeyM_CertGetName(
     KeyM_CertificateIdType certId,
@@ -2336,7 +2895,11 @@ ISSUER_NAME: /* PRQA S 2015 */ /* VL_KeyM_2015 */
     /* PRQA S 2001 -- */
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32* time)
 {
     uint32         eleLen = len;
@@ -2366,7 +2929,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32*
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6060,2889 ++ */ /* VL_MTR_KeyM_STM19,VL_QAC_MultiReturn */
 KEYM_LOCAL Std_ReturnType KeyM_CertCheckDate(const KeyM_CertTimeType* time)
 /* PRQA S 6060,2889 -- */
@@ -2420,7 +2987,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertCheckDate(const KeyM_CertTimeType* time)
     /* PRQA S 2743,3120 -- */
     return E_OK;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030, 6010 ++ */ /* VL_MTR_KeyM_STMIF, VL_MTR_KeyM_STCYC  */
 KEYM_LOCAL Std_ReturnType KeyM_CertParseTime(uint32 len, uint32 yearLen, uint8** cerS, KeyM_CertTimeType* time)
 /* PRQA S 6030, 6010 -- */
@@ -2500,7 +3071,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTime(uint32 len, uint32 yearLen, uint8**
     /* PRQA S 3120,1252 -- */
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetTime(
     KeyM_CertificateIdType certId,
     uint8**                cerS,
@@ -2553,7 +3128,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetTime(
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetTime(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 {
     uint32         len;
@@ -2591,7 +3170,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetTime(KeyM_CertificateIdType certId, uint8*
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_KeyM_STMIF */
 KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetPubKeyAlgo(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 /* PRQA S 6030 -- */
@@ -2652,7 +3235,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertHandleGetPubKeyAlgo(KeyM_CertificateIdType ce
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_KeyM_STMIF */
 KEYM_LOCAL Std_ReturnType KeyM_CertGetPubKeyInfo(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 /* PRQA S 6030 -- */
@@ -2694,7 +3281,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetPubKeyInfo(KeyM_CertificateIdType certId, 
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL void KeyM_CertSkipField(uint8** cerS, const uint8* cerE, uint8 type)
 {
     uint32         len;
@@ -2710,6 +3301,11 @@ KEYM_LOCAL void KeyM_CertSkipField(uint8** cerS, const uint8* cerE, uint8 type)
     }
 }
 
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetExtention(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 {
     uint32           len;
@@ -2738,6 +3334,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetExtention(KeyM_CertificateIdType certId, u
     return ret;
 }
 
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CertGetSignature(KeyM_CertificateIdType certId, uint8** cerS, const uint8* cerE)
 {
     uint32           len;
@@ -2767,7 +3368,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSignature(KeyM_CertificateIdType certId, u
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL KeyM_Asn1DesType* KeyM_GetCertEle(KeyM_CertificateIdType certId, KeyM_CertEleStructType certEleStru)
 {
     const KeyM_CertPCfgType* certCfgPtr;
@@ -2795,7 +3400,11 @@ KEYM_LOCAL KeyM_Asn1DesType* KeyM_GetCertEle(KeyM_CertificateIdType certId, KeyM
     return certEleBuf;
     /* PRQA S 2963 -- */
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_CmpCertEle(
     /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
     KeyM_Asn1DesType* certEleBuf,
@@ -2826,7 +3435,11 @@ KEYM_LOCAL Std_ReturnType KeyM_CmpCertEle(
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_GlobalTimeCheck(KeyM_CertificateIdType certId)
 {
     uint64             ts_s;
@@ -2862,7 +3475,11 @@ KEYM_LOCAL Std_ReturnType KeyM_GlobalTimeCheck(KeyM_CertificateIdType certId)
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL uint8 KeyM_IsLeapYear(uint16 year)
 {
     uint8 ret = 0u;
@@ -2882,7 +3499,11 @@ KEYM_LOCAL uint8 KeyM_IsLeapYear(uint16 year)
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL uint32 KeyM_ConvertTime_BeijingToUnix(const KeyM_CertTimeType* bjTime)
 {
     uint32 dayNum = 0u;
@@ -2936,7 +3557,11 @@ KEYM_LOCAL uint32 KeyM_ConvertTime_BeijingToUnix(const KeyM_CertTimeType* bjTime
     /* PRQA S 3120,1252 -- */
     return secNum;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 6030,6020,6080 ++ */ /* VL_MTR_KeyM_STMIF,VL_MTR_KeyM_STLIN,VL_MTR_KeyM_STPTH, */
 /* PRQA S 6010,1532 ++ */      /* VL_MTR_KeyM_STCYC,VL_QAC_OneFunRef */
 Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const KeyM_CertPCfgType* certUpperHierRef)
@@ -3137,6 +3762,23 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
     }
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
+KEYM_LOCAL
+uint32 KeyM_CertEleMap2KeyEle(const KeyM_CertificateIdType CertId, const KeyM_CertElementIdType CertElementId)
+{
+    const KeyM_CertEleType* certElePCfgPtr = &KeyM_CertPCfg[CertId].certEleRef[CertElementId];
+
+    /*Mapping calculation through configuration tools.@SWS_Crypto_00261*/
+    return certElePCfgPtr->mapCertEle2KeyEleId;
+}
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+#endif /* KEYM_CUSTOM_SERV_ENABLE == STD_ON */
 #endif /*STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED*/
 /* PRQA S 0488 -- */
 /* PRQA S 4603,4604 -- */

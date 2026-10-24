@@ -28,6 +28,7 @@
 #include "PduR_Dcm.h"
 #include "Dcm_Internal.h"
 #include "Dcm_ComM.h"
+#include "Dcm_Arti.h"
 /* ===================================================== macros ===================================================== */
 /**
  * @brief service id of UDS service TesterPresent
@@ -40,6 +41,10 @@
  * @brief protocol control unit @range NA
  */
 Dcm_ProtocolCtrlType Dcm_ProtocolCtrl[DCM_PROTOCOLROW_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief msgContext for storing reqData and resData @range NA
  */
@@ -60,9 +65,17 @@ Dcm_ActiveDiagnosticType Dcm_ActiveDiagnostic;
  * @brief current comm State @range NA
  */
 Dcm_CommStateType Dcm_CommState[DCM_MAINCONNECTION_NUM];
-boolean           Dcm_RequestRejectedDueToBoot    = FALSE;
-boolean           Dcm_ResRejectedDueToAFTER_RESET = FALSE;
 #define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+boolean Dcm_RequestRejectedDueToBoot = FALSE;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+boolean Dcm_ResRejectedDueToAFTER_RESET = FALSE;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
@@ -70,14 +83,18 @@ boolean           Dcm_ResRejectedDueToAFTER_RESET = FALSE;
  * @brief the whole dcm buffer (all TX+RX) @range NA
  */
 uint8 Dcm_Buffer[DCM_TOTAL_BUFFER_SIZE];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #if (DCM_METADATA_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief stored metadata
  */
 uint8 Dcm_MetaData[DCM_METADATA_NUM * DCM_METADATA_SIZE];
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
+#endif
 /**
  * @brief pduInfoBuffer for multicore transmission @range NA
  */
@@ -92,6 +109,10 @@ PduInfoType Dcm_TempPduInfo[DCM_PROTOCOLROW_NUM];
  * @brief indicates if there is pending setProgramConditions globally @range 0..1
  */
 boolean Dcm_PendingSetProg;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is onging setProgramConditions which is process in Dcm_MainFunction @range 0..1
  */
@@ -106,6 +127,10 @@ boolean Dcm_ProcessingSetProg;
  * @brief The current request queue index @range 0..255
  */
 uint8 Dcm_QueuedIndex;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief request queue buffer @range NA
  */
@@ -136,6 +161,10 @@ Dcm_ConfirmationHandleType Dcm_ConfirmationHandle[DCM_PROTOCOLROW_NUM];
  * @brief current security level @range NA
  */
 Dcm_SecLevelType Dcm_CurrentSecurity;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief current diagnostic state @range NA
  */
@@ -143,6 +172,8 @@ DCM_LOCAL Dcm_DiagnosticStateType Dcm_DiagnosticState[DCM_MAINCONNECTION_NUM]; /
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function checks whether the protocol shares a buffer with other protocols and those protocols are
  *                idle or not
@@ -155,6 +186,10 @@ DCM_LOCAL Dcm_DiagnosticStateType Dcm_DiagnosticState[DCM_MAINCONNECTION_NUM]; /
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DslInternal_CheckProtocolWithSameBuffer(const Dcm_DslProtocolRowType* protocolRow);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function searches for matched protocol and connection Id by txPduId
  * @param[in]     Id           : Identification of the I-PDU.
@@ -168,6 +203,10 @@ DCM_LOCAL Std_ReturnType DslInternal_CheckProtocolWithSameBuffer(const Dcm_DslPr
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DslInternal_FindProtocolRowByTxPduId(PduIdType Id, uint8* ProtocolId, uint16* connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function checks whether all the current State of running protocol except input protocol are idle
  *                or not
@@ -180,8 +219,12 @@ DCM_LOCAL Std_ReturnType DslInternal_FindProtocolRowByTxPduId(PduIdType Id, uint
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL boolean DslInternal_CheckIdle(uint8 protocolId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function checks common params and initialization status for callbacks
  * @param[in]     id            : Identification of the I-PDU.
@@ -199,6 +242,10 @@ DCM_LOCAL boolean DslInternal_CheckIdle(uint8 protocolId);
  */
 DCM_LOCAL uint8
     DslInternal_RxCheckParam(PduIdType id, const PduInfoType* info, const PduLengthType* bufferSizePtr, uint8 apiId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function checks params for copyTxData
@@ -219,7 +266,11 @@ DCM_LOCAL uint8
  */
 DCM_LOCAL uint8
     DslInternal_CopyTxDataCheckParam(PduIdType id, const PduInfoType* info, const PduLengthType* availableDataPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function do internal process for tpRxIndication
@@ -232,6 +283,10 @@ DCM_LOCAL uint8
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DslInternal_RxProcessRequest(PduIdType id, uint8 protocolId, uint16 connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function do internal process for fullComMode entered
@@ -242,6 +297,10 @@ DCM_LOCAL void DslInternal_RxProcessRequest(PduIdType id, uint8 protocolId, uint
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DslInternal_HandleFullComMode(uint16 connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function do internal process for copyTxData when sduLength > 0
@@ -253,6 +312,10 @@ DCM_LOCAL void DslInternal_HandleFullComMode(uint16 connectionId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL BufReq_ReturnType DslInternal_HandleTxDataCopy(uint16 connectionId, const PduInfoType* info);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function handle startOfReception when the buffer is enough for storing data
@@ -270,6 +333,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
     uint16             connectionId,
     PduLengthType      TpSduLength,
     const PduInfoType* info);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function handle tpTxConfirmation when the result is E_OK and condition check succeeds
@@ -281,6 +348,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
  *
  */
 DCM_LOCAL void DslInternal_HandleTpTxConfirmation(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function sets from default session to non-default session
@@ -293,6 +364,10 @@ DCM_LOCAL void DslInternal_HandleTpTxConfirmation(uint8 protocolId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DslInternal_DefaultToNonDefault(uint8 ProtocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This handle copyTxData for positive response
@@ -306,6 +381,10 @@ DCM_LOCAL Std_ReturnType DslInternal_DefaultToNonDefault(uint8 ProtocolId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL BufReq_ReturnType DslInternal_PosRespTxDataCopy(uint8 protocolId, const PduInfoType* info);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This handle copyTxData for negative response
@@ -319,6 +398,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_PosRespTxDataCopy(uint8 protocolId, cons
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL BufReq_ReturnType DslInternal_NegRespTxDataCopy(uint8 protocolId, const PduInfoType* info);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This process actual copy of copyRxData
@@ -333,8 +416,12 @@ DCM_LOCAL BufReq_ReturnType DslInternal_NegRespTxDataCopy(uint8 protocolId, cons
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL BufReq_ReturnType DslInternal_ProcessCopyRxData(PduIdType id, const PduInfoType* info, uint8 protocolId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         check copyTxData for Roe protocol
  * @param[in]     id           : input pduId
@@ -348,6 +435,8 @@ DCM_LOCAL BufReq_ReturnType DslInternal_ProcessCopyRxData(PduIdType id, const Pd
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL boolean Dcm_CopyTxDataCheckRoe(PduIdType id, uint8* ProtocolId, uint16* connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE_FAST
@@ -355,9 +444,22 @@ DCM_LOCAL boolean Dcm_CopyTxDataCheckRoe(PduIdType id, uint8* ProtocolId, uint16
 /**
  * check the occupancy of protocol buffer and return accordingly, copy data if provided and return BUFREQ_OK
  */
+/* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
 BufReq_ReturnType
     Dcm_StartOfReception(PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr)
 {
+    /* PRQA S 6030-- */ ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dcm,
+        0,
+        Bsw_Start,
+        5,
+        0x46,
+        id,
+        info,
+        TpSduLength,
+        bufferSizePtr);
     BufReq_ReturnType     bufResult    = BUFREQ_OK;
     uint8                 protocolId   = 0u;
     uint16                connectionId = 0u;
@@ -376,7 +478,7 @@ BufReq_ReturnType
         protocolCtrlPtr                                    = &Dcm_ProtocolCtrl[protocolId];
         msgContextPtr                                      = &Dcm_MsgContext[protocolId];
         /* total length is 0 or provided data length is over total length*/
-        if ((0u == TpSduLength) || (info->SduLength > TpSduLength))
+        if ((0u == TpSduLength) || ((info != NULL_PTR) && (info->SduLength > TpSduLength)))
         {
             bufResult = BUFREQ_E_NOT_OK;
         }
@@ -404,10 +506,18 @@ BufReq_ReturnType
                 queuedCtrl->QueuedRequestRxPduId      = id;
                 queuedCtrl->QueuedRequestConnectionId = connectionId;
                 queuedCtrl->QueuedRequestLength       = TpSduLength - 1u;
-                queuedCtrl->QueuedRxCopyLen           = info->SduLength;
-                queuedCtrl->QueuedRequestOldBuffer    = msgContextPtr->reqData;
-                *bufferSizePtr                        = Dcm_DslProtocolRow[protocolId].RxBufferSize - info->SduLength;
-                DcmInternal_Memcpy(Dcm_RequestQueuedBuffer[Dcm_QueuedIndex], info->SduDataPtr, info->SduLength);
+                if (info != NULL_PTR)
+                {
+                    queuedCtrl->QueuedRxCopyLen = info->SduLength;
+                    *bufferSizePtr              = Dcm_DslProtocolRow[protocolId].RxBufferSize - info->SduLength;
+                    DcmInternal_Memcpy(Dcm_RequestQueuedBuffer[Dcm_QueuedIndex], info->SduDataPtr, info->SduLength);
+                }
+                else
+                {
+                    *bufferSizePtr = Dcm_DslProtocolRow[protocolId].RxBufferSize;
+                }
+                queuedCtrl->QueuedRequestOldBuffer = msgContextPtr->reqData;
+
                 if (TRUE == Dcm_DslMainConnection[connectionId].MainConnectionUseGenericConnection)
                 {
                     DcmInternal_Memcpy(protocolCtrlPtr->MetaDataPtr, info->MetaDataPtr, (uint32)DCM_METADATA_SIZE);
@@ -427,23 +537,30 @@ BufReq_ReturnType
                 msgContextPtr->msgAddInfo.reqType = (uint8)rxAddr;
                 msgContextPtr->reqDataLen         = (Dcm_MsgLenType)TpSduLength - 1uL;
                 /* only process for sdulength != 0 */
-                if (info->SduLength >= 1u)
+                if (info != NULL_PTR)
                 {
-                    /* assign sid */
-                    protocolCtrlPtr->Sid = info->SduDataPtr[0u];
-                    /* copy the rest */
-                    if (info->SduLength > 1u)
+                    if (info->SduLength >= 1u)
                     {
-                        DcmInternal_Memcpy(
-                            msgContextPtr->reqData,
-                            &info->SduDataPtr[1u],
-                            (uint32)info->SduLength - 1uL);
+                        /* assign sid */
+                        protocolCtrlPtr->Sid = info->SduDataPtr[0u];
+                        /* copy the rest */
+                        if (info->SduLength > 1u)
+                        {
+                            DcmInternal_Memcpy(
+                                msgContextPtr->reqData,
+                                &info->SduDataPtr[1u],
+                                (uint32)info->SduLength - 1uL);
+                        }
                     }
+                    protocolCtrlPtr->RxCopyLen = info->SduLength;
+                    *bufferSizePtr =
+                        (PduLengthType)Dcm_DslProtocolRow[protocolId].RxBufferSize - (PduLengthType)info->SduLength;
                 }
-                protocolCtrlPtr->RxCopyLen = info->SduLength;
-                *bufferSizePtr =
-                    (PduLengthType)Dcm_DslProtocolRow[protocolId].RxBufferSize - (PduLengthType)info->SduLength;
-                if (Dcm_DslMainConnection[connectionId].MainConnectionUseGenericConnection)
+                else
+                {
+                    *bufferSizePtr = (PduLengthType)Dcm_DslProtocolRow[protocolId].RxBufferSize;
+                }
+                if ((Dcm_DslMainConnection[connectionId].MainConnectionUseGenericConnection) && (info != NULL_PTR))
                 {
                     DcmInternal_Memcpy(protocolCtrlPtr->MetaDataPtr, info->MetaDataPtr, (uint32)DCM_METADATA_SIZE);
                 }
@@ -457,15 +574,20 @@ BufReq_ReturnType
         bufResult = BUFREQ_E_NOT_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x46, bufResult);
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 /**
  * check current copied length and whether in the process of reception, returns accordingly, copy data if provided and
  * return BUFREQ_OK, provide remaining available bufferSize
  */
 BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 4, 0x44, id, info, bufferSizePtr);
     BufReq_ReturnType bufResult  = BUFREQ_E_NOT_OK;
     uint8             protocolId = 0u;
     uint16            connectionId;
@@ -510,15 +632,20 @@ BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x44, bufResult);
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 /**
  * check current copied length (equal to reqeusted length) and whether in the process of reception, set state to
  * DCM_MSG_RECEIVED if successful
  */
 void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x45, id, result);
     uint8  protocolId   = 0u;
     uint16 connectionId = 0u;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
@@ -591,8 +718,12 @@ void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result)
         DCM_DET_REPORT(DCM_TPRXINDICATION_ID, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x45);
 }
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 /**
  * check current copied length and whether in the process of transmission and return accordingly, provide txData and
  * remaining available data size
@@ -600,6 +731,7 @@ void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result)
 BufReq_ReturnType
     Dcm_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 5, 0x43, id, info, retry, availableDataPtr);
     BufReq_ReturnType bufResult = BUFREQ_OK;
     uint8             protocolId;
     uint16            connectionId;
@@ -657,14 +789,19 @@ BufReq_ReturnType
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x43, bufResult);
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 /**
  * confirmation for response transmission, initialize protocol control and transfer confirmaton to Dsp
  */
 void Dcm_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x48, id, result);
     uint8                      protocolId;
     Dcm_ConfirmationStatusType confirmationStatus;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
@@ -725,13 +862,18 @@ void Dcm_TpTxConfirmation(PduIdType id, Std_ReturnType result)
         DCM_DET_REPORT(DCM_TPTXCONFIRMATION_ID, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x48);
 }
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 /**
  * confirmation for periodic transmission
  */
 void Dcm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x40, TxPduId, result);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     uint8 errorId = 0u;
     if (NULL_PTR == Dcm_CfgPtr)
@@ -763,6 +905,7 @@ void Dcm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
         DCM_DET_REPORT(DCM_TXCONFIRMATION_ID, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x40);
 }
 #define DCM_STOP_SEC_CODE_FAST
 #include "Dcm_MemMap.h"
@@ -775,6 +918,7 @@ void Dcm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 /* PRQA S 0624++ */ /* VL_Dcm_0624 */
 Std_ReturnType Dcm_SetActiveDiagnostic(boolean active)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x56, active);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -793,8 +937,13 @@ Std_ReturnType Dcm_SetActiveDiagnostic(boolean active)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x56, E_OK);
     return E_OK;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 0624-- */ /* VL_Dcm_0624 */
 
 /**
@@ -802,6 +951,7 @@ Std_ReturnType Dcm_SetActiveDiagnostic(boolean active)
  */
 void Dcm_ComM_NoComModeEntered(uint8 NetworkId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x21, NetworkId);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -818,13 +968,18 @@ void Dcm_ComM_NoComModeEntered(uint8 NetworkId)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x21);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set variable to change to silent communication mode (receive only)
  */
 void Dcm_ComM_SilentComModeEntered(uint8 NetworkId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x22, NetworkId);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -841,13 +996,18 @@ void Dcm_ComM_SilentComModeEntered(uint8 NetworkId)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x22);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set variable to change to full communication mode
  */
 void Dcm_ComM_FullComModeEntered(uint8 NetworkId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x23, NetworkId);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -864,8 +1024,12 @@ void Dcm_ComM_FullComModeEntered(uint8 NetworkId)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x23);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize Dcm_SessionCtrl
  */
@@ -876,7 +1040,10 @@ void DslInternal_SessionInit(void)
     Dcm_SessionCtrl.NewSessionProtocolId = DCM_INVALID_UINT8;
     Dcm_SessionCtrl.SessionTimer         = 0u;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize securityCtrlPtr
  */
@@ -903,7 +1070,10 @@ void DslInternal_SecurityInit(void)
 #endif
     Dcm_CurrentSecurity = DCM_SEC_LEV_LOCKED;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize Dcm_ProtocolCtrl
  */
@@ -958,8 +1128,11 @@ void DslInternal_ProtocolInit(void)
         Dcm_DiagnosticState[i] = DCM_INACTIVE;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize Dcm_ProtocolCtrl pagebuffer contents
  */
@@ -969,8 +1142,11 @@ void DslInternal_PagedBufferInit(Dcm_ProtocolCtrlType* protocolCtrlPtr)
     protocolCtrlPtr->FirstPageLength    = 0u;
     protocolCtrlPtr->RemainPageLength   = 0u;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * find configured protocolRow index based on rxPduId(which has the same index as DcmDslProtocolRx)
  */
@@ -1005,7 +1181,10 @@ Std_ReturnType DslInternal_FindProtocolRowByRxPduId(PduIdType Id, uint8* Protoco
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * call by Dcm_MainFunction to asynchronously transmit, call PduR_DcmTransmit to send data, pduInfo is from
  * Dcm_TempPduInfo(asynchronously stored when calling DsdInternal_SendResponse)
@@ -1059,7 +1238,10 @@ void DslInternal_ProcessTransmit(uint8 ProtocolId)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set new securitylevel
  */
@@ -1078,8 +1260,11 @@ void DslInternal_SetSecurityLevel(Dcm_SecLevelType SecurityLevel)
         SchM_Exit_Dcm_ExclusiveArea();
         (void)Rte_Switch_SecurityAccessModeSwitchInterface_securityAccess(SecurityLevel);
         (void)SchM_Switch_Dcm_DcmSecurityAccess(SecurityLevel);
-#if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID) && (STD_ON == DCM_DDDID_CHECK_SOURCE))
+#if ((STD_ON == DCM_UDS_0X2A) && (DCM_DID_NUM > 0u))
         Dcm_UDS0x2A_StatusChangeHandle();
+#endif
+#if ((STD_ON == DCM_UDS_0X2F) && (DCM_DID_NUM > 0u))
+        Dcm_UDS0x2F_StatusChangeHandle(Dcm_SessionCtrl.CurrentSession);
 #endif
     }
     else
@@ -1087,7 +1272,10 @@ void DslInternal_SetSecurityLevel(Dcm_SecLevelType SecurityLevel)
         SchM_Exit_Dcm_ExclusiveArea();
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set current session to default session, only do session change synchronously when Immediate is TRUE, otherwise wait
  * until TpTxConfirmation
@@ -1100,7 +1288,10 @@ void DslInternal_ResetToDefaultSession(boolean Immediate)
         Dcm_UDS0x10_SessionChange();
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set current session to target session, need to check other protocols' occupancy when change to non-default session
  */
@@ -1128,7 +1319,10 @@ Std_ReturnType DslInternal_SetSesCtrlType(uint8 ProtocolId, Dcm_SesCtrlType SesC
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set current diagnostic state, notify ComM accordingly
  */
@@ -1157,7 +1351,10 @@ void DslInternal_SetDiagnosticState(uint16 ConnectionId, Dcm_DiagnosticStateType
         SchM_Exit_Dcm_ExclusiveArea();
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * reset protocol state to idle, initialize members, deal with confirmation notification synchronously if
  * immediateHandle is TRUE, otherwise store related info in Dcm_ConfirmationHandle
@@ -1201,7 +1398,6 @@ void DslInternal_SetStateIdle(
                 }
             }
 
-            protocolCtrlPtr->RxPduId      = 0u;
             protocolCtrlPtr->ConnectionId = DCM_INVALID_UINT16;
             if (DslInternal_CheckIdle(protocolId))
             {
@@ -1257,8 +1453,11 @@ void DslInternal_SetStateIdle(
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize Dcm_QueuedRequestCtrl for requested index
  */
@@ -1273,8 +1472,11 @@ void DslInternal_InitChannelQueuedRequestCtrl(uint8 index)
     queuedRequestCtrlPtr->QueuedRequestLength     = 0u;
     SchM_Exit_Dcm_ExclusiveArea();
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * call stopProtocol callouts, return the result
  */
@@ -1342,7 +1544,10 @@ DCM_LOCAL Std_ReturnType DslInternal_CheckProtocolWithSameBuffer(const Dcm_DslPr
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * find protocol and mainconnection id based on txPduId
  */
@@ -1365,7 +1570,10 @@ DCM_LOCAL Std_ReturnType DslInternal_FindProtocolRowByTxPduId(PduIdType Id, uint
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * iterate over all protocol except input one, check whether all protocols are idle
  */
@@ -1395,24 +1603,36 @@ DCM_LOCAL boolean DslInternal_CheckIdle(uint8 protocolId)
 
     return idleState;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* check condition for rx callbacks */
 DCM_LOCAL uint8
     DslInternal_RxCheckParam(PduIdType id, const PduInfoType* info, const PduLengthType* bufferSizePtr, uint8 apiId)
 {
-    uint8 errorId = 0u;
+    uint8  errorId      = 0u;
+    uint16 connectionId = 0u;
     if (NULL_PTR == Dcm_CfgPtr)
     {
         errorId = DCM_E_UNINIT;
     }
-    else if ((NULL_PTR == info) || (NULL_PTR == bufferSizePtr))
-    {
-        errorId = DCM_E_PARAM_POINTER;
-    }
-    else if (E_NOT_OK == DslInternal_FindProtocolRowByRxPduId(id, NULL_PTR, NULL_PTR))
+    else if (E_NOT_OK == DslInternal_FindProtocolRowByRxPduId(id, NULL_PTR, &connectionId))
     {
         errorId = DCM_E_PARAM;
+    }
+    else if (NULL_PTR == info)
+    {
+        if ((apiId != DCM_STARTOFRECEPTION_ID)
+            || (Dcm_DslMainConnection[connectionId].MainConnectionUseGenericConnection))
+        {
+            errorId = DCM_E_PARAM_POINTER;
+        }
+    }
+    else if (NULL_PTR == bufferSizePtr)
+    {
+        errorId = DCM_E_PARAM_POINTER;
     }
     else
     {
@@ -1426,7 +1646,11 @@ DCM_LOCAL uint8
 
     return errorId;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* check condition for copyTxData */
 DCM_LOCAL uint8
     DslInternal_CopyTxDataCheckParam(PduIdType id, const PduInfoType* info, const PduLengthType* availableDataPtr)
@@ -1456,8 +1680,11 @@ DCM_LOCAL uint8
 
     return errorId;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* internal process of tpRxIndication */
 /* PRQA S 6010,6080, 5017 ++ */ /* VL_MTR_Dcm_STCYC,VL_MTR_Dcm_STPTH,VL_Dcm_5017 */
 DCM_LOCAL void DslInternal_RxProcessRequest(PduIdType id, uint8 protocolId, uint16 connectionId)
@@ -1547,6 +1774,10 @@ DCM_LOCAL void DslInternal_RxProcessRequest(PduIdType id, uint8 protocolId, uint
         protocolCtrlPtr->ConcurrentTesterPresent = FALSE;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6010,6080, 5017-- */ /* VL_MTR_Dcm_STPTH */
 
 DCM_LOCAL void DslInternal_HandleFullComMode(uint16 connectionId)
@@ -1612,7 +1843,10 @@ DCM_LOCAL void DslInternal_HandleFullComMode(uint16 connectionId)
         Dcm_ProgConditions.ResponseRequired = FALSE;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL BufReq_ReturnType DslInternal_PosRespTxDataCopy(uint8 protocolId, const PduInfoType* info)
 {
     BufReq_ReturnType         bufResult       = BUFREQ_OK;
@@ -1657,7 +1891,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_PosRespTxDataCopy(uint8 protocolId, cons
 
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL BufReq_ReturnType DslInternal_NegRespTxDataCopy(uint8 protocolId, const PduInfoType* info)
 {
     BufReq_ReturnType     bufResult       = BUFREQ_OK;
@@ -1712,7 +1949,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_NegRespTxDataCopy(uint8 protocolId, cons
 
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle copyTxData internal process when sduLength > 0 */
 DCM_LOCAL BufReq_ReturnType DslInternal_HandleTxDataCopy(uint16 connectionId, const PduInfoType* info)
 {
@@ -1747,7 +1987,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleTxDataCopy(uint16 connectionId, co
 
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL BufReq_ReturnType DslInternal_ProcessCopyRxData(PduIdType id, const PduInfoType* info, uint8 protocolId)
 {
     Dcm_ProtocolCtrlType*     protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
@@ -1800,7 +2043,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_ProcessCopyRxData(PduIdType id, const Pd
 
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
     PduIdType          id,
     uint16             connectionId,
@@ -1874,16 +2120,18 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
 #endif
         {
             /* check the possbility of a concurrent tester present */
+            /* PRQA S 2995,2996 ++ */ /* VL_Dcm_2995,VL_Dcm_2996 */
             if (
 #if (STD_OFF == DCM_REQUEST_QUEUED_ENABLED)
                 (DCM_PHYSICAL_TYPE == rxAddr) ||
 #endif
-                (DCM_UDS3E_MINREQLEN != TpSduLength) || (info->SduLength > 2u)
-                || (((1u == info->SduLength) && (DCM_UDS_TESTERPRESENT_SID != info->SduDataPtr[0u]))
-                    || ((DCM_UDS3E_MINREQLEN == info->SduLength)
+                (DCM_UDS3E_MINREQLEN != TpSduLength) || (TpSduLength > 2u) || (info == NULL_PTR)
+                || (((1u == TpSduLength) && (DCM_UDS_TESTERPRESENT_SID != info->SduDataPtr[0u]))
+                    || ((DCM_UDS3E_MINREQLEN == TpSduLength)
                         && ((DCM_UDS_TESTERPRESENT_SID != info->SduDataPtr[0u])
                             || (DCM_SUPPRESS_BIT != info->SduDataPtr[1u])))))
             {
+                /* PRQA S 2995,2996 -- */
                 bufResult = BUFREQ_E_NOT_OK;
             }
             else
@@ -1898,7 +2146,10 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
 
     return bufResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void DslInternal_HandleTpTxConfirmation(uint8 protocolId)
 {
     Dcm_ProtocolCtrlType* protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
@@ -1934,7 +2185,10 @@ DCM_LOCAL void DslInternal_HandleTpTxConfirmation(uint8 protocolId)
         /* idle */
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType DslInternal_DefaultToNonDefault(uint8 ProtocolId)
 {
     Std_ReturnType                result         = E_OK;
@@ -1954,8 +2208,11 @@ DCM_LOCAL Std_ReturnType DslInternal_DefaultToNonDefault(uint8 ProtocolId)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL boolean Dcm_CopyTxDataCheckRoe(PduIdType id, uint8* ProtocolId, uint16* connectionId)
 {
     boolean roe = FALSE;
@@ -1989,6 +2246,6 @@ DCM_LOCAL boolean Dcm_CopyTxDataCheckRoe(PduIdType id, uint8* ProtocolId, uint16
     }
     return roe;
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif

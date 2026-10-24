@@ -38,134 +38,138 @@
     \li VL_Csm_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_0722
       Reason: Enum constant not explicitly initialized
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3430
       Reason: The code requires the use of struct nesting.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_1503
       Reason: Allow some external functions not to be called.Since we're providing an API set, will it be called or not
   depends on how the project is integrated.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_1532
       Reason: autosar requires functions to be defined and declared in specific units.Allow these functions to be
   called, possibly once, in the integration code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3218
       Reason: Used to record global information, such as the timestamp of the first entry into the main function, the
   last access to the main function.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_1514
       Reason: Static global variables need to be used
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_2877
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Csm_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Csm_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
   stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Csm_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3673
       Reason: Pointers without const need to be used.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_1317
       Reason: Definitions from other modules are used.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_4522
       Reason: The enumeration type needs to be enumerated for bitwise and operations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_1823
       Reason: It is necessary to compare signed numbers with unsigned ones.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_2109
       Reason: Boolean types need to be used as operands
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_UsedBeforModify
       Reason: The operation is not redundant, because it must be emptied.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_3678
       Reason: non-const type declaration is necessary depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_0770
       Reason: Ability to quickly jump of next loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_5017
       Reason: High cyclomatic complexity is reserved for better readability.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Csm_0553
-      Reason: The usage of this file depends on the config.
+      Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Csm_3207
-      Reason: It depends on the configuration.
+    \li VL_Csm_0704
+      Reason: Unused para, default initialization is applied to the remainder of the members.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
+     \li VL_MTR_Csm_CONF
+      Reason: Configuration files do not need particularly many useless comments.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef CSM_H
@@ -185,12 +189,12 @@ extern "C" {
 #define CSM_VENDOR_ID          ((uint16)(62U))  /** @brief  Vendor ID of the CSM module */
 #define CSM_MODULE_INSTANCE_ID ((0U))           /** @brief  Instance ID of the CSM module */
 
-#define CSM_H_AR_MAJOR_VERSION 4U /** @brief  Major version of the CSM module's AUTOSAR version */
-#define CSM_H_AR_MINOR_VERSION 9U /** @brief  Minor version of the CSM module's AUTOSAR version */
-#define CSM_H_AR_PATCH_VERSION 0U /** @brief  Patch version of the CSM module's AUTOSAR version */
-#define CSM_H_SW_MAJOR_VERSION 2U /** @brief  Major version of the CSM module's software version */
-#define CSM_H_SW_MINOR_VERSION 1U /** @brief  Minor version of the CSM module's software version */
-#define CSM_H_SW_PATCH_VERSION 3U /** @brief  Patch version of the CSM module's software version */
+#define CSM_AR_RELEASE_MAJOR_VERSION 4U /** @brief  Major version of the CSM module's AUTOSAR version */
+#define CSM_AR_RELEASE_MINOR_VERSION 9U /** @brief  Minor version of the CSM module's AUTOSAR version */
+#define CSM_AR_RELEASE_PATCH_VERSION 0U /** @brief  Patch version of the CSM module's AUTOSAR version */
+#define CSM_SW_MAJOR_VERSION         2U /** @brief  Major version of the CSM module's software version */
+#define CSM_SW_MINOR_VERSION         1U /** @brief  Minor version of the CSM module's software version */
+#define CSM_SW_PATCH_VERSION         3U /** @brief  Patch version of the CSM module's software version */
 
 /* ===================================================== macros ===================================================== */
 #if (STD_ON == CSM_DEV_ERROR_DETECT)
@@ -204,45 +208,49 @@ extern "C" {
 
 /*Runtime error codes*/
 #define CSM_E_QUEUE_FULL (0x01u) /** @brief  Runtime error for queue full */
-/*service id*/
-#define CSM_SID_INIT                 (0x00u) /** @brief  Service ID for initialization */
-#define CSM_SID_GETVERSIONINFO       (0x3Bu) /** @brief  Service ID for getting version information */
-#define CSM_SID_HASH                 (0x5Du) /** @brief  Service ID for hash operation */
-#define CSM_SID_MAC_GEN              (0x60u) /** @brief  Service ID for MAC generation */
-#define CSM_SID_MAC_VERIFY           (0x61u) /** @brief  Service ID for MAC verification */
-#define CSM_SID_ENCRYPT              (0x5Eu) /** @brief  Service ID for encryption */
-#define CSM_SID_DECRYPT              (0x5Fu) /** @brief  Service ID for decryption */
-#define CSM_SID_AEADENCRYPT          (0x62u) /** @brief  Service ID for AEAD encryption */
-#define CSM_SID_AEADDECRYPT          (0x63u) /** @brief  Service ID for AEAD decryption */
-#define CSM_SID_SIG_GEN              (0x76u) /** @brief  Service ID for signature generation */
-#define CSM_SID_SIG_VERIFY           (0x64u) /** @brief  Service ID for signature verification */
-#define CSM_SID_RANDOM_GEN           (0x72u) /** @brief  Service ID for random number generation */
-#define CSM_SID_KEYELEMENTSET        (0x78u) /** @brief  Service ID for setting key element */
-#define CSM_SID_KEYSET_VALID         (0x67u) /** @brief  Service ID for setting key valid */
-#define CSM_SID_KEYELEMENTGET        (0x68u) /** @brief  Service ID for getting key element */
-#define CSM_SID_KEYELEMENTCPY        (0x71u) /** @brief  Service ID for copying key element */
-#define CSM_SID_KEYCPY               (0x73u) /** @brief  Service ID for copying key */
-#define CSM_SID_KEYELEMENTCPYPARTIAL (0x79u) /** @brief  Service ID for partially copying key element */
-#define CSM_SID_RANDOMSEED           (0x69u) /** @brief  Service ID for setting random seed */
-#define CSM_SID_KEY_GENERATE         (0x6Au) /** @brief  Service ID for key generation */
-#define CSM_SID_KEY_DERIVE           (0x6Bu) /** @brief  Service ID for key derivation */
-#define CSM_SID_KEY_EX_PUB           (0x6Cu) /** @brief  Service ID for exporting public key */
-#define CSM_SID_KEY_EX_SEC           (0x6Du) /** @brief  Service ID for exporting secret key */
-#define CSM_SID_JOBKEYSETVALID       (0x7Au) /** @brief  Service ID for setting job key valid */
-#define CSM_SID_JOBRANDOMSEED        (0x7Bu) /** @brief  Service ID for setting job random seed */
-#define CSM_SID_JOBKEYGENERATE       (0x7Cu) /** @brief  Service ID for job key generation */
-#define CSM_SID_JOBKEYDERIVE         (0x7Du) /** @brief  Service ID for job key derivation */
-#define CSM_SID_JOBKEY_EX_PUB        (0x7Eu) /** @brief  Service ID for exporting job public key */
-#define CSM_SID_JOBKEY_EX_SEC        (0x7Fu) /** @brief  Service ID for exporting job secret key */
-#define CSM_SID_JOBCERTIFICATEPARSE  (0x80u) /** @brief  Service ID for parsing job certificate */
-#define CSM_SID_JOBCERTIFICATEVERIFY (0x81u) /** @brief  Service ID for verifying job certificate */
-#define CSM_SID_CANCELJOB            (0x6Fu) /** @brief  Service ID for canceling job */
-#define CSM_SID_CBK_NOTIFY           (0x70u) /** @brief  Service ID for callback notification */
-#define CSM_SID_KEY_GETSTATUS        (0x83u) /** @brief  Service ID for getting key status */
-#define CSM_SID_MAINFUNCTION         (0x01u) /** @brief  Service ID for main function */
-#define CSM_SID_JOBKEYSETINVALID     (0x84u) /** @brief  Service ID for setting job keyinvalid */
-#define CSM_SID_KEYSET_INVALID       (0x85u) /** @brief  Service ID for invalid key */
 #endif
+
+/*service id*/
+#define CSM_SID_INIT                 0x00u /** @brief  Service ID for initialization */
+#define CSM_SID_GETVERSIONINFO       0x3Bu /** @brief  Service ID for getting version information */
+#define CSM_SID_HASH                 0x5Du /** @brief  Service ID for hash operation */
+#define CSM_SID_MAC_GEN              0x60u /** @brief  Service ID for MAC generation */
+#define CSM_SID_MAC_VERIFY           0x61u /** @brief  Service ID for MAC verification */
+#define CSM_SID_ENCRYPT              0x5Eu /** @brief  Service ID for encryption */
+#define CSM_SID_DECRYPT              0x5Fu /** @brief  Service ID for decryption */
+#define CSM_SID_AEADENCRYPT          0x62u /** @brief  Service ID for AEAD encryption */
+#define CSM_SID_AEADDECRYPT          0x63u /** @brief  Service ID for AEAD decryption */
+#define CSM_SID_SIG_GEN              0x76u /** @brief  Service ID for signature generation */
+#define CSM_SID_SIG_VERIFY           0x64u /** @brief  Service ID for signature verification */
+#define CSM_SID_RANDOM_GEN           0x72u /** @brief  Service ID for random number generation */
+#define CSM_SID_KEYELEMENTSET        0x78u /** @brief  Service ID for setting key element */
+#define CSM_SID_KEYSET_VALID         0x67u /** @brief  Service ID for setting key valid */
+#define CSM_SID_KEYELEMENTGET        0x68u /** @brief  Service ID for getting key element */
+#define CSM_SID_KEYELEMENTCPY        0x71u /** @brief  Service ID for copying key element */
+#define CSM_SID_KEYCPY               0x73u /** @brief  Service ID for copying key */
+#define CSM_SID_KEYELEMENTCPYPARTIAL 0x79u /** @brief  Service ID for partially copying key element */
+#define CSM_SID_RANDOMSEED           0x69u /** @brief  Service ID for setting random seed */
+#define CSM_SID_KEY_GENERATE         0x6Au /** @brief  Service ID for key generation */
+#define CSM_SID_KEY_DERIVE           0x6Bu /** @brief  Service ID for key derivation */
+#define CSM_SID_KEY_EX_PUB           0x6Cu /** @brief  Service ID for exporting public key */
+#define CSM_SID_KEY_EX_SEC           0x6Du /** @brief  Service ID for exporting secret key */
+#define CSM_SID_JOBKEYSETVALID       0x7Au /** @brief  Service ID for setting job key valid */
+#define CSM_SID_JOBRANDOMSEED        0x7Bu /** @brief  Service ID for setting job random seed */
+#define CSM_SID_JOBKEYGENERATE       0x7Cu /** @brief  Service ID for job key generation */
+#define CSM_SID_JOBKEYDERIVE         0x7Du /** @brief  Service ID for job key derivation */
+#define CSM_SID_JOBKEY_EX_PUB        0x7Eu /** @brief  Service ID for exporting job public key */
+#define CSM_SID_JOBKEY_EX_SEC        0x7Fu /** @brief  Service ID for exporting job secret key */
+#define CSM_SID_JOBCERTIFICATEPARSE  0x80u /** @brief  Service ID for parsing job certificate */
+#define CSM_SID_JOBCERTIFICATEVERIFY 0x81u /** @brief  Service ID for verifying job certificate */
+#define CSM_SID_CANCELJOB            0x6Fu /** @brief  Service ID for canceling job */
+#define CSM_SID_CBK_NOTIFY           0x70u /** @brief  Service ID for callback notification */
+#define CSM_SID_KEY_GETSTATUS        0x83u /** @brief  Service ID for getting key status */
+#define CSM_SID_MAINFUNCTION         0x01u /** @brief  Service ID for main function */
+#define CSM_SID_JOBKEYSETINVALID     0x84u /** @brief  Service ID for setting job keyinvalid */
+#define CSM_SID_KEYSET_INVALID       0x85u /** @brief  Service ID for invalid key */
+#define CSM_SID_SAVE_CONTEXT         0x86u /** @brief  Service ID for Csm_SaveContextJob */
+#define CSM_SID_RESTORE_CONTEXT      0x87u /** @brief  Service ID for Csm_RestoreContextJob */
+#define CSM_SID_CUSTOM_SEV           0x13u /** @brief  Service ID for Csm_CustomService */
 
 /* ================================================ type definitions ================================================ */
 /**
@@ -262,7 +270,11 @@ typedef uint8 Csm_ConfigType;
  * @param[in] configPtr: Pointer to a selected configuration structure
  * @trace       CPD-71169
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 void Csm_Init(const Csm_ConfigType* configPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #if (CSM_GET_VERSION_INFO == STD_ON)
 
 /**
@@ -272,7 +284,11 @@ void Csm_Init(const Csm_ConfigType* configPtr);
  * @param[out]  versioninfo: Pointer to where to store the version information of this module.
  * @trace       CPD-71170
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 void Csm_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 
 #if (CSM_HASH_SUPPORT == STD_ON)
@@ -301,6 +317,8 @@ void Csm_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-71171
  * @implements CPD-49581
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_Hash(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -308,6 +326,8 @@ Std_ReturnType Csm_Hash(
     uint32                   dataLength,
     uint8*                   resultPtr,
     uint32*                  resultLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 #endif
 
@@ -339,6 +359,8 @@ Std_ReturnType Csm_Hash(
  * @trace       CPD-71172
  * @implements CPD-49582
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_MacGenerate(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -346,6 +368,8 @@ Std_ReturnType Csm_MacGenerate(
     uint32                   dataLength,
     uint8*                   macPtr,
     uint32*                  macLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Verifies the given MAC by comparing if the MAC is generated with the given data.
@@ -371,6 +395,8 @@ Std_ReturnType Csm_MacGenerate(
  * @trace       CPD-71173
  * @implements CPD-49583
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_MacVerify(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -379,6 +405,8 @@ Std_ReturnType Csm_MacVerify(
     const uint8*             macPtr,
     uint32                   macLength,
     Crypto_VerifyResultType* verifyPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 #endif
 
@@ -411,6 +439,8 @@ Std_ReturnType Csm_MacVerify(
  * @trace       CPD-71174
  * @implements CPD-49584
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_Encrypt(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -418,6 +448,8 @@ Std_ReturnType Csm_Encrypt(
     uint32                   dataLength,
     uint8*                   resultPtr,
     uint32*                  resultLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Decrypts the given encrypted data and store the decrypted plaintext in the memory
@@ -447,6 +479,8 @@ Std_ReturnType Csm_Encrypt(
  * @trace       CPD-71175
  * @implements CPD-49585
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_Decrypt(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -454,6 +488,8 @@ Std_ReturnType Csm_Decrypt(
     uint32                   dataLength,
     uint8*                   resultPtr,
     uint32*                  resultLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 
 #if (CSM_AEADENCRYPT_SUPPORT == STD_ON)
@@ -491,6 +527,8 @@ Std_ReturnType Csm_Decrypt(
  * @trace       CPD-71176
  * @implements CPD-49586
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_AEADEncrypt(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -502,6 +540,8 @@ Std_ReturnType Csm_AEADEncrypt(
     uint32*                  ciphertextLengthPtr,
     uint8*                   tagPtr,
     uint32*                  tagLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Uses the given data to perform an AEAD Decryption and stores the ciphertext
@@ -536,6 +576,8 @@ Std_ReturnType Csm_AEADEncrypt(
  * @trace       CPD-71177
  * @implements CPD-49587
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_AEADDecrypt(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -548,6 +590,8 @@ Std_ReturnType Csm_AEADDecrypt(
     uint8*                   plaintextPtr,
     uint32*                  plaintextLengthPtr,
     Crypto_VerifyResultType* verifyPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 
 #if (CSM_SIGNATURE_SUPPORT == STD_ON)
@@ -579,6 +623,8 @@ Std_ReturnType Csm_AEADDecrypt(
  * @trace       CPD-71178
  * @implements CPD-49588
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_SignatureGenerate(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -586,6 +632,8 @@ Std_ReturnType Csm_SignatureGenerate(
     uint32                   dataLength,
     uint8*                   resultPtr,
     uint32*                  resultLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Verifies the given MAC by comparing if the signature is generated with the given data.
@@ -611,6 +659,8 @@ Std_ReturnType Csm_SignatureGenerate(
  * @trace       CPD-71179
  * @implements CPD-49589
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_SignatureVerify(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -619,6 +669,8 @@ Std_ReturnType Csm_SignatureVerify(
     const uint8*             signaturePtr,
     uint32                   signatureLength,
     Crypto_VerifyResultType* verifyPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 
 #if (CSM_RANDOM_SUPPORT == STD_ON)
@@ -645,8 +697,12 @@ Std_ReturnType Csm_SignatureVerify(
  * @trace       CPD-71180
  * @implements CPD-49590
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType
     Csm_RandomGenerate(uint32 jobId, Crypto_OperationModeType mode, uint8* resultPtr, uint32* resultLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 
 /**
@@ -668,7 +724,11 @@ Std_ReturnType
  * @trace       CPD-71181
  * @implements CPD-49593
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyElementSet(uint32 keyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Sets the key state of the key identified by keyId to valid.
@@ -683,7 +743,11 @@ Std_ReturnType Csm_KeyElementSet(uint32 keyId, uint32 keyElementId, const uint8*
  * @trace       CPD-71182
  * @implements CPD-49595
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeySetValid(uint32 keyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief Sets the key state of the key identified by keyId to invalid.
  * @synchronous  TRUE
@@ -697,7 +761,11 @@ Std_ReturnType Csm_KeySetValid(uint32 keyId);
  * @trace      CPD-71994
  * @implements CPD-49597
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeySetInvalid(uint32 keyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Retrieves the key element bytes from a specific key element of the key
@@ -726,7 +794,11 @@ Std_ReturnType Csm_KeySetInvalid(uint32 keyId);
  * @trace       CPD-71183
  * @implements CPD-49601
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyElementGet(uint32 keyId, uint32 keyElementId, uint8* keyPtr, uint32* keyLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief This function shall copy a key elements from one key to a target key.
@@ -747,11 +819,15 @@ Std_ReturnType Csm_KeyElementGet(uint32 keyId, uint32 keyElementId, uint8* keyPt
  * @trace       CPD-71184
  * @implements CPD-49603
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyElementCopy(
     const uint32 keyId,
     const uint32 keyElementId,
     const uint32 targetKeyId,
     const uint32 targetKeyElementId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  This function shall copy all key elements from the source key to a target key.
@@ -772,7 +848,11 @@ Std_ReturnType Csm_KeyElementCopy(
  * @trace       CPD-71185
  * @implements CPD-49605
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyCopy(const uint32 keyId, const uint32 targetKeyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Copies a key element to another key element in the same crypto driver. The keyElementSourceOffset
@@ -803,6 +883,8 @@ Std_ReturnType Csm_KeyCopy(const uint32 keyId, const uint32 targetKeyId);
  * @trace       CPD-71186
  * @implements CPD-49607
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyElementCopyPartial(
     uint32 keyId,
     uint32 keyElementId,
@@ -811,6 +893,8 @@ Std_ReturnType Csm_KeyElementCopyPartial(
     uint32 keyElementCopyLength,
     uint32 targetKeyId,
     uint32 targetKeyElementId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Feeds the key element CRYPTO_KE_RANDOM_SEED with a random seed.
@@ -828,7 +912,11 @@ Std_ReturnType Csm_KeyElementCopyPartial(
  * @trace       CPD-71187
  * @implements CPD-49612
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_RandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Generates new key material and store it in the key identified by keyId.
@@ -845,7 +933,11 @@ Std_ReturnType Csm_RandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLen
  * @trace       CPD-71188
  * @implements CPD-49614
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyGenerate(uint32 keyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Derives a new key by using the key elements in the given key identified by the
@@ -869,7 +961,11 @@ Std_ReturnType Csm_KeyGenerate(uint32 keyId);
  * @trace       CPD-71189
  * @implements CPD-49616
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyDerive(uint32 keyId, uint32 targetKeyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Calculates the public value of the current user for the key exchange and stores
@@ -895,7 +991,11 @@ Std_ReturnType Csm_KeyDerive(uint32 keyId, uint32 targetKeyId);
  * @trace       CPD-71190
  * @implements CPD-49619
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyExchangeCalcPubVal(uint32 keyId, uint8* publicValuePtr, uint32* publicValueLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Calculates the shared secret key for the key exchange with the key material of
@@ -918,8 +1018,12 @@ Std_ReturnType Csm_KeyExchangeCalcPubVal(uint32 keyId, uint8* publicValuePtr, ui
  * @trace       CPD-71191
  * @implements CPD-49621
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType
     Csm_KeyExchangeCalcSecret(uint32 keyId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Stores the key if necessary and sets the key state of the key identified by keyId to valid.
@@ -933,7 +1037,11 @@ Std_ReturnType
  * @trace       CPD-71192
  * @implements CPD-49623
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobKeySetValid(uint32 jobId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Stores the key if necessary and sets the key state of the key identified by keyId to invalid.
@@ -947,7 +1055,11 @@ Std_ReturnType Csm_JobKeySetValid(uint32 jobId);
  * @trace       CPD-71998
  * @implements CPD-49624
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobKeySetInValid(uint32 jobId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  This function shall dispatch the random seed function to the configured crypto driver object.
@@ -966,7 +1078,11 @@ Std_ReturnType Csm_JobKeySetInValid(uint32 jobId);
  * @trace       CPD-71193
  * @implements CPD-49625
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPtr, uint32 seedLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Generates new key material and stores it in the key identified by keyId.
@@ -984,7 +1100,11 @@ Std_ReturnType Csm_JobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPt
  * @trace       CPD-71194
  * @implements CPD-49626
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobKeyGenerate(uint32 jobId, uint32 keyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Derives a new key by using the key elements in the given key identified by the keyId.
@@ -1008,7 +1128,11 @@ Std_ReturnType Csm_JobKeyGenerate(uint32 jobId, uint32 keyId);
  * @trace       CPD-71195
  * @implements CPD-49627
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Calculates the public value of the current user for the key exchange and stores the public key
@@ -1029,7 +1153,11 @@ Std_ReturnType Csm_JobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId);
  * @trace       CPD-71196
  * @implements CPD-49628
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_JobKeyExchangeCalcPubVal(uint32 jobId, uint8* publicValuePtr, uint32* publicValueLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Calculates the shared secret key for the key exchange with the key material of the key
@@ -1052,8 +1180,12 @@ Std_ReturnType Csm_JobKeyExchangeCalcPubVal(uint32 jobId, uint8* publicValuePtr,
  * @trace       CPD-71197
  * @implements CPD-49629
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType
     Csm_JobKeyExchangeCalcSecret(uint32 jobId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief  Cancels the job processing from asynchronous or streaming jobs.
@@ -1070,7 +1202,11 @@ Std_ReturnType
  * @trace       CPD-71198
  * @implements CPD-49634
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Retrieves the status of a key in the CSM module.
@@ -1092,7 +1228,11 @@ Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode);
  * @trace       CPD-71199
  * @implements CPD-49599
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_KeyGetStatus(uint32 keyId, Crypto_KeyStatusType* keyStatusPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Custom service operation for the CSM module.
@@ -1127,6 +1267,8 @@ Std_ReturnType Csm_KeyGetStatus(uint32 keyId, Crypto_KeyStatusType* keyStatusPtr
  * @trace       CPD-71200
  * @implements CPD-49639
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_CustomService(
     uint32                   jobId,
     Crypto_OperationModeType mode,
@@ -1142,6 +1284,8 @@ Std_ReturnType Csm_CustomService(
     uint8*                   secondaryOutputPtr,
     uint32*                  secondaryOutputLengthPtr,
     Crypto_VerifyResultType* verifyPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Custom synchronous operation for the CSM module.
@@ -1172,6 +1316,8 @@ Std_ReturnType Csm_CustomService(
  * @trace       CPD-71201
  * @implements CPD-49640
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_CustomSync(
     uint32       dispatchId,
     uint32       keyId,
@@ -1184,6 +1330,8 @@ Std_ReturnType Csm_CustomSync(
     uint32*      outputLengthPtr,
     uint8*       secondaryOutputPtr,
     uint32*      secondaryOutputLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Saves the context of a job in the CSM module.
@@ -1208,7 +1356,11 @@ Std_ReturnType Csm_CustomSync(
  * @trace       CPD-71202
  * @implements CPD-49630
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_SaveContextJob(uint32 jobId, uint8* contextBufferPtr, uint32* contextBufferLengthPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Restores the context of a job in the CSM module.
@@ -1232,7 +1384,11 @@ Std_ReturnType Csm_SaveContextJob(uint32 jobId, uint8* contextBufferPtr, uint32*
  * @trace       CPD-71203
  * @implements CPD-49632
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_RestoreContextJob(uint32 jobId, const uint8* contextBufferPtr, uint32 contextBufferLength);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 #ifdef __cplusplus
 }

@@ -12,31 +12,38 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Extened.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Extended functions                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
-
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Extend.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for extended function
+ **
+ ***********************************************************************************************************************/
 #ifndef OS_EXTEND_H
 #define OS_EXTEND_H
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Types.h"
-#include "Os_Internal.h"
-#include "Arch_Extend.h"
+/* =================================================== inclusions =================================================== */
+#include "Std_Types.h"
+#include "Os_Hal_Define.h"
 
-/*=======[M A C R O S]========================================================*/
+/* ===================================================== macros ===================================================== */
+/* PRQA S 3472, 3120, 5209 ++ */ /* VL_Os_3472, VL_QAC_MagicNum, VL_Os_5209 */
+#define OS_TICKS2NS_MonitorTimer(ticks)	(((double)(ticks))*1000000.0/(double)OS_HAL_HWTIMER_MS_TO_TICKS)
+#define OS_TICKS2US_MonitorTimer(ticks)	(((double)(ticks))*1000.0/(double)OS_HAL_HWTIMER_MS_TO_TICKS)
+#define OS_TICKS2MS_MonitorTimer(ticks)	(((double)(ticks))/(double)OS_HAL_HWTIMER_MS_TO_TICKS)
+#define OS_TICKS2SEC_MonitorTimer(ticks)	(((double)(ticks))/(double)OS_HAL_HWTIMER_MS_TO_TICKS/1000.0)
+/* PRQA S 3472, 3120, 5209 -- */
+
+/**
+ * Define the vendor ID and module ID.
+ */
+#define OS_VENDOR_ID (62U)
+#define OS_MODULE_ID (1U)
+
 /* Types of stack usage. */
-typedef uint32 osStackUsageType;
+typedef uint32 Os_StackUsageType;
 
 /* Enumeration type of stack object. */
 typedef enum
@@ -44,7 +51,7 @@ typedef enum
     OS_STACK_SYSTEM = 0,
     OS_STACK_TASK   = 1,
     OS_STACK_ISR2   = 2
-} osStackObject;
+} Os_StackObject;
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
 
@@ -52,50 +59,87 @@ typedef enum
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /**
- * @brief           Provide Version information to user.
- * @param[out]      osVerInfoPtr: pointer for getting OS version
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
+ * @brief          Provide Version information to user.
+ * @param[in]      Versioninfo: Version information.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
  */
 void OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr);
-
-#if (CHECK_STACK_USAGE > 0)
-/**
- * @brief           Get max usage of system,task,ISR2 stack.
- * @param[in]       stack: Stack type
- * @param[in]       id: Object ID
- * @return          osStackUsageType
- * @retval          uint32: Max usage of stack
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
- */
-osStackUsageType OSGetStackUsage(osStackObject stack, uint16 id);
-#endif
-
-/**
- * @brief           OSCheckISRSource is used to check the interrupt source.
- * @param[in]       Source: Isr source
- * @return          StatusType
- * @retval          TRUE: current triggered interrupt.
- * @retval          FALSE: not current triggered interrupt.
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
- */
-StatusType OSCheckISRSource(uint32 Source);
-
-/**
- * @brief           OSCheckCPUInformation is used to check if the CPU information is correct.
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
- */
-void OSCheckCPUInformation(void);
-
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_EXTEND_H */
+
+#if (CFG_STACK_USAGE_CHECK == TRUE)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief          Get max usage of system,task,ISR2 stack.
+ * @param[in]      stack: The type of stack.
+ * @param[in]      id: The id of stack.
+ * @return         Os_StackUsageType
+ * @retval         Return the used size of the stack.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
+ */
+Os_StackUsageType OSGetStackUsage(Os_StackObject stack, uint16 id);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief          Check ISR source.
+ * @param[in]      source: The Interrupt source.
+ * @return         StatusType
+ * @retval         Check if the input interrupt source is the current interrupt;
+ *                 if it is, return TRUE, otherwise return FALSE.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
+ */
+extern StatusType OSCheckISRSource(uint32 source);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief          Check whether CPU information is correct.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
+ */
+void OSCheckCPUInformation(void);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief          Shell processing commands.
+ * @reentrant      FALSE
+ * @synchronous    FALSE
+ * @trace          -
+ */
+extern void OSShellhandler(void); /* PRQA S 1753, 1501 */ /* VL_Os_1753, VL_Os_1501 */
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief          Get global time (top-level API for users).
+ * @return         Os_TimerTickType
+ * @retval         Return the global time in hardware ticks.
+ * @reentrant      TRUE
+ * @synchronous    TRUE
+ * @trace          -
+ */
+extern Os_TimerTickType OSGetGlobalTime(void);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/

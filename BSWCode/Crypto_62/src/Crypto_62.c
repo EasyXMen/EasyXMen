@@ -27,26 +27,12 @@
 #include "CryIf_Cbk.h"
 
 #include "Crypto_62_Internal.h"
-/* PRQA S 1503,1532 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */     /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6030 EOF */     /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6080 EOF */     /* VL_MTR_Crypto_62_STPTH */
 
 /* ===================================================== macros ===================================================== */
-#define CRYPTO_H_AR_MAJOR_VERSION 4U
-#define CRYPTO_H_AR_MINOR_VERSION 9U
-#define CRYPTO_H_AR_PATCH_VERSION 0U
-#define CRYPTO_H_SW_MAJOR_VERSION 1U
-#define CRYPTO_H_SW_MINOR_VERSION 0U
-#define CRYPTO_H_SW_PATCH_VERSION 0U
-
-#if (                                                           \
-    (CRYPTO_C_AR_MAJOR_VERSION != CRYPTO_H_AR_MAJOR_VERSION)    \
-    || (CRYPTO_C_AR_MINOR_VERSION != CRYPTO_H_AR_MINOR_VERSION) \
-    || (CRYPTO_C_AR_PATCH_VERSION != CRYPTO_H_AR_PATCH_VERSION) \
-    || (CRYPTO_C_SW_MAJOR_VERSION != CRYPTO_H_SW_MAJOR_VERSION) \
-    || (CRYPTO_C_SW_MINOR_VERSION != CRYPTO_H_SW_MINOR_VERSION) \
-    || (CRYPTO_C_SW_PATCH_VERSION != CRYPTO_H_SW_PATCH_VERSION))
-
-#error "crypto.c version mismatching with crypto.h"
-#endif
 
 /* ================================================ type definitions ================================================ */
 
@@ -57,8 +43,6 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /***************************************************************************************/
 /**
@@ -73,9 +57,12 @@
  */
 /***************************************************************************************/
 /* @req SRS_BSW_00101,SRS_BSW_00358,SRS_BSW_00414*/
-
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
 {
+    Crypto_62_ArtiApiStart(2, CRYPTO_SID_INIT, configPtr);
+
     uint8 objectindex;
 #if (CRYPTO_JOB_QUEUING == STD_ON)
     uint32 index;
@@ -83,10 +70,11 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
     uint32 Keyindex;
 
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
+    /*PRQA S 3138 ++*/ /* VL_Crypto_62_DETReport */
     if (NULL_PTR != configPtr)
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_INIT, CRYPTO_E_INIT_FAILED);
-    }
+    } /*PRQA S 3138 --*/
     else
 #else
     (void)configPtr;
@@ -95,14 +83,15 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
         /*@req SWS_Crypto_62_00215 @req [SWS_Crypto_62_00019] */ /* @req SWS_Crypto_62_00198 */
                                                                  /*init job*/
         Crypto_62_DriverStatus = CRYPTO_DRIVER_IDLE;
-        (void)IStdLib_MemHeapInit(Crypto_62_MemPool, CRYPTO_MEMPOOL_SIZE);
+        (void)IStdLib_MemHeapInit((uint8*)Crypto_62_MemPool, CRYPTO_MEMPOOL_SIZE);
 
         for (objectindex = 0U; objectindex < CRYPTO_MAX_DRIVER_OBJECT; objectindex++)
         {
+            Crypto_62_StoredJobBusy[objectindex] = CRYPTO_STOREDJOB_IDLE;
             Crypto_62_ClearStoredJob(objectindex);
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
-            /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
+            /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
             for (index = 0U; index < CRYPTO_MAX_QUEUE_SIZE; index++)
             /* PRQA S 1252 -- */
             {
@@ -116,11 +105,12 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
                 Crypto_62_JobInQueue[objectindex][index].jobRedirectionInfoRef = NULL_PTR;
                 Crypto_62_JobInQueue[objectindex][index].targetCryptoKeyId     = 0u;
             }
-            Crypto_62_QueueFilledSize[objectindex] = 0U;
+            Crypto_62_QueueFilledSize[objectindex]  = 0U;
+            Crypto_62_QueueSkipDequeue[objectindex] = FALSE;
 #endif
         }
 #if (CRYPTO_MAXKEY_CONFIGURED > 0)
-        /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
         for (Keyindex = 0U; Keyindex < CRYPTO_MAXKEY_CONFIGURED; Keyindex++)
         /* PRQA S 1252 -- */
         {
@@ -129,8 +119,16 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
         }
 #endif
     }
-}
 
+    Crypto_62_ArtiApiStop(1, CRYPTO_SID_INIT);
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#if (CRYPTO_VERSION_INFO_API == STD_ON)
+/* @req SWS_Crypto_910011,SRS_BSW_00407 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /***************************************************************************************/
 /**
  * @brief CRYPTO driver get version interface
@@ -142,16 +140,17 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
  * @return        None
  */
 /*****************************************************************************************/
-#if (CRYPTO_VERSION_INFO_API == STD_ON)
-/* @req SWS_Crypto_910011,SRS_BSW_00407 */
 void Crypto_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    Crypto_62_ArtiApiStart(2, CRYPTO_SID_GETVERSIONINFO, versioninfo);
+
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
+    /*PRQA S 3138 ++*/ /* VL_Crypto_62_DETReport */
     /*@req SWS_Crypto_00047*/
     if (NULL_PTR == versioninfo)
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_GETVERSIONINFO, CRYPTO_E_PARAM_POINTER);
-    }
+    } /*PRQA S 3138 --*/
     else
 #endif
     {
@@ -161,9 +160,15 @@ void Crypto_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
         (versioninfo)->sw_minor_version = (uint8)CRYPTO_C_SW_MINOR_VERSION;
         (versioninfo)->sw_patch_version = (uint8)CRYPTO_C_SW_PATCH_VERSION;
     }
+
+    Crypto_62_ArtiApiStop(1, CRYPTO_SID_GETVERSIONINFO);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /***************************************************************************************/
 /**
  * @brief CRYPTO driver job process interface
@@ -192,10 +197,13 @@ void Crypto_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
 /* @req SWS_Crypto_91003 */
 Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
 {
+    Crypto_62_ArtiApiStart(3, CRYPTO_SID_PROCESSJOB, objectId, job);
+
     Std_ReturnType           status = E_NOT_OK;
     Crypto_OperationModeType operationMode;
 
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
+    /*PRQA S 3138 ++*/ /* VL_Crypto_62_DETReport */
     /*@req SWS_Crypto_00057*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
     {
@@ -230,7 +238,7 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
         && (job->cryptoKeyId >= CRYPTO_MAXKEY_CONFIGURED))
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_PROCESSJOB, CRYPTO_E_PARAM_HANDLE);
-    }
+    } /*PRQA S 3138 --*/
     else
 #endif
     {
@@ -243,13 +251,38 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
             operationMode = CRYPTO_OPERATIONMODE_SINGLECALL;
         }
 
+        job->jobPrimitiveInputOutput.mode = operationMode;
+
         if (CRYPTO_PROCESSING_SYNC == job->jobPrimitiveInfo->processingType)
         {
+#if (STD_ON == CRYPTO_JOB_QUEUING)
+            boolean queueOccupied = (boolean)(Crypto_62_QueueFilledSize[objectId] > 0u);
+            uint32  queueHeadPrio = Crypto_62_GetQueueHighestPriority(objectId);
+#endif
             if ((CRYPTO_OBJECT_BUSY == Crypto_ObjectStatus[objectId]) && (job->jobState != CRYPTO_JOBSTATE_ACTIVE))
             {
-                /* @req SWS_Crypto_00118 */
+                /* @req SWS_Crypto_00118 */ /* SWS_Crypto_00034 */
                 status = (Std_ReturnType)CRYPTO_E_BUSY;
             }
+#if (STD_ON == CRYPTO_JOB_QUEUING)
+            else if ((queueOccupied == TRUE) && (job->jobState != CRYPTO_JOBSTATE_ACTIVE))
+            {
+                if (job->jobPriority > queueHeadPrio)
+                {
+                    /* @req SWS_Crypto_00199 */
+                    status = Crypto_62_ProcessJob_Internal(objectId, job, operationMode);
+                    if (E_OK == status)
+                    {
+                        Crypto_62_QueueSkipDequeue[objectId] = TRUE;
+                    }
+                }
+                else
+                {
+                    /* Sync priority not higher than Crypto queue head */
+                    status = (Std_ReturnType)CRYPTO_E_BUSY;
+                }
+            }
+#endif
             else
             {
                 status = Crypto_62_ProcessJob_Internal(objectId, job, operationMode);
@@ -263,7 +296,7 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
                     || (CRYPTO_OPERATIONMODE_SINGLECALL == operationMode))
                 {
 #if (STD_ON == CRYPTO_JOB_QUEUING)
-                    /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
+                    /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
                     if (Crypto_62_QueueFilledSize[objectId] < CRYPTO_MAX_QUEUE_SIZE)
                     /* PRQA S 1252 -- */
                     {
@@ -274,7 +307,7 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
                         status = CRYPTO_E_BUSY;
                     }
 #else
-                    Status = CRYPTO_E_BUSY;
+                    status = CRYPTO_E_BUSY;
 #endif
                 }
                 else if (
@@ -290,15 +323,25 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
             }
             else
             {
-                job->jobState                 = CRYPTO_JOBSTATE_ACTIVE;
-                Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_BUSY;
-                status                        = Crypto_62_QueueInJob(objectId, job);
+#if (STD_ON == CRYPTO_JOB_QUEUING)
+                job->jobState = CRYPTO_JOBSTATE_ACTIVE;
+                status        = Crypto_62_QueueInJob(objectId, job);
+#else
+                status = CRYPTO_E_BUSY;
+#endif
             }
         }
     }
+
+    Crypto_62_ArtiApiStop(2, CRYPTO_SID_PROCESSJOB, status);
+
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /***************************************************************************************/
 /**
  * @brief CRYPTO driver job cancel interface
@@ -316,8 +359,11 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
 {
-    Std_ReturnType status = E_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
+    Crypto_62_ArtiApiStart(3, CRYPTO_SID_CANCELJOB, objectId, job);
+
+    Std_ReturnType status = E_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
+    /*PRQA S 3138 ++*/ /* VL_Crypto_62_DETReport */
     /*@req SWS_Crypto_00123*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
     {
@@ -332,7 +378,7 @@ Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
     else if (NULL_PTR == job)
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_CANCELJOB, CRYPTO_E_PARAM_POINTER);
-    }
+    } /*PRQA S 3138 --*/
     else
 #endif
     {
@@ -351,17 +397,21 @@ Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
             }
             else
             {
-                if (&Crypto_62_StoredJob[objectId] == job)
+                if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                    && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
                 {
-                    if (0U < Crypto_62_QueueFilledSize[objectId]) /* PRQA S 1252  */ /* VL_Crypto_62_General */
+                    if (0U < Crypto_62_QueueFilledSize[objectId]) /* PRQA S 1252  */ /* VL_QAC_Crypto */
                     {
-                        Crypto_62_StoredJob[objectId] = Crypto_62_JobInQueue[objectId][0];
+                        Crypto_62_StoredJob[objectId]          = Crypto_62_JobInQueue[objectId][0];
+                        Crypto_62_StoredJobBusy[objectId]      = CRYPTO_STOREDJOB_INUSE;
+                        Crypto_62_StoredJob[objectId].jobState = CRYPTO_JOBSTATE_ACTIVE;
                         (void)Crypto_62_CancelQueuedJob(objectId, &Crypto_62_JobInQueue[objectId][0]);
                         Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_BUSY;
                     }
                     else
                     {
-                        Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_BUSY;
+                        Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_IDLE;
+                        Crypto_62_ClearStoredJob(objectId);
                     }
                     status = (Std_ReturnType)CRYPTO_E_JOB_CANCELED;
                     CryIf_CallbackNotification(job, (Std_ReturnType)CRYPTO_E_JOB_CANCELED);
@@ -382,13 +432,26 @@ Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
         }
         else
         {
-            status                        = (Std_ReturnType)E_OK;
-            Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_BUSY;
+            /* @req SWS_Crypto_00214 / SWS_Crypto_00143 */
+            if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+            {
+                Crypto_ObjectStatus[objectId] = CRYPTO_OBJECT_IDLE;
+                Crypto_62_ClearStoredJob(objectId);
+            }
+            status = E_OK;
         }
     }
+
+    Crypto_62_ArtiApiStop(2, CRYPTO_SID_CANCELJOB, status);
+
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /***************************************************************************************/
 /**
 * @brief    Crypto_62_MainFunction.
@@ -408,70 +471,99 @@ is called cyclically to process queued jobs.
 /***************************************************************************************/
 void Crypto_62_MainFunction(void)
 {
-    Std_ReturnType           status = E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
-    uint8                    objectId;
-    Crypto_OperationModeType operationMode;
+    Crypto_62_ArtiApiStart(1, CRYPTO_SID_MAINFUNCTION);
 
+    Std_ReturnType           status = E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Crypto_OperationModeType operationMode;
+    Crypto_JobType           tmpStoreJob;
+
+    if (Crypto_62_DriverStatus != CRYPTO_DRIVER_UNINIT)
+    {
 #if (CRYPTO_MAXNVBLOCK_CONFIGURED > 0)
-    uint32 cryptokeyId;
-    /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
-    for (cryptokeyId = 0U; cryptokeyId < CRYPTO_MAXKEY_CONFIGURED; cryptokeyId++)
-    /* PRQA S 1252 -- */
-    {
-        if ((NULL_PTR != Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef)
-            && (CryptoKeyStatus[cryptokeyId] == CRYPTO_KEYSTATUS_UPDATE_IN_PROGRESS)
-            && (Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId]
-                < Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->CryptoNvBlockFailedRetries))
-        {
-            /* PRQA S 0314 ++ */ /* VL_Crypto_62_General */
-            status = NvM_WriteBlock(
-                Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId,
-                (void*)&Crypto_62_Key_Store0[0]);
-            /* PRQA S 0314 -- */
-            Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId] += 1u;
-            if (E_OK == status)
-            {
-                CryptoKeyStatus[cryptokeyId] = CRYPTO_KEYSTATUS_VALID;
-                Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId] = 0u;
-            }
-        }
-    }
-#endif
-    for (objectId = 0U; objectId < CRYPTO_MAX_DRIVER_OBJECT; objectId++)
-    {
-        operationMode = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode;
-        if ((Crypto_62_StoredJob[objectId].jobState == CRYPTO_JOBSTATE_ACTIVE)
-            && (CRYPTO_PROCESSING_ASYNC == Crypto_62_StoredJob[objectId].jobPrimitiveInfo->processingType))
-        {
-            /* PRQA S 2982 ++ */ /* VL_Crypto_62_2982 */
-            status = Crypto_62_ProcessJob_Internal(objectId, &Crypto_62_StoredJob[objectId], operationMode);
-            /* PRQA S 2982 -- */
-        }
-#if (STD_ON == CRYPTO_JOB_QUEUING)
-        /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
-        while (Crypto_62_QueueFilledSize[objectId] > 0U)
+        /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+        for (uint32 cryptokeyId = 0u; cryptokeyId < CRYPTO_MAXKEY_CONFIGURED; cryptokeyId++)
         /* PRQA S 1252 -- */
         {
-            /* PRQA S 2982 ++ */ /* VL_Crypto_62_General */
-            status = Crypto_62_QueueOutJob(objectId, &Crypto_62_StoredJob[objectId]);
-            if (E_OK == status)
+            if ((NULL_PTR != Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef)
+                && (CryptoKeyStatus[cryptokeyId] == CRYPTO_KEYSTATUS_UPDATE_IN_PROGRESS)
+                && (Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoNvBlock]
+                    < Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->CryptoNvBlockFailedRetries))
             {
-                Crypto_62_StoredJob[objectId].jobState = CRYPTO_JOBSTATE_ACTIVE;
+                /* PRQA S 0314 ++ */ /* VL_QAC_Crypto */
+                status = Crypto_62_KeyWriteNvm(cryptokeyId);
+                /* PRQA S 0314 -- */
+                Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoNvBlock] += 1u;
+                if (E_OK == status)
+                {
+                    CryptoKeyStatus[cryptokeyId]                                       = CRYPTO_KEYSTATUS_VALID;
+                    Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoNvBlock] = 0u;
+                }
             }
-            /* PRQA S 2982 -- */
-            if ((Crypto_62_StoredJob[objectId].jobState == CRYPTO_JOBSTATE_ACTIVE)
-                && (CRYPTO_PROCESSING_ASYNC == Crypto_62_StoredJob[objectId].jobPrimitiveInfo->processingType))
+            if ((NULL_PTR != Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef)
+                && (Crypto_KeyReadfromNVM[cryptokeyId] == TRUE))
             {
-                /* PRQA S 2982 ++ */ /* VL_Crypto_62_2982 */
-                status = Crypto_62_ProcessJob_Internal(objectId, &Crypto_62_StoredJob[objectId], operationMode);
-                /* PRQA S 2982 -- */
+                CryptoKeyStatus[cryptokeyId] = CRYPTO_KEYSTATUS_VALID;
             }
         }
 #endif
-    }
-}
+        for (uint8 objectId = 0u; objectId < CRYPTO_MAX_DRIVER_OBJECT; objectId++)
+        {
+            tmpStoreJob = Crypto_62_StoredJob[objectId];
+            if (tmpStoreJob.jobState == CRYPTO_JOBSTATE_ACTIVE)
+            {
+                if (tmpStoreJob.jobPrimitiveInfo != NULL_PTR)
+                {
+                    if (CRYPTO_PROCESSING_ASYNC == tmpStoreJob.jobPrimitiveInfo->processingType)
+                    {
+                        /* operationMode depends on the current StoredJob content */
+                        operationMode = tmpStoreJob.jobPrimitiveInputOutput.mode;
+                        /* PRQA S 2982 ++ */ /* VL_Crypto_62_2982 */
+                        status = Crypto_62_ProcessJob_Internal(objectId, &Crypto_62_StoredJob[objectId], operationMode);
+                        /* PRQA S 2982 -- */
+                    }
+                }
+            }
 
+#if (STD_ON == CRYPTO_JOB_QUEUING)
+            /* @req SWS_Crypto_00199: skip dequeue for one MainFunction after high-prio sync */
+            /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+            if (Crypto_62_QueueSkipDequeue[objectId] == TRUE)
+            {
+                Crypto_62_QueueSkipDequeue[objectId] = FALSE;
+            }
+            else
+            {
+                while ((Crypto_62_QueueFilledSize[objectId] > 0U)
+                       && (Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_IDLE)
+                       && (Crypto_62_StoredJob[objectId].jobState == CRYPTO_JOBSTATE_IDLE))
+                {
+                    /* PRQA S 2982 ++ */ /* VL_QAC_Crypto */
+                    status = Crypto_62_QueueOutJob(objectId, &Crypto_62_StoredJob[objectId]);
+                    if (E_OK == status)
+                    {
+                        Crypto_62_StoredJobBusy[objectId]      = CRYPTO_STOREDJOB_INUSE;
+                        Crypto_62_StoredJob[objectId].jobState = CRYPTO_JOBSTATE_ACTIVE;
+                        Crypto_ObjectStatus[objectId]          = CRYPTO_OBJECT_BUSY;
+                    }
+                    /* PRQA S 2982 -- */
+                    if ((Crypto_62_StoredJob[objectId].jobState == CRYPTO_JOBSTATE_ACTIVE)
+                        && (CRYPTO_PROCESSING_ASYNC == Crypto_62_StoredJob[objectId].jobPrimitiveInfo->processingType))
+                    {
+                        /* QueueOutJob updated StoredJob, so operationMode must be refreshed */
+                        operationMode = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode;
+                        /* PRQA S 2982 ++ */ /* VL_Crypto_62_2982 */
+                        status = Crypto_62_ProcessJob_Internal(objectId, &Crypto_62_StoredJob[objectId], operationMode);
+                        /* PRQA S 2982 -- */
+                    }
+                }
+            }
+            /* PRQA S 1252 -- */
+#endif
+        }
+    }
+
+    Crypto_62_ArtiApiStop(1, CRYPTO_SID_MAINFUNCTION);
+}
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
-
 /* PRQA S 1503,1532 -- */

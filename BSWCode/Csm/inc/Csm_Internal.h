@@ -32,6 +32,7 @@
 #include "Det.h"
 #endif
 #include "CryIf.h"
+#include "Csm_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,8 +79,8 @@ static inline void Csm_ReportRuntimeErr(uint8 serviceId, uint8 error)
  */
 typedef void (*Csm_CallbackFuncType)(
     /* PRQA S 3432 -- */
-    const Crypto_JobType* job,
-    Crypto_ResultType     result);
+    uint32            jobId,
+    Crypto_ResultType result);
 
 /** @brief Run-time configuration type definitions*/
 typedef struct Csm_JobInQueueTag
@@ -103,7 +104,6 @@ typedef struct
     Csm_JobInQueueType* pendingJobQue; /* PRQA S 3432 */ /* VL_Csm_3432 */
     uint32              maxPriority;                     /*Max job priority in this queue*/
     uint32              jobCnt;                          /*Number of job in this queue*/
-    boolean             dealSynJobIng;
 } Csm_QueueChStatusType;
 
 /**
@@ -122,34 +122,56 @@ typedef struct
 /**
  * @brief Configuration array for CSM callback functions.
  */
+#define CSM_START_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 extern const Csm_JobCbkCfgType Csm_CbkCfg[CSM_CBKFUNCS_NUM];
+#define CSM_STOP_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 #endif /*CSM_CBKFUNCS_NUM > 0*/
 
 #if (CSM_KEY_NUM > 0u)
 /**
  * @brief Configuration array for CSM keys.
  */
+#define CSM_START_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 extern const Csm_KeyCfgType Csm_KeyCfg[CSM_KEY_NUM];
+#define CSM_STOP_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 #endif /*CSM_KEY_NUM > 0*/
 
 /**
  * @brief Configuration array for CSM queues.
  */
+#define CSM_START_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 extern const Csm_QueueCfgType Csm_QueCfg[CSM_QUEUE_NUM];
+#define CSM_STOP_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 
 /**
  * @brief Configuration array for CSM jobs.
  */
+#define CSM_START_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 extern const Csm_JobsCfgType Csm_JobCfg[CSM_JOB_NUM];
+#define CSM_STOP_SEC_CONST_UNSPECIFIED
+#include "Csm_MemMap.h"
 
 /*Module initialize status, TRUE initialized, FALSE not initialized*/
 
+#define CSM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 extern boolean Csm_InitStatus;
+#define CSM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 
-/*Jobs states*/
-extern Crypto_JobStateType Csm_JobStates[CSM_JOB_NUM];
 /* Job postpone flag, TRUE job is postpone, FALSE job is not postpone */
+#define CSM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 extern boolean Csm_JobPostponeFlag[CSM_JOB_NUM];
+#define CSM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
 
@@ -171,7 +193,11 @@ extern boolean Csm_JobPostponeFlag[CSM_JOB_NUM];
  * @synchronous    TRUE
  * @trace       CPD-71206
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 boolean Csm_ChkInitParam(const Csm_ConfigType* configPtr);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_GetVersionInfo function.
@@ -188,7 +214,11 @@ boolean Csm_ChkInitParam(const Csm_ConfigType* configPtr);
  * @synchronous    TRUE
  * @trace       CPD-71207
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkGetVersionInfo(const Std_VersionInfoType* versioninfo, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_Servicexxx function.
@@ -205,7 +235,11 @@ Std_ReturnType Csm_ChkGetVersionInfo(const Std_VersionInfoType* versioninfo, uin
  * @synchronous    TRUE
  * @trace       CPD-71208
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkServiceParam(uint32 jobId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the CryIf_KeyElementSet function.
@@ -224,7 +258,11 @@ Std_ReturnType Csm_ChkServiceParam(uint32 jobId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71209
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyEleSetParam(uint32 keyId, const uint8* keyPtr, uint32 keyLength, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeySetValid function.
@@ -241,7 +279,11 @@ Std_ReturnType Csm_ChkKeyEleSetParam(uint32 keyId, const uint8* keyPtr, uint32 k
  * @synchronous    TRUE
  * @trace       CPD-71210
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeySetValid(uint32 keyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief Checks the parameters for the Csm_KeySetInvalid function.
  *
@@ -257,7 +299,11 @@ Std_ReturnType Csm_ChkKeySetValid(uint32 keyId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71995
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeySetInValid(uint32 keyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyElementGet function.
@@ -276,7 +322,11 @@ Std_ReturnType Csm_ChkKeySetInValid(uint32 keyId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71211
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyEleGet(uint32 keyId, const uint8* keyPtr, const uint32* keyLengthPtr, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyElementCopy function.
@@ -294,7 +344,11 @@ Std_ReturnType Csm_ChkKeyEleGet(uint32 keyId, const uint8* keyPtr, const uint32*
  * @synchronous    TRUE
  * @trace       CPD-71212
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyEleCopy(const uint32 keyId, const uint32 targetKeyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyCopy function.
@@ -311,7 +365,11 @@ Std_ReturnType Csm_ChkKeyEleCopy(const uint32 keyId, const uint32 targetKeyId, u
  * @synchronous    TRUE
  * @trace       CPD-71213
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyCopy(const uint32 keyId, const uint32 targetKeyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyElementCopyPartial function.
@@ -329,7 +387,11 @@ Std_ReturnType Csm_ChkKeyCopy(const uint32 keyId, const uint32 targetKeyId, uint
  * @synchronous    TRUE
  * @trace       CPD-71214
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyEleCopyPart(uint32 keyId, uint32 targetKeyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_RandomSeed function.
@@ -348,7 +410,11 @@ Std_ReturnType Csm_ChkKeyEleCopyPart(uint32 keyId, uint32 targetKeyId, uint8 sid
  * @synchronous    TRUE
  * @trace       CPD-71215
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkRandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLength, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyGenerate function.
@@ -365,7 +431,11 @@ Std_ReturnType Csm_ChkRandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seed
  * @synchronous    TRUE
  * @trace       CPD-71216
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyGenerate(uint32 keyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyDerive function.
@@ -383,7 +453,11 @@ Std_ReturnType Csm_ChkKeyGenerate(uint32 keyId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71217
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkKeyDerive(uint32 keyId, uint32 targetKeyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyExchangeCalcPubVal function.
@@ -401,7 +475,11 @@ Std_ReturnType Csm_ChkKeyDerive(uint32 keyId, uint32 targetKeyId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71218
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkExCalcPubVal(const uint8* publicValuePtr, const uint32* publicValueLengthPtr, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_KeyExchangeCalcSecret function.
@@ -419,7 +497,11 @@ Std_ReturnType Csm_ChkExCalcPubVal(const uint8* publicValuePtr, const uint32* pu
  * @synchronous    TRUE
  * @trace       CPD-71219
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkExCalcSecVal(const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobKeySetValid function.
@@ -436,7 +518,11 @@ Std_ReturnType Csm_ChkExCalcSecVal(const uint8* partnerPublicValuePtr, uint32 pa
  * @synchronous    TRUE
  * @trace       CPD-71220
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkJobKeySetValid(uint32 jobId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief Checks the parameters for the Csm_JobKeySetInValid function.
  *
@@ -452,7 +538,11 @@ Std_ReturnType Csm_ChkJobKeySetValid(uint32 jobId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71997
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkJobKeySetInValid(uint32 jobId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobRandomSeed function.
@@ -472,7 +562,11 @@ Std_ReturnType Csm_ChkJobKeySetInValid(uint32 jobId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71221
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkJobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPtr, uint32 seedLength, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobKeyGenerate function.
@@ -490,7 +584,11 @@ Std_ReturnType Csm_ChkJobRandomSeed(uint32 jobId, uint32 keyId, const uint8* see
  * @synchronous    TRUE
  * @trace       CPD-71222
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkJobKeyGenerate(uint32 jobId, uint32 keyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobKeyDerive function.
@@ -509,7 +607,11 @@ Std_ReturnType Csm_ChkJobKeyGenerate(uint32 jobId, uint32 keyId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71223
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkJobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobKeyExchangeCalcPubVal function.
@@ -528,8 +630,12 @@ Std_ReturnType Csm_ChkJobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyI
  * @synchronous    TRUE
  * @trace       CPD-71224
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType
     Csm_ChkJobExCalcPubVal(uint32 jobId, const uint8* publicValuePtr, const uint32* publicValueLengthPtr, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_JobKeyExchangeCalcSecret function.
@@ -548,8 +654,12 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71225
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType
     Csm_ChkJobExCalcSec(uint32 jobId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_CancelJob function.
@@ -566,7 +676,11 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71226
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkCancelJob(uint32 jobId, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /**
  * @brief Checks the parameters for the Csm_CbkNotify function.
@@ -583,7 +697,11 @@ Std_ReturnType Csm_ChkCancelJob(uint32 jobId, uint8 sid);
  * @synchronous    TRUE
  * @trace       CPD-71227
  */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 Std_ReturnType Csm_ChkCbkNotify(const Crypto_JobType* job, uint8 sid);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
 
 #ifdef __cplusplus

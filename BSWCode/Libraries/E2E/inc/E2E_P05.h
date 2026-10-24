@@ -93,6 +93,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Protects the array/buffer to be transmitted using the E2E profile 5.
  *               This includes checksum calculation, handling of counter and Data ID.
@@ -114,7 +116,11 @@ Std_ReturnType E2E_P05Protect(
     E2E_P05ProtectStateType* StatePtr,
     uint8*                   DataPtr,
     uint16                   Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the protection state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -126,7 +132,11 @@ Std_ReturnType E2E_P05Protect(
  * @trace        CPD-46935
  */
 Std_ReturnType E2E_P05ProtectInit(E2E_P05ProtectStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Checks the Data received using the E2E profile 5.
  *               This includes CRC calculation, handling of Counter and Data ID.
@@ -148,7 +158,11 @@ Std_ReturnType E2E_P05Check(
     E2E_P05CheckStateType*   StatePtr,
     const uint8*             DataPtr,
     uint16                   Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the check state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -160,7 +174,11 @@ Std_ReturnType E2E_P05Check(
  * @trace        CPD-46939
  */
 Std_ReturnType E2E_P05CheckInit(E2E_P05CheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief       The function maps the check status of Profile 1 to a generic check status, which can be
  *              used by E2E state machine check function. The E2E Profile 1 delivers a more fine-granular
@@ -173,10 +191,8 @@ Std_ReturnType E2E_P05CheckInit(E2E_P05CheckStateType* StatePtr);
  * @trace       CPD-46892
  */
 E2E_PCheckStatusType E2E_P05MapStatusToSM(Std_ReturnType CheckReturn, E2E_P05CheckStatusType Status);
-
-#ifdef __cplusplus
-
-#endif
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

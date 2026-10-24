@@ -39,11 +39,11 @@ extern "C" {
 
 /* ===================================================== macros ===================================================== */
 /* the Private Macro Definition */
-#define COM_UNUSED_UINT8     0xFFu
-#define COM_UNUSED_UINT16    0xFFFFu
-#define COM_UNUSED_UINT32    0xFFFFFFFFu
-#define COM_UNUSED_UINT64    0xFFFFFFFFFFFFFFFFULL
-#define COM_NOUSED(paramter) (void)(paramter)
+#define COM_UNUSED_UINT8           0xFFu
+#define COM_UNUSED_UINT16          0xFFFFu
+#define COM_UNUSED_UINT32          0xFFFFFFFFu
+#define COM_UNUSED_UINT64          0xFFFFFFFFFFFFFFFFULL
+#define COM_NOUSED(paramter)       (void)(paramter)
 /* Com unused Type */
 #define COM_UNUSED_RXIPDUCOUNTERID (Com_RxIPduCounterIdType)(-1)
 #define COM_UNUSED_RXIPDUGROUPID   (Com_RxIpduGroupIdType)(-1)
@@ -124,40 +124,124 @@ extern "C" {
 
 #define COM_INLINE static inline
 /* ============================================ external data definitions =========================================== */
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_ConfigType* Com_ConfigStd;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 
 #if (COM_MAX_RXIPDU_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_RxIPduType* Com_CfgRxIPduPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
 #if (COM_MAX_TXIPDU_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_TxIPduType* Com_CfgTxIPduPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
-extern const Com_RxSignalType*      Com_CfgRxSignalPtr;
-extern const Com_TxSignalType*      Com_CfgTxSignalPtr;
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+extern const Com_RxSignalType* Com_CfgRxSignalPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+extern const Com_TxSignalType* Com_CfgTxSignalPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_RxSignalGroupType* Com_CfgRxSignalGroupPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_TxSignalGroupType* Com_CfgTxSignalGroupPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_RxGroupSignalType* Com_CfgRxGroupSignalPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_TxGroupSignalType* Com_CfgTxGroupSignalPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const uint16* Com_CfgMainFuncRxPartitionRangePtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const uint16* Com_CfgMainFuncTxPartitionRangePtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
 #if (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_GwMappingConfigType* Com_CfgGwMappingConfigPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
 #if (STD_ON == COM_SIGNAL_INITVALUE_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_SignalInitValueType* Com_CfgSignalInitValuePtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
 #if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_TxModeAndSignalFilterPtrType* Com_CfgTxModeAndSignalFilterPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
 #if (STD_ON == COM_SIGNAL_TIMEOUT_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 extern const Com_SignalTimeoutType* Com_CfgSignalTimeoutPtr;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
 #endif
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 extern Com_SignalIdType Com_CfgTxSignalNum;
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 extern Com_SignalIdType Com_CfgRxSignalNum;
-extern PduIdType        Com_CfgTxPduNum;
-extern PduIdType        Com_CfgRxPduNum;
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
+#define COM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
+extern PduIdType Com_CfgTxPduNum;
+#define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
+extern PduIdType Com_CfgRxPduNum;
+#define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 /**
  * @brief         set RxIpdu deadline monitor flag
@@ -396,103 +480,203 @@ COM_INLINE boolean
 /* =========================================== external data declarations =========================================== */
 /*define in Com_PBcfg.c*/
 #if (COM_MAX_RXIPDU_NUMBER > 0u)
+#define COM_START_SEC_CONFIG_DATA_PTR
+#include "Com_MemMap.h"
 extern Com_RxIPduRunTimeStateType* const Com_RxIPduRunTimeState[COM_MAX_NUMBER_OF_MAIN_FUNCTION_RX];
+#define COM_STOP_SEC_CONFIG_DATA_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_TXIPDU_NUMBER > 0u)
+#define COM_START_SEC_CONFIG_DATA_PTR
+#include "Com_MemMap.h"
 extern Com_TxIPduRunTimeStateType* const Com_TxIPduRunTimeState[COM_MAX_NUMBER_OF_MAIN_FUNCTION_TX];
+#define COM_STOP_SEC_CONFIG_DATA_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
 extern Com_TxSignalGroupRunTimeStateType Com_TxSignalGroupState[COM_MAX_TXSIGNALGROUP_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_TXIPDUBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint8* Com_TxIPduRuntimeBuff[COM_MAX_NUMBER_OF_MAIN_FUNCTION_TX];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXIPDUBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint8* Com_RxIPduRuntimeBuff[COM_MAX_NUMBER_OF_MAIN_FUNCTION_RX];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_SIGNAL_BOOLBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern boolean* Com_SignalBoolRuntimeBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_SIGNAL_8BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint8* Com_Signal8BitRuntimeBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_SIGNAL_16BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint16* Com_SignalBit16RuntimeBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_SIGNAL_32BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint32* Com_Signal32BitRuntimeBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_SIGNAL_64BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint64* Com_Signal64BitRuntimeBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXGROUPSIGNAL_BOOLBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern boolean* Com_RxGroupSignalBoolShadowBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXGROUPSIGNAL_8BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint8* Com_RxGroupSignal8BitShadowBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXGROUPSIGNAL_16BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint16* Com_RxGroupSignalBit16ShadowBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXGROUPSIGNAL_32BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint32* Com_RxGroupSignal32BitShadowBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXGROUPSIGNAL_64BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern uint64* Com_RxGroupSignal64BitShadowBuff[COM_MAX_PARTITION_NUMBER];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_GWSIGNAL_BOOLBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
 extern boolean Com_GWSignalBoolBuff[COM_MAX_GWSIGNAL_BOOLBUFF_SIZE];
+#define COM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_GWSIGNAL_8BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_CLEARED_8
+#include "Com_MemMap.h"
 extern uint8 Com_GWSignal8BitBuff[COM_MAX_GWSIGNAL_8BITBUFF_SIZE];
+#define COM_STOP_SEC_VAR_CLEARED_8
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_GWSIGNAL_16BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 extern uint16 Com_GWSignalBit16Buff[COM_MAX_GWSIGNAL_16BITBUFF_SIZE];
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_GWSIGNAL_32BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_CLEARED_32
+#include "Com_MemMap.h"
 extern uint32 Com_GWSignal32BitBuff[COM_MAX_GWSIGNAL_32BITBUFF_SIZE];
+#define COM_STOP_SEC_VAR_CLEARED_32
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_GWSIGNAL_64BITBUFF_SIZE > 0u)
+#define COM_START_SEC_VAR_CLEARED_64
+#include "Com_MemMap.h"
 extern uint64 Com_GWSignal64BitBuff[COM_MAX_GWSIGNAL_64BITBUFF_SIZE];
+#define COM_STOP_SEC_VAR_CLEARED_64
+#include "Com_MemMap.h"
 #endif
 
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
+#define COM_START_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 extern boolean* Com_TxSignalTMCRunTime[COM_MAX_NUMBER_OF_MAIN_FUNCTION_TX];
+#define COM_STOP_SEC_VAR_INIT_PTR
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_32
+#include "Com_MemMap.h"
 extern uint32 Com_OneEveryNcnt[COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_32
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
 extern boolean Com_MaskNewDifferMaskOldTimeOut[COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
 #endif
 
 #if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 extern uint16 Com_RxSignalTimeOutCnt[COM_MAX_RXSIG_TIMEOUT_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 #endif
 
 #if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 extern uint16 Com_RxSignalGroupTimeOutCnt[COM_MAX_RXSIGGRP_TIMEOUT_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 #endif
 /* ========================================= external function declarations ========================================= */
 /* PRQA S 5015 ++ */ /* VL_Com_UntrustedMethod */
@@ -505,7 +689,11 @@ extern uint16 Com_RxSignalGroupTimeOutCnt[COM_MAX_RXSIGGRP_TIMEOUT_NUMBER];
  * @trace         CPD-66520
  */
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint16 Com_PartitonIdFromList(ApplicationType osApplicationId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Init signal/group signal buffer
@@ -518,11 +706,15 @@ extern uint16 Com_PartitonIdFromList(ApplicationType osApplicationId);
  * @trace         CPD-66524
  */
 #if ((0u < COM_MAX_IPDUGROUP_NUMBER) || (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_InitSignalBuffer(
     Com_SignalType SignalType,
     uint16         SignalInitValueId,
     uint16         ComSignalLength,
     uint16         PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack all byte value(group signal/signal cover,except MSB byte).
@@ -537,6 +729,8 @@ extern void Com_InitSignalBuffer(
  */
 #if (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     || ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint64 Com_SignalUnPackHandle(
 #if (STD_ON == COM_SIGNAL_SIGNED_TYPE_ENABLE)
     Com_SignalType SignalType,
@@ -544,6 +738,8 @@ extern uint64 Com_SignalUnPackHandle(
     Com_SignalConfigType SignalConfigType,
     const void*          SignalPtr,
     const uint8*         IPduBufferPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_TxSignalPack,Com_TxGroupSignalPack
@@ -558,11 +754,15 @@ extern uint64 Com_SignalUnPackHandle(
  * @trace         CPD-66526
  */
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) || (0u < COM_MAX_TXSIGNAL_NUMBER) || (0u < COM_MAX_GWMAPPING_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TxSignalPackHandle(
     Com_SignalConfigType SignalConfigType,
     const void*          TxSignalPtr,
     uint64               TxValue,
     uint8*               IPduBufferPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_TxSignalTMCCalculate,
@@ -580,12 +780,16 @@ extern void Com_TxSignalPackHandle(
  */
 #if (COM_MAX_TXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISOUTSIDE_NUMBER > 0u) \
     || (COM_MAX_TXNEWISOUTSIDE_NUMBER > 0U)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern boolean Com_NewIsWInWOtFilterCalculate(
     Com_SignalType    SignalType,
     uint64            SignalValue,
     Com_FilterMaxType ComFilterMax,
     Com_FilterMinType ComFilterMin,
     boolean           Within);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_TxSignalTMHandle,Com_TxIpduTMSHandle.
@@ -601,7 +805,11 @@ extern boolean Com_NewIsWInWOtFilterCalculate(
     (0u < COM_MAX_TXSIGNAL_NUMBER) || ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER)) \
     || (0u < COM_MAX_GWMAPPING_NUMBER))                                                                     \
     && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Called by Com_SendSignalGroupArray,Com_SendSignalGroup,
@@ -616,8 +824,12 @@ extern boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainF
  * @trace         CPD-66529
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) || (0u < COM_MAX_GWMAPPING_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void
     Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, uint16* RptNum);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Set tx signal update bit to 1
@@ -632,11 +844,15 @@ extern void
 #if (0u < COM_MAX_TXIPDU_NUMBER)                                                                      \
     && ((STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) \
         || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_SetSignalUpdateBit(
     Com_TxIpduBufIdType    IpduBufferIndex,
     Com_SignalPositionType UpdateBitPosition,
     uint8                  UpdateBitMask,
     uint8*                 TxIpduRuntimeBuffPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         When FilterAlgorithm is MASKED_NEW_DIFFERS_MASKED_OLD,calculate the signal's TMC
@@ -651,12 +867,16 @@ extern void Com_SetSignalUpdateBit(
  * @trace         CPD-66531
  */
 #if (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern boolean Com_MaskedNewDiffersMaskedOldFilterCalculate(
     Com_SignalType     SignalType,
     uint64             SignalValue,
     uint16             SignalBufferId,
     Com_FilterMaskType ComFilterMask,
     uint16             PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Substitute signal/group signal buffer
@@ -671,12 +891,16 @@ extern boolean Com_MaskedNewDiffersMaskedOldFilterCalculate(
  */
 #if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE) \
     || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_SubstituteSignalBuffer(
     Com_SignalType SignalType,
     uint16         SignalInitValueId,
     uint16         ComSignalLength,
     uint16         SignalSubstituteValueId,
     uint16         PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Init Runtime TMC of all tx signals and tx group siganls
@@ -686,7 +910,11 @@ extern void Com_SubstituteSignalBuffer(
  * @synchronous   TRUE
  * @trace         CPD-66521
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TxSignalTMCStateInit(Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Set all tx signal group state to not need to trigger transmit
  * @reentrant     FALSE
@@ -694,7 +922,11 @@ extern void Com_TxSignalTMCStateInit(Com_MainFunctionIdType TxMainfunctionId);
  * @trace         CPD-66522
  */
 #if (0u < COM_MAX_TXSIGNALGROUP_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TxSignalGroupTriggerFlagInit(void);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Used to handle all Tx Ipdu state change or not.
@@ -707,11 +939,15 @@ extern void Com_TxSignalGroupTriggerFlagInit(void);
  * @trace         CPD-66531
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TxIpduControl(
     Com_MainFunctionIdType TxMainfunctionId,
     Com_IpduGroupIdType    IpduGroupId,
     boolean                Initialize,
     boolean                IsEnable);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send dynamic Tx group signal handle.
@@ -724,11 +960,15 @@ extern void Com_TxIpduControl(
  * @trace         CPD-66448
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendTxDynGroupSignalHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     Com_SignalIdType            TxGroupSignalId,
     const void*                 SignalDataPtr,
     uint16                      DynLength);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Tx notification for all signals/signal groups of the Tx Pdu
@@ -738,7 +978,11 @@ extern uint8 Com_SendTxDynGroupSignalHandle(
  * @trace         CPD-66449
  */
 #if (STD_ON == COM_TX_SIGNAL_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_ConfirmationProcess(const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Reset the counter of tx Ipdu MDT.
@@ -749,7 +993,11 @@ extern void Com_ConfirmationProcess(const Com_TxIPduType* TxIpduPtr);
  * @trace         CPD-66479
  */
 #if (STD_ON == COM_MDT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive Dynamic Group Signal handle
@@ -765,7 +1013,11 @@ extern void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const
     ((COM_MAX_RXSIGNALGROUP_NUMBER > 0u) && (COM_MAX_RXGROUPSIGNAL_NUMBER > 0u)) \
     && (0u < COM_MAX_RXGROUPSIGNAL_8BITBUFF_SIZE))                               \
     && (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Calculate dest signal/group signal/description signal TMC
@@ -780,6 +1032,8 @@ extern uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* Si
  * @trace         CPD-66539
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern boolean Com_DestSignalTMCCalculate(
     Com_SignalType          SignalType,
     Com_FilterAlgorithmType FilterType,
@@ -788,6 +1042,8 @@ extern boolean Com_DestSignalTMCCalculate(
     uint64 OldSignalValue,
 #endif
     uint64 NewSignalValue);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send SignalGroup(Array) handle
@@ -799,7 +1055,11 @@ extern boolean Com_DestSignalTMCCalculate(
  * @trace         CPD-66447
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, const uint8* SignalGroupArrayPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send Signal handle
@@ -812,8 +1072,12 @@ extern uint8 Com_SendSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId,
  * @trace         CPD-66450
  */
 #if (((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)) && (0u < COM_MAX_TXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8
     Com_SendSignalHandle(Com_SignalIdType SignalId, const void* SignalDataPtr, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Send Dynamic Signal handle
  * @param[in]     SignalId:Signal index
@@ -825,11 +1089,15 @@ extern uint8
  * @synchronous   TRUE
  * @trace         CPD-67901
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendDynSignalHandle(
     Com_SignalIdType       SignalId,
     const void*            SignalDataPtr,
     uint16                 Length,
     Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send SignalGroup handle
@@ -841,7 +1109,11 @@ extern uint8 Com_SendDynSignalHandle(
  * @trace         CPD-66451
  */
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send SignalGroup handle
@@ -852,7 +1124,11 @@ extern uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_
  * @trace         CPD-66453
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) && ((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_InvalidateSignalHandle(Com_SignalIdType SignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Send Invalidate SignalGroup handle
@@ -863,7 +1139,11 @@ extern uint8 Com_InvalidateSignalHandle(Com_SignalIdType SignalId);
  * @trace         CPD-66454
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) && ((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Trigger IPDU send handle
@@ -877,6 +1157,8 @@ extern uint8 Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId
  * @trace         CPD-66456
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerIPDUSendHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -884,6 +1166,8 @@ extern Std_ReturnType Com_TriggerIPDUSendHandle(
     PduIdType IpduId,
 #endif
     Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Trigger IPDU(with metadata) send handle
@@ -899,6 +1183,8 @@ extern Std_ReturnType Com_TriggerIPDUSendHandle(
  */
 #if (STD_ON == COM_METADATA_SUPPORT)
 /* PRQA S 1712 ++ */ /* VL_Com_1712 */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -907,6 +1193,8 @@ extern Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
 #endif
     Com_MainFunctionIdType TxMainfunctionId,
     const uint8*           MetaData);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1712 -- */
 #endif
 /**
@@ -919,10 +1207,14 @@ extern Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
  * @trace         CPD-66468
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_SwitchIpduTxModeHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     boolean                     Mode);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         TxPdu MainFunction handle
@@ -932,7 +1224,11 @@ extern void Com_SwitchIpduTxModeHandle(
  * @trace         CPD-66476
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionTxHandle(Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         TxPdu Trigger Transmit handle
@@ -947,12 +1243,16 @@ extern void Com_MainFunctionTxHandle(Com_MainFunctionIdType TxMainfunctionId);
  * @trace         CPD-66477
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerTransmitHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
     PduIdType                   TxIpduId,
     PduInfoType*                PduInfoPtr,
     Com_MainFunctionIdType      TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         TP TxPdu TxConfirmation handle
@@ -965,11 +1265,15 @@ extern Std_ReturnType Com_TriggerTransmitHandle(
  * @trace         CPD-66478
  */
 #if ((0u < COM_MAX_TXIPDU_NUMBER) && (STD_ON == COM_TXTPPDU_SUPPORT))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TpTxConfirmationHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
     Com_MainFunctionIdType      TxMainfunctionId,
     Std_ReturnType              result);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         TP TxPdu copy pdu data handle
  * @param[in]     TxIpduId:TxIpdu index
@@ -982,12 +1286,16 @@ extern void Com_TpTxConfirmationHandle(
  * @synchronous   TRUE
  * @trace         CPD-66864
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern BufReq_ReturnType Com_CopyTxDataHandle(
     PduIdType              TxIpduId,
     Com_MainFunctionIdType TxMainfunctionId,
     const PduInfoType*     info,
     const RetryInfoType*   retry,
     PduLengthType*         availableDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive group signal handle
@@ -999,7 +1307,11 @@ extern BufReq_ReturnType Com_CopyTxDataHandle(
  * @trace         CPD-66517
  */
 #if (0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive signal handle
@@ -1011,7 +1323,11 @@ extern uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* Signa
  * @trace         CPD-66518
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive all group signal of the SignalGroup
@@ -1024,11 +1340,15 @@ extern uint8 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, void* SignalData
  * @trace         CPD-66516
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_ReceiveSignalGroupHandle(
     const Com_RxIPduType*       RxIpduPtr,
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     uint16                      PartitionId,
     Com_SignalGroupIdType       SignalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive SignalGroup(Array) data handle
@@ -1041,7 +1361,11 @@ extern void Com_ReceiveSignalGroupHandle(
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) \
     && ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, uint8* SignalGroupArrayPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Receive Dynamic Signal handle
@@ -1055,7 +1379,11 @@ extern uint8 Com_ReceiveSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroup
  */
 #if ((0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_SIGNAL_8BITBUFF_SIZE)) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         If RxPdu RxIndication handle
@@ -1069,6 +1397,8 @@ extern uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalD
  * @trace         CPD-66511
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_RxIndicationHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -1077,6 +1407,8 @@ extern void Com_RxIndicationHandle(
 #endif
     const PduInfoType*     PduInfoPtr,
     Com_MainFunctionIdType RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         TP RxPdu RxIndication handle
@@ -1090,12 +1422,16 @@ extern void Com_RxIndicationHandle(
  * @trace         CPD-66509
  */
 #if (STD_ON == COM_RXTPPDU_SUPPORT)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_TpRxIndicationHandle(
     PduIdType                   RxIpduId,
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     Com_MainFunctionIdType      RxMainfunctionId,
     Std_ReturnType              result);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         TP Pdu copy receive data handle
  * @param[in]     RxIpduId:RxIpdu index
@@ -1107,11 +1443,15 @@ extern void Com_TpRxIndicationHandle(
  * @synchronous   TRUE
  * @trace         CPD-67808
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern BufReq_ReturnType Com_CopyRxDataHandle(
     PduIdType              RxIpduId,
     Com_MainFunctionIdType RxMainfunctionId,
     const PduInfoType*     info,
     PduLengthType*         bufferSizePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         TP Pdu Start receive handle
  * @param[in]     RxIpduId:RxIpdu index
@@ -1124,12 +1464,16 @@ extern BufReq_ReturnType Com_CopyRxDataHandle(
  * @synchronous   TRUE
  * @trace         CPD-67809
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern BufReq_ReturnType Com_StartOfReceptionHandle(
     PduIdType              RxIpduId,
     Com_MainFunctionIdType RxMainfunctionId,
     const PduInfoType*     info,
     PduLengthType          TpSduLength,
     PduLengthType*         bufferSizePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         RxPdu MainFunction handle
@@ -1139,7 +1483,11 @@ extern BufReq_ReturnType Com_StartOfReceptionHandle(
  * @trace         CPD-66512
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionRxHandle(Com_MainFunctionIdType RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 #if COM_MAX_GWMAPPING_NUMBER > 0u
 /**
@@ -1149,7 +1497,11 @@ extern void Com_MainFunctionRxHandle(Com_MainFunctionIdType RxMainfunctionId);
  * @synchronous   TRUE
  * @trace         CPD-66541
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionRouteSignalsHandle(Com_MainFunctionIdType RouteSignalsMainFunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief         Init every destination request flag in the Gateway
@@ -1157,7 +1509,11 @@ extern void Com_MainFunctionRouteSignalsHandle(Com_MainFunctionIdType RouteSigna
  * @synchronous   TRUE
  * @trace         CPD-66542
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_GwInitDestinationRequest(void);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Set every destination request flag in the Gateway
  * @param[in]     gwMappingId:Gateway mapping index
@@ -1166,7 +1522,11 @@ extern void Com_GwInitDestinationRequest(void);
  * @synchronous   TRUE
  * @trace         CPD-66543
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_GwUpdateDestinationRequest(Com_GwMappingIdType gwMappingId, boolean request);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Clear all signal group/signal/dest description signal update bit of the Tx Pdu
@@ -1178,8 +1538,28 @@ extern void Com_GwUpdateDestinationRequest(Com_GwMappingIdType gwMappingId, bool
  */
 #if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
     || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
+#if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+/**
+ * @brief         provide state of an IpduGroup.
+ * @param[in]     IpduGroupId:IpduGroupId
+ * @reentrant     TRUE
+ * @synchronous   TRUE
+ * @trace
+ */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
+extern boolean Com_IsIpduGroupEnable(Com_IpduGroupIdType IpduGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+#endif
+
 /* PRQA S 5015 -- */
 #ifdef __cplusplus
 }

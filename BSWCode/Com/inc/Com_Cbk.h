@@ -51,7 +51,11 @@ extern "C" {
  * @synchronous   TRUE
  * @trace         CPD-66396
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         Indication of a received I-PDU from a lower layer communication interface module.
  * @param[in]     RxPduId: ID of the received I-PDU.
@@ -61,7 +65,11 @@ extern Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInf
  * @synchronous   TRUE
  * @trace         CPD-66395
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         This service Initializes internal and external interfaces of the CAN Interface for the further
  * processing.
@@ -71,7 +79,11 @@ extern void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @synchronous   TRUE
  * @trace         CPD-66397
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern void Com_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         The lower layer communication interface module confirms the transmission of an IPDU.
  * @param[in]     TxPduId: ID of the I-PDU that has been transmitted.
@@ -80,7 +92,11 @@ extern void Com_TpRxIndication(PduIdType id, Std_ReturnType result);
  * @synchronous   TRUE
  * @trace         CPD-66398
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         This function is called after the I-PDU has been transmitted on its network, the result indicates
  *                whether the transmission was successful or not.
@@ -90,7 +106,11 @@ extern void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @synchronous   TRUE
  * @trace         CPD-66399
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern void Com_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         This function is called at the start of receiving an N-SDU. The N-SDU might be fragmented into
  * multiple N-PDUs (FF with one or more following CFs) or might consist of a single N-PDU (SF).
@@ -113,11 +133,15 @@ extern void Com_TpTxConfirmation(PduIdType id, Std_ReturnType result);
  * @synchronous   TRUE
  * @trace         CPD-66400
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern BufReq_ReturnType Com_StartOfReception(
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper
  *                layer. Each call to this function provides the next part of the I-PDU data.
@@ -133,7 +157,11 @@ extern BufReq_ReturnType Com_StartOfReception(
  * @synchronous   TRUE
  * @trace         CPD-66401
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /**
  * @brief         This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
  *                Each call to this function provides the next part of the I-PDU data unless retry->TpDataState
@@ -159,8 +187,12 @@ extern BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, P
  * @synchronous   TRUE
  * @trace         CPD-66402
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 extern BufReq_ReturnType
     Com_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr);
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /* PRQA S 5015 -- */
 #ifdef __cplusplus
 }

@@ -34,9 +34,9 @@ extern "C" {
 #endif
 
 /* ===================================================== macros ===================================================== */
-
+#define COMM_NUM_OF_STATEMACHINES_PNC 4u
 /* ================================================ type definitions ================================================ */
-typedef struct ComM_PncConfigType_Tag
+typedef struct ComM_PncConfigType_Tag /* PRQA S 1536 */ /* VL_ComM_1536 */
 {
     uint16            BitIndex;
     uint16            PrepareSleepTimer;
@@ -47,10 +47,10 @@ typedef struct ComM_PncConfigType_Tag
     uint8             ChannelBitVectorERALength;
     NetworkHandleType PassiveChannel;
 #endif
-    const uint8 ChannelMappingBitVector[COMM_CHANNEL_NUMBER / 8u + 1u];
-    const uint8 TxOnlyChannelMappingBitVector[COMM_CHANNEL_NUMBER / 8u + 1u];
+    const uint8 ChannelMappingBitVector[(COMM_CHANNEL_NUMBER / COMM_CHAR_BIT) + 1u];
+    const uint8 TxOnlyChannelMappingBitVector[(COMM_CHANNEL_NUMBER / COMM_CHAR_BIT) + 1u];
 #if COMM_USER_NUMBER > 0u
-    const uint8 UserMappingBitVector[COMM_USER_NUMBER / 8u + 1u];
+    const uint8 UserMappingBitVector[(COMM_USER_NUMBER / COMM_CHAR_BIT) + 1u]; /* PRQA S 1039 */ /* VL_ComM_1039 */
 #endif
 } ComM_PncConfigType;
 
@@ -59,6 +59,8 @@ typedef struct ComM_PncConfigType_Tag
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Initializes Pncs and restarts the internal state machines.
  * @param[in]     pncConfigs  Pointer to post-build configuration data for all pncs
@@ -67,7 +69,11 @@ typedef struct ComM_PncConfigType_Tag
  * @trace         CPD-64979
  */
 void ComM_PncInit(const ComM_PncConfigType* pncConfigs);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The function returns the current mode of the corresponding pnc.
  * @param[in]    pnc  See PNCHandleType
@@ -77,7 +83,11 @@ void ComM_PncInit(const ComM_PncConfigType* pncConfigs);
  * @trace        CPD-64986
  */
 ComM_PncModeType ComM_PncGetMode(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to query the maximum allowed Communication Mode of the corresponding pnc.
  * @param[in]    pnc  See PNCHandleType
@@ -87,7 +97,11 @@ ComM_PncModeType ComM_PncGetMode(PNCHandleType pnc);
  * @trace        CPD-64993
  */
 ComM_ModeType ComM_PncGetMaxComMode(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to query the bit index in pnc bit vector of the corresponding pnc.
  * @param[in]    pnc  See PNCHandleType
@@ -97,7 +111,11 @@ ComM_ModeType ComM_PncGetMaxComMode(PNCHandleType pnc);
  * @trace        CPD-65002
  */
 uint16 ComM_PncGetBitIndex(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Store the current aggregated external / internal PNC request.
  * @param[in]    pncBitVectorPtr  Pointer to the PNC bit vector which contain the current aggregated internal and
@@ -107,8 +125,12 @@ uint16 ComM_PncGetBitIndex(PNCHandleType pnc);
  * @trace        CPD-64999
  */
 void ComM_PncUpdateEIRA(const uint8* pncBitVectorPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Indicate the current external PNC request of the corresponding channel for the corresponding pnc.
  * @param[in]    pnc              See PNCHandleType
@@ -119,11 +141,15 @@ void ComM_PncUpdateEIRA(const uint8* pncBitVectorPtr);
  * @trace        CPD-65001
  */
 void ComM_PncUpdateChannelBitVectorERA(PNCHandleType pnc, NetworkHandleType channel, const uint8* pncBitVectorPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS ComM_PncPassiveChannelRequested
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to query whether there is a pnc request on the passive channel(pnc gateway is enabled on the pnc).
  * @param[in]    pnc  See PNCHandleType
@@ -134,8 +160,12 @@ void ComM_PncUpdateChannelBitVectorERA(PNCHandleType pnc, NetworkHandleType chan
  * @trace        CPD-65004
  */
 boolean ComM_PncPassiveChannelRequested(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Notification of a wake up on the corresponding partial network cluster.
  * @param[in]    pnc  Identifier of the partial network cluster
@@ -144,7 +174,11 @@ boolean ComM_PncPassiveChannelRequested(PNCHandleType pnc);
  * @trace        CPD-65010
  */
 void ComM_PncWakeUpIndication(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to query whether there is a pnc request by user or on the active channel(pnc gateway is enabled on the pnc).
  * @param[in]    pnc  See PNCHandleType
@@ -155,7 +189,11 @@ void ComM_PncWakeUpIndication(PNCHandleType pnc);
  * @trace        CPD-65012
  */
 boolean ComM_PncUserOrActiveChannelRequested(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * This function shall perform the processing of the ComM Pnc state activities.
  * @param[in]    pnc      See PNCHandleType
@@ -165,8 +203,12 @@ boolean ComM_PncUserOrActiveChannelRequested(PNCHandleType pnc);
  * @trace        CPD-65013
  */
 void ComM_PncMainFunction(PNCHandleType pnc, NetworkHandleType channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_USER_NUMBER > 0u
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Determine if the User is assigned to the corresponding PNC.
  * @param[in]    pnc      See PNCHandleType
@@ -177,8 +219,12 @@ void ComM_PncMainFunction(PNCHandleType pnc, NetworkHandleType channel);
  * @trace        CPD-64998
  */
 boolean ComM_PncIsUserAssigned(PNCHandleType pnc, ComM_UserHandleType user);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Determine if the Channel is assigned to the corresponding PNC.
  * @param[in]    pnc      See PNCHandleType
@@ -189,6 +235,9 @@ boolean ComM_PncIsUserAssigned(PNCHandleType pnc, ComM_UserHandleType user);
  * @trace        CPD-64939
  */
 boolean ComM_PncIsChannelAssigned(PNCHandleType pnc, NetworkHandleType channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
 #ifdef __cplusplus
 }
 #endif

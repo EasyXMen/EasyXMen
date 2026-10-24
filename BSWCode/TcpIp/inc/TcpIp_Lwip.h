@@ -55,9 +55,17 @@ typedef struct TcpIp_LwipRuntimeTag
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
+#define TCPIP_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern const TcpIp_LwipRuntimeType TcpIp_LwipRuntime[TCPIP_PARTITION_NUMBER];
+#define TCPIP_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_VAR_CLONE_8
+#include "TcpIp_MemMap.h"
 extern uint8 TcpIp_MulticoreIndex;
+#define TCPIP_STOP_SEC_VAR_CLONE_8
+#include "TcpIp_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 

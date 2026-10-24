@@ -51,6 +51,8 @@
 void BswM_InitNvMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITNVMREQUESTPORTS);
+
 #if ((BSWM_NVMJOBMODEINDICATION_ENABLED == STD_ON) || (BSWM_NVMREQUEST_ENABLED == STD_ON))
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
@@ -89,12 +91,18 @@ void BswM_InitNvMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITNVMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 #endif
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITNVMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current job mode for a specific NvM multi-block request.
  * This function retrieves the partition configuration and updates the NvM job mode indication status.
@@ -105,6 +113,8 @@ void BswM_InitNvMRequestPorts(void)
 void BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_RequestResultType CurrentJobMode)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_NVM_CURRENT_JOB_MODE, MultiBlockRequest, CurrentJobMode);
+
 #if (BSWM_NVMJOBMODEINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -170,9 +180,14 @@ void BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_Re
     (void)MultiBlockRequest;
     (void)CurrentJobMode;
 #endif /*BSWM_NVMJOBMODEINDICATION_ENABLED == STD_ON*/
+    BswM_ArtiApiStop(1, BSWM_API_ID_NVM_CURRENT_JOB_MODE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_NVMJOBMODEINDICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current job mode for a specified NvM job index.
  * This function gets the partition configuration and returns the NvM job mode indication status.
@@ -192,8 +207,12 @@ NvM_RequestResultType BswM_GetCurNvmJobMode(uint16 jobIdx)
     }
     return blockMode;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NVMJOBMODEINDICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current block mode for a specified NvM block.
  * This function checks the validity of the current block mode, retrieves the partition configuration,
@@ -204,6 +223,8 @@ NvM_RequestResultType BswM_GetCurNvmJobMode(uint16 jobIdx)
 void BswM_NvM_CurrentBlockMode(NvM_BlockIdType Block, NvM_RequestResultType CurrentBlockMode)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_NVM_CURRENT_BLOCK_MODE, Block, CurrentBlockMode);
+
 #if (BSWM_NVMREQUEST_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -269,9 +290,14 @@ void BswM_NvM_CurrentBlockMode(NvM_BlockIdType Block, NvM_RequestResultType Curr
     (void)Block;
     (void)CurrentBlockMode;
 #endif /*BSWM_NVMREQUEST_ENABLED == STD_ON*/
+    BswM_ArtiApiStop(1, BSWM_API_ID_NVM_CURRENT_BLOCK_MODE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_NVMREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current block mode for a specified NvM block index.
  * This function gets the partition configuration and returns the NvM request status for the specified block.
@@ -291,11 +317,11 @@ NvM_RequestResultType BswM_GetCurNvmBlockMode(NvM_BlockIdType blockIdx)
     }
     return blockMode;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_NVMREQUEST_ENABLED == STD_ON*/
 
-#define BSWM_STOP_SEC_CODE
-#include "BswM_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_NVM_ENABLED == STD_ON*/

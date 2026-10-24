@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_ETHSMINDICATION_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_ETHSMINDICATION_ENABLED == STD_ON)
 /**
  * Initializes the request ports for the Ethernet State Manager (EthSM).
  * This function sets the initial status of the EthSM indication ports based on the configuration.
@@ -49,6 +49,8 @@
 void BswM_InitEthSMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITETHSMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -77,10 +79,17 @@ void BswM_InitEthSMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITETHSMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITETHSMREQUESTPORTS);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current status of the specified Ethernet State Manager (EthSM) channel.
  * This function queries the runtime configuration to get the current state of the EthSM indication port.
@@ -100,8 +109,12 @@ EthSM_NetworkModeStateType BswM_GetEthSmIndStatus(NetworkHandleType ethsmChIdx)
     }
     return retStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current state of the specified Ethernet State Manager (EthSM) network.
  * This function checks the current state and updates the internal state of the EthSM indication port.
@@ -111,6 +124,8 @@ EthSM_NetworkModeStateType BswM_GetEthSmIndStatus(NetworkHandleType ethsmChIdx)
 void BswM_EthSM_CurrentState(NetworkHandleType Network, EthSM_NetworkModeStateType CurrentState)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_ETHSM_CURRENT_STATE, Network, CurrentState);
+
 #if (BSWM_ETHSMINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -175,8 +190,9 @@ void BswM_EthSM_CurrentState(NetworkHandleType Network, EthSM_NetworkModeStateTy
     (void)Network;
     (void)CurrentState;
 #endif /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_ETHSM_CURRENT_STATE);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
 /* ========================================== internal function definitions ========================================= */

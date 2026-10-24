@@ -30,6 +30,10 @@
  *  V02.02.01 2025-02-14  Jian.Jiang    1. Changes to the Match PduR Receiver Function
  *  V02.02.02 2025-02-18  Jian.Jiang    1. Add certified data macro switch for freshness values
  *  V02.02.03 2025-02-19  Jian.Jiang    1. Specification of QAC Notes and Explanation of Reasons
+ *  V02.02.04 2025-11-06  Jian.Jiang    1. Modify the FVM bit sequence method for this input/output (SWS_SecOC_00220)
+ *            2025-11-21  Jian.Jiang    1. Modify the definition of the Csm callback function's first parameter type to
+ *  uint32.
+ *  V02.02.05 2026-04-02  Jian.Jiang    1. Fix the compilation issue caused by the configuration not being enabled.
  *
  ==================================================================================================================== */
 
@@ -42,7 +46,7 @@
     \li VL_SecOC_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_5017
       Reason: High cyclomatic complexity is reserved for better readability.
@@ -69,7 +73,7 @@
     \li VL_SecOC_4397
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_2834
       Reason:When the scheduling table has no entries, the modulo operation will not be executed.
@@ -89,27 +93,27 @@
     \li VL_SecOC_3414
       Reason: specific keyword macro is necessary for unit testing
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_1336
       Reason: Defining function pointer types
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_0771
       Reason: Ability to quickly jump out of loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_5004
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_0488
       Reason: Calculates the offset value of the array.
@@ -129,222 +133,214 @@
     \li VL_SecOC_3469
       Reason: A function should be used in preference to a function-like macro where they are interchangeable.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STTPP
       Reason: The number of lines of code is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_SecOC_2755
+      Reason: There is a lot of logic in the code and it is deeply nested, which makes the processing time longer.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SecOC_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_3232
       Reason: A pointer array is needed.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_3415
-      Reason: Complex logical expressions may have short circuits. Logical short circuits are designed to
-        account for operational efficiency and expected behavior.
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_SecOC_1512
-      Reason: Rte-generated headers and module headers may contain the same declaration for the same
-        function, so they are compatible with each other.
-      Risk: No risk.
-      Prevention: None.
-
-    \li VL_SecOC_1707
-      Reason: There are no multiple declaration types of the same object. In AUTOSAR standard, there may be different
-        situations between the object declaration type of Rte and the declaration of SecOC module, and they are
-        compatible with each other as long as they are in different scopes.
-      Risk: No risk.
-      Prevention: None.
-
-    \li VL_SecOC_1759
-      Reason: The name of the array of global variables is determined at generation time and may be the same as the
-        member name of the array of structures.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_1753
-      Reason: The definition of the function is generated in the configuration file, and when a module uses the
-        function, the definition is generated.
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Ensure that the project is working properly through unit testing.
 
-    \li VL_SecOC_2996
-      Reason: Functions defined out are not used in the project and have no impact on the integration application.
+    \li VL_SecOC_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_SecOC_2880
-      Reason: Some code branches will never be reached due to the different macro definition values
-        generated by the configuration.
+    \li VL_SecOC_1513
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_SecOC_1501
-      Reason: Whether the feature is used or not depends on the generated configuration.
+      Reason: The function '${name}' is declared but is not used within this project.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_SecOC_1707
+      Reason: Function '${name}' is not using the same aliases.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_SecOC_1709
+      Reason: Function '${name}' is not using the same parameter names.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
  */
 
 #ifndef SECOC_H
 #define SECOC_H
 
-/* PRQA S 1707,1512 EOF */ /* VL_SecOC_1707,VL_SecOC_1512 */
-
 /* =================================================== inclusions =================================================== */
 #include "SecOC_Cfg.h"
 #include "SecOC_Cbk.h"
-#include "Rte_Csm_Type.h"
-#include "Rte_SecOC_Type.h"
 #include "SchM_SecOC.h"
 #include "SecOC_PBcfg.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*PRQA S 1512 EOF*/               /*VL_SecOC_1512*/
+/* PRQA S 1709, 1707, 1513 EOF */ /* VL_SecOC_1709, VL_SecOC_1707, VL_SecOC_1513 */
 /* =============================================== version information ============================================== */
 /** Vendor ID */
-#define SECOC_VENDOR_ID 62u
+#define SECOC_VENDOR_ID                62u
 /** Module ID */
-#define SECOC_MODULE_ID 150u
+#define SECOC_MODULE_ID                150u
 /** Instance ID */
-#define SECOC_INSTANCE_ID 0u
+#define SECOC_INSTANCE_ID              0u
 /** AUTOSAR major version */
-#define SECOC_H_AR_MAJOR_VERSION 4u
+#define SECOC_AR_RELEASE_MAJOR_VERSION 4u
 /** AUTOSAR minor version */
-#define SECOC_H_AR_MINOR_VERSION 9u
+#define SECOC_AR_RELEASE_MINOR_VERSION 9u
 /** AUTOSAR patch version */
-#define SECOC_H_AR_PATCH_VERSION 0u
+#define SECOC_AR_RELEASE_PATCH_VERSION 0u
 /** Software major version */
-#define SECOC_H_SW_MAJOR_VERSION 2u
+#define SECOC_SW_MAJOR_VERSION         2u
 /** Software minor version */
-#define SECOC_H_SW_MINOR_VERSION 2u
+#define SECOC_SW_MINOR_VERSION         2u
 /** Software patch version */
-#define SECOC_H_SW_PATCH_VERSION 3u
+#define SECOC_SW_PATCH_VERSION         5u
 
 /* ===================================================== macros ===================================================== */
 /** Service ID for SecOC_Init */
 #define SECOC_INIT_ID 0x01u
 
 /** Service ID for SecOC_DeInit */
-#define SECOC_DEINIT_ID 0x05u
+#define SECOC_DEINIT_ID                               0x05u
 /** Service ID for SecOC_GetVersionInfo */
-#define SECOC_GETVERSIONINFO_ID 0x02u
+#define SECOC_GETVERSIONINFO_ID                       0x02u
 /** Service ID for SecOC_IfTransmit */
-#define SECOC_IFTRANSMIT_ID 0x49u
+#define SECOC_IFTRANSMIT_ID                           0x49u
 /** Service ID for SecOC_TpTransmit */
-#define SECOC_TPTRANSMIT_ID 0x49u
+#define SECOC_TPTRANSMIT_ID                           0x53u
 /** Service ID for SecOC_IfCancelTransmit */
-#define SECOC_IFCANCELTRANSMIT_ID 0x4au
+#define SECOC_IFCANCELTRANSMIT_ID                     0x4au
 /** Service ID for SecOC_TpCancelTransmit */
-#define SECOC_TPCANCELTRANSMIT_ID 0x4au
+#define SECOC_TPCANCELTRANSMIT_ID                     0x54u
 /** Service ID for SecOC_TpCancelReceive */
-#define SECOC_TPCANCELRECEIVE_ID 0x4cu
+#define SECOC_TPCANCELRECEIVE_ID                      0x4cu
 /** Service ID for SecOC_VerifyStatusOverride */
-#define SECOC_VERIFYSTATUSOVERRIDE_ID 0x0bu
+#define SECOC_VERIFYSTATUSOVERRIDE_ID                 0x0bu
 /** Service ID for SecOC_SendDefaultAuthenticationInformation */
 #define SECOC_SENDDEFAULTAUTHENTICATIONINFORMATION_ID 0x04u
 /** Service ID for SecOC_RxIndication */
-#define SECOC_RXINDICATION_ID 0x42u
+#define SECOC_RXINDICATION_ID                         0x42u
 /** Service ID for SecOC_TpRxIndication */
-#define SECOC_TPRXINDICATION_ID 0x45u
+#define SECOC_TPRXINDICATION_ID                       0x45u
 /** Service ID for SecOC_TxConfirmation */
-#define SECOC_TXCONFIRMATION_ID 0x40u
+#define SECOC_TXCONFIRMATION_ID                       0x40u
 /** Service ID for SecOC_TpTxConfirmation */
-#define SECOC_TPTXCONFIRMATION_ID 0x48u
+#define SECOC_TPTXCONFIRMATION_ID                     0x48u
 /** Service ID for SecOC_TriggerTransmit */
-#define SECOC_TRIGGERTRANSMIT_ID 0x41u
+#define SECOC_TRIGGERTRANSMIT_ID                      0x41u
 /** Service ID for SecOC_CopyRxData */
-#define SECOC_COPYRXDATA_ID 0x44u
+#define SECOC_COPYRXDATA_ID                           0x44u
 /** Service ID for SecOC_CopyTxData */
-#define SECOC_COPYTXDATA_ID 0x43u
+#define SECOC_COPYTXDATA_ID                           0x43u
 /** Service ID for SecOC_StartOfReception */
-#define SECOC_STARTOFRECEPTION_ID 0x46u
+#define SECOC_STARTOFRECEPTION_ID                     0x46u
 /** Service ID for SecOC_MainFunctionRx */
-#define SECOC_MAINFUNCTIONRX_ID 0x06u
+#define SECOC_MAINFUNCTIONRX_ID                       0x06u
 /** Service ID for SecOC_MainFunctionTx */
-#define SECOC_MAINFUNCTIONTX_ID 0x03u
+#define SECOC_MAINFUNCTIONTX_ID                       0x03u
 /** Service ID for SecOC_CsmGenerateJobFinishedIndication */
-#define SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID 0x50u
+#define SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID     0x50u
 /** Service ID for SecOC_CsmVerifyJobFinishedIndication */
-#define SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID 0x51u
+#define SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID       0x51u
 
 /** Development Error: Parameter pointer is NULL */
-#define SECOC_E_PARAM_POINTER 0x01u
+#define SECOC_E_PARAM_POINTER      0x01u
 /** Development Error: Module is uninitialized */
-#define SECOC_E_UNINIT 0x02u
+#define SECOC_E_UNINIT             0x02u
 /** Development Error: Invalid PDU SDU ID */
 #define SECOC_E_INVALID_PDU_SDU_ID 0x03u
 /** Development Error: Crypto failure */
-#define SECOC_E_CRYPTO_FAILURE 0x04u
+#define SECOC_E_CRYPTO_FAILURE     0x04u
 /** Development Error: Initialization failed */
-#define SECOC_E_INIT_FAILED 0x07u
+#define SECOC_E_INIT_FAILED        0x07u
 /** Development Error: Error partition */
-#define SECOC_E_ERROR_PARTITION 0x09u
+#define SECOC_E_ERROR_PARTITION    0x09u
 /** Runtime Error: Freshness failure */
-#define SECOC_E_FRESHNESS_FAILURE 0x08u
+#define SECOC_E_FRESHNESS_FAILURE  0x08u
 
 #if !defined(SECOC_LOCAL)
 /** Local function definition */
@@ -384,7 +380,11 @@ typedef SecOC_PbConfigType SecOC_ConfigType;
  * @synchronous    TRUE
  * @trace       CPD-70334
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 void SecOC_Init(const SecOC_ConfigType* config);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This service stops the secure onboard communication.
@@ -394,7 +394,11 @@ void SecOC_Init(const SecOC_ConfigType* config);
  * @synchronous    TRUE
  * @trace       CPD-70335
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 void SecOC_DeInit(void);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Returns the version information of this module.
@@ -404,7 +408,11 @@ void SecOC_DeInit(void);
  * @synchronous    TRUE
  * @trace       CPD-70336
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 void SecOC_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Requests transmission of a PDU.
@@ -418,7 +426,11 @@ void SecOC_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous    TRUE
  * @trace       CPD-70337
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Requests transmission of a PDU.
@@ -432,7 +444,11 @@ Std_ReturnType SecOC_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
  * @synchronous    TRUE
  * @trace       CPD-70338
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Requests cancellation of an ongoing transmission of a PDU
@@ -447,7 +463,11 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
  * @synchronous    TRUE
  * @trace       CPD-70339
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_IfCancelTransmit(PduIdType TxPduId);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Requests cancellation of an ongoing transmission of a PDU
@@ -462,7 +482,11 @@ Std_ReturnType SecOC_IfCancelTransmit(PduIdType TxPduId);
  * @synchronous    TRUE
  * @trace       CPD-70340
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Requests cancellation of an ongoing reception of a PDU in
@@ -477,7 +501,11 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId);
  * @synchronous    TRUE
  * @trace       CPD-70341
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This service provides the ability to force specific
@@ -504,12 +532,16 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId);
  * @synchronous    TRUE
  * @trace       CPD-70342
  */
-/* PRQA S 1513 ++ */ /* VL_QAC_MultiDeclaration */
+/* PRQA S 1512, 1513 ++ */ /* VL_SecOC_1512, VL_SecOC_1513 */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_VerifyStatusOverride(
     uint16                   ValueID,
     SecOC_OverrideStatusType overrideStatus,
     uint8                    numberOfMessagesToOverride);
-/* PRQA S 1513 -- */
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+/* PRQA S 1512, 1513 -- */
 
 #if defined(SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN)
 /**
@@ -532,8 +564,12 @@ Std_ReturnType SecOC_VerifyStatusOverride(
  * @synchronous    TRUE
  * @trace       CPD-70343
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 Std_ReturnType
     SecOC_SendDefaultAuthenticationInformation(uint16 FreshnessValueID, boolean sendDefaultAuthenticationInformation);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif
 
 #ifdef __cplusplus

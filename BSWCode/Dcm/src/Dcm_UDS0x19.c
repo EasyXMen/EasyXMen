@@ -37,7 +37,7 @@
 /**
  * @brief subfunction reportDTCByStatusMask
  */
-#define DCM_UDS19_REPODTC 2u
+#define DCM_UDS19_REPODTC    2u
 /**
  * @brief subfunction reportSupportedDTC
  */
@@ -68,16 +68,18 @@
 /**
  * @brief the length of DTC
  */
-#define DCM_DTC_LENGTH 3uL
+#define DCM_DTC_LENGTH        3uL
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-#define DCM_START_SEC_VAR_CLEARED_16
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
-static boolean oldPagedBufferStarted = FALSE;
-#define DCM_STOP_SEC_VAR_CLEARED_16
+static boolean oldPagedBufferStarted;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== internal function declarations ======================================== */
 #ifdef DCM_UDS_0X19_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x01
  * @param[in]     clientId    : the Dem clientId
@@ -96,9 +98,13 @@ static boolean oldPagedBufferStarted = FALSE;
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_01(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((defined DCM_UDS_0X19_0X2) || (defined DCM_UDS_0X19_0XA))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x02 and 0x0A
  * @param[in]     clientId           : the Dem clientId
@@ -117,6 +123,10 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_02_0A(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for processing sunfunction 0x2/0xA
@@ -135,6 +145,10 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_02_0A_Prepare(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process sunfunction 0x2/0xA
@@ -157,9 +171,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_02_0A_Process(
     boolean oldPagedBufferStarted,
 #endif
     uint32* offset);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0X3
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x03
  * @param[in]     clientId           : the Dem clientId
@@ -178,6 +196,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_02_0A_Process(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_03(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for processing sunfunction 0x3
@@ -196,9 +218,13 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_03_Prepare(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x04
  * @param[in]     OpStatus        : current operation status
@@ -221,6 +247,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04(
     uint8                         clientId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for processing sunfunction 0x4
@@ -245,9 +275,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04_Prepare(
     Dcm_MsgContextType*           pMsgContext,
     boolean*                      disabled,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0X6
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x06
  * @param[in]     OpStatus           : current operation status
@@ -270,6 +304,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06(
     uint8                         clientId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for processing sunfunction 0x4
@@ -294,9 +332,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06_Prepare(
     Dcm_MsgContextType*           pMsgContext,
     boolean*                      disabled,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0XD
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x0D
  * @param[in]     clientId    : the Dem clientId
@@ -315,9 +357,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06_Prepare(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_0D(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0XE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19 subfunction 0x0E
  * @param[in]     clientId    : the Dem clientId
@@ -336,7 +382,11 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_0E(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process subFunction of 0x19
@@ -356,6 +406,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_ProcessSubFunction(
     Dcm_OpStatusType              OpStatus,
     uint8                         protocolId,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         deal with subFunction process result
@@ -375,10 +429,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_PostProcess(
     uint8                         protocolId,
     Std_ReturnType                subFunctionResult,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (                                                                                            \
     (STD_ON == DCM_UDS_0X19_0X2) || (STD_ON == DCM_UDS_0X19_0XA) || (STD_ON == DCM_UDS_0X19_0X6) \
     || (STD_ON == DCM_UDS_0X19_0X4) || (STD_ON == DCM_UDS_0X19_0X3))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         deal with total response length
  * @param[in]     pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -393,6 +451,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_PostProcess(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_HandleTotalLength(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -417,9 +477,13 @@ Std_ReturnType Dcm_UDS0x19(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 1532-- */ /* VL_QAC_OneFunRef */
 /* ========================================== internal function definitions ========================================= */
 #ifdef DCM_UDS_0X19_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x01
  */
@@ -467,9 +531,12 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if ((STD_ON == DCM_UDS_0X19_0X2) || (STD_ON == DCM_UDS_0X19_0XA))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x02/0x0A
  */
@@ -501,6 +568,14 @@ DCM_LOCAL Std_ReturnType
         result = Dcm_UDS0x19_02_0A_Process(clientId, pMsgContext, &offset);
 #endif
     }
+    else if ((E_NOT_OK == result) && ((*ErrorCode) == DCM_POS_RESP))
+    {
+        result = E_OK;
+    }
+    else
+    {
+        /*for qac */
+    }
 
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
     if (((E_OK == result) || (DEM_NO_SUCH_ELEMENT == result))
@@ -519,7 +594,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+/* PRQA S 6080,6010 ++ */ /* VL_MTR_Dcm_STPTH,VL_MTR_Dcm_STCYC */
 /* setup filter and get number of filterd DTC, prepare for further process */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_02_0A_Prepare(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -536,7 +615,25 @@ DCM_LOCAL Std_ReturnType
         }
         else
         {
-            DTCStatusMask = pMsgContext->reqData[1u];
+            uint8 DTCStatusAvailabilityMask = 0u;
+            DTCStatusMask                   = pMsgContext->reqData[1u];
+            if (DTCStatusMask == 0u)
+            {
+                if (Dem_GetDTCStatusAvailabilityMask(
+                        clientId,
+                        &DTCStatusAvailabilityMask,
+                        DEM_DTC_ORIGIN_PRIMARY_MEMORY)
+                    == E_OK)
+                {
+                    pMsgContext->resDataLen  = 2uL;
+                    pMsgContext->resData[1u] = DTCStatusAvailabilityMask;
+                    result                   = E_NOT_OK;
+                }
+                else
+                {
+                    *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
+                }
+            }
         }
     }
     else
@@ -570,10 +667,21 @@ DCM_LOCAL Std_ReturnType
             result                  = Dcm_UDS0x19_HandleTotalLength(pMsgContext, ErrorCode);
         }
     }
+    if ((result == E_NOT_OK) && (*ErrorCode == DCM_POS_RESP))
+    {
+        if ((DTCStatusMask != 0u) || (0x02u != pMsgContext->reqData[0u]))
+        {
+            *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
+        }
+    }
 
     return result;
 }
-
+/* PRQA S 6080,6010 -- */
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x19_02_0A_Process(
     uint8 clientId,
     /* PRQA S 3673++ */ /* VL_QAC_3673 */
@@ -659,9 +767,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_02_0A_Process(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X19_0X3
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x03
  */
@@ -736,7 +847,10 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* setup filter and get number of result */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_03_Prepare(uint8 clientId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -767,9 +881,12 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X19_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x04
  */
@@ -838,7 +955,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* setup filter and get number of result */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04_Prepare(
     Dcm_OpStatusType              OpStatus,
@@ -912,9 +1032,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04_Prepare(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0X6
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x06
  */
@@ -983,7 +1107,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* setup filter and get number of result */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06_Prepare(
     Dcm_OpStatusType              OpStatus,
@@ -1057,9 +1185,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06_Prepare(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X19_0XD
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x0D
  */
@@ -1107,9 +1239,12 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X19_0XE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x0E
  */
@@ -1165,8 +1300,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* switch case for sunfunction handling */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_ProcessSubFunction(Dcm_OpStatusType OpStatus, uint8 protocolId, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -1237,13 +1375,15 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* deal with the result of subFunction process */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_PostProcess(uint8 protocolId, Std_ReturnType subFunctionResult, Dcm_NegativeResponseCodeType* ErrorCode)
 {
-    Std_ReturnType result      = E_NOT_OK;
-    uint8          subFunction = Dcm_MsgContext[protocolId].reqData[0u];
+    Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
     Dcm_ProtocolCtrlType* protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
 #endif
@@ -1257,10 +1397,10 @@ DCM_LOCAL Std_ReturnType
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
         if (oldPagedBufferStarted == FALSE)
         {
-            pMsgContext->resData[0u] = subFunction;
+            pMsgContext->resData[0u] = pMsgContext->reqData[0u];
         }
 #else
-        pMsgContext->resData[0u] = subFunction;
+        pMsgContext->resData[0u] = pMsgContext->reqData[0u];
 #endif
         result = E_OK;
 
@@ -1309,10 +1449,13 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (                                                                                            \
     (STD_ON == DCM_UDS_0X19_0X2) || (STD_ON == DCM_UDS_0X19_0XA) || (STD_ON == DCM_UDS_0X19_0X6) \
     || (STD_ON == DCM_UDS_0X19_0X4) || (STD_ON == DCM_UDS_0X19_0X3))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_HandleTotalLength(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -1340,7 +1483,7 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif

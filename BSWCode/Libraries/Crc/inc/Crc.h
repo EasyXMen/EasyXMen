@@ -118,6 +118,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * @brief         This service returns the version information of this module
  * @param[out]    Versioninfo : Pointer to where to store the version
@@ -126,8 +128,12 @@ extern "C" {
  * @trace         CPD-56165
  */
 void Crc_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 
 #if (STD_ON == CRC8_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * @brief         This service makes a CRC8 calculation on Crc_Length data bytes, with SAE J1850 parameters
  * @param[in]     Crc_DataPtr     : Pointer to start address of data block to be calculated.
@@ -143,6 +149,8 @@ void Crc_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @trace         CPD-56362
  */
 uint8 Crc_CalculateCRC8(const uint8* Crc_DataPtr, uint32 Crc_Length, uint8 Crc_StartValue8, boolean Crc_IsFirstCall);
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 
 #endif
 
@@ -161,12 +169,15 @@ uint8 Crc_CalculateCRC8(const uint8* Crc_DataPtr, uint32 Crc_Length, uint8 Crc_S
  * @synchronous   TRUE
  * @trace         CPD-56363
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint8 Crc_CalculateCRC8H2F(
     const uint8* Crc_DataPtr,
     uint32       Crc_Length,
     uint8        Crc_StartValue8H2F,
     boolean      Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC16_ALGORITHM)
@@ -184,9 +195,12 @@ uint8 Crc_CalculateCRC8H2F(
  * @synchronous   TRUE
  * @trace         CPD-56364
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint16
     Crc_CalculateCRC16(const uint8* Crc_DataPtr, uint32 Crc_Length, uint16 Crc_StartValue16, boolean Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC16ARC_ALGORITHM)
@@ -204,12 +218,15 @@ uint16
  * @synchronous   TRUE
  * @trace         CPD-56365
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint16 Crc_CalculateCRC16ARC(
     const uint8* Crc_DataPtr,
     uint32       Crc_Length,
     uint16       Crc_StartValue16,
     boolean      Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC32_ALGORITHM)
@@ -227,9 +244,12 @@ uint16 Crc_CalculateCRC16ARC(
  * @synchronous   TRUE
  * @trace         CPD-56366
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint32
     Crc_CalculateCRC32(const uint8* Crc_DataPtr, uint32 Crc_Length, uint32 Crc_StartValue32, boolean Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC32P4_ALGORITHM)
@@ -247,9 +267,12 @@ uint32
  * @synchronous   TRUE
  * @trace         CPD-56367
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint32
     Crc_CalculateCRC32P4(const uint8* Crc_DataPtr, uint32 Crc_Length, uint32 Crc_StartValue32, boolean Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC64_ALGORITHM)
@@ -267,9 +290,12 @@ uint32
  * @synchronous   TRUE
  * @trace         CPD-56368
  */
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 uint64
     Crc_CalculateCRC64(const uint8* Crc_DataPtr, uint64 Crc_Length, uint64 Crc_StartValue64, boolean Crc_IsFirstCall);
-
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 #ifdef __cplusplus
 }

@@ -254,7 +254,7 @@ typedef struct
 /**
  * @brief This container is used to configure the UserNm PDU.
  */
-typedef struct
+typedef struct UdpNm_UserDataTxPduTag
 {
     PduIdType TxUserDataPduId; /**< This parameter defines the Handle ID of the NM User Data I-PDU. @range 0..65535 */
     PduIdType UpperLayerPduId; /**< The macro value of the configuration when UdpNmTxUserDataPduRef is referenced

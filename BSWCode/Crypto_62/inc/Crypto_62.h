@@ -38,149 +38,236 @@
     \li VL_Crypto_62_1336
       Reason: Defining function pointer types
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_3457
       Reason: Macro defines a braced initializer
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_3412
       Reason: Macro defines an unrecognized code-fragment
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_3672
       Reason: function pointer needs to be assigned depends on configuration
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_General
-      Reason: Generic masking annotations for Crypto_62 that mask common QAC issues in this module.
+      Reason: Algorithm-related, not processed for the time being
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_Crypto_62_STTPP
       Reason: The number of lines of code is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_2982
       Reason: The operation is not redundant, because it must be emptied.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_Crypto_62_IfAlwaysFalse
+      Reason: The variable is assigned a value within the scope encapsulated by macro definitions.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_Crypto_62_PointerAith
+      Reason: Address offset is used to concatenate key data.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_QAC_NoReferenced
+      Reason: Variable referenced in macro conditional blocks, valid crypto driver status variable.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_QAC_NoModified
+      Reason: Variable Modified in macro conditional blocks, valid crypto driver status variable.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_Crypto_62_ConstCast
+      Reason: Valid crypto key RAM buffer initialization write, only allowed in key load phase.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_QAC_NoFunc
+      Reason: Functions are inside macro conditional blocks.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_Crypto_62_TypeUnused
+      Reason: Definition are used inside macro conditional blocks.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li   VL_Crypto_62_DETReport
+      Reason: Definition are used inside macro conditional blocks.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Crypto_62_STCYC
+      Reason: Because there are higher requirements for minimizing the stack and runtime usage of the applied code.
+      Risk: Understandability and testability become overly complex
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_Crypto_62_STMIF
+      Reason: Functions handle specific tasks across the entire component behavior.
+      Risk: Code is difficult to maintain.
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_Crypto_62_1505
+      Reason: Functions defined out are not used in the project and have no impact on the integration application.
+      Risk: No impact on integrated functions.
+      Prevention: Provided to the application to use, the application use need to use the corresponding interface.
+
+    \li VL_Crypto_62_STLIN
+    Reason: Splitting them into smaller parts will lead to performance degradation.
+    Risk: The code is difficult to maintain.
+    Prevention: Design and code review + clear structure and well-commented code.
+
+    \li VL_Crypto_62_6040
+    Reason: The implementation is completely in accordance with the specification.
+    Risk: None.
+    Prevention: None.
+
+    \li VL_Crypto_62_6060
+    Reason: The implementation is completely in accordance with the specification.
+    Risk: None.
+    Prevention: None.
+
+    \li VL_Crypto_62_0432
+      Reason: Function argument is not of compatible pointer type.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Crypto_62_STPTH
+    Reason: Due to the implementation requirements of some diagnostic message functions, the functions were not
+  separated into sub-functions
+    Risk: Understandability and testability become overly complex
+    Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_Crypto_62_2004
+    Reason: The else branch does not need to be executed.
+    Risk: None.
+    Prevention: None.
+
+    \li VL_Crypto_62_0553
+      Reason: The usage of this file depends on the config
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Crypto_62_2990
+    Reason: The implementation is in accordance with the specification.
+    Risk: None.
+    Prevention: None.
 
     \li VL_Crypto_62_5209
-      Reason: The unsigned type identifier is used, as is the design of the code.
-      Risk: No risk.
-      Prevention: None.
+    Reason: The implementation is in accordance with the specification.
+    Risk: None.
+    Prevention: None.
 
-    \li VL_Crypto_62_3494
-      Reason: The value of the first condition in a compound conditional expression is
-        configurable and will not always be "false".
+    \li VL_Crypto_62_2961
+      Reason: Strong rotations between different pointer types have no effect.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Crypto_62_1512
-      Reason: Rte-generated headers and module headers may contain the same declaration for the same
-        function, so they are compatible with each other.
+    \li VL_Crypto_62_3232
+      Reason: In the subsequent code blocks, this buffer shall be assigned with valid data.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_Crypto_62_1501
-      Reason: Whether a function is used or not depends on the generated macro definition.
-      Risk: No risk.
-      Prevention: None.
-
-    \li VL_Crypto_62_1753
-      Reason: The definition of the function is generated in the configuration file, and when a module uses the
-        function, the definition is generated.
-      Risk: No risk.
-      Prevention: None.
-
-    \li VL_Crypto_62_1712
-      Reason: The interface names are designed in such a way that it is easy to classify the interfaces.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Crypto_62_0686
-      Reason: Array has fewer initializers than its declared size.
+      Reason: The code meets the requirement for full array initialization.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Crypto_62_1759
-      Reason: In the configuration generation of this module, the generated global array variable is the
-        definition of the structure member.
+    \li VL_Crypto_62_1712
+      Reason: External identifiers have the same first '${n}' characters '${name}'.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Crypto_62_1753
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_Crypto_62_1501
+      Reason: The function '${name}' is declared but is not used within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
 
  */
 
@@ -192,6 +279,9 @@
 #include "Csm_Types.h"
 #include "CryIf.h"
 #include "Crypto_62_Types.h"
+#include "Crypto_GeneralTypes.h"
+
+/* PRQA S 1712 EOF */ /* VL_Crypto_62_1712 */
 
 #ifdef __cplusplus
 extern "C" {
@@ -217,30 +307,30 @@ extern "C" {
 #define CRYPTO_E_RE_NVM_ACCESS_FAILED ((uint8)0x04U) /**< Error code for NVM access failure @range 0x04U */
 
 /* Service IDs */
-#define CRYPTO_SID_INIT           ((uint8)0x00U) /**< Service ID for initialization @range 0x00U */
-#define CRYPTO_SID_GETVERSIONINFO ((uint8)0x01U) /**< Service ID for getting version information @range 0x01U */
-#define CRYPTO_SID_PROCESSJOB     ((uint8)0x03U) /**< Service ID for processing a job @range 0x03U */
-#define CRYPTO_SID_KEYELEMENTSET  ((uint8)0x04U) /**< Service ID for setting a key element @range 0x04U */
-#define CRYPTO_SID_KEYSETVALID    ((uint8)0x05U) /**< Service ID for setting a key as valid @range 0x05U */
-#define CRYPTO_SID_KEYELEMENTGET  ((uint8)0x06U) /**< Service ID for getting a key element @range 0x06U */
-#define CRYPTO_SID_KEYGENERATE    ((uint8)0x07U) /**< Service ID for generating a key @range 0x07U */
-#define CRYPTO_SID_KEYDERIVE      ((uint8)0x08U) /**< Service ID for deriving a key @range 0x08U */
+#define CRYPTO_SID_INIT           0x00U /**< Service ID for initialization @range 0x00U */
+#define CRYPTO_SID_GETVERSIONINFO 0x01U /**< Service ID for getting version information @range 0x01U */
+#define CRYPTO_SID_PROCESSJOB     0x03U /**< Service ID for processing a job @range 0x03U */
+#define CRYPTO_SID_KEYELEMENTSET  0x04U /**< Service ID for setting a key element @range 0x04U */
+#define CRYPTO_SID_KEYSETVALID    0x05U /**< Service ID for setting a key as valid @range 0x05U */
+#define CRYPTO_SID_KEYELEMENTGET  0x06U /**< Service ID for getting a key element @range 0x06U */
+#define CRYPTO_SID_KEYGENERATE    0x07U /**< Service ID for generating a key @range 0x07U */
+#define CRYPTO_SID_KEYDERIVE      0x08U /**< Service ID for deriving a key @range 0x08U */
 #define CRYPTO_SID_KEYEXCHANGECALCPUBVAL \
-    ((uint8)0x09U) /**< Service ID for calculating the public value in key exchange @range 0x09U */
+    0x09U /**< Service ID for calculating the public value in key exchange @range 0x09U */
 #define CRYPTO_SID_KEYEXCHANGECALCSECRET \
-    ((uint8)0x0AU) /**< Service ID for calculating the secret in key exchange @range 0x0AU */
-#define CRYPTO_SID_CERTIFICATE_PARSE  ((uint8)0x0BU) /**< Service ID for parsing a certificate @range 0x0BU */
-#define CRYPTO_SID_RANDOMSEED         ((uint8)0x0DU) /**< Service ID for seeding the random number generator @range 0x0DU */
-#define CRYPTO_SID_CANCELJOB          ((uint8)0x0EU) /**< Service ID for canceling a job @range 0x0EU */
-#define CRYPTO_SID_KEYELEMENTCOPY     ((uint8)0x0FU) /**< Service ID for copying a key element @range 0x0FU */
-#define CRYPTO_SID_KEYCOPY            ((uint8)0x10U) /**< Service ID for copying a key @range 0x10U */
-#define CRYPTO_SID_KEYELEMEMTIDSGET   ((uint8)0x11U) /**< Service ID for getting key element IDs @range 0x11U */
-#define CRYPTO_SID_CERTIFICATE_VERIFY ((uint8)0x12U) /**< Service ID for verifying a certificate @range 0x12U */
-#define CRYPTO_SID_KEYELEMENTCOPYPARTIAL \
-    ((uint8)0x13U)                              /**< Service ID for partially copying a key element @range 0x13U */
-#define CRYPTO_SID_KEYGETSTATUS  ((uint8)0x14U) /**< Service ID for getting the status of a key @range 0x14U */
-#define CRYPTO_SID_KEYSETINVALID ((uint8)0x15U) /**< Service ID for setting a key as invalid @range 0x15U */
-#define CRYPTO_SID_CustomSync    ((uint8)0x1aU) /**< Service ID for custom synchronization @range 0x1aU */
+    0x0AU /**< Service ID for calculating the secret in key exchange @range 0x0AU */
+#define CRYPTO_SID_CERTIFICATE_PARSE     0x0BU /**< Service ID for parsing a certificate @range 0x0BU */
+#define CRYPTO_SID_MAINFUNCTION          0x0CU /**< Service ID for mainFunction @range 0x0CU */
+#define CRYPTO_SID_RANDOMSEED            0x0DU /**< Service ID for seeding the random number generator @range 0x0DU */
+#define CRYPTO_SID_CANCELJOB             0x0EU /**< Service ID for canceling a job @range 0x0EU */
+#define CRYPTO_SID_KEYELEMENTCOPY        0x0FU /**< Service ID for copying a key element @range 0x0FU */
+#define CRYPTO_SID_KEYCOPY               0x10U /**< Service ID for copying a key @range 0x10U */
+#define CRYPTO_SID_KEYELEMEMTIDSGET      0x11U /**< Service ID for getting key element IDs @range 0x11U */
+#define CRYPTO_SID_CERTIFICATE_VERIFY    0x12U /**< Service ID for verifying a certificate @range 0x12U */
+#define CRYPTO_SID_KEYELEMENTCOPYPARTIAL 0x13U /**< Service ID for partially copying a key element @range 0x13U */
+#define CRYPTO_SID_KEYGETSTATUS          0x14U /**< Service ID for getting the status of a key @range 0x14U */
+#define CRYPTO_SID_KEYSETINVALID         0x15U /**< Service ID for setting a key as invalid @range 0x15U */
+#define CRYPTO_SID_CustomSync            0x1aU /**< Service ID for custom synchronization @range 0x1aU */
 
 /* ================================================ type definitions ================================================ */
 /**
@@ -261,7 +351,11 @@ typedef uint8 Crypto_62_ConfigType;
  * @synchronous    TRUE
  * @trace       CPD-71637
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_Init(const Crypto_62_ConfigType* configPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Retrieves the version information of the Crypto_62 module.
@@ -273,7 +367,11 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr);
  */
 #if (CRYPTO_VERSION_INFO_API == STD_ON)
 /* @req SWS_Crypto_910011,SRS_BSW_00407 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 
 /**
@@ -291,7 +389,11 @@ void Crypto_62_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous    TRUE
  * @trace       CPD-71639
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Cancels a cryptographic job.
@@ -308,7 +410,11 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71640
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Sets a key element for a cryptographic key.
@@ -327,7 +433,11 @@ Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71641
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyElementSet(uint32 cryptokeyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Sets a cryptographic key to a valid state.
@@ -342,7 +452,11 @@ Std_ReturnType Crypto_62_KeyElementSet(uint32 cryptokeyId, uint32 keyElementId, 
  * @synchronous    TRUE
  * @trace       CPD-71642
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeySetValid(uint32 cryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Sets a cryptographic key to an invalid state.
@@ -356,7 +470,11 @@ Std_ReturnType Crypto_62_KeySetValid(uint32 cryptoKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71643
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeySetInValid(uint32 cryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Retrieves a key element from a cryptographic key.
@@ -378,8 +496,12 @@ Std_ReturnType Crypto_62_KeySetInValid(uint32 cryptoKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71644
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_62_KeyElementGet(uint32 cryptoKeyId, uint32 keyElementId, uint8* resultPtr, uint32* resultLengthPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Retrieves the status of a cryptographic key.
@@ -395,7 +517,11 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71645
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyGetStatus(uint32 cryptoKeyId, Crypto_KeyStatusType* keyStatusPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Copies a key element from one cryptographic key to another.
@@ -415,11 +541,15 @@ Std_ReturnType Crypto_62_KeyGetStatus(uint32 cryptoKeyId, Crypto_KeyStatusType* 
  * @synchronous    TRUE
  * @trace       CPD-71646
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyElementCopy(
     uint32 cryptoKeyId,
     uint32 keyElementId,
     uint32 targetCryptoKeyId,
     uint32 targetKeyElementId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Copies a partial key element from one cryptographic key to another.
@@ -443,6 +573,8 @@ Std_ReturnType Crypto_62_KeyElementCopy(
  * @synchronous    TRUE
  * @trace       CPD-71647
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyElementCopyPartial(
     uint32 cryptoKeyId,
     uint32 keyElementId,
@@ -451,6 +583,8 @@ Std_ReturnType Crypto_62_KeyElementCopyPartial(
     uint32 keyElementCopyLength,
     uint32 targetCryptoKeyId,
     uint32 targetKeyElementId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Copies all key elements from one cryptographic key to another.
@@ -465,7 +599,11 @@ Std_ReturnType Crypto_62_KeyElementCopyPartial(
  * @synchronous    TRUE
  * @trace       CPD-71648
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyCopy(uint32 cryptoKeyId, uint32 targetCryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Retrieves the IDs and lengths of all key elements for a cryptographic key.
@@ -481,7 +619,11 @@ Std_ReturnType Crypto_62_KeyCopy(uint32 cryptoKeyId, uint32 targetCryptoKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71649
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyElementIdsGet(uint32 cryptoKeyId, uint32* keyElementIdsPtr, uint32* keyElementIdsLengthPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Seeds the random number generator with a given seed.
@@ -500,7 +642,11 @@ Std_ReturnType Crypto_62_KeyElementIdsGet(uint32 cryptoKeyId, uint32* keyElement
  * @synchronous    TRUE
  * @trace       CPD-71650
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_RandomSeed(uint32 cryptoKeyId, const uint8* seedPtr, uint32 seedLength);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Generates a cryptographic key.
@@ -514,7 +660,11 @@ Std_ReturnType Crypto_62_RandomSeed(uint32 cryptoKeyId, const uint8* seedPtr, ui
  * @synchronous    TRUE
  * @trace       CPD-71651
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyGenerate(uint32 cryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Derives a cryptographic key from another key.
@@ -529,7 +679,11 @@ Std_ReturnType Crypto_62_KeyGenerate(uint32 cryptoKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71652
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyDerive(uint32 cryptoKeyId, uint32 targetCryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Calculates the public value for a key exchange operation.
@@ -548,7 +702,13 @@ Std_ReturnType Crypto_62_KeyDerive(uint32 cryptoKeyId, uint32 targetCryptoKeyId)
  * @synchronous    TRUE
  * @trace       CPD-71653
  */
+/*PRQA S 1712 ++*/ /*VL_Crypto_62_1712*/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyExchangeCalcPubVal(uint32 cryptoKeyId, uint8* publicValuePtr, uint32* publicValueLengthPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/*PRQA S 1712 --*/ /*VL_Crypto_62_1712*/
 
 /**
  * @brief          Calculates the shared secret for a key exchange operation.
@@ -566,12 +726,14 @@ Std_ReturnType Crypto_62_KeyExchangeCalcPubVal(uint32 cryptoKeyId, uint8* public
  * @synchronous    TRUE
  * @trace       CPD-71654
  */
-/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret(
     uint32       cryptoKeyId,
     const uint8* partnerPublicValuePtr,
     uint32       partnerPublicValueLength);
-/* PRQA S 1712 -- */
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Performs a custom synchronous cryptographic operation.
@@ -597,6 +759,8 @@ Std_ReturnType Crypto_62_KeyExchangeCalcSecret(
  * @synchronous    TRUE
  * @trace       CPD-71655
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_CustomSync(
     uint32       dispatchId,
     uint32       keyId,
@@ -609,6 +773,8 @@ Std_ReturnType Crypto_62_CustomSync(
     uint32*      outputLengthPtr,
     uint8*       secondaryOutputPtr,
     uint32*      secondaryOutputLengthPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

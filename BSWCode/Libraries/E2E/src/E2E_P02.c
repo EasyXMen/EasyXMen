@@ -32,7 +32,6 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-
 #define E2E_START_SEC_CODE
 #include "E2E_MemMap.h"
 /**
@@ -53,6 +52,11 @@ E2E_LOCAL Std_ReturnType E2E_P02ProtectVerifyInputs(
     const E2E_P02ConfigType*       ConfigPtr,
     const E2E_P02ProtectStateType* StatePtr,
     const uint8*                   DataPtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of protect()
  * @param[in]    ConfigPtr : Pointer to static configuration.
@@ -71,6 +75,11 @@ E2E_LOCAL Std_ReturnType E2E_P02CheckVerifyInputs(
     const E2E_P02ConfigType*     ConfigPtr,
     const E2E_P02CheckStateType* StatePtr,
     const uint8*                 DataPtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Caculate the status of received counter
  * @param[in]    ConfigPtr       : Pointer to static configuration.
@@ -86,6 +95,11 @@ E2E_LOCAL void E2E_P02AnalysisDeltaCounter(
     E2E_P02CheckStateType*   StatePtr,
     const E2E_P02ConfigType* ConfigPtr,
     uint8                    ReceivedCounter);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Caculate the status to OK, OKSOMELOST, SYNC
  * @param[in]    ConfigPtr       : Pointer to static configuration.
@@ -139,6 +153,11 @@ Std_ReturnType E2E_P02Protect(const E2E_P02ConfigType* ConfigPtr, E2E_P02Protect
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Initializes the protection state.
  */
@@ -157,6 +176,11 @@ Std_ReturnType E2E_P02ProtectInit(E2E_P02ProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 2.
  */
@@ -222,6 +246,11 @@ Std_ReturnType E2E_P02Check(const E2E_P02ConfigType* ConfigPtr, E2E_P02CheckStat
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Initializes the check state.
  */
@@ -248,6 +277,11 @@ Std_ReturnType E2E_P02CheckInit(E2E_P02CheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of Profile 1 to a generic check status.
  */
@@ -295,8 +329,12 @@ E2E_PCheckStatusType
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P02ProtectVerifyInputs(
     const E2E_P02ConfigType*       ConfigPtr,
     const E2E_P02ProtectStateType* StatePtr,
@@ -319,6 +357,11 @@ E2E_LOCAL Std_ReturnType E2E_P02ProtectVerifyInputs(
     }
     return ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P02CheckVerifyInputs(
     const E2E_P02ConfigType*     ConfigPtr,
     const E2E_P02CheckStateType* StatePtr,
@@ -343,7 +386,11 @@ E2E_LOCAL Std_ReturnType E2E_P02CheckVerifyInputs(
     }
     return ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void E2E_P02AnalysisDeltaCounter(
     uint8                    DeltaCounter,
     E2E_P02CheckStateType*   StatePtr,
@@ -384,6 +431,11 @@ E2E_LOCAL void E2E_P02AnalysisDeltaCounter(
         }
     }
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_P02AddStatus(E2E_P02CheckStateType* StatePtr, const E2E_P02ConfigType* ConfigPtr, E2E_P02CheckStatusType status)
 {

@@ -60,7 +60,7 @@ typedef struct
 /* ============================================ internal data definitions =========================================== */
 #define COMM_START_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
-COMM_LOCAL const ComM_ChannelConfigType* ComM_ChannelConfigs;
+COMM_LOCAL const ComM_ChannelConfigType* ComM_ChannelConfigsPtr;
 #define COMM_STOP_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
 
@@ -108,6 +108,8 @@ COMM_LOCAL_INLINE boolean ComM_ChannelIsNoWakeUp(NetworkHandleType Channel)
 }
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief On entry of channel state COMM_NO_COM_REQUEST_PENDING on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -116,7 +118,11 @@ COMM_LOCAL_INLINE boolean ComM_ChannelIsNoWakeUp(NetworkHandleType Channel)
  * @trace       CPD-64901
  */
 COMM_LOCAL void ComM_ChBeh_EntryNoComRequestPending(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief On entry of channel state COMM_NO_COM_NO_PENDING_REQUEST on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -125,7 +131,11 @@ COMM_LOCAL void ComM_ChBeh_EntryNoComRequestPending(NetworkHandleType Channel);
  * @trace       CPD-64904
  */
 COMM_LOCAL void ComM_ChBeh_EntryNoCom(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief On entry of channel state COMM_FULL_COM_READY_SLEEP on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -134,7 +144,11 @@ COMM_LOCAL void ComM_ChBeh_EntryNoCom(NetworkHandleType Channel);
  * @trace       CPD-64907
  */
 COMM_LOCAL void ComM_ChBeh_EntryComReadySleep(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief On entry of channel state COMM_FULL_COM_NETWORK_REQUESTED on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -144,7 +158,12 @@ COMM_LOCAL void ComM_ChBeh_EntryComReadySleep(NetworkHandleType Channel);
  * @trace       CPD-64913
  */
 COMM_LOCAL void ComM_ChBeh_EntryFullComReq(NetworkHandleType Channel, boolean ActiveRequested);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief On entry of channel state COMM_SILENT_COM on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -153,8 +172,13 @@ COMM_LOCAL void ComM_ChBeh_EntryFullComReq(NetworkHandleType Channel, boolean Ac
  * @trace       CPD-64916
  */
 COMM_LOCAL void ComM_ChBeh_EntrySlientMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Behavior in channel state COMM_FULL_COM_NETWORK_REQUESTED on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -163,9 +187,13 @@ COMM_LOCAL void ComM_ChBeh_EntrySlientMode(NetworkHandleType Channel);
  * @trace       CPD-64918
  */
 COMM_LOCAL void ComM_ChannelDoFullComReq(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_CURRENT_CHANNEL_REQUEST_NOTIFICATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief A SW-C that wants to get informed about, which users are currently requesting COMM_FULL_COMMUNICATION requires
  * the sender-receiver interface ComM_CurrentChannelRequest.
@@ -175,8 +203,12 @@ COMM_LOCAL void ComM_ChannelDoFullComReq(NetworkHandleType Channel);
  * @trace       CPD-64922
  */
 COMM_LOCAL void ComM_ChannelFullComRequestNotification(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query whether there are active requests of the corresponding channel.
  * @param[in]   channel see NetworkHandleType.
@@ -187,7 +219,11 @@ COMM_LOCAL void ComM_ChannelFullComRequestNotification(NetworkHandleType Channel
  * @trace       CPD-64924
  */
 COMM_LOCAL boolean ComM_ChannelActiveRequested(NetworkHandleType channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Channel state machine try transit to COMM_FULL_COM_NETWORK_REQUESTED on the corresponding channel.
  * @param[in]   Channel         see NetworkHandleType.
@@ -197,7 +233,11 @@ COMM_LOCAL boolean ComM_ChannelActiveRequested(NetworkHandleType channel);
  * @trace       CPD-64925
  */
 COMM_LOCAL void ComM_ChannelStateTransitionToFullCom(NetworkHandleType Channel, boolean ActiveRequested);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Channel state machine try transit to COMM_NO_COM_NO_PENDING_REQUEST on the corresponding channel.
  * @param[in]   Channel see NetworkHandleType.
@@ -206,8 +246,12 @@ COMM_LOCAL void ComM_ChannelStateTransitionToFullCom(NetworkHandleType Channel, 
  * @trace       CPD-64926
  */
 COMM_LOCAL void ComM_ChannelStateTransitionToNoCom(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Atomically replaces the value pointed to by Object with the value of Desired.
  * @param[in]   Object Object
@@ -217,7 +261,11 @@ COMM_LOCAL void ComM_ChannelStateTransitionToNoCom(NetworkHandleType Channel);
  * @trace       CPD-64927
  */
 COMM_LOCAL void ComM_ChannelStoreNmModeEvent(ComM_NmModeEventType* Object, ComM_NmModeEventType Desired);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Atomically compares the value pointed to by Object for equality with that in Expected, and if true, replaces
  * the value pointed to by Object with COMM_NM_MODE_EVENT_NONE.
@@ -229,7 +277,11 @@ COMM_LOCAL void ComM_ChannelStoreNmModeEvent(ComM_NmModeEventType* Object, ComM_
  * @trace       CPD-64928
  */
 COMM_LOCAL boolean ComM_ChannelCompareAndClearNmModeEvent(ComM_NmModeEventType* Object, ComM_NmModeEventType Expected);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Handle channel state machine transition on the corresponding channel via NmModeEvent.
  * @param[in]   Channel see NetworkHandleType.
@@ -239,6 +291,8 @@ COMM_LOCAL boolean ComM_ChannelCompareAndClearNmModeEvent(ComM_NmModeEventType* 
  * @trace       CPD-64931
  */
 COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, boolean ActiveRequested);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_USER_NUMBER > 0u
@@ -246,6 +300,8 @@ COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, boolean
 #pragma PRQA_NO_SIDE_EFFECTS ComM_ChannelUserRequested
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Handle channel state machine transition on the corresponding channel via NmModeEvent.
  * @param[in]   Channel see NetworkHandleType.
@@ -255,10 +311,16 @@ COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, boolean
  * @trace       CPD-65026
  */
 COMM_LOCAL boolean ComM_ChannelUserRequested(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelUpdateIRA(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #define COMM_START_SEC_CODE
@@ -280,9 +342,13 @@ void ComM_ChannelGlobalInit(const ComM_ChannelConfigType* ChannelConfigs)
         channelGlobalVarPtr->ActiveDiagnostic = FALSE;
     }
 
-    ComM_ChannelConfigs = ChannelConfigs;
+    ComM_ChannelConfigsPtr = ChannelConfigs;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelLocalInit(void)
 {
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
@@ -293,7 +359,7 @@ void ComM_ChannelLocalInit(void)
     {
 #if (COMM_MULTIPLE_PARTITION_ENABLED == STD_ON) || (COMM_CURRENT_CHANNEL_REQUEST_NOTIFICATION_ENABLED == STD_ON) \
     || (COMM_PNC_SUPPORT == STD_ON)
-        const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[channel];
+        const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[channel];
 #endif
 
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
@@ -324,22 +390,31 @@ void ComM_ChannelLocalInit(void)
 
 #if COMM_PNC_SUPPORT == STD_ON
             channelLocalVarPtr->PncBitVectorIRA = channelConfigPtr->PncBitVectorIRA;
-            (void)IStdLib_MemSet(channelLocalVarPtr->PncBitVectorIRA, 0, channelConfigPtr->PncBitVectorLength);
+            (void)IStdLib_MemSet(channelLocalVarPtr->PncBitVectorIRA, 0u, channelConfigPtr->PncBitVectorLength);
 #endif
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef COMM_TEST
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_StateType ComM_ChannelGetState(NetworkHandleType Channel)
 {
     const ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
     return channelLocalVarPtr->State;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 ComM_ModeType ComM_ChannelGetMaxComMode(NetworkHandleType Channel)
 {
+    (void)Channel; /* avoid unused-parameter warning when Macro disabled */
 #if COMM_MODE_LIMITATION_ENABLED == STD_ON
     if (ComM_ChannelIsNoCom(Channel))
     {
@@ -356,6 +431,10 @@ ComM_ModeType ComM_ChannelGetMaxComMode(NetworkHandleType Channel)
 
     return COMM_FULL_COMMUNICATION;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* PRQA S 6060 -- */ /* VL_MTR_ComM_STM19 */
 /**
  * The implementation of ComM_ChannelGetCurrentComMode.
@@ -365,46 +444,34 @@ ComM_ModeType ComM_ChannelGetCurrentComMode(NetworkHandleType Channel)
     const ComM_ChannelGlobalVarType* channelGlobalVarPtr = &ComM_ChannelGlobalVars[Channel];
     return channelGlobalVarPtr->CurrentComMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelCommunicationAllowed(NetworkHandleType Channel, boolean Allowed)
 {
     ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
     channelLocalVarPtr->Allowed                  = Allowed;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_ChannelBusSMModeIndication.
  * ComM shall propagate the indicated state to the users with means of the RTE and BswM.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_ComM_STCAL */
 void ComM_ChannelBusSMModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode)
+/* PRQA S 6070 -- */
 {
     ComM_ChannelGlobalVarType* channelGlobalVarPtr = &ComM_ChannelGlobalVars[Channel];
 
     if (ComMode != channelGlobalVarPtr->CurrentComMode)
     {
-#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
-        ComM_ModeType                 previousUserCurrentMode[COMM_USER_NUMBER] = {0};
-        const ComM_ChannelConfigType* channelConfigPtr                          = &ComM_ChannelConfigs[Channel];
-        SchM_Enter_ComM_UM();
-        for (uint8 i = 0u; i < channelConfigPtr->NumberOfUsers; ++i)
-        {
-            previousUserCurrentMode[i] = ComM_UserGetCurrentMode(channelConfigPtr->Users[i]);
-        }
-
         channelGlobalVarPtr->CurrentComMode = ComMode;
-
-        for (uint8 i = 0u; i < channelConfigPtr->NumberOfUsers; ++i)
-        {
-            ComM_ModeType nextUserCurrentMode = ComM_UserGetCurrentMode(channelConfigPtr->Users[i]);
-            if (previousUserCurrentMode[i] != nextUserCurrentMode)
-            {
-                ComM_UserSwitchCurrentMode(channelConfigPtr->Users[i], nextUserCurrentMode);
-            }
-        }
-        SchM_Exit_ComM_UM();
-#else
-        channelGlobalVarPtr->CurrentComMode = ComMode;
-#endif
 
         BswM_ComM_CurrentMode(Channel, ComMode);
 
@@ -437,11 +504,15 @@ void ComM_ChannelBusSMModeIndication(NetworkHandleType Channel, ComM_ModeType Co
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelNmModeIndication(NetworkHandleType Channel, ComM_NmModeEventType NmModeEvent)
 {
-    const ComM_ChannelConfigType* channelConfigPtr   = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr   = &ComM_ChannelConfigsPtr[Channel];
     ComM_ChannelLocalVarType*     channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
 
     if ((channelConfigPtr->NmVariant == COMM_NM_VARIANT_FULL)
@@ -450,12 +521,18 @@ void ComM_ChannelNmModeIndication(NetworkHandleType Channel, ComM_NmModeEventTyp
         ComM_ChannelStoreNmModeEvent(&channelLocalVarPtr->NmModeEvent, NmModeEvent);
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_ChannelWakeUpIndication.
  */
+/* PRQA S 6030 ++ */ /* VL_MTR_ComM_STMIF */
 void ComM_ChannelWakeUpIndication(NetworkHandleType Channel, boolean SynchronousWakeUp)
+/* PRQA S 6030 -- */
 {
 #if COMM_SYNCHRONOUS_WAKE_UP == STD_ON
     if (SynchronousWakeUp)
@@ -485,14 +562,18 @@ void ComM_ChannelWakeUpIndication(NetworkHandleType Channel, boolean Synchronous
         ComM_ChannelGlobalVars[Channel].WakeUpIndication = TRUE;
 
         /* ComMNmVariant of a managed channel is set to LIGHT */
-        NetworkHandleType managingChannel = ComM_ChannelConfigs[Channel].ManagingChannel;
+        NetworkHandleType managingChannel = ComM_ChannelConfigsPtr[Channel].ManagingChannel;
         if (managingChannel != COMM_NOT_USED_CHANNEL_ID)
         {
-            ComM_ChannelGlobalVars[Channel].WakeUpIndication = TRUE;
+            ComM_ChannelGlobalVars[managingChannel].WakeUpIndication = TRUE;
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelMainFunction(NetworkHandleType Channel)
 {
     ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
@@ -519,10 +600,11 @@ void ComM_ChannelMainFunction(NetworkHandleType Channel)
     ComM_ChannelFullComRequestNotification(Channel);
 #endif
 
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     boolean                       activeRequested  = ComM_ChannelActiveRequested(Channel);
 
-    /* event priority: NmModeEvent > activeRequested and WakeUpIndicati */
+    (void)channelConfigPtr; /* avoid unused-variable warning when Macro disabled */
+    /* event priority: NmModeEvent > activeRequested and WakeUpIndication */
 #if COMM_NM_ENABLED == STD_ON
     if ((channelConfigPtr->NmVariant == COMM_NM_VARIANT_FULL)
         || (channelConfigPtr->NmVariant == COMM_NM_VARIANT_PASSIVE))
@@ -530,6 +612,23 @@ void ComM_ChannelMainFunction(NetworkHandleType Channel)
         ComM_ChannelNmModeEventHandle(Channel, activeRequested);
     }
 #endif
+    /*
+     * 1. Recording a passive wakeup (WakeUpIndication) in any state other than NO_COM
+     *    would cause redundant state transitions. Periodic cleanup here prevents that.
+     * 2. ComM_ChannelWakeUpIndication filters recording based on channel state, but the
+     *    state is updated concurrently in MainFunction. Race conditions may lose events,
+     *    so we clear the passive wakeup record in MainFunction just before the actual
+     *    state transition to unify handling. For possible erroneous cleanup, see item 3.
+     * 3. When leaving FULL_COM for NO_COM (e.g., NmLightTimeout expires), if a passive
+     *    wakeup arrives right before the state check, the flag is set while the state is
+     *    still FULL_COM. This causes incorrect clearing and loss of the wakeup event.
+     *    Recovery depends on a subsequent passive wakeup trigger.
+     */
+    if ((channelLocalVarPtr->State != COMM_NO_COM_NO_PENDING_REQUEST)
+        && (channelLocalVarPtr->State != COMM_NO_COM_REQUEST_PENDING))
+    {
+        ComM_ChannelGlobalVars[Channel].WakeUpIndication = FALSE;
+    }
 
     if (activeRequested)
     {
@@ -549,35 +648,48 @@ void ComM_ChannelMainFunction(NetworkHandleType Channel)
         ComM_ChannelStateTransitionToNoCom(Channel);
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelSetPncNmRequest(NetworkHandleType Channel)
 {
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     if (channelConfigPtr->PncNmRequest)
     {
         ComM_ChannelGlobalVars[Channel].PncNmRequest = TRUE;
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 boolean ComM_ChannelSetWakeupSleepRequest(NetworkHandleType Channel)
 {
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
+    boolean                       ret              = FALSE;
     if (channelConfigPtr->WakeupSleepRequestEnabled)
     {
         ComM_ChannelGlobalVars[Channel].WakeupSleepRequest = TRUE;
-        return TRUE;
+        ret                                                = TRUE;
     }
-    return FALSE;
+    return ret;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_ChannelActiveDiagnostic.
  */
 void ComM_ChannelActiveDiagnostic(NetworkHandleType channel, boolean active)
 {
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[channel];
     if ((channelConfigPtr->NmVariant == COMM_NM_VARIANT_FULL) || (channelConfigPtr->NmVariant == COMM_NM_VARIANT_LIGHT)
         || (channelConfigPtr->NmVariant == COMM_NM_VARIANT_NONE))
     {
@@ -585,9 +697,13 @@ void ComM_ChannelActiveDiagnostic(NetworkHandleType channel, boolean active)
         channelGlobalVarPtr->ActiveDiagnostic          = active;
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_ChannelUpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorPtr)
 {
     if (ComM_PncEnabled)
@@ -601,34 +717,42 @@ void ComM_ChannelUpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorP
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #endif
 
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
-ApplicationType ComM_ChannelGetApplication(NetworkHandleType Channel)
-{
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
-    return channelConfigPtr->Application;
-}
-#endif
-#define COMM_STOP_SEC_CODE
-#include "ComM_MemMap.h"
-
-/* ========================================== internal function definitions ========================================= */
 #define COMM_START_SEC_CODE
 #include "ComM_MemMap.h"
+ApplicationType ComM_ChannelGetApplication(NetworkHandleType Channel)
+{
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
+    return channelConfigPtr->Application;
+}
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+/* ========================================== internal function definitions ========================================= */
 COMM_LOCAL void ComM_ChBeh_EntryNoComRequestPending(NetworkHandleType Channel)
 {
     ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
     channelLocalVarPtr->State                    = COMM_NO_COM_REQUEST_PENDING;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChBeh_EntryNoCom(NetworkHandleType Channel)
 {
     ComM_ChannelLocalVarType* chVarPtr = ComM_ChannelLocalVarPtrs[Channel];
     chVarPtr->State                    = COMM_NO_COM_NO_PENDING_REQUEST;
 
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     /* SWS_ComM_00073
      * on entering state comm no commuication the ComM channel state machine shall switch off the transmit and reception
      */
@@ -643,11 +767,15 @@ COMM_LOCAL void ComM_ChBeh_EntryNoCom(NetworkHandleType Channel)
     }
 #endif
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChBeh_EntryComReadySleep(NetworkHandleType Channel)
 {
     ComM_ChannelLocalVarType*     channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
-    const ComM_ChannelConfigType* channelConfigPtr   = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr   = &ComM_ChannelConfigsPtr[Channel];
     channelLocalVarPtr->State                        = COMM_FULL_COM_READY_SLEEP;
 #if COMM_NM_ENABLED == STD_ON
     /* SWS_ComM_00133 ComMNmVariant=FULL shall release network */
@@ -662,13 +790,18 @@ COMM_LOCAL void ComM_ChBeh_EntryComReadySleep(NetworkHandleType Channel)
         channelLocalVarPtr->NmLightTimeout = channelConfigPtr->NmLightTimeout;
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChBeh_EntryFullComReq(NetworkHandleType Channel, boolean ActiveRequested)
 {
+    (void)ActiveRequested; /* avoid unused-parameter warning when Macro disabled */
     ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
     channelLocalVarPtr->State                    = COMM_FULL_COM_NETWORK_REQUESTED;
 
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     /* SWS_ComM_00892 ComMNmVariant=LIGHT In sub-state COMM_FULL_COM_READY_SLEEP
        switch COMM_FULL_COM_NETWORK_REQUESTED the timer for ComMNmLightTimeout shall be canceled */
     if (channelConfigPtr->NmVariant == COMM_NM_VARIANT_LIGHT)
@@ -713,7 +846,12 @@ COMM_LOCAL void ComM_ChBeh_EntryFullComReq(NetworkHandleType Channel, boolean Ac
      * the wake-up event before BusNm has actually processed the passive wake-up. */
     ComM_ChannelGlobalVars[Channel].WakeUpIndication = FALSE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Dont need to call Nm_NetworkRelease, either ComM_Nm_NetworkMode or ComM_Nm_BusSleepMode will be called later anyway.
  * - Nm_NetworkRelease is not required after ComM_Nm_NetworkMode.
@@ -722,7 +860,7 @@ COMM_LOCAL void ComM_ChBeh_EntryFullComReq(NetworkHandleType Channel, boolean Ac
 COMM_LOCAL void ComM_ChBeh_EntrySlientMode(NetworkHandleType Channel)
 {
     ComM_ChannelLocalVarType*     chVarPtr         = ComM_ChannelLocalVarPtrs[Channel];
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     chVarPtr->State                                = COMM_SILENT_COM;
     /* SWS_ComM_00071
      * on entering state silent the ComM channel state machine shall switch off the transmit keep reception capability
@@ -730,10 +868,15 @@ COMM_LOCAL void ComM_ChBeh_EntrySlientMode(NetworkHandleType Channel)
      */
     (void)channelConfigPtr->BusSMRequestComMode(Channel, COMM_SILENT_COMMUNICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelDoFullComReq(NetworkHandleType Channel)
 {
-    const ComM_ChannelConfigType* channelConfigPtr    = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr    = &ComM_ChannelConfigsPtr[Channel];
     ComM_ChannelGlobalVarType*    channelGlobalVarPtr = &ComM_ChannelGlobalVars[Channel];
 
     if (channelGlobalVarPtr->PncNmRequest)
@@ -747,16 +890,20 @@ COMM_LOCAL void ComM_ChannelDoFullComReq(NetworkHandleType Channel)
         (void)channelConfigPtr->BusSMRequestComMode(Channel, COMM_FULL_COMMUNICATION_WITH_WAKEUP_REQUEST);
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_CURRENT_CHANNEL_REQUEST_NOTIFICATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelFullComRequestNotification(NetworkHandleType Channel)
 {
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     if (channelConfigPtr->CurrentChannelRequest != NULL_PTR)
     {
-        uint8               numberOfUserRequesters                          = 0u;
-        ComM_UserHandleType userRequesters[channelConfigPtr->NumberOfUsers] = {0};
+        uint8               numberOfUserRequesters                     = 0u;
+        ComM_UserHandleType userRequesters[COMM_MAX_CHANNEL_REQUESTER] = {0};
 
         for (uint8 i = 0u; i < channelConfigPtr->NumberOfUsers; ++i)
         {
@@ -776,7 +923,11 @@ COMM_LOCAL void ComM_ChannelFullComRequestNotification(NetworkHandleType Channel
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 COMM_LOCAL boolean ComM_ChannelActiveRequested(NetworkHandleType channel)
 {
@@ -793,7 +944,7 @@ COMM_LOCAL boolean ComM_ChannelActiveRequested(NetworkHandleType channel)
         return FALSE;
     }
 
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[channel];
 
     /* User requests will be ignored on channels with ComMNmVariant=PASSIVE|SLAVE_PASSIVE */
     if (channelConfigPtr->NmVariant == COMM_NM_VARIANT_PASSIVE)
@@ -826,6 +977,10 @@ COMM_LOCAL boolean ComM_ChannelActiveRequested(NetworkHandleType channel)
 
     return FALSE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* PRQA S 6060 -- */ /* VL_MTR_ComM_STM19 */
 COMM_LOCAL void ComM_ChannelStateTransitionToFullCom(NetworkHandleType Channel, boolean ActiveRequested)
 {
@@ -873,11 +1028,15 @@ COMM_LOCAL void ComM_ChannelStateTransitionToFullCom(NetworkHandleType Channel, 
         }
     } while (channelLocalVarPtr->State != previousState);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelStateTransitionToNoCom(NetworkHandleType Channel)
 {
     const ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
-    const ComM_ChannelConfigType*   channelConfigPtr   = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType*   channelConfigPtr   = &ComM_ChannelConfigsPtr[Channel];
     ComM_StateType                  oldState;
 
     do
@@ -918,15 +1077,23 @@ COMM_LOCAL void ComM_ChannelStateTransitionToNoCom(NetworkHandleType Channel)
         }
     } while (channelLocalVarPtr->State != oldState);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelStoreNmModeEvent(ComM_NmModeEventType* Object, ComM_NmModeEventType Desired)
 {
     SchM_Enter_ComM_Channel();
     *Object = Desired;
     SchM_Exit_ComM_Channel();
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL boolean ComM_ChannelCompareAndClearNmModeEvent(ComM_NmModeEventType* Object, ComM_NmModeEventType Expected)
 {
     boolean equal = FALSE;
@@ -939,7 +1106,11 @@ COMM_LOCAL boolean ComM_ChannelCompareAndClearNmModeEvent(ComM_NmModeEventType* 
     SchM_Exit_ComM_Channel();
     return equal;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, boolean ActiveRequested)
 {
     ComM_ChannelLocalVarType* channelLocalVarPtr = ComM_ChannelLocalVarPtrs[Channel];
@@ -971,13 +1142,17 @@ COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, boolean
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_USER_NUMBER > 0u
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 COMM_LOCAL boolean ComM_ChannelUserRequested(NetworkHandleType Channel)
 {
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigsPtr[Channel];
     for (uint8 i = 0u; i < channelConfigPtr->NumberOfUsers; ++i)
     {
         if (ComM_UserGetRequestedComMode(channelConfigPtr->Users[i]) == COMM_FULL_COMMUNICATION)
@@ -987,20 +1162,14 @@ COMM_LOCAL boolean ComM_ChannelUserRequested(NetworkHandleType Channel)
     }
     return FALSE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 /* PRQA S 6060 -- */ /* VL_MTR_ComM_STM19 */
 
-#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
-/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
-ApplicationType ComM_GetChannelApplicationID(NetworkHandleType Channel)
-/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
-{
-    const ComM_ChannelConfigType* channelConfigPtr = &ComM_ChannelConfigs[Channel];
-    return channelConfigPtr->Application;
-}
-#endif
-
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Calculate the IRA for the corresponding channel, and update it to NM if the IRA changes.
  * @param[in]    Channel  See NetworkHandleType
@@ -1008,9 +1177,11 @@ ApplicationType ComM_GetChannelApplicationID(NetworkHandleType Channel)
  * @synchronous  TRUE
  * @trace        CPD-61614
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_ComM_STCAL */
 COMM_LOCAL void ComM_ChannelUpdateIRA(NetworkHandleType Channel)
+/* PRQA S 6070 -- */
 {
-    const ComM_ChannelConfigType* configPtr                                       = &ComM_ChannelConfigs[Channel];
+    const ComM_ChannelConfigType* configPtr                                       = &ComM_ChannelConfigsPtr[Channel];
     uint8                         pncBitVectorIRA[COMM_MAX_PNC_BIT_VECTOR_LENGTH] = {0};
 
     for (PNCHandleType pnc = 0u; pnc < COMM_PNC_NUMBER; ++pnc)
@@ -1034,7 +1205,7 @@ COMM_LOCAL void ComM_ChannelUpdateIRA(NetworkHandleType Channel)
 
             const ComM_ChannelLocalVarType* localVarPtr = ComM_ChannelLocalVarPtrs[Channel];
 
-            if (IStdLib_MemCmp(localVarPtr->PncBitVectorIRA, pncBitVectorIRA, configPtr->PncBitVectorLength) != 0)
+            if (IStdLib_MemCmp(localVarPtr->PncBitVectorIRA, pncBitVectorIRA, configPtr->PncBitVectorLength) != 0u)
             {
                 (void)IStdLib_MemCpy(localVarPtr->PncBitVectorIRA, pncBitVectorIRA, configPtr->PncBitVectorLength);
                 Nm_UpdateIRA(Channel, pncBitVectorIRA);
@@ -1042,7 +1213,7 @@ COMM_LOCAL void ComM_ChannelUpdateIRA(NetworkHandleType Channel)
         }
     }
 }
-#endif
-/* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"
+#endif
+/* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */

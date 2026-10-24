@@ -374,12 +374,18 @@ typedef void (*NvM_VoidFuncVoidPtr)(void); /* PRQA S 5004 */ /* VL_NvM_5004 */
 
 /* =========================================== external data declarations =========================================== */
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_VAR_CLEARED_16
+#include "NvM_MemMap.h"
 /**
  * @brief BUffer for queue with priority @range NA
  */
 extern uint16 NvM_QueueSpaceTalbe[NVM_TABLE_SIZE_JOB_QUEUE];
+#define NVM_STOP_SEC_VAR_CLEARED_16
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_CONST_PTR
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_3 != NVM_API_CONFIG_CLASS)
 /**
  * @brief API function for class1 and calss3
@@ -396,52 +402,88 @@ extern const NvM_VoidFuncVoidPtr NvM_MemIfAsyncFuncTable[NVM_MEMIF_JOB_MAX_NUM][
  */
 extern const NvM_VoidFuncVoidPtr NvM_MemIfAsyncFuncTable[NVM_MEMIF_JOB_MAX_NUM][NVM_MEMIF_JOB_MAX_NUM];
 #endif
+#define NVM_STOP_SEC_CONST_PTR
+#include "NvM_MemMap.h"
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the priority list information @range NA
  */
 extern NvM_PriTable2QueueType NvM_PriTable2Queue[NVM_PRI_TAB_MAX_NUM][NVM_TOTAL_NUM_DIFF_PRI];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Immediate Queue @range NA
  */
 extern NvM_ImmedQueueType NvM_ImmedQueue[NVM_SIZE_IMMEDIATE_JOB_QUEUE];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Standard Queue @range NA
  */
 extern NvM_StandQueueType NvM_StandQueue[NVM_SIZE_STANDARD_JOB_QUEUE];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the management block information @range NA
  */
 extern NvM_AdminBlockType NvM_AdminBlock[NVM_BLOCK_NUM_ALL];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the schema information in NvM module @range NA
  */
 extern NvM_ModuleType NvM_Module;
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the multi-block job information in NvM module @range NA
  */
 extern NvM_MultiJobType NvM_MultiJob;
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the automated job information in NvM Module @range NA
  */
 extern NvM_AtomJobType NvM_AtomJob;
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the block-related information currently processed @range NA
  */
 extern NvM_CurRunningType NvM_CurRunning;
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
 /**
  * @brief Management message information of the queue with immediately data @range NA
@@ -453,28 +495,51 @@ extern NvM_RoundRobinQueueManageType NvM_ImmedQueueManage;
  */
 extern NvM_RoundRobinQueueManageType NvM_StandQueueManage;
 #endif
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #endif
 
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_VAR_CLEARED_16
+#include "NvM_MemMap.h"
 /**
  * @brief Buffer of Priority Table @range NA
  */
 /* PRQA S 1512 ++ */ /* VL_NvM_1512 */
 extern uint16 NvM_PriorityTable[NVM_PRI_TAB_MAX_NUM][NVM_TABLE_SIZE_PRIORITY];
 /* PRQA S 1512 -- */
+#define NVM_STOP_SEC_VAR_CLEARED_16
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_VAR_CLEARED_PTR
+#include "NvM_MemMap.h"
 /**
- * @brief BUffer of NVRAM block @range NA
+ * @brief Pointer to NVRAM block buffer
  */
-extern uint8 NvM_NvDataBuffer[NVM_MAX_LENGTH_NV_BLOCK + NVM_NV_CRC_MAX_LENGTH];
+extern uint8* NvM_NvDataBuffer;
+#define NVM_STOP_SEC_VAR_CLEARED_PTR
+#include "NvM_MemMap.h"
+
 #if (STD_ON == NVM_CIPHERING_ENABLE)
+#define NVM_START_SEC_VAR_CLEARED_8
+#include "NvM_MemMap.h"
 /**
  * @brief Data buffer for ciphering
  */
 extern uint8 NvM_CipheringBuffer[NVM_BLOCKMAXLENGTH];
+#define NVM_STOP_SEC_VAR_CLEARED_8
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_CONST_UNSPECIFIED
+#include "NvM_MemMap.h"
+/**
+ * @brief Function pointer to automated task @range NA
+ */
+extern const NvM_VoidFuncVoidPtr NvM_AtomJobFuncMatrix[NVM_ATOMJOB_MAX_NONE];
+#define NVM_STOP_SEC_CONST_UNSPECIFIED
+#include "NvM_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 /**
  * @brief        Service is used to get the pointer of the runtime data.
@@ -601,7 +666,6 @@ NVM_LOCAL_INLINE boolean NVM_ISFLAGOFF(uint16 flag, uint16 type)
 {
     return ((boolean)STD_OFF == NvM_GetWordBitState(flag, type)) ? TRUE : FALSE; /* PRQA S 1881 */ /* VL_NvM_1881 */
 }
-
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
 /**
  * @brief       Report Running Time Error
@@ -676,7 +740,6 @@ NVM_LOCAL_INLINE boolean NvM_CheckBlockEcucPartition(NvM_BlockIdType BlockId)
     return checkFlag;
 }
 #endif
-
 /**
  * @brief       Record the single result of request multi-job
  * @reentrant   Non Reentrant
@@ -685,23 +748,27 @@ NVM_LOCAL_INLINE boolean NvM_CheckBlockEcucPartition(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL_INLINE void NvM_EMultiReqResultCheck(void)
 {
-    NvM_CurRunningType*       CurRunningPtr = &NvM_CurRunning;
-    NvM_BlockIdType           intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
-    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-    if ((NVM_JOB_TYPE_MULTI == NvM_Module.CurrentJobType) && (NVM_JOB_STEP_IDLE == NvM_Module.JobStep)
-        && (NVM_REQ_OK != AdminBlockPtr->SingleReqResult) && (NVM_REQ_BLOCK_SKIPPED != AdminBlockPtr->SingleReqResult))
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    if (NVM_BLOCK_NUM_ALL > CurRunningPtr->BlockId)
     {
+        NvM_BlockIdType       intBlockId      = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+        NvM_RequestResultType SingleReqResult = NvM_AdminBlock[intBlockId].SingleReqResult;
+        if ((NVM_JOB_TYPE_MULTI == NvM_Module.CurrentJobType) && (NVM_JOB_STEP_IDLE == NvM_Module.JobStep)
+            && (NVM_REQ_OK != SingleReqResult) && (NVM_REQ_BLOCK_SKIPPED != SingleReqResult)
+            && (NVM_REQ_PENDING != SingleReqResult))
+        {
 #if ((NVM_API_CONFIG_CLASS_1 == NVM_API_CONFIG_CLASS) || (STD_OFF == NVM_JOB_PRIORITIZATION))
-        if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId))
+            if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId))
 #else
-        if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == NvM_MultiJob.ServiceId))
+            if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == NvM_MultiJob.ServiceId))
 #endif
-        {
-            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
-        }
-        else
-        {
-            CurRunningPtr->EMultiReqResult = NVM_REQ_NOT_OK;
+            {
+                CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
+            }
+            else
+            {
+                CurRunningPtr->EMultiReqResult = NVM_REQ_NOT_OK;
+            }
         }
     }
 }
@@ -820,6 +887,8 @@ NVM_LOCAL_INLINE void NVM_GetRepeatMirrorOperation(void)
 }
 
 /* ========================================= external function declarations ========================================= */
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       Place the requested task in the queue
  * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
@@ -833,8 +902,12 @@ NVM_LOCAL_INLINE void NVM_GetRepeatMirrorOperation(void)
  * @trace       CPD-76638
  */
 extern Std_ReturnType NvM_JobEnqueue(NvM_BlockIdType BlockId, NvM_ServiceIdType ServiceId, uint8* DestSrcPtr);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_SET_RAM_BLOCK_STATUS_API)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       The module internal function to process set ram status request
  * @reentrant   Non Reentrant
@@ -842,9 +915,13 @@ extern Std_ReturnType NvM_JobEnqueue(NvM_BlockIdType BlockId, NvM_ServiceIdType 
  * @trace       CPD-76639
  */
 extern void NvM_InterSetRamStatus(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       The module internal function to process restore block default request
  * @reentrant   Non Reentrant
@@ -852,7 +929,11 @@ extern void NvM_InterSetRamStatus(void);
  * @trace       CPD-76640
  */
 extern void NvM_InterRestoreBlockDefaults(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Remove a task from the queue for processing
@@ -864,6 +945,10 @@ extern void NvM_InterRestoreBlockDefaults(void);
  * @trace       CPD-76641
  */
 extern Std_ReturnType NvM_JobDequeue(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Set the corresponding flag bit when the job ends
@@ -874,6 +959,10 @@ extern Std_ReturnType NvM_JobDequeue(void);
  * @trace       CPD-76642
  */
 extern void NvM_JobOverSetFlag(NvM_RequestResultType SingleReqResult, NvM_CrcChangeType CrcChange);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Send a request to the underlying memif
@@ -883,9 +972,13 @@ extern void NvM_JobOverSetFlag(NvM_RequestResultType SingleReqResult, NvM_CrcCha
  * @trace       CPD-76643
  */
 extern void NvM_MemIfReq(NvM_MemIfReqType NvM_MemIfRequest);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       The module internal function to process erase NV block
  *              request Since the GC mechanism, Block pre-Erase before write
@@ -894,7 +987,11 @@ extern void NvM_MemIfReq(NvM_MemIfReqType NvM_MemIfRequest);
  * @trace       CPD-76644
  */
 extern void NvM_InterEraseNvBlock(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process invalidate NV block request
@@ -903,9 +1000,13 @@ extern void NvM_InterEraseNvBlock(void);
  * @trace       CPD-76645
  */
 extern void NvM_InterInvalidateNvBlock(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 
 #if (STD_ON == NVM_WRITE_VERIFY)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       Inter Write Verification ok process
  * @reentrant   Non Reentrant
@@ -913,6 +1014,10 @@ extern void NvM_InterInvalidateNvBlock(void);
  * @trace       CPD-76646
  */
 extern void NvM_InterWriteVerificationOK(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Inter Write Verification
@@ -921,7 +1026,11 @@ extern void NvM_InterWriteVerificationOK(void);
  * @trace       CPD-76648
  */
 extern void NvM_InterWriteVerification(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process writing block request
@@ -930,8 +1039,12 @@ extern void NvM_InterWriteVerification(void);
  * @trace       CPD-76649
  */
 extern void NvM_InterWriteAll(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       The module internal function to process first init all block request
  * @reentrant   Non Reentrant
@@ -939,7 +1052,11 @@ extern void NvM_InterWriteAll(void);
  * @trace       CPD-76650
  */
 extern void NvM_InterFirstInitAll(void); /* PRQA S 1501 */ /* VL_NvM_1501 */
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process read all block request
@@ -948,6 +1065,10 @@ extern void NvM_InterFirstInitAll(void); /* PRQA S 1501 */ /* VL_NvM_1501 */
  * @trace       CPD-76651
  */
 extern void NvM_InterReadAll(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process writing block request
@@ -956,6 +1077,10 @@ extern void NvM_InterReadAll(void);
  * @trace       CPD-76652
  */
 extern void NvM_InterWriteBlock(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process read block request sub deal
@@ -964,6 +1089,10 @@ extern void NvM_InterWriteBlock(void);
  * @trace       CPD-76653
  */
 extern void NvM_InterReadBlock(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to calculate crc
@@ -972,8 +1101,12 @@ extern void NvM_InterReadBlock(void);
  * @trace       CPD-76654
  */
 extern void NvM_InterCalcCrc(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       The module internal function to process validating all block request
  * @reentrant   Non Reentrant
@@ -981,7 +1114,11 @@ extern void NvM_InterCalcCrc(void);
  * @trace       CPD-76655
  */
 extern void NvM_InterValidateAll(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The module internal function to process read rom request
@@ -990,6 +1127,10 @@ extern void NvM_InterValidateAll(void);
  * @trace       CPD-76656
  */
 extern void NvM_InterReadRom(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The feedabck interface of multi job result
@@ -1000,6 +1141,10 @@ extern void NvM_InterReadRom(void);
  * @trace       CPD-76657
  */
 extern void NvM_MultiJobResultFeedBack(NvM_ServiceIdType ServiceId, NvM_RequestResultType Result);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       The feedabck interface of single job result
@@ -1010,8 +1155,12 @@ extern void NvM_MultiJobResultFeedBack(NvM_ServiceIdType ServiceId, NvM_RequestR
  * @trace       CPD-76658
  */
 extern void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType Result);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_ECUC_PARTITION_NUM > 1U)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Check feedback flag of all blocks, and call BswM interface to signal
  * @reentrant   Non Reentrant
@@ -1019,6 +1168,8 @@ extern void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResu
  * @trace       CPD-76659
  */
 extern void NvM_SatelliteMainFunction(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 
 #ifdef __cplusplus

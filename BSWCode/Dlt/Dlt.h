@@ -1,4 +1,3 @@
-/* PRQA S 3108++ */
 /**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
@@ -16,7 +15,7 @@
 /*
 ********************************************************************************
 **                                                                            **
-**  FILENAME    : Dlt.c                                                       **
+**  FILENAME    : Dlt.H                                                       **
 **                                                                            **
 **  Created on  :                                                             **
 **  Author      : tao.yu                                                      **
@@ -26,8 +25,8 @@
 **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
 **                                                                            **
 *******************************************************************************/
-#ifndef RTE_DLT_H_
-#define RTE_DLT_H_
+#ifndef DLT_H
+#define DLT_H
 
 #include "Dlt_Cbk.h"
 #include "Dlt_internal.h"
@@ -52,6 +51,9 @@ rules caused by SWC are not configured
  * V2.0.14      2024-09-12  haibin.shao Adjust the interface condition judgment
  * V2.0.15      2025-10-27  xue.han     fix Service Sync Time Stamp
  * V2.0.16      2026-03-04  haibin.shao Resolve the processing logic in the verbose mode
+ * V2.0.17      2026-04-16  xue.han     Resolve compilation warnings
+*  V02.00.18    2026-06-05  tao.yu      add arti
+*  V02.00.19    2026-08-03  xue.han     fix time resolution to 0.1 milliseconds
 
 ============================================================================*/
 /*==============================================================================
@@ -65,13 +67,23 @@ rules caused by SWC are not configured
 #define DLT_AR_RELEASE_PATCH_VERSION 0U
 #define DLT_SW_MAJOR_VERSION         2U
 #define DLT_SW_MINOR_VERSION         0U
-#define DLT_SW_PATCH_VERSION         16U
+#define DLT_SW_PATCH_VERSION         19U
 
 #if (DLT_SWC_NUM > 0)
+#define DLT_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern CONST(Dlt_SwcType, DLT_CONST) Dlt_Swc;
+#define DLT_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Dlt_MemMap.h"
 #endif /* DLT_SWC_NUM > 0 */
+#define DLT_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern CONST(Dlt_ConfigType, DLT_CONST) Dlt_Config;
+#define DLT_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Dlt is using the NVRamManager and is to be initialized very
  *                     late in the ECU startup phase. The Dlt_Init() extern FUNCtion should
@@ -85,9 +97,12 @@ extern CONST(Dlt_ConfigType, DLT_CONST) Dlt_Config;
  * Return              N/A
  */
 extern FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) config);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
 #if (DLT_VERSION_INFO_API == STD_ON)
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Returns the version information of this module.
  * ServiceId           0x02
@@ -100,10 +115,14 @@ extern FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT
  */
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 extern FUNC(void, DLT_APPL_CODE) Dlt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DLT_APPL_DATA) versioninfo);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
 #endif
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service represents the interface to be used by basic
  *                     software modules or by software components to trace parameters.
@@ -127,7 +146,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SendTraceMessage(
     P2CONST(Dlt_MessageTraceInfoType, AUTOMATIC, DLT_APPL_CONST) traceInfo,
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) traceData,
     uint16 traceDataLength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service represents the interface to be used by basic software modules or by software
  * component to send Log Messages. ServiceId           0x03 Sync/Async          Synchronous Reentrancy Reentrant
@@ -144,7 +167,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SendLogMessage(
     P2CONST(Dlt_MessageLogInfoType, AUTOMATIC, DLT_APPL_CONST) logInfo,
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) logData,
     uint16 logDataLength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service has to be called when a software module wants to use services offered
  *                     by DLT software component for a specific context. If a ContextId is being registered
@@ -167,7 +194,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_RegisterContext(
     uint8 lenAppDescription,
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) contextDescription,
     uint8 lenContextDescription);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service has to be called when a software module is going to be stopped.
  * ServiceId           0x16
@@ -184,9 +215,12 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_RegisterContext(
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
     Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
 #if (DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON)
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service to forward error reports from Det to Dlt
  * ServiceId           0x07
@@ -203,9 +237,12 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE)
  */
 extern FUNC(void, DLT_APPL_CODE)
     Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId);
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               This service is used to change the LogLevel for the given tuple of ApplicationID/ContextID.
  * ServiceId           0x08
@@ -221,7 +258,11 @@ extern FUNC(void, DLT_APPL_CODE)
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
     Dlt_SetLogLevel(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, Dlt_MessageLogLevelType newLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service Dlt_SetTraceStatus sets the trace status for a specific tuple of ApplicationID and
  * ContextID. ServiceId           0x09 Sync/Async          Synchronous Reentrancy          Non Reentrant Param-Name[in]
@@ -232,7 +273,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE)
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
     Dlt_SetTraceStatus(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, boolean newTraceStatus);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Called to request information about registered ApplicationIds, their ContextIds and the
  * corresponding log level. ServiceId           0x0a Sync/Async          Synchronous Reentrancy          Non Reentrant
@@ -249,7 +294,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetLogInfo(
     P2VAR(uint8, AUTOMATIC, DLT_APPL_DATA) status,
     /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
     Dlt_LogInfoType* logInfo);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Returns the Default Log Level currently used by the Dlt module.
  *                     The returned Log Level might differ from the one which is stored non volatile.
@@ -263,7 +312,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetLogInfo(
  *                     E_NOT_OK:The default LogLevel could not be returned
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultLogLevel(Dlt_MessageLogLevelType* defaultLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Copies the current Dlt configuration to NvRAM by calling NvM_WriteBlock().
  * ServiceId           0x1a
@@ -277,7 +330,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultLogLevel(Dlt_MessageLog
  *                     DLT_E_NOT_SUPPORTED: Service is not supported
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_StoreConfiguration(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The service Dlt_ResetToFactoryDefault sets the LogLevel and TraceStatus back to
  *                     the persistently stored default values. If the feature NvMRAM support is enabled,
@@ -292,7 +349,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_StoreConfiguration(void);
  *                     E_NOT_OK: Configuration has not been reset
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ResetToFactoryDefault(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Switches on/off the message filtering extern FUNCtionality of the Dlt module.
  * ServiceId           0x1b
@@ -306,7 +367,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ResetToFactoryDefault(void);
  *                     E_NOT_OK: Setting of message filtering failed
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetMessageFiltering(boolean status);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Called to modify the pass through range for Log Messages for all not explicit set ContextIds.
  * ServiceId           0x11
@@ -319,7 +384,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetMessageFiltering(boolean statu
  *                     E_NOT_OK: Default LogLevel could not be set
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLogLevelType newLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Called to enable or disable trace messages for all not explicitly set ContextIds.
  * ServiceId           0x12
@@ -334,7 +403,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLog
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
     Dlt_SetDefaultTraceStatus(boolean newTraceStatus, const Dlt_LogChannelNameType logChannelName);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Returns the current Trace Status of the addressed LogChannel.
  * ServiceId           0x19
@@ -350,8 +423,12 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultTraceStatus(
     const Dlt_LogChannelNameType logChannelName,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               The caller provides the number of logChannelNames to be returned.
  *                     The extern FUNCtion returns the requested amount of LogChannelNames and updates
@@ -370,7 +447,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetLogChannelNames(
     P2VAR(uint8, AUTOMATIC, DLT_APPL_DATA) numberOfLogChannels,
     /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
     Dlt_LogChannelNameType* logChannelNames);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Returns the current Trace Status for a given tuple ApplicationId/ContextId.
  * ServiceId           0x1f
@@ -389,7 +470,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetTraceStatus(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Adds/removes the addressed tuple ApplicationId/ContextId to/from the addressed LogChannel.
  * ServiceId           0x20
@@ -407,7 +492,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelAssignment(
     Dlt_ContextIDType            contextId,
     const Dlt_LogChannelNameType logChannelName,
     Dlt_AssignmentOperation      addRemoveOp);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Sets the filter threshold for the given LogChannel.
  * ServiceId           0x21
@@ -424,7 +513,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelThreshold(
     const Dlt_LogChannelNameType logChannelName,
     Dlt_MessageLogLevelType      newThreshold,
     boolean                      newTraceStatus);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Returns the filter threshold for the given LogChannel.
  * ServiceId           0x22
@@ -444,5 +537,7 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetLogChannelThreshold(
     P2VAR(Dlt_MessageLogLevelType, AUTOMATIC, DLT_APPL_DATA) logChannelThreshold,
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
 #endif /* RTE_DLT_H_ */

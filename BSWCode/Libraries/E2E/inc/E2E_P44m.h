@@ -95,6 +95,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Protects the array/buffer to be transmitted using the E2E profile 44m.
  *               This includes checksum calculation, handling of counter and Data ID.
@@ -123,7 +125,11 @@ Std_ReturnType E2E_P44mProtect(
     Std_MessageResultType     MessageResult,
     uint8*                    DataPtr,
     uint16                    Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the protection state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -136,7 +142,11 @@ Std_ReturnType E2E_P44mProtect(
  */
 
 Std_ReturnType E2E_P44mProtectInit(E2E_P44mProtectStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Checks the Data received using the E2E profile 44m. This includes
  *               CRC calculation, handling of Counter, Data ID, Message Type, Message Result,
@@ -164,7 +174,11 @@ Std_ReturnType E2E_P44mSourceCheck(
     Std_MessageResultType     MessageResult,
     const uint8*              DataPtr,
     uint16                    Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Checks the Data received using the E2E profile 44m. This includes
  *               CRC calculation, handling of Counter, Data ID, Message Type, Message Result,
@@ -192,7 +206,11 @@ Std_ReturnType E2E_P44mSinkCheck(
     Std_MessageResultType     MessageResult,
     const uint8*              DataPtr,
     uint16                    Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the check state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -205,7 +223,11 @@ Std_ReturnType E2E_P44mSinkCheck(
  */
 
 Std_ReturnType E2E_P44mCheckInit(E2E_P44mCheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief       The function maps the check status of profile 44m to a generic check status, which can be
  *              used by E2E state machine check function. The E2E profile 44m delivers a more fine-granular
@@ -222,6 +244,8 @@ E2E_PCheckStatusType E2E_P44mMapStatusToSM(Std_ReturnType CheckReturn, E2E_P44mC
 #ifdef __cplusplus
 
 #endif
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

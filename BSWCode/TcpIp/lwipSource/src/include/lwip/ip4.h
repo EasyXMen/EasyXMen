@@ -62,40 +62,92 @@ extern "C" {
 #define IP_OPTIONS_SEND   (LWIP_IPV4 && LWIP_IGMP)
 
 #define ip_init() /* Compatibility define, no init needed. */
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *ip4_route(const ip4_addr_t *dest);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
 #if LWIP_IPV4_SRC_ROUTING
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *ip4_route_src(const ip4_addr_t *src, const ip4_addr_t *dest);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else /* LWIP_IPV4_SRC_ROUTING */
 #define ip4_route_src(src, dest) ip4_route(dest)
 #endif /* LWIP_IPV4_SRC_ROUTING */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_input(struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output_if(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output_if_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
 #if LWIP_NETIF_USE_HINTS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output_hinted(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif_hint *netif_hint);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_USE_HINTS */
+
 #if IP_OPTIONS_SEND
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output_if_opt(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
        u16_t optlen);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
        u16_t optlen);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_OPTIONS_SEND */
 
 #if LWIP_MULTICAST_TX_OPTIONS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  ip4_set_default_multicast_netif(struct netif* default_multicast_netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_MULTICAST_TX_OPTIONS */
 
 #define ip4_netif_get_local_ip(netif) (((netif) != NULL) ? netif_ip_addr4(netif) : NULL)
 
 #if IP_DEBUG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void ip4_debug_print(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
 #define ip4_debug_print(p)
 #endif /* IP_DEBUG */

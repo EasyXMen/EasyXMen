@@ -307,28 +307,42 @@ typedef struct
 
 /* =========================================== external data declarations =========================================== */
 
+#define DOIP_START_SEC_VAR_CLEARED_8
+#include "DoIP_MemMap.h"
 /**
  * @brief Number of connections that have been established
  *        @range 0..255
  */
 extern uint8 DoIP_CurrentTcpConnCnt;
+#define DOIP_STOP_SEC_VAR_CLEARED_8
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief Status of TCP connection
  *        @range NA
  */
 extern DoIP_TcpConnStatusType DoIP_TcpConnStatus[DOIP_TCP_MAX_CONNECTION];
+#define DOIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief Send and receive context of TCP
  *        @range NA
  */
 extern DoIP_TcpTxRxContextType DoIP_TcpTxRxContext[DOIP_TCP_MAX_CONNECTION];
+#define DOIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 
 /* cfg */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Get TCP configuration.
  * @param[in]   soadRxPduId: Specify which TCP configuration to get.
@@ -340,6 +354,10 @@ extern DoIP_TcpTxRxContextType DoIP_TcpTxRxContext[DOIP_TCP_MAX_CONNECTION];
 /* PRQA S 5016 ++ */ /* VL_DoIP_5016 */
 const DoIP_PBConnectionCfgType* DoIP_GetTcpConnBySoAdRxPduId(PduIdType soadRxPduId);
 /* PRQA S 5016 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get PdurRxPdu.
@@ -354,6 +372,10 @@ const DoIP_PBConnectionCfgType* DoIP_GetTcpConnBySoAdRxPduId(PduIdType soadRxPdu
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetPduRRxPduRef(uint16 sa, uint16 ta, PduIdType* pdurRxPduRef);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get SoadTxPduRef.
@@ -367,6 +389,10 @@ Std_ReturnType DoIP_GetPduRRxPduRef(uint16 sa, uint16 ta, PduIdType* pdurRxPduRe
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetSoAdTxPduRefBySoAdRxPduId(PduIdType soadRxPduId, uint16* soadTxPduRef);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of channel.
@@ -380,6 +406,10 @@ Std_ReturnType DoIP_GetSoAdTxPduRefBySoAdRxPduId(PduIdType soadRxPduId, uint16* 
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetChannelIdxByPduRRxPduId(PduIdType pdurRxPduId, uint16* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of channel.
@@ -394,6 +424,10 @@ Std_ReturnType DoIP_GetChannelIdxByPduRRxPduId(PduIdType pdurRxPduId, uint16* in
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetChannelIdxByPduRTxPduId(PduIdType pdurTxPduId, DoIP_PBPduTypeType pduType, uint16* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* connect */
 
@@ -408,6 +442,10 @@ Std_ReturnType DoIP_GetChannelIdxByPduRTxPduId(PduIdType pdurTxPduId, DoIP_PBPdu
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_SwitchTcp(const boolean* active);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Return status of TCP.
@@ -420,6 +458,10 @@ boolean DoIP_SwitchTcp(const boolean* active);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_IsSoConOnline(uint16 channelIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Notify status of TCP.
@@ -431,6 +473,10 @@ boolean DoIP_IsSoConOnline(uint16 channelIdx);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoConModeChgTcp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Close TCP.
@@ -441,6 +487,10 @@ void DoIP_SoConModeChgTcp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_CloseTcpConnection(SoAd_SoConIdType soConId);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* connect's status */
 
@@ -456,6 +506,10 @@ void DoIP_CloseTcpConnection(SoAd_SoConIdType soConId);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpConnStatusIdxBySoAdTxPduId(uint16 soadTxPduId, uint8* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of DoIP_TcpConnStatus.
@@ -469,6 +523,10 @@ Std_ReturnType DoIP_GetTcpConnStatusIdxBySoAdTxPduId(uint16 soadTxPduId, uint8* 
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpConnStatusIdxBySoAdRxPduId(uint16 soadRxPduId, uint8* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of DoIP_TcpConnStatus.
@@ -482,6 +540,10 @@ Std_ReturnType DoIP_GetTcpConnStatusIdxBySoAdRxPduId(uint16 soadRxPduId, uint8* 
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpConnStatusIdxBySa(uint16 sa, uint8* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Reset of DoIP_TcpConnStatus.
@@ -492,6 +554,10 @@ Std_ReturnType DoIP_GetTcpConnStatusIdxBySa(uint16 sa, uint8* index);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ResetTcpConnStatus(uint8 index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* tx rx context */
 
@@ -507,6 +573,10 @@ void DoIP_ResetTcpConnStatus(uint8 index);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(PduIdType pdurTxPduId, uint8* txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of DoIP_TcpTxRxContext.
@@ -520,6 +590,10 @@ Std_ReturnType DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(PduIdType pdurTxPduId, uint8* 
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpTxRxCtxIdxBySoAdRxPduId(PduIdType soadRxPduId, uint8* txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of DoIP_TcpTxRxContext.
@@ -533,6 +607,10 @@ Std_ReturnType DoIP_GetTcpTxRxCtxIdxBySoAdRxPduId(PduIdType soadRxPduId, uint8* 
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpTxRxCtxIdxByChannelIdx(uint16 channelIdx, uint8* txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Reset of send DoIP_TcpTxRxContext.
@@ -543,6 +621,10 @@ Std_ReturnType DoIP_GetTcpTxRxCtxIdxByChannelIdx(uint16 channelIdx, uint8* txRxC
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ResetTcpTxContext(uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Reset of receive DoIP_TcpTxRxContext.
@@ -553,6 +635,10 @@ void DoIP_ResetTcpTxContext(uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ResetTcpRxContext(uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Reset of send/receive DoIP_TcpTxRxContext.
@@ -563,6 +649,10 @@ void DoIP_ResetTcpRxContext(uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ResetTcpTxRxContext(uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* send */
 
@@ -578,6 +668,10 @@ void DoIP_ResetTcpTxRxContext(uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_IsValidMatadata(uint16 channelIdx, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Trigger send TP message.
@@ -598,6 +692,10 @@ Std_ReturnType DoIP_TriggerTpTransmit(
     const PduInfoType*  pduInfoPtr,
     DoIP_TcpTxCtrlType* txCtrl,
     DoIP_TcpTxMsgType   msgType);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Trigger send TP message.
@@ -612,6 +710,10 @@ Std_ReturnType DoIP_TriggerTpTransmit(
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_TpTransmitInternal(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Trigger send IF message.
@@ -626,6 +728,10 @@ Std_ReturnType DoIP_TpTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_IfTransmitInternal(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Copy non TP data form send buffer.
@@ -645,6 +751,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxNoTpData(
     DoIP_TcpTxRxContextType* ctx,
     const PduInfoType*       pduInfoPtr,
     PduLengthType*           availableDataPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Copy TP data form send buffer.
@@ -667,6 +777,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxTpData(
     const PduInfoType*       pduInfoPtr,
     const RetryInfoType*     retry,
     PduLengthType*           availableDataPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* pending */
 
@@ -684,6 +798,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxTpData(
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_EnqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Enqueue IF message.
@@ -699,6 +817,10 @@ Std_ReturnType DoIP_EnqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId,
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_EnqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Clear IF queue.
@@ -710,6 +832,10 @@ Std_ReturnType DoIP_EnqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId,
  * @trace       CPD-PLACEHOLDER
  */
 void DOIP_ClearIfQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Clear TP queue.
@@ -721,6 +847,10 @@ void DOIP_ClearIfQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur);
  * @trace       CPD-PLACEHOLDER
  */
 void DOIP_ClearTpQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Clear pending routing activation request.
@@ -730,6 +860,10 @@ void DOIP_ClearTpQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_ClearPendingRaMsg(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle pending message.
@@ -739,6 +873,10 @@ void DoIP_ClearPendingRaMsg(void);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandlePendingMsg(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* rcv */
 
@@ -762,6 +900,10 @@ BufReq_ReturnType DoIP_GetResourseForRcvTpMsg(
     SoAd_SoConIdType* soConId,
     uint8*            txRxCtxIdx,
     uint8*            tcpConnStatusIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get resource for receive TP message.
@@ -781,6 +923,10 @@ BufReq_ReturnType DoIP_HandleTpRxHeader(
     uint16             soadTxPduRef,
     PduLengthType*     bufferSizePtr,
     uint8              txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle receive messages continuously.
@@ -800,6 +946,10 @@ BufReq_ReturnType DoIP_HandleTpCFRx(
     const PduInfoType*          pduInfoPtr,
     uint16                      soadTxPduRef,
     PduLengthType*              bufferSizePtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* timer */
 
@@ -811,6 +961,8 @@ BufReq_ReturnType DoIP_HandleTpCFRx(
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandleTcpTimeout(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

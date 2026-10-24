@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -48,6 +48,11 @@
  */
 ECUM_LOCAL void EcuM_InternalInit(EcuM_RunTimeLcType* pRt);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Pre-OS initialization function for EcuM module.
  * @details This function performs various initialization steps before the OS starts.
@@ -63,6 +68,11 @@ ECUM_LOCAL void EcuM_InternalInit(EcuM_RunTimeLcType* pRt);
  */
 ECUM_LOCAL void EcuM_StartPreOS(void);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Initializes the core EcuM module.
  * @details This function initializes the core EcuM module and performs the following tasks:
@@ -76,6 +86,11 @@ ECUM_LOCAL void EcuM_StartPreOS(void);
  */
 ECUM_LOCAL void EcuM_InitializeCore(void);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Initializes the EcuM module and notifies the BSW manager.
  * @details This function initializes the EcuM module by setting the initial state and notifying the BSW manager.
@@ -87,11 +102,16 @@ ECUM_LOCAL void EcuM_InitializeCore(void);
  */
 ECUM_LOCAL void EcuM_InitAndNotifyBswM(EcuM_RunTimeLcType* tempRunData);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Maps the reset reason to the corresponding wake-up source.
  * @details This function maps the given reset reason to the appropriate wake-up source by checking the configuration.
- *          If a valid wake-up source is found, it updates the `EcuMWksValidated` variable with the corresponding
- * wake-up source. If no valid wake-up source is found, it sets the `EcuMWksValidated` to `ECUM_WKSOURCE_RESET`.
+ *          If a valid wake-up source is found, it updates the `EcuM_WksValidated` variable with the corresponding
+ * wake-up source. If no valid wake-up source is found, it sets the `EcuM_WksValidated` to `ECUM_WKSOURCE_RESET`.
  * @param[in] resetReason : The reset reason to be mapped to a wake-up source.
  * @reentrant FALSE
  * @synchronous TRUE
@@ -100,17 +120,44 @@ ECUM_LOCAL void EcuM_InitAndNotifyBswM(EcuM_RunTimeLcType* tempRunData);
 ECUM_LOCAL void EcuM_MapReset2WakeupSource(Mcu_ResetType resetReason);
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+
 /* ============================================ internal data definitions =========================================== */
 #define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "EcuM_MemMap.h"
 /* Wake-up sources that are pending */
-EcuM_WakeupSourceType EcuMWksPending;
-/* Wake-up sources that have been validated */
-EcuM_WakeupSourceType EcuMWksValidated;
-/* Wake-up sources that have expired */
-EcuM_WakeupSourceType EcuMWksExpired;
+EcuM_WakeupSourceType EcuM_WksPending;
 #define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+/* Wake-up sources that have been validated */
+EcuM_WakeupSourceType EcuM_WksValidated;
+#define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+/* Wake-up sources that have expired */
+EcuM_WakeupSourceType EcuM_WksExpired;
+#define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+/* PRQA S 3218 ++ */ /* VL_EcuM_3218 */
+#define ECUM_START_SEC_VAR_POWER_ON_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+ECUM_LOCAL EcuM_TargetType EcuM_SdtgLast;
+#define ECUM_STOP_SEC_VAR_POWER_ON_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_VAR_POWER_ON_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+ECUM_LOCAL EcuM_TargetType EcuM_SdtgNext;
+#define ECUM_STOP_SEC_VAR_POWER_ON_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+/* PRQA S 3218 -- */
+
 /* ============================================ external data definitions =========================================== */
 #define ECUM_START_SEC_VAR_FAST_CLEARED_UNSPECIFIED
 #include "EcuM_MemMap.h"
@@ -122,7 +169,6 @@ const EcuM_ConfigType* EcuM_ConfigPtr;
 /* ========================================== external function definitions ========================================= */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Initializes the ECU Manager module.
@@ -134,19 +180,29 @@ const EcuM_ConfigType* EcuM_ConfigPtr;
  */
 void EcuM_Init(void)
 {
-    EcuM_RunTimeLcType* pRt;
+    EcuM_ArtiApiStart(1, ECUM_SID_INIT);
+
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     uint8 detErrorId = ECUM_E_OK;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
 
-    pRt = EcuM_GetLcRunDataPtr();
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON)
+    EcuM_RunTimeLcType* pRt = &EcuMRunData;
+#else
+    EcuM_RunTimeLcType* pRt = EcuM_GetLcRunDataPtr();
+#endif
+
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF)
     /* Init Check */
     if (NULL_PTR == pRt)
     {
         detErrorId = ECUM_E_INIT_FAILED;
     }
     else if (pRt->EcuM_IsInit)
+#else
+    if (pRt->EcuM_IsInit)
+#endif /*ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF*/
     {
         detErrorId = ECUM_E_REINIT;
     }
@@ -174,9 +230,15 @@ void EcuM_Init(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_INIT, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(1, ECUM_SID_INIT);
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 1532, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 /**
  * Performs the second stage of the ECU Manager startup process.
@@ -188,6 +250,8 @@ void EcuM_Init(void)
  */
 void EcuM_StartupTwo(void)
 {
+    EcuM_ArtiApiStart(1, ECUM_SID_STARTUPTWO);
+
     EcuM_RunTimeLcType* tempRunData;
     uint8               detErrorId = ECUM_E_OK;
 
@@ -228,14 +292,17 @@ void EcuM_StartupTwo(void)
 #else
     (void)detErrorId;
 #endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(1, ECUM_SID_STARTUPTWO);
 }
 /* PRQA S 1503, 1532, 2814 -- */
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
+
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Initializes the ECU Manager state and notifies the BSW Manager.
@@ -256,7 +323,11 @@ ECUM_LOCAL void EcuM_InitAndNotifyBswM(EcuM_RunTimeLcType* tempRunData)
     }
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Initializes the internal state and runtime variables of the ECU Manager.
@@ -273,9 +344,12 @@ ECUM_LOCAL void EcuM_InternalInit(EcuM_RunTimeLcType* pRt)
     pRt->EcuM_TimeRecord = 0u;
 #endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
-    pRt->Wks.Pending   = &EcuMWksPending;
-    pRt->Wks.Expired   = &EcuMWksExpired;
-    pRt->Wks.Validated = &EcuMWksValidated;
+    pRt->Wks.Pending   = &EcuM_WksPending;
+    pRt->Wks.Expired   = &EcuM_WksExpired;
+    pRt->Wks.Validated = &EcuM_WksValidated;
+    pRt->SdtgLast      = &EcuM_SdtgLast;
+    pRt->SdtgNext      = &EcuM_SdtgNext;
+
 #if (ECUM_MAX_MCU_CORE_NUM > 1u)
     pRt->coreId = GetCoreID();
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1 */
@@ -290,7 +364,11 @@ ECUM_LOCAL void EcuM_InternalInit(EcuM_RunTimeLcType* pRt)
 #endif /*ECUM_MODE_HANDING == STD_ON*/
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Performs pre-OS initialization activities for the ECU Manager.
@@ -339,7 +417,11 @@ ECUM_LOCAL void EcuM_StartPreOS(void)
     }
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Initializes the core for the ECU Manager.
@@ -387,7 +469,11 @@ ECUM_LOCAL void EcuM_InitializeCore(void)
     }
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814, 2824 ++ */ /* VL_QAC_MultiReturn, VL_EcuM_ComputeInvalidPtr */
 /**
  * Maps the reset reason to a wakeup source.
@@ -408,8 +494,8 @@ ECUM_LOCAL void EcuM_MapReset2WakeupSource(Mcu_ResetType resetReason)
         {
             if (EcuM_GetWakeupSourceCfgPtr(wkSrcIdx)->resetResasonPtr[rstRasaonIdx] == resetReason)
             {
-                EcuMWksValidated =
-                    (EcuM_WakeupSourceType)(EcuMWksValidated) | (EcuM_GetWakeupSourceCfgPtr(wkSrcIdx)->wkSource);
+                EcuM_WksValidated =
+                    (EcuM_WakeupSourceType)(EcuM_WksValidated) | (EcuM_GetWakeupSourceCfgPtr(wkSrcIdx)->wkSource);
                 wakeupTag = TRUE;
                 break;
             }
@@ -422,10 +508,9 @@ ECUM_LOCAL void EcuM_MapReset2WakeupSource(Mcu_ResetType resetReason)
     if (!wakeupTag)
     {
         /* SWS_EcuM_02601 */
-        EcuMWksValidated = (EcuM_WakeupSourceType)(EcuMWksValidated) | ECUM_WKSOURCE_RESET;
+        EcuM_WksValidated = (EcuM_WakeupSourceType)(EcuM_WksValidated) | ECUM_WKSOURCE_RESET;
     }
 }
 /* PRQA S 2814, 2824 -- */
-
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"

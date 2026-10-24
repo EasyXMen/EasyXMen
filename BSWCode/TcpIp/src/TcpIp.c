@@ -23,14 +23,16 @@
  ***********************************************************************************************************************/
 /* PRQA S 1503 EOF */ /* VL_QAC_NoUsedApi */
 /* PRQA S 1505 EOF */ /* VL_TcpIp_1505 */
-/* PRQA S 1501 EOF */ /* VL_TcpIp_1501 */
-/* PRQA S 1753 EOF */ /* VL_TcpIp_1753 */
 /* PRQA S 1532 EOF */ /* VL_QAC_OneFunRef */
 /* PRQA S 6510 EOF */ /* VL_MTR_TcpIp_CONF */
 /* PRQA S 6040 EOF */ /* VL_MTR_TcpIp_STPAR */
+/* PRQA S 3673 EOF */ /* VL_QAC_3673 */
 /* =================================================== inclusions =================================================== */
 #include "Os_Types.h"
 #include "ComStack_Types.h"
+#include "IStdLib.h"
+#include "EthIf.h"
+
 #include "TcpIp_Cfg.h"
 #include "TcpIp_PBcfg.h"
 #include "TcpIp_Types.h"
@@ -38,9 +40,13 @@
 #include "TcpIp.h"
 #include "TcpIp_Internal.h"
 #include "TcpIp_DetError.h"
-
-#include "IStdLib.h"
-#include "EthIf.h"
+#if (TCPIP_IPSEC_ENABLED == STD_ON)
+#include "TcpIp_Ike.h"
+#endif
+#if (TCPIP_TCP_TLS_ENABLED == STD_ON)
+#include "TcpIp_Tls.h"
+#endif
+#include "TcpIp_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #if ((STD_ON != TCPIP_TCP_ENABLED) && (STD_ON != TCPIP_UDP_ENABLED))
@@ -50,9 +56,6 @@
 #if (STD_ON != TCPIP_TCP_ENABLED)
 #define TcpIp_InnerChangeParameterTcpNagle     NULL_PTR
 #define TcpIp_InnerChangeParameterTcpKeepAlive NULL_PTR
-#endif
-#if (STD_ON != TCPIP_TCP_TLS_ENABLED)
-#define TcpIp_TlsDynamicConnect NULL_PTR
 #endif
 
 /* ================================================ type definitions ================================================ */
@@ -96,11 +99,13 @@ TCPIP_LOCAL const TcpIp_InnerChangeParameterFuncType TcpIp_ChangeParameterHandle
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+
 #define TCPIP_START_SEC_CODE
 #include "TcpIp_MemMap.h"
-
 void TcpIp_Init(const TcpIp_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 2, 0x01, ConfigPtr);
+
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
     if (E_OK == TcpIp_ValidateInit(ConfigPtr))
 #endif
@@ -126,13 +131,24 @@ void TcpIp_Init(const TcpIp_ConfigType* ConfigPtr)
 #if (STD_ON == TCPIP_TCP_TLS_ENABLED)
             TcpIp_TlsInit(TcpIp_PbCfgPtr->TlsCfgPtr);
 #endif
+#if (STD_ON == TCPIP_IPSEC_ENABLED)
+            TcpIp_IkeInit();
+#endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 1, 0x01);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_VERSION_INFO_API)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void TcpIp_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 2, 0x02, versioninfo);
+
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
     if (E_OK == TcpIp_ValidateGetVersionInfo(versioninfo))
 #endif
@@ -143,11 +159,19 @@ void TcpIp_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = TCPIP_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = TCPIP_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 1, 0x02);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_Close(TcpIp_SocketIdType SocketId, boolean Abort)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x04, SocketId, Abort);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -161,11 +185,19 @@ Std_ReturnType TcpIp_Close(TcpIp_SocketIdType SocketId, boolean Abort)
         ret = TcpIp_InnerClose(socketRtPtr, Abort);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x04, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_Bind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdType LocalAddrId, uint16* PortPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 4, 0x05, SocketId, LocalAddrId, PortPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -180,30 +212,46 @@ Std_ReturnType TcpIp_Bind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdType Loc
         ret = TcpIp_InnerBind(socketRtPtr, localAddrId, PortPtr);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x05, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_TcpConnect(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x06, SocketId, RemoteAddrPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
     if (E_OK == TcpIp_ValidateTcpConnect(SocketId, RemoteAddrPtr))
 #endif
     {
-        ApplicationType                partitionIndex = TcpIp_MulticoreIndex;
-        TcpIp_SocketIdType             socketIndex    = TCPIP_SOCKET_INDEX(partitionIndex, SocketId);
-        const TcpIp_SocketRuntimeType* socketRtPtr    = &TCPIP_SOCKET(partitionIndex, socketIndex);
+        ApplicationType          partitionIndex = TcpIp_MulticoreIndex;
+        TcpIp_SocketIdType       socketIndex    = TCPIP_SOCKET_INDEX(partitionIndex, SocketId);
+        TcpIp_SocketRuntimeType* socketRtPtr    = &TCPIP_SOCKET(partitionIndex, socketIndex);
 
         ret = TcpIp_InnerTcpConnect(socketRtPtr, RemoteAddrPtr);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x06, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_TcpListen(TcpIp_SocketIdType SocketId, uint16 MaxChannels)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x07, SocketId, MaxChannels);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -218,11 +266,19 @@ Std_ReturnType TcpIp_TcpListen(TcpIp_SocketIdType SocketId, uint16 MaxChannels)
         ret = TcpIp_InnerTcpListen(socketRtPtr, maxChannNum);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x07, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_TcpReceived(TcpIp_SocketIdType SocketId, uint32 Length)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x08, SocketId, Length);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -237,12 +293,20 @@ Std_ReturnType TcpIp_TcpReceived(TcpIp_SocketIdType SocketId, uint32 Length)
         ret = TcpIp_InnerTcpReceived(socketRtPtr, recvLen);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x08, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_RequestComMode(uint8 CtrlIdx, TcpIp_StateType State)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x09, CtrlIdx, State);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -273,9 +337,15 @@ Std_ReturnType TcpIp_RequestComMode(uint8 CtrlIdx, TcpIp_StateType State)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x09, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_RequestIpAddrAssignment(
     TcpIp_LocalAddrIdType      LocalAddrId,
     TcpIp_IpAddrAssignmentType Type,
@@ -283,10 +353,24 @@ Std_ReturnType TcpIp_RequestIpAddrAssignment(
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        6,
+        0x0A,
+        LocalAddrId,
+        Type,
+        LocalIpAddrPtr,
+        Netmask,
+        DefaultRouterPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateRequestIpAddrAssignment(LocalAddrId, Type, LocalIpAddrPtr, Netmask, DefaultRouterPtr))
+#if (TCPIP_DEV_ERROR_DETECT == STD_ON)
+    if (TcpIp_ValidateRequestIpAddrAssignment(LocalAddrId, Type, LocalIpAddrPtr, Netmask, DefaultRouterPtr) == E_OK)
 #endif
     {
         TcpIp_LocalAddrIdType      localAddrId     = TcpIp_LocalAddrId2Var(LocalAddrId);
@@ -295,7 +379,7 @@ Std_ReturnType TcpIp_RequestIpAddrAssignment(
         const TcpIp_CtrlType*      ctrlCfgPtr      = &TCPIP_CTRL_CONFIG(ctrlIndex);
         TcpIp_CtrlRuntimeType*     ctrlRtPtr       = ctrlCfgPtr->RuntimePtr;
 
-        if (TCPIP_STATE_OFFLINE != ctrlRtPtr->CtrlStatus)
+        if ((ctrlRtPtr->CtrlStatus != TCPIP_STATE_OFFLINE) && (ctrlRtPtr->CtrlStatus != TCPIP_STATE_SHUTDOWN))
         {
             ret = TcpIp_InnerRequestIpAddrAssignment(
                 ctrlCfgPtr,
@@ -308,15 +392,23 @@ Std_ReturnType TcpIp_RequestIpAddrAssignment(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0A, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalAddrId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 2, 0x0B, LocalAddrId);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateReleaseIpAddrAssignment(LocalAddrId))
+#if (TCPIP_DEV_ERROR_DETECT == STD_ON)
+    if (TcpIp_ValidateReleaseIpAddrAssignment(LocalAddrId) == E_OK)
 #endif
     {
         TcpIp_LocalAddrIdType      localAddrId     = TcpIp_LocalAddrId2Var(LocalAddrId);
@@ -331,12 +423,20 @@ Std_ReturnType TcpIp_ReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalAddrId)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0B, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if ((STD_ON == TCPIP_DHCP_CLIENT_ENABLED) && (STD_ON == TCPIP_RESET_IP_ASSIGNMENT_API))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ResetIpAssignment(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 1, 0x1B);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -345,12 +445,17 @@ Std_ReturnType TcpIp_ResetIpAssignment(void)
     {
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x1B, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if (STD_ON == TCPIP_ICMP_ENABLED)
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#if (TCPIP_ICMP_ENABLED == STD_ON)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_IcmpTransmit(
     TcpIp_LocalAddrIdType     LocalIpAddrId,
     const TcpIp_SockAddrType* RemoteAddrPtr,
@@ -360,10 +465,26 @@ Std_ReturnType TcpIp_IcmpTransmit(
     uint16                    DataLength,
     const uint8*              DataPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        8,
+        0x0C,
+        LocalIpAddrId,
+        RemoteAddrPtr,
+        Ttl,
+        Type,
+        Code,
+        DataLength,
+        DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateIcmpTransmit(LocalIpAddrId, RemoteAddrPtr, Ttl, Type, Code, DataLength, DataPtr))
+#if (TCPIP_DEV_ERROR_DETECT == STD_ON)
+    if (TcpIp_ValidateIcmpTransmit(LocalIpAddrId, RemoteAddrPtr, Ttl, Type, Code, DataLength, DataPtr) == E_OK)
 #endif
     {
         TcpIp_LocalAddrIdType   localAddrId = TcpIp_LocalAddrId2Var(LocalIpAddrId);
@@ -379,11 +500,17 @@ Std_ReturnType TcpIp_IcmpTransmit(
         ret = TcpIp_InnerIcmpTransmit(localAddrId, &icmpParam);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0C, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_IcmpV6Transmit(
     TcpIp_LocalAddrIdType     LocalIpAddrId,
     const TcpIp_SockAddrType* RemoteAddrPtr,
@@ -393,90 +520,139 @@ Std_ReturnType TcpIp_IcmpV6Transmit(
     uint16                    DataLength,
     const uint8*              DataPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        8,
+        0x18,
+        LocalIpAddrId,
+        RemoteAddrPtr,
+        HopLimit,
+        Type,
+        Code,
+        DataLength,
+        DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateIcmpV6Transmit(LocalIpAddrId, RemoteAddrPtr, HopLimit, Type, Code, DataLength, DataPtr))
-#endif
-    {
-    }
+    TCPIP_UNUSED_ARG(LocalIpAddrId);
+    TCPIP_UNUSED_ARG(RemoteAddrPtr);
+    TCPIP_UNUSED_ARG(HopLimit);
+    TCPIP_UNUSED_ARG(Type);
+    TCPIP_UNUSED_ARG(Code);
+    TCPIP_UNUSED_ARG(DataLength);
+    TCPIP_UNUSED_ARG(DataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x18, ret);
 
     return ret;
 }
-#endif
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_DhcpReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8* DataLength, uint8* DataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x0D, LocalIpAddrId, Option, DataLength, DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateDhcpReadOption(LocalIpAddrId, Option, DataLength, DataPtr))
-#endif
-    {
-    }
+    TCPIP_UNUSED_ARG(LocalIpAddrId);
+    TCPIP_UNUSED_ARG(Option);
+    TCPIP_UNUSED_ARG(DataLength);
+    TCPIP_UNUSED_ARG(DataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0D, ret);
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if TCPIP_UNUSED_FUNCTION
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_DhcpV6ReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint16 Option, uint16* DataLength, uint8* DataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x19, LocalIpAddrId, Option, DataLength, DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateDhcpV6ReadOption(LocalIpAddrId, Option, DataLength, DataPtr))
-#endif
-    {
-    }
+    TCPIP_UNUSED_ARG(LocalIpAddrId);
+    TCPIP_UNUSED_ARG(Option);
+    TCPIP_UNUSED_ARG(DataLength);
+    TCPIP_UNUSED_ARG(DataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x19, ret);
 
     return ret;
 }
-#endif
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_DhcpWriteOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8 DataLength, const uint8* DataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x0E, LocalIpAddrId, Option, DataLength, DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateDhcpWriteOption(LocalIpAddrId, Option, DataLength, DataPtr))
-#endif
-    {
-    }
+    TCPIP_UNUSED_ARG(LocalIpAddrId);
+    TCPIP_UNUSED_ARG(Option);
+    TCPIP_UNUSED_ARG(DataLength);
+    TCPIP_UNUSED_ARG(DataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0E, ret);
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if TCPIP_UNUSED_FUNCTION
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_DhcpV6WriteOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint16 Option, uint16 DataLength, const uint8* DataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x1A, LocalIpAddrId, Option, DataLength, DataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
-#if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK == TcpIp_ValidateDhcpV6WriteOption(LocalIpAddrId, Option, DataLength, DataPtr))
-#endif
-    {
-    }
+    TCPIP_UNUSED_ARG(LocalIpAddrId);
+    TCPIP_UNUSED_ARG(Option);
+    TCPIP_UNUSED_ARG(DataLength);
+    TCPIP_UNUSED_ARG(DataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x1A, ret);
 
     return ret;
 }
-#endif
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_ChangeParameter(TcpIp_SocketIdType SocketId, TcpIp_ParamIdType ParameterId, const uint8* ParameterValue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 4, 0x0F, SocketId, ParameterId, ParameterValue);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -513,15 +689,34 @@ Std_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x0F, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetIpAddr(
     TcpIp_LocalAddrIdType LocalAddrId,
     TcpIp_SockAddrType*   IpAddrPtr,
     uint8*                NetmaskPtr,
     TcpIp_SockAddrType*   DefaultRouterPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        5,
+        0x10,
+        LocalAddrId,
+        IpAddrPtr,
+        NetmaskPtr,
+        DefaultRouterPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -544,11 +739,19 @@ Std_ReturnType TcpIp_GetIpAddr(
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x10, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8* PhysAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x11, LocalAddrId, PhysAddrPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -563,12 +766,20 @@ Std_ReturnType TcpIp_GetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8* PhysA
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x11, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 TcpIp_ReturnType
     TcpIp_GetRemotePhysAddr(uint8 CtrlIdx, const TcpIp_SockAddrType* IpAddrPtr, uint8* PhysAddrPtr, boolean initRes)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x16, CtrlIdx, IpAddrPtr, PhysAddrPtr, initRes);
+
     TcpIp_ReturnType ret = TCPIP_E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -596,51 +807,101 @@ TcpIp_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x16, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCPIP_UNUSED_FUNCTION
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8* CtrlIdxPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x17, LocalAddrId, CtrlIdxPtr);
+
     TCPIP_UNUSED_ARG(LocalAddrId);
     TCPIP_UNUSED_ARG(CtrlIdxPtr);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x17, E_OK);
+
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetArpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_ArpCacheEntryType* entryListPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 4, 0x1D, ctrlIdx, numberOfElements, entryListPtr);
+
     TCPIP_UNUSED_ARG(ctrlIdx);
     TCPIP_UNUSED_ARG(numberOfElements);
     TCPIP_UNUSED_ARG(entryListPtr);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x1D, E_OK);
+
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetNdpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_NdpCacheEntryType* entryListPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 4, 0x1C, ctrlIdx, numberOfElements, entryListPtr);
+
     TCPIP_UNUSED_ARG(ctrlIdx);
     TCPIP_UNUSED_ARG(numberOfElements);
     TCPIP_UNUSED_ARG(entryListPtr);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x1C, E_OK);
+
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetAndResetMeasurementData(
     TcpIp_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
     uint32*                  MeasurementDataPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        4,
+        0x45,
+        MeasurementIdx,
+        MeasurementResetNeeded,
+        MeasurementDataPtr);
+
     TCPIP_UNUSED_ARG(MeasurementIdx);
     TCPIP_UNUSED_ARG(MeasurementResetNeeded);
     TCPIP_UNUSED_ARG(MeasurementDataPtr);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x45, E_OK);
+
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 TcpIp_ReturnType TcpIp_IsConnectionReady(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 3, 0x46, SocketId, RemoteAddrPtr);
+
     TcpIp_ReturnType ret = TCPIP_E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -654,16 +915,24 @@ TcpIp_ReturnType TcpIp_IsConnectionReady(TcpIp_SocketIdType SocketId, const TcpI
         ret = TcpIp_InnerIsConnectionReady(socketRtPtr, RemoteAddrPtr);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x46, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_UdpTransmit(
     TcpIp_SocketIdType        SocketId,
     const uint8*              DataPtr,
     const TcpIp_SockAddrType* RemoteAddrPtr,
     uint16                    TotalLength)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x12, SocketId, DataPtr, RemoteAddrPtr, TotalLength);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -684,14 +953,22 @@ Std_ReturnType TcpIp_UdpTransmit(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x12, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_TcpTransmit(TcpIp_SocketIdType SocketId, const uint8* DataPtr, uint32 AvailableLength, boolean ForceRetrieve)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x13, SocketId, DataPtr, AvailableLength, ForceRetrieve);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -727,10 +1004,16 @@ Std_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x13, ret);
+
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void TcpIp_RxIndication(
     uint8         CtrlIdx,
     Eth_FrameType FrameType,
@@ -739,6 +1022,21 @@ void TcpIp_RxIndication(
     const uint8*  DataPtr,
     uint16        LenByte)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        TcpIp,
+        0,
+        Bsw_Start,
+        7,
+        0x14,
+        CtrlIdx,
+        FrameType,
+        IsBroadcast,
+        PhysAddrPtr,
+        DataPtr,
+        LenByte);
+
     TCPIP_UNUSED_ARG(PhysAddrPtr);
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
@@ -754,8 +1052,14 @@ void TcpIp_RxIndication(
             TcpIp_InnerRxIndication(ctrlCfgPtr, FrameType, flag, DataPtr, LenByte);
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 1, 0x14);
+}
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if (STD_ON == TCPIP_PARTITION_USED)
 void TcpIp_MainFunction(ApplicationType partitionIndex)
 #else
@@ -764,6 +1068,12 @@ void TcpIp_MainFunction(void)
 {
 #if (STD_ON != TCPIP_PARTITION_USED)
     ApplicationType partitionIndex = 0u;
+#endif
+
+#if (STD_ON == TCPIP_PARTITION_USED)
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 2, 0x15, partitionIndex);
+#else
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 1, 0x15);
 #endif
 
     if (NULL_PTR != TcpIp_PbCfgPtr)
@@ -778,36 +1088,39 @@ void TcpIp_MainFunction(void)
 #if (0u < TCPIP_SOCKET_NUM)
             TcpIp_SocketPollMainHandle(partitionIndex);
 #endif
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+            /* stack needs to expand for crypto */
+            TcpIp_TlsSockeRuntimeProcess(partitionIndex);
+#endif
             TcpIp_PeriodTimerMainHandle(partitionIndex);
+#if (STD_ON == TCPIP_IPSEC_ENABLED)
+            TcpIp_IkeInitHandle(partitionIndex);
+#endif
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 1, 0x15);
+}
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_GetSocket(
-    TcpIp_DomainType   Domain,
-    TcpIp_ProtocolType Protocol,
-#if (1u < TCPIP_SOCKETOWNER_NUMBER)
-    uint8 socketOwnerId,
-#endif
+    TcpIp_DomainType    Domain,
+    TcpIp_ProtocolType  Protocol,
+    uint8               SocketOwnerId,
     TcpIp_SocketIdType* SocketIdPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Start, 5, 0x03, Domain, Protocol, SocketOwnerId, SocketIdPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
-    if (E_OK
-        == TcpIp_ValidateGetSocket(
-            Domain,
-            Protocol,
-#if (1u < TCPIP_SOCKETOWNER_NUMBER)
-            socketOwnerId,
-#endif
-            SocketIdPtr))
+    if (E_OK == TcpIp_ValidateGetSocket(Domain, Protocol, SocketOwnerId, SocketIdPtr))
 #endif
     {
-#if (1u == TCPIP_SOCKETOWNER_NUMBER)
-        uint8 socketOwnerId = 0u;
-#endif
-        const TcpIp_SocketOwnerType* ownerCfgPtr = &TcpIp_LConfig.SocketOwnerPtr[socketOwnerId];
+        const TcpIp_SocketOwnerType* ownerCfgPtr = &TcpIp_LConfig.SocketOwnerPtr[SocketOwnerId];
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
         if (TCPIP_IPPROTO_TCP == Protocol)
@@ -824,10 +1137,11 @@ Std_ReturnType TcpIp_GetSocket(
 #endif
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, TcpIp, 0, Bsw_Return, 2, 0x03, ret);
+
     return ret;
 }
-
-/* ========================================== internal function definitions ========================================= */
-
 #define TCPIP_STOP_SEC_CODE
 #include "TcpIp_MemMap.h"
+
+/* ========================================== internal function definitions ========================================= */

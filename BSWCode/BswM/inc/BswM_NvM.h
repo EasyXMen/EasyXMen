@@ -54,7 +54,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66331
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_RequestResultType CurrentJobMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by NvM to indicate the current block mode of an NvM block.
@@ -66,7 +70,11 @@ void BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_Re
  * @synchronous TRUE
  * @trace       CPD-66333
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_NvM_CurrentBlockMode(NvM_BlockIdType Block, NvM_RequestResultType CurrentBlockMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_NVM_ENABLED == STD_ON*/
 

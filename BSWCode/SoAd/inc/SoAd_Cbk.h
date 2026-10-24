@@ -34,13 +34,15 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         The TCP/IP stack calls this primitive after the reception of data on a socket. The socket identifier
  *                along with configuration information determines which module is to be called.
  *
  * @param[in]     SocketId: Socket identifier of the related local socket resource.
  * @param[in]     RemoteAddrPtr: Pointer to memory containing IP address and port of the remote host which sent the
- *                               data.
+ * data.
  * @param[in]     BufPtr: Pointer to the received data
  * @param[in]     Length: Data length of the received TCP segment or UDP datagram
  * @reentrant     Reentrant for different SocketIds. Non reentrant for the same SocketId.
@@ -52,7 +54,11 @@ void SoAd_RxIndication(
     const TcpIp_SockAddrType* RemoteAddrPtr,
     const uint8*              BufPtr,
     uint16                    Length);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service requests to copy data for transmission to the buffer indicated. This call is triggered
  *                by TcpIp_Transmit(). Note: The call to <Up>_CopyTxData() may happen in the context of TcpIp_Transmit()
@@ -68,7 +74,11 @@ void SoAd_RxIndication(
  * @trace         CPD-74649
  */
 BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, uint16 BufLength);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         The TCP/IP stack calls this function after the data has been acknowledged by the peer for TCP.
  *                Caveats: The upper layer might not be able to determine exactly which data bytes have been confirmed
@@ -80,7 +90,11 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
  * @trace         CPD-74650
  */
 void SoAd_TxConfirmation(TcpIp_SocketIdType SocketId, uint16 Length);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service gets called if the stack put a socket into the listen mode before (as server) and a
  *                peer connected to it (as client).In detail: The TCP/IP stack calls this function after a socket was
@@ -100,7 +114,11 @@ Std_ReturnType SoAd_TcpAccepted(
     TcpIp_SocketIdType        SocketId,
     TcpIp_SocketIdType        SocketIdConnected,
     const TcpIp_SockAddrType* RemoteAddrPtr);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service gets called if the stack initiated a TCP connection before (as client) and the peer
  *                (the server) acknowledged the connection set up.In detail:The TCP/IP stack calls this function after
@@ -114,7 +132,11 @@ Std_ReturnType SoAd_TcpAccepted(
  * @trace         CPD-74652
  */
 void SoAd_TcpConnected(TcpIp_SocketIdType SocketId);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service gets called if the stack encounters a condition described by the values in Event.
  *
@@ -125,7 +147,11 @@ void SoAd_TcpConnected(TcpIp_SocketIdType SocketId);
  * @trace         CPD-74653
  */
 void SoAd_TcpIpEvent(TcpIp_SocketIdType SocketId, TcpIp_EventType Event);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * @brief         This service gets called by the TCP/IP stack if an IP address assignment changes (i.e. new address
  *                assigned or assigned address becomes invalid).
@@ -138,6 +164,8 @@ void SoAd_TcpIpEvent(TcpIp_SocketIdType SocketId, TcpIp_EventType Event);
  * @trace         CPD-74654
  */
 void SoAd_LocalIpAddrAssignmentChg(TcpIp_LocalAddrIdType IpAddrId, TcpIp_IpAddrStateType State);
+#define SOAD_STOP_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 
 #ifdef __cplusplus
 }

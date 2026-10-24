@@ -32,9 +32,11 @@
 /**
  * @brief the did mask for obd did
  */
-#define DCM_OBD_DID_MASK 0x00FFu
+#define DCM_OBD_DID_MASK                0x00FFu
 /* ========================================= internal function declarations ========================================= */
 #if ((STD_ON == DCM_UDS_0X23) || (STD_ON == DCM_UDS_0X34) || (STD_ON == DCM_UDS_0X2C) || (STD_ON == DCM_UDS_0X3D))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Verify memory request condition such as addAndLengthformatId and request length
  * @param[in]     MemoryCfg     : the target memory configuration ptr
@@ -59,6 +61,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_CheckMemoryCondition(
     uint8*                        addByteNumber,
     uint8*                        LenByteNumber,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Verify requested memory is within the configuration
@@ -82,6 +88,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_CheckMemoryRangeCheck(
     uint32                             MemorySize,
     uint8*                             MemoryIdentifier,
     const Dcm_DspMemoryRangeInfoType** targetMemoryInfo);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         find requested memory range info within the configuration
@@ -103,6 +113,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_FindMemoryRange(
     const Dcm_DspMemoryRangeInfoType*  memoryInfo,
     uint16                             infoNum,
     const Dcm_DspMemoryRangeInfoType** targetMemoryInfo);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check target memory range session/security/modeRule
@@ -117,9 +131,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_FindMemoryRange(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS_CheckMemoryAuth(const Dcm_DspMemoryRangeInfoType* memoryRangeInfo, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2F))
 #if ((STD_ON == DCM_USE_NVM) && (STD_ON == DCM_USE_BLOCK_ID_ENABLED))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Calls NvM APIs to read data from nvm block
  * @param[in]     OpStatus      : Indicates the current operation status
@@ -141,7 +159,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
     const Dcm_DspDataCfgType*     dspData,
     uint8*                        DestBuffer,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read data from signal using callouts(CS/SR/Callout) handle return value
@@ -158,6 +180,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS_SignalReturnValueHandle(Std_ReturnType inResult, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read data from signal using callouts(CS/SR/Callout)
@@ -181,9 +207,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
     uint8*                        DestBuffer,
     uint16*                       DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_DYN_DID)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         prepare for reading dynamic did
  * @param[in]     OpStatus     : Indicates the current operation status
@@ -220,6 +250,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedDID(
     boolean* checkFail,
 #endif
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read dynamic did that is defined by source did
@@ -251,6 +285,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedDIDHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read dynamic did that is defined by memory address and memory size
@@ -284,6 +322,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedAdd(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #if ((STD_ON == DCM_UDS_0X23) || (STD_ON == DCM_UDS_0X34) || (STD_ON == DCM_UDS_0X2C) || (STD_ON == DCM_UDS_0X3D))
@@ -568,6 +608,18 @@ Std_ReturnType
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2F))
+
+#define DCM_START_SEC_VAR_CLEARED_16
+#include "Dcm_MemMap.h"
+DCM_LOCAL uint16 Dcm_ReadDidSignalIndex; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_16
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_ReadDidSignalOpStatus; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
 /**
@@ -581,11 +633,17 @@ Std_ReturnType Dcm_UDS_SignalHandle(
     uint16*                       DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
-    Std_ReturnType finalResult = E_OK;
-
+    Std_ReturnType finalResult  = E_OK;
+    boolean        continueLoop = TRUE;
 #if (DCM_DID_SIGNAL_NUM > 0)
+    if (OpStatus == DCM_INITIAL)
+    {
+        Dcm_ReadDidSignalOpStatus = DCM_INITIAL;
+        Dcm_ReadDidSignalIndex    = Dcm_DspDid[DidIndex].DidSignalIndexStart;
+    }
 
-    for (uint16 index = Dcm_DspDid[DidIndex].DidSignalIndexStart; index <= Dcm_DspDid[DidIndex].DidSignalIndexEnd;
+    for (uint16 index = Dcm_ReadDidSignalIndex;
+         (index <= Dcm_DspDid[DidIndex].DidSignalIndexEnd) && (continueLoop == TRUE);
          index++)
     {
         uint16                    offset      = Dcm_DspDidSignal[index].DidByteOffset;
@@ -600,7 +658,7 @@ Std_ReturnType Dcm_UDS_SignalHandle(
             if (NULL_PTR != DestBuffer)
             {
                 /* read data from configured nvm block */
-                result = Dcm_UDS_SignalHandleNvM(OpStatus, dspData, &DestBuffer[offset], ErrorCode);
+                result = Dcm_UDS_SignalHandleNvM(Dcm_ReadDidSignalOpStatus, dspData, &DestBuffer[offset], ErrorCode);
             }
             break;
         }
@@ -626,15 +684,22 @@ Std_ReturnType Dcm_UDS_SignalHandle(
             break;
         }
         }
+        if (E_OK == result)
+        {
+            Dcm_ReadDidSignalIndex    = index + 1u;
+            Dcm_ReadDidSignalOpStatus = DCM_INITIAL;
+        }
         /* the result is pending, save the final result */
         if (DCM_E_PENDING == result)
         {
-            finalResult = DCM_E_PENDING;
+            finalResult               = DCM_E_PENDING;
+            Dcm_ReadDidSignalOpStatus = DCM_PENDING;
+            continueLoop              = FALSE;
         }
         else if (E_OK != result)
         {
-            finalResult = E_NOT_OK;
-            break;
+            finalResult  = E_NOT_OK;
+            continueLoop = FALSE;
         }
         else
         {
@@ -647,9 +712,9 @@ Std_ReturnType Dcm_UDS_SignalHandle(
 
     return finalResult;
 }
-/* PRQA S 1505-- */ /* VL_QAC_OneFunRef */
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+/* PRQA S 1505-- */ /* VL_QAC_OneFunRef */
 
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -844,7 +909,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_CheckMemoryCondition(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over memoryIdInfo to find matched range */
 DCM_LOCAL Std_ReturnType Dcm_UDS_CheckMemoryRangeCheck(
     const Dcm_DspMemoryType*           MemoryCfg,
@@ -897,6 +965,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_CheckMemoryRangeCheck(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040 -- */
 
 /* iterate over input memoryInfo to find matched rangeInfo */
@@ -921,7 +993,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_FindMemoryRange(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* check security/session/modeRule requirement for the specific memoryRange */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS_CheckMemoryAuth(const Dcm_DspMemoryRangeInfoType* memoryRangeInfo, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -955,9 +1030,9 @@ DCM_LOCAL Std_ReturnType
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2F))
+#if ((STD_ON == DCM_USE_NVM) && (STD_ON == DCM_USE_BLOCK_ID_ENABLED))
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-#if ((STD_ON == DCM_USE_NVM) && (STD_ON == DCM_USE_BLOCK_ID_ENABLED))
 /* Calls NvM APIs to read data from nvm block */
 DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -969,7 +1044,6 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
 
     if (DCM_INITIAL == OpStatus)
     {
-        (void)NvM_CancelJobs(dspData->DspDataBlockIdRef);
         result = NvM_ReadBlock(dspData->DspDataBlockIdRef, DestBuffer);
         if (E_OK == result)
         {
@@ -1009,8 +1083,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* read data from signal using callouts(CS/SR/Callout) handle return value */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS_SignalReturnValueHandle(Std_ReturnType inResult, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -1038,7 +1115,10 @@ DCM_LOCAL Std_ReturnType
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* read data from signal using callouts(CS/SR/Callout) */
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
@@ -1094,6 +1174,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
 #endif
 
 #if (STD_ON == DCM_DYN_DID)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* prepare for reading dynamic did that is defined using source did */
 DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedDID(
     Dcm_ExtendedOpStatusType OpStatus,
@@ -1136,6 +1218,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedDID(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /* read dynamic did that is defined using source did */
 #define DCM_START_SEC_CODE
@@ -1193,7 +1277,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedDIDHandle(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* read dynamic did that is defined by memory address and memory size */
 DCM_LOCAL Std_ReturnType Dcm_UDS_DynDidDefinedAdd(
     Dcm_ExtendedOpStatusType      OpStatus,

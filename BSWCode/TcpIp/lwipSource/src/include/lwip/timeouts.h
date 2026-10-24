@@ -77,9 +77,18 @@ struct lwip_cyclic_timer {
 
 /** This array contains all stack-internal cyclic timers. To get the number of
  * timers, use lwip_num_cyclic_timers */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern const struct lwip_cyclic_timer lwip_cyclic_timers[];
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
 /** Array size of lwip_cyclic_timers[] */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern const int lwip_num_cyclic_timers;
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TIMERS
 

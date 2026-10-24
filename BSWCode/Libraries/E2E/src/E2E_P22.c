@@ -30,6 +30,8 @@
 #define E2E_P22_MAX_COUNTER_VALUE 0xFu
 /* ================================================ type definitions ================================================ */
 /* ========================================== internal function declarations ======================================== */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of check()
  * @param[in]    ConfigPtr : Pointer to static configuration.
@@ -50,6 +52,8 @@ E2E_LOCAL Std_ReturnType E2E_P22CheckVerifyInputs(
     const E2E_P22CheckStateType* StatePtr,
     const uint8*                 DataPtr,
     uint16                       Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /* ============================================ internal data definitions =========================================== */
 /* ============================================ external data definitions =========================================== */
 /* ========================================== external function definitions ========================================= */
@@ -118,6 +122,11 @@ Std_ReturnType
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -137,6 +146,11 @@ Std_ReturnType E2E_P22ProtectInit(E2E_P22ProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 22.
  */
@@ -226,6 +240,11 @@ Std_ReturnType E2E_P22Check(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -246,6 +265,11 @@ Std_ReturnType E2E_P22CheckInit(E2E_P22CheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 22 to a generic check status.
  */
@@ -284,8 +308,12 @@ E2E_PCheckStatusType E2E_P22MapStatusToSM(Std_ReturnType CheckReturn, E2E_P22Che
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P22CheckVerifyInputs(
     const E2E_P22ConfigType*     ConfigPtr,
     const E2E_P22CheckStateType* StatePtr,

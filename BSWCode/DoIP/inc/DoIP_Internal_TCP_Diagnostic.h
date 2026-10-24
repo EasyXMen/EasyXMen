@@ -37,7 +37,8 @@ extern "C" {
 
 /* connect */
 /* PRQA S 1512 EOF */ /* VL_DoIP_1512 */
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Notify PdurR when close tcp connection.
  * @param[in]   txRxCtxIdx: index of DoIP_TcpTxRxContext.
@@ -47,6 +48,10 @@ extern "C" {
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* pending */
 
@@ -61,6 +66,10 @@ void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_HandlePendingTpMsg(DoIP_TcpTxRxContextType* ctx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle IF message in queued.
@@ -73,6 +82,10 @@ boolean DoIP_HandlePendingTpMsg(DoIP_TcpTxRxContextType* ctx);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_HandlePendingIfMsg(DoIP_TcpTxRxContextType* ctx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* rcv */
 
@@ -92,6 +105,8 @@ BufReq_ReturnType DoIP_HandleDiagMsg(
     const PduInfoType*                pduInfoPtr,
     PduLengthType*                    bufferSizePtr,
     const DoIP_HandleDiagContextType* handleDiagCtx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 #ifdef __cplusplus
 }

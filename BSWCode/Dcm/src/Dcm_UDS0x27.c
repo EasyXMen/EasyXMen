@@ -52,13 +52,13 @@ Dcm_SecurityCtrlType Dcm_SecurityCtrl[DCM_SECURITY_NUM];
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
-#define DCM_START_SEC_VAR_CLEARED_16
+#define DCM_START_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
 /**
  * @brief current security readout timer for initial read
  */
 uint32 Dcm_SecurityReadoutTimer;
-#define DCM_STOP_SEC_VAR_CLEARED_16
+#define DCM_STOP_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_INIT_BOOLEAN
 #include "Dcm_MemMap.h"
@@ -66,6 +66,10 @@ uint32 Dcm_SecurityReadoutTimer;
  * @brief indicates if there is pending getAttemptCounter globally
  */
 boolean Dcm_PendingGetAttemptCounter = TRUE;
+#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is pending setAttemptCounter globally
  */
@@ -74,6 +78,8 @@ boolean Dcm_PendingSetAttemptCounter = TRUE;
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function deal with request seed subfunction
  * @param[in]     OpStatus      : current operation status
@@ -97,6 +103,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_RequestSeed(
     uint8                         securityLevel,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function deal with send key subfunction
@@ -121,6 +131,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_SendKey(
     uint8                         securityLevel,
     const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function deal with request seed callout
@@ -145,8 +159,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_RequestSeedProcess(
     const Dcm_MsgContextType*     pMsgContext,
     const Dcm_DspSecurityRowType* securityRow,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function deal with getAttemptCounter callout
  * @param[in]     OpStatus      : current operation status
@@ -165,6 +183,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_GetAttemptCounterProcess(
     uint8            index,
     Dcm_OpStatusType OpStatus,
     boolean*         finish);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -206,7 +226,10 @@ Std_ReturnType Dcm_UDS0x27(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check whether current security satisfies
  */
@@ -240,7 +263,10 @@ Std_ReturnType Dcm_UDS0x27_CheckSecurity(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with security access dealy timer
  */
@@ -260,8 +286,11 @@ void Dcm_UDS0x27_CheckTimer(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * get current attempt counter during the first few calls of mainFunction
  */
@@ -299,7 +328,10 @@ void Dcm_UDS0x27_GetAttemptCounter(void)
         DcmInternal_DecreaseTimer(&Dcm_SecurityReadoutTimer); /* PRQA S 3200 */ /* VL_Dcm_3200 */
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set attempt counter after change
  */
@@ -331,8 +363,11 @@ void Dcm_UDS0x27_SetAttemptCounterHandle(void)
         Dcm_PendingSetAttemptCounter = FALSE;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * actual handle for setAttemptCounter
  */
@@ -446,7 +481,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_RequestSeed(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function deal with request seed callout */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x27_RequestSeedProcess(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -482,7 +520,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_RequestSeedProcess(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x27_SendKey(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint8                         securityIndex,
@@ -559,8 +600,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_SendKey(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function deal with getAttemptCounter callout */
 /* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x27_GetAttemptCounterProcess(
@@ -642,7 +686,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x27_GetAttemptCounterProcess(
     return result;
 }
 /* PRQA S 6030-- */
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif

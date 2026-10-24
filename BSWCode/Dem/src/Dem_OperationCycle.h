@@ -43,6 +43,8 @@
     (defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)) \
     || (defined(DEM_OCC3)) || (defined(DEM_AGINGCTR_DOWNCNT)) || (defined(DEM_AGINGCTR_UPCNT_FIRST_ACTIVE))    \
     || (defined(DEM_AGINGCTR_UPCNT)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the distance between cycle counter values
  * @param[in]     CurrentCounter: The current counter
@@ -53,8 +55,12 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_CycleCountDistance(uint16 CurrentCounter, uint16 TargetCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes cycle update for stored entries.
  * This function processes the aging cycle updates for all events currently stored in the event memory. This has effect
@@ -67,6 +73,10 @@ DEM_LOCAL uint16 Dem_CycleCountDistance(uint16 CurrentCounter, uint16 TargetCoun
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_OperationCycleStored(uint8 OperationCycleId, uint16 CycleCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Checks if passed event is affected by cycle update
@@ -80,6 +90,10 @@ DEM_LOCAL void Dem_OperationCycleStored(uint8 OperationCycleId, uint16 CycleCoun
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_UpdateCheckEventAffected(Dem_EventIdType EventId, uint8 OperationCycleId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process all queued operation cycle changes
@@ -88,11 +102,10 @@ DEM_LOCAL boolean Dem_UpdateCheckEventAffected(Dem_EventIdType EventId, uint8 Op
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_OperationCycleTask(void);
-
-/* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
+#define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
 
+/* ========================================== internal function definitions ========================================= */
 /**
  * @brief         Init the state of the operation cycle
  * @reentrant     FALSE
@@ -150,11 +163,12 @@ DEM_LOCAL_INLINE uint16 Dem_AddCycleCount(uint16 CurrentCounter, uint8 DeltaValu
     }
     return targetCycle;
 }
-
 #if (                                                                                                          \
     (defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)) \
     || (defined(DEM_OCC3)) || (defined(DEM_AGINGCTR_DOWNCNT)) || (defined(DEM_AGINGCTR_UPCNT_FIRST_ACTIVE))    \
     || (defined(DEM_AGINGCTR_UPCNT)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the distance between cycle counter values
  */
@@ -171,8 +185,9 @@ DEM_LOCAL uint16 Dem_CycleCountDistance(uint16 CurrentCounter, uint16 TargetCoun
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (                                                                                                          \
     (defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)) \
     || (defined(DEM_OCC3)))
@@ -211,7 +226,8 @@ DEM_LOCAL_INLINE boolean Dem_MemCheckCycleCounterLatched(Dem_NvBlockNumType Memo
     return ret;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes cycle update for stored entries.
  * This function processes the aging cycle updates for all events currently stored in the event memory. This has effect
@@ -257,7 +273,8 @@ DEM_LOCAL void Dem_OperationCycleStored(uint8 OperationCycleId, uint16 CycleCoun
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes global cycle counter and aging cycles
  * @param[in]     OperationCycleId: Identification of operation cycle, like power cycle, driving cycle.
@@ -275,7 +292,8 @@ DEM_LOCAL_INLINE void Dem_OperationCycleEnd(uint8 OperationCycleId)
     /** Aging cycle start */
     Dem_OperationCycleStored(OperationCycleId, cycleCounter);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Checks if passed event is affected by cycle update
  */
@@ -302,7 +320,8 @@ DEM_LOCAL boolean Dem_UpdateCheckEventAffected(Dem_EventIdType EventId, uint8 Op
 
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes the operation cycle update for the passed event
  * @param[in]     EventId: Event Id
@@ -392,6 +411,7 @@ DEM_LOCAL_INLINE void Dem_UpdateProcessEvent(Dem_EventIdType EventId)
 #endif
     Dem_NotiDtcStatusChanged(EventId, oldDtcStatus, Dem_DTCApplyExternalStatus(EventId, newDtcStatus));
 }
+
 /* PRQA S 6070 -- */
 /**
  * @brief         Processes operation cycle updates
@@ -448,7 +468,8 @@ DEM_LOCAL_INLINE void Dem_OperationCycleProcess(uint8 RestartFlag, uint8 Operati
         flag = flag >> 1u;
     }
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process all queued operation cycle changes
  */
@@ -473,7 +494,8 @@ DEM_LOCAL void Dem_OperationCycleTask(void)
         operationCycleId += DEM_OPERATION_CYCLE_BYTE_SIZE;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes the OperationCycle
  * @reentrant     FALSE
@@ -497,7 +519,4 @@ DEM_LOCAL_INLINE void Dem_OperationCycleSetReStart(uint8 OperationCycleId)
     DEM_BITS_SET(Dem_GetOCRestartFlag(), OperationCycleId);
     Dem_EnableTaskOnce(Dem_Task_OperationCycle);
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

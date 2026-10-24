@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -26,8 +26,6 @@
 #if (XCP_ON_CAN_ENABLE == STD_ON)
 #include "XcpOnCan_Cbk.h"
 #endif
-
-/* PRQA S 6070 EOF */ /* VL_MTR_Xcp_STCAL */
 
 /* ===================================================== macros ===================================================== */
 #define XCP_CONNECT_MODE_OFFSET 0x01u
@@ -68,29 +66,56 @@ typedef enum
 /*
  * Complex Command Handler
  */
+#if (XCP_SEED_AND_UNLOCK == STD_ON)
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
-#if (XCP_SEED_AND_UNLOCK == STD_ON)
 XCP_LOCAL void Xcp_CopySeedIntoFrame(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_GetSeedHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #endif /*XCP_SEED_AND_UNLOCK == STD_ON*/
 
 #if (XCP_UPLOAD == STD_ON)
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_UploadHal(void);
-#endif
-#if (XCP_SHORT_UPLOAD == STD_ON)
-XCP_LOCAL void Xcp_ShortUploadHal(void);
-#endif
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+
+#endif
+#if (XCP_SHORT_UPLOAD == STD_ON)
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_ShortUploadHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+#endif
+
 
 /* ============================================ internal data definitions =========================================== */
 #if (XCP_SEED_AND_UNLOCK == STD_ON)
 #define XCP_START_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
 XCP_LOCAL uint8 Xcp_SeedBuffer[XCP_SEED_MAX_LENGTH];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 XCP_LOCAL uint8 Xcp_KeyBuffer[XCP_KEY_MAX_LENGTH]; /*PRQA S 3218*/ /* VL_Xcp_3218 */
 #define XCP_STOP_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
@@ -162,7 +187,11 @@ void Xcp_Connect(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Disconnects from the XCP slave. This function disables the command processor
  * and, if applicable, the DAQ processor. It clears the status and sets the
@@ -179,7 +208,11 @@ void Xcp_DisconnectHal(void)
 
     Xcp_ChannelCommonData.ConnectionStatus = XCP_DISCONNECT;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Disconnects from the XCP slave. This function checks the command length and
  * programming status. If the programming is active, it sets an appropriate error
@@ -224,7 +257,11 @@ void Xcp_Disconnect(void)
 #endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves the current status of the XCP session. This function checks the
  * command length and prepares the response buffer with the session status,
@@ -252,7 +289,11 @@ void Xcp_GetStatus(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Synchronizes the XCP session. This function checks the command length and
  * the programming status. If the programming is active, it does nothing. Otherwise,
@@ -285,11 +326,15 @@ void Xcp_Synch(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /*
  * S T D   o p t i o n a l    c o m m a n d
  */
 #if (XCP_GET_COMM_MODE_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves communication mode information. This function checks the command
  * length and prepares the response buffer with details about the communication
@@ -326,15 +371,19 @@ void Xcp_GetCommModeInfo(void)
 #endif
         /* XCP Driver Version Number */
         Xcp_RespBuffer[XCP_CONST_7] =
-            ((uint8)((XCP_H_SW_MAJOR_VERSION & XCP_U8_MAX) << XCP_CONST_4)) | (XCP_H_SW_MINOR_VERSION & XCP_U8_MAX);
+            ((uint8)((XCP_SW_MAJOR_VERSION & XCP_U8_MAX) << XCP_CONST_4)) | (XCP_SW_MINOR_VERSION & XCP_U8_MAX);
         Xcp_ChannelCommonData.RespLength = XCP_CONST_8;
     }
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_GET_COMM_MODE_INFO == STD_ON*/
 
 #if (STD_ON == XCP_GET_ID)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves identification information. This function checks the command length
  * and the requested ID type. It searches for the matching ID in the configuration
@@ -398,9 +447,13 @@ void Xcp_GetId(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_GET_ID*/
 
 #if (XCP_SET_REQUEST == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets a request for calibration storage or DAQ list management. This function
  * checks the command length and processes the request based on the command
@@ -472,9 +525,13 @@ void Xcp_SetRequest(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (STD_ON == XCP_SEED_AND_UNLOCK)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Copies the seed into the response frame buffer. This function checks the
  * seed length and copies the seed data into the response buffer. If the seed
@@ -512,7 +569,11 @@ XCP_LOCAL void Xcp_CopySeedIntoFrame(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Generates and retrieves a seed for unlocking protected resources. This function
  * checks the mode and resource type, and either generates a new seed or continues
@@ -595,6 +656,11 @@ XCP_LOCAL void Xcp_GetSeedHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves a seed for unlocking protected resources. This function checks the
  * command length and programming status. If the programming is active or the
@@ -625,7 +691,11 @@ void Xcp_GetSeed(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the key verification process for unlocking protected resources. This
  * function checks whether the key is provided in multiple frames or a single
@@ -644,12 +714,12 @@ XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr)
     /* key in multi frames */
     if (len > resCto)
     {
-        for (pos = 0u; pos < resCto; pos++)
+        for (pos = 0u; (pos < resCto) && ((Xcp_ChannelCommonData.SeedandKeyPos + pos) < XCP_KEY_MAX_LENGTH); pos++)
         {
             Xcp_KeyBuffer[Xcp_ChannelCommonData.SeedandKeyPos + pos] = Xcp_CmdBuffer[pos + XCP_UNLOCK_DATA_OFFSET];
         }
         Xcp_ChannelCommonData.SeedandKeyPos += pos;
-        Xcp_ChannelCommonData.SeedandKeyLen -= resCto;
+        Xcp_ChannelCommonData.SeedandKeyLen -= pos;
         Xcp_RespBuffer[1u]               = Xcp_ChannelCommonData.ProtectionStatus;
         Xcp_ChannelCommonData.RespLength = XCP_CONST_2;
     }
@@ -657,7 +727,7 @@ XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr)
     else
     {
         /* copy last data frame */
-        for (pos = 0u; pos < len; pos++)
+        for (pos = 0u; (pos < len) && ((Xcp_ChannelCommonData.SeedandKeyPos + pos) < XCP_KEY_MAX_LENGTH); pos++)
         {
             Xcp_KeyBuffer[Xcp_ChannelCommonData.SeedandKeyPos + pos] = Xcp_CmdBuffer[pos + XCP_UNLOCK_DATA_OFFSET];
         }
@@ -685,7 +755,11 @@ XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Unlocks protected resources by verifying the provided key. This function checks
  * the command length and programming status. It processes the key based on the
@@ -772,9 +846,13 @@ void Xcp_Unlock(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /* XCP_SEED_AND_UNLOCK == STD_ON */
 
 #if (STD_ON == XCP_SET_MTA)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the Memory Transfer Address (MTA). This function checks the command length
  * and validates the address based on the specified memory segment. If the address
@@ -826,9 +904,17 @@ void Xcp_SetMta(void)
     }
 #endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
     Xcp_SendResp();
+
+    (void)calflag;
+    (void)pgmflag;
+
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Convert the MTA (Memory Transfer Address) to an address.
  */
@@ -837,9 +923,13 @@ uint32 Xcp_Mta2Ptr(const uint8 u1AddExt, const uint32 u4Add)
     (void)u1AddExt;
     return u4Add;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_SET_MTA*/
 
 #if (STD_ON == XCP_UPLOAD)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Uploads data from the specified memory address. This function checks the
  * command length, protection status, and programming status. If the command
@@ -875,7 +965,11 @@ void Xcp_Upload(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Performs the actual data upload from the specified memory address. This function
  * checks the length of the data to be uploaded and ensures it is within valid
@@ -931,9 +1025,13 @@ XCP_LOCAL void Xcp_UploadHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_UPLOAD*/
 
 #if (STD_ON == XCP_SHORT_UPLOAD)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Performs a short data upload from the specified memory address. This function
  * checks the command length, programming status, and protection status. If the
@@ -969,7 +1067,11 @@ void Xcp_ShortUpload(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Performs a short data upload from a specified memory address. This function
  * checks the length of the data to be uploaded and ensures it is within valid
@@ -1015,9 +1117,13 @@ XCP_LOCAL void Xcp_ShortUploadHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_SHORT_UPLOAD == STD_ON*/
 
 #if (XCP_BUILD_CHECKSUM == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Computes a checksum for a specified memory block. This function checks the
  * command length, protection status, and block size. It calculates the checksum
@@ -1027,6 +1133,7 @@ XCP_LOCAL void Xcp_ShortUploadHal(void)
  * invalid, it sets an appropriate error code. This function is intended for
  * internal use.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_Xcp_STCAL */
 void Xcp_BuildChecksum(void)
 {
     uint32 crcResult;
@@ -1076,19 +1183,22 @@ void Xcp_BuildChecksum(void)
             Xcp_ChecksumCompute(checksumStartAddress, (blockSize * XCP_AG), &crcResult);
             /* PRQA S 2985 -- */
             Xcp_CopyU4ToU1Buffer(crcResult, &(Xcp_RespBuffer[XCP_CONST_4]), (uint8)CPU_BYTE_ORDER);
-            /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
-            Xcp_UpdateMTA(blockSize * XCP_AG);
-            /* PRQA S 2985 -- */
+            Xcp_UpdateMTA(blockSize * XCP_AG); /* PRQA S 2985 */ /* VL_Xcp_2985 */
             Xcp_ChannelCommonData.RespLength = XCP_CONST_8;
         }
     }
     Xcp_SendResp();
     return;
 }
+/* PRQA S 6070 -- */
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_BUILD_CHECKSUM == STD_ON*/
 
 /* Transport Layer Command */
 #if (XCP_GET_SLAVE_ID == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Identifies the slave ID by echoing or inversely echoing a specific command.
  * This function checks the command length, programming status, and the mode
@@ -1206,10 +1316,14 @@ void Xcp_GetSlaveId(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /* XCP_GET_SLAVE_ID == STD_ON */
 
 #if (0u != ((XCP_PL_CAL | XCP_PL_PGM) & XCP_RESOURCE))
 #if (STD_ON == XCP_CHECK_MEA_ADDR)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks if the specified memory address and size are valid for measurement.
  * This function iterates through a set of predefined memory ranges and checks
@@ -1238,7 +1352,12 @@ boolean Xcp_CheckMeaMem(uint32 addr, uint32 size)
 
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Validates the specified memory address and size based on the memory type.
  * This function checks if the address and size are valid for calibration,
@@ -1291,9 +1410,13 @@ boolean Xcp_CheckAddress(uint32 addr, uint32 size, Xcp_MemAddrType type)
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_PL_CAL | XCP_PL_PGM & XCP_RESOURCE*/
 
 #if (STD_ON == XCP_SET_MTA)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Updates the Memory Transfer Address (MTA) by the specified length. This
  * function increments the MTA by the given number of bytes. This function
@@ -1305,9 +1428,9 @@ void Xcp_UpdateMTA(uint32 u4Length)
     Xcp_ChannelCommonData.MTA += u4Length;
     return;
 }
-#endif /*STD_ON == XCP_SET_MTA*/
-/* PRQA S 1532 -- */
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+#endif /*STD_ON == XCP_SET_MTA*/
+/* PRQA S 1532 -- */
 
 /* ========================================== internal function definitions ========================================= */

@@ -24,38 +24,39 @@
 
 /* =================================================== inclusions =================================================== */
 #include "Tm.h"
-#include "Gpt.h" /* PRQA S 0380 */ /* VL_Tm_0380 */
 #include "Det.h"
+#include "Tm_Arti.h"
 
 /* ===================================================== macros ===================================================== */
-/**
- * @name TM_VERSION_C_INFO_GROUP
- * @{
- * @brief Tm module version infomation macros in Tm source file.
- */
-#define TM_C_AR_MAJOR_VERSION 4U /**< Tm C ar major version*/
-#define TM_C_AR_MINOR_VERSION 9U /**< Tm C ar minor version*/
-#define TM_C_AR_PATCH_VERSION 0U /**< Tm C ar patch version*/
-#define TM_C_SW_MAJOR_VERSION 2U /**< Tm C sw major version*/
-#define TM_C_SW_MINOR_VERSION 2U /**< Tm C sw minor version*/
-#define TM_C_SW_PATCH_VERSION 0U /**< Tm C sw patch version*/
-/** @} */
+
+#define TM_START_SEC_VAR_FAST_CLEARED_PTR
+#include "Tm_MemMap.h"
+static const Tm_ConfigType* Tm_ConfigPtr;
+#define TM_STOP_SEC_VAR_FAST_CLEARED_PTR
+#include "Tm_MemMap.h"
+
+#define TM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Tm_MemMap.h"
+static boolean Tm_InitState;
+#define TM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Tm_MemMap.h"
+
+#define TM_START_SEC_VAR_CLEARED_32
+#include "Tm_MemMap.h"
+static uint32 Tm_PreDefTimerValue[TM_TIMER_INSTANCE_NUM];
+#define TM_STOP_SEC_VAR_CLEARED_32
+#include "Tm_MemMap.h"
 
 #if (STD_ON == TM_DEV_ERROR_DETECT)
 /* PRQA S 3472 ++ */ /* VL_Tm_3472 */
 /** TM_DET_REPORT macro api in Tm */
 #define TM_DET_REPORT(ApiId, ErrorId) ((void)Det_ReportError(TM_MODULE_ID, TM_INSTANCE_ID, (ApiId), (ErrorId)))
 /* PRQA S 3472 -- */
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-
-/* ------------------------------------------------- Version  Check ------------------------------------------------- */
-#if (                                                                                                       \
-    (TM_C_AR_MAJOR_VERSION != TM_H_AR_MAJOR_VERSION) || (TM_C_AR_MINOR_VERSION != TM_H_AR_MINOR_VERSION)    \
-    || (TM_C_AR_PATCH_VERSION != TM_H_AR_PATCH_VERSION) || (TM_C_SW_MAJOR_VERSION != TM_H_SW_MAJOR_VERSION) \
-    || (TM_C_SW_MINOR_VERSION != TM_H_SW_MINOR_VERSION) || (TM_C_SW_PATCH_VERSION != TM_H_SW_PATCH_VERSION))
-
-#error "Tm.c : Mismatch in Specification Major Version"
-#endif
+#endif               /* STD_ON == TM_DEV_ERROR_DETECT */
+/* PRQA S 3472 ++ */ /* VL_Tm_3472 */
+#define TM_DET_REPORTRUNTIME(ApiId, ErrorId) \
+    ((void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, (ApiId), (ErrorId)))
+/* PRQA S 3472 -- */
 
 /* ================================================ type definitions ================================================ */
 
@@ -66,15 +67,46 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+void Tm_Init(const Tm_ConfigType* config)
+{
+    Tm_ArtiApiStart(2, TM_INIT_ID, config);
+
+    if (config != NULL_PTR)
+    {
+        if (!Tm_InitState)
+        {
+            for (uint8 idx = 0u; idx < TM_TIMER_INSTANCE_NUM; idx++)
+            {
+                Tm_PreDefTimerValue[idx] = TM_INVALID_TIMER_VALUE;
+            }
+        }
+        Tm_InitState = TRUE;
+        Tm_ConfigPtr = config;
+    }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+    else
+    {
+        TM_DET_REPORT(TM_INIT_ID, TM_E_PARAM_POINTER);
+    }
+#endif /* STD_ON == TM_DEV_ERROR_DETECT */
+
+    Tm_ArtiApiStop(1, TM_INIT_ID);
+}
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
+
 #if (STD_ON == TM_VERSIONINFO_API)
 #define TM_START_SEC_CODE
 #include "Tm_MemMap.h"
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
 void Tm_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    Tm_ArtiApiStart(2, TM_GETVERSIONINFO_ID, versioninfo);
+
 #if (STD_ON == TM_DEV_ERROR_DETECT)
     /* detect null_ptr */
-    if (NULL_PTR == versioninfo)
+    if (versioninfo == NULL_PTR)
     {
         TM_DET_REPORT(TM_GETVERSIONINFO_ID, TM_E_PARAM_POINTER);
     }
@@ -84,518 +116,270 @@ void Tm_GetVersionInfo(Std_VersionInfoType* versioninfo)
         /* update versioninfo */
         versioninfo->vendorID         = TM_VENDOR_ID;
         versioninfo->moduleID         = TM_MODULE_ID;
-        versioninfo->sw_major_version = TM_H_SW_MAJOR_VERSION;
-        versioninfo->sw_minor_version = TM_H_SW_MINOR_VERSION;
-        versioninfo->sw_patch_version = TM_H_SW_PATCH_VERSION;
+        versioninfo->sw_major_version = TM_SW_MAJOR_VERSION;
+        versioninfo->sw_minor_version = TM_SW_MINOR_VERSION;
+        versioninfo->sw_patch_version = TM_SW_PATCH_VERSION;
     }
+
+    Tm_ArtiApiStop(1, TM_GETVERSIONINFO_ID);
 }
-/* PRQA S 1503 -- */
 #define TM_STOP_SEC_CODE
 #include "Tm_MemMap.h"
 #endif /* STD_ON == TM_VERSIONINFO_API */
 
-#if (STD_ON == TM_1US16BIT)
 #define TM_START_SEC_CODE
 #include "Tm_MemMap.h"
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_ResetTimer1us16bit(Tm_PredefTimer1us16bitType* TimerPtr)
+Std_ReturnType Tm_ResetTimer(uint32 timerId)
 {
-    Std_ReturnType ret            = E_NOT_OK;
-    uint32         CurrentTime    = 0u;
-    uint32*        CurrentTimePtr = &CurrentTime;
+    Tm_ArtiApiStart(2, TM_RESETTIMER_ID, timerId);
 
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect null_ptr */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_RESETTIMER1US16BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt real time and assign to reference time of given clock */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_16BIT, CurrentTimePtr);
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            TimerPtr->ui16RefTime = (uint16)CurrentTime;
-        }
-        else
-        {
-            /* gpt clock error */
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_RESETTIMER1US16BIT_ID, TM_E_HARDWARE_TIMER);
-        }
-    }
-    return ret;
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_GetTimeSpan1us16bit(const Tm_PredefTimer1us16bitType* TimerPtr, uint16* TimeSpanPtr)
-{
-    Std_ReturnType ret                = E_NOT_OK;
-    uint32         ui16CurrentTime    = 0u;
-    uint32*        ui16CurrentTimePtr = &ui16CurrentTime;
-
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect null_ptr */
-    if ((NULL_PTR == TimerPtr) || (NULL_PTR == TimeSpanPtr))
-    {
-        TM_DET_REPORT(TM_GETTIMESPAN1US16BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt time, subtract it from reference time */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_16BIT, ui16CurrentTimePtr);
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            *TimeSpanPtr = (uint16)(ui16CurrentTime - TimerPtr->ui16RefTime);
-        }
-        else
-        {
-            /* gpt clock error, timespan=0 */
-            *TimeSpanPtr = 0U;
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_GETTIMESPAN1US16BIT_ID, TM_E_HARDWARE_TIMER);
-        }
-    }
-    return ret;
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_ShiftTimer1us16bit(Tm_PredefTimer1us16bitType* TimerPtr, uint16 TimeValue)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect null_ptr */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_SHIFTTIMER1US16BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* simply add TimeValue to refernce time */
-        TimerPtr->ui16RefTime = (uint16)(TimerPtr->ui16RefTime + TimeValue);
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_SyncTimer1us16bit(Tm_PredefTimer1us16bitType* TimerDstPtr, const Tm_PredefTimer1us16bitType* TimerSrcPtr)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect null_ptr */
-    if ((NULL_PTR == TimerDstPtr) || (NULL_PTR == TimerSrcPtr))
-    {
-        TM_DET_REPORT(TM_SYNCTIMER1US16BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* Sync two clocks */
-        TimerDstPtr->ui16RefTime = TimerSrcPtr->ui16RefTime;
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_BusyWait1us16bit(uint8 WaitingTimeMin)
-{
-    Std_ReturnType ret;
-    uint32         RefTime        = 0u;
-    uint32*        RefTimePtr     = &RefTime;
-    uint32         CurrentTime    = 0u;
-    uint32*        CurrentTimePtr = &CurrentTime;
-
-    /* get the start time */
-    ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_16BIT, RefTimePtr);
-
-    /* keep getting the current time and subtract it from start time until over timemin */
-    do
-    {
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_16BIT, CurrentTimePtr);
-        }
-        else
-        {
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_BUSYWAIT1US16BIT_ID, TM_E_HARDWARE_TIMER);
-            break;
-        }
-    } while ((uint16)(CurrentTime - RefTime) <= WaitingTimeMin);
-
-    return ret;
-}
-/* PRQA S 1503 -- */
-
-#endif /* STD_ON == TM_1US16BIT */
-
-#if (STD_ON == TM_1US24BIT)
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_ResetTimer1us24bit(Tm_PredefTimer1us24bitType* TimerPtr)
-{
     Std_ReturnType ret = E_NOT_OK;
-    uint32         CurrentTime;
 
 #if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect null_ptr */
-    if (NULL_PTR == TimerPtr)
+    if (timerId >= TM_TIMER_INSTANCE_NUM)
     {
-        TM_DET_REPORT(TM_RESETTIMER1US24BIT_ID, TM_E_PARAM_POINTER);
+        TM_DET_REPORT(TM_RESETTIMER_ID, TM_E_PARAM_VALUE);
     }
     else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
     {
-        /* get current gpt real time and assign to reference time of given clock */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_24BIT, &CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
+        if (Tm_InitState)
         {
-            TimerPtr->ui24RefTime = CurrentTime & (uint32)TM_1US24BIT_MAX_MASK;
+            ret = Gpt_GetPredefTimerValue(Tm_ConfigPtr->preDefTimer[timerId].timerType, &Tm_PreDefTimerValue[timerId]);
+            if (ret == E_NOT_OK)
+            {
+                TM_DET_REPORTRUNTIME(TM_RESETTIMER_ID, TM_E_HARDWARE_TIMER);
+            }
         }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
         else
         {
-            /* gpt clock error */
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_RESETTIMER1US24BIT_ID, TM_E_HARDWARE_TIMER);
+            TM_DET_REPORTRUNTIME(TM_RESETTIMER_ID, TM_E_UNINIT);
         }
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
     }
-    return ret;
-}
-/* PRQA S 1503 -- */
 
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_GetTimeSpan1us24bit(const Tm_PredefTimer1us24bitType* TimerPtr, uint32* TimeSpanPtr)
-{
-    Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_Tm_2981 */
-    uint32         ui32CurrentTime;
-
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if ((NULL_PTR == TimerPtr) || (NULL_PTR == TimeSpanPtr))
-    {
-        TM_DET_REPORT(TM_GETTIMESPAN1US24BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt time, subtract it from reference time */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_24BIT, &ui32CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            *TimeSpanPtr = (uint32)(ui32CurrentTime - TimerPtr->ui24RefTime) & (uint32)TM_1US24BIT_MAX_MASK;
-        }
-        else
-        {
-            /* gpt error, TimeSpan = 0 */
-            *TimeSpanPtr = 0U;
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_GETTIMESPAN1US24BIT_ID, TM_E_HARDWARE_TIMER);
-        }
-    }
-    return ret;
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_ShiftTimer1us24bit(Tm_PredefTimer1us24bitType* TimerPtr, uint32 TimeValue)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_SHIFTTIMER1US24BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else if (TimeValue > TM_1US24BIT_MAX_MASK)
-    {
-        TM_DET_REPORT(TM_SHIFTTIMER1US24BIT_ID, TM_E_PARAM_VALUE);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* simply add TimeValue to refernce time */
-        TimerPtr->ui24RefTime = (uint32)(TimerPtr->ui24RefTime + TimeValue) & (uint32)TM_1US24BIT_MAX_MASK;
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_SyncTimer1us24bit(Tm_PredefTimer1us24bitType* TimerDstPtr, const Tm_PredefTimer1us24bitType* TimerSrcPtr)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if ((NULL_PTR == TimerDstPtr) || (NULL_PTR == TimerSrcPtr))
-    {
-        TM_DET_REPORT(TM_SYNCTIMER1US24BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* Sync two clocks */
-        TimerDstPtr->ui24RefTime = TimerSrcPtr->ui24RefTime;
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_BusyWait1us24bit(uint8 WaitingTimeMin)
-{
-    Std_ReturnType ret;
-    uint32         RefTime;
-    uint32         CurrentTime;
-
-    /* get the start time */
-    ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_24BIT, &RefTime);
-
-    /* keep getting the current time and subtract it from start time until over timemin */
-    do
-    {
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_24BIT, &CurrentTime);
-        }
-        else
-        {
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_BUSYWAIT1US24BIT_ID, TM_E_HARDWARE_TIMER);
-            break;
-        }
-    } while (((uint32)(CurrentTime - RefTime) & (uint32)TM_1US24BIT_MAX_MASK) <= WaitingTimeMin);
+    Tm_ArtiApiStop(2, TM_RESETTIMER_ID, ret);
 
     return ret;
 }
-/* PRQA S 1503 -- */
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
-#endif /* STD_ON == TM_1US24BIT */
-
-#if (STD_ON == TM_1US32BIT)
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_ResetTimer1us32bit(Tm_PredefTimer1us32bitType* TimerPtr)
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+/* PRQA S 6010, 6030 ++ */ /* VL_MTR_Tm_STCYC, VL_MTR_Tm_STMIF */
+Std_ReturnType Tm_GetTimeSpan(uint32 timerId, uint32* timeSpan)
 {
-    Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_Tm_2981 */
-    uint32         CurrentTime;
+    Tm_ArtiApiStart(3, TM_GETTIMESPAN_ID, timerId, timeSpan);
 
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_RESETTIMER1US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt real time and assign to reference time of given clock */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_32BIT, &CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            TimerPtr->ui32RefTime = CurrentTime;
-        }
-        else
-        {
-            /* gpt clock error */
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_RESETTIMER1US32BIT_ID, TM_E_HARDWARE_TIMER);
-        }
-    }
-    return ret;
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_GetTimeSpan1us32bit(const Tm_PredefTimer1us32bitType* TimerPtr, uint32* TimeSpanPtr)
-{
     Std_ReturnType ret = E_NOT_OK;
-    uint32         ui32CurrentTime;
 
-#if (TM_DEV_ERROR_DETECT == STD_ON)
-    /* detect NULL_PTR */
-    if ((NULL_PTR == TimerPtr) || (NULL_PTR == TimeSpanPtr))
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+    if (timerId >= TM_TIMER_INSTANCE_NUM)
     {
-        TM_DET_REPORT(TM_GETTIMESPAN1US32BIT_ID, TM_E_PARAM_POINTER);
+        TM_DET_REPORT(TM_GETTIMESPAN_ID, TM_E_PARAM_VALUE);
+    }
+    else if (timeSpan == NULL_PTR)
+    {
+        TM_DET_REPORT(TM_GETTIMESPAN_ID, TM_E_PARAM_POINTER);
+    }
+    else if (Tm_PreDefTimerValue[timerId] == TM_INVALID_TIMER_VALUE)
+    {
+        TM_DET_REPORT(TM_GETTIMESPAN_ID, TM_E_STATE);
     }
     else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
+#endif
     {
-        /* get current gpt time, subtract it from reference time */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_32BIT, &ui32CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
+        if (Tm_InitState)
         {
-            *TimeSpanPtr = (uint32)(ui32CurrentTime - TimerPtr->ui32RefTime);
+            uint32 currentTimerValue = 0u;
+            ret = Gpt_GetPredefTimerValue(Tm_ConfigPtr->preDefTimer[timerId].timerType, &currentTimerValue);
+            if (ret == E_OK)
+            {
+                if (currentTimerValue <= Tm_PreDefTimerValue[timerId])
+                {
+                    /* When current time tick is equal to reset time tick, it can be considered that after a period.
+                     * Although many cycles may have passed, only one cycle can be considered. */
+                    switch (Tm_ConfigPtr->preDefTimer[timerId].timerType)
+                    {
+                    case TM_PREDEF_TIMER_1US_16BIT:
+                        *timeSpan = (uint32)(((uint16)TM_1US16BIT_MAX_VALUE - Tm_PreDefTimerValue[timerId])
+                                             + currentTimerValue + 1u);
+                        break;
+                    case TM_PREDEF_TIMER_1US_24BIT:
+                        *timeSpan = (uint32)(((uint32)TM_1US24BIT_MAX_VALUE - Tm_PreDefTimerValue[timerId])
+                                             + currentTimerValue + 1u);
+                        break;
+                    case TM_PREDEF_TIMER_1US_32BIT:
+                        *timeSpan = (uint32)(((uint32)TM_1US32BIT_MAX_VALUE - Tm_PreDefTimerValue[timerId])
+                                             + currentTimerValue + 1u);
+                        break;
+                    case TM_PREDEF_TIMER_100US_32BIT:
+                        *timeSpan = (uint32)(((uint32)TM_100US32BIT_MAX_VALUE - Tm_PreDefTimerValue[timerId])
+                                             + currentTimerValue + 1u);
+                        break;
+                    default:
+                        (void)timerId; /* to avoid compiler warning */
+                        break;
+                    }
+                }
+                else
+                {
+                    *timeSpan = currentTimerValue - Tm_PreDefTimerValue[timerId];
+                }
+            }
+            else
+            {
+                *timeSpan = 0u;
+                TM_DET_REPORTRUNTIME(TM_GETTIMESPAN_ID, TM_E_HARDWARE_TIMER);
+            }
         }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
         else
         {
-            /* gpt error, TimeSpan = 0 */
-            *TimeSpanPtr = 0U;
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_GETTIMESPAN1US32BIT_ID, TM_E_HARDWARE_TIMER);
+            TM_DET_REPORTRUNTIME(TM_GETTIMESPAN_ID, TM_E_UNINIT);
         }
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
     }
-    return ret;
-}
-/* PRQA S 1503 -- */
 
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_ShiftTimer1us32bit(Tm_PredefTimer1us32bitType* TimerPtr, uint32 TimeValue)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_SHIFTTIMER1US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* simply add TimeValue to refernce time */
-        TimerPtr->ui32RefTime = (uint32)(TimerPtr->ui32RefTime + TimeValue);
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_SyncTimer1us32bit(Tm_PredefTimer1us32bitType* TimerDstPtr, const Tm_PredefTimer1us32bitType* TimerSrcPtr)
-{
-/* detect NULL_PTR */
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    if ((NULL_PTR == TimerDstPtr) || (NULL_PTR == TimerSrcPtr))
-    {
-        TM_DET_REPORT(TM_SYNCTIMER1US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* Sync two clocks */
-        TimerDstPtr->ui32RefTime = TimerSrcPtr->ui32RefTime;
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_BusyWait1us32bit(uint8 WaitingTimeMin)
-{
-    Std_ReturnType ret;
-    uint32         RefTime;
-    uint32         CurrentTime;
-
-    /* get the start time */
-    ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_32BIT, &RefTime);
-
-    /* keep getting the current time and subtract it from start time until over timemin */
-    do
-    {
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_1US_32BIT, &CurrentTime);
-        }
-        else
-        {
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_BUSYWAIT1US32BIT_ID, TM_E_HARDWARE_TIMER);
-            break;
-        }
-    } while (((uint32)(CurrentTime - RefTime)) <= WaitingTimeMin);
+    Tm_ArtiApiStop(2, TM_GETTIMESPAN_ID, ret);
 
     return ret;
 }
-/* PRQA S 1503 -- */
-#endif /* STD_ON == TM_1US32BIT */
+/* PRQA S 6010, 6030 -- */
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
-#if (STD_ON == TM_100US32BIT)
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-Std_ReturnType Tm_ResetTimer100us32bit(Tm_PredefTimer100us32bitType* TimerPtr)
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+/* PRQA S 6030 ++ */ /* VL_MTR_Tm_STMIF */
+void Tm_ShiftTimer(uint32 timerId, uint32 timeValue)
 {
+    Tm_ArtiApiStart(3, TM_SHIFTTIMER_ID, timerId, timeValue);
+
+    if (Tm_InitState)
+    {
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+        if (timerId >= TM_TIMER_INSTANCE_NUM)
+        {
+            TM_DET_REPORT(TM_SHIFTTIMER_ID, TM_E_PARAM_VALUE);
+        }
+        else if (
+            (Tm_ConfigPtr->preDefTimer[timerId].timerType == TM_PREDEF_TIMER_1US_16BIT)
+            && (timeValue > TM_1US16BIT_MAX_VALUE))
+        {
+            TM_DET_REPORT(TM_SHIFTTIMER_ID, TM_E_PARAM_VALUE);
+        }
+        else if (
+            (Tm_ConfigPtr->preDefTimer[timerId].timerType == TM_PREDEF_TIMER_1US_24BIT)
+            && (timeValue > TM_1US24BIT_MAX_VALUE))
+        {
+            TM_DET_REPORT(TM_SHIFTTIMER_ID, TM_E_PARAM_VALUE);
+        }
+        else if (Tm_PreDefTimerValue[timerId] == TM_INVALID_TIMER_VALUE)
+        {
+            TM_DET_REPORT(TM_SHIFTTIMER_ID, TM_E_STATE);
+        }
+        else
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
+        {
+            Tm_PreDefTimerValue[timerId] += timeValue;
+        }
+    }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+    else
+    {
+        TM_DET_REPORT(TM_SHIFTTIMER_ID, TM_E_UNINIT);
+    }
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
+
+    Tm_ArtiApiStop(1, TM_SHIFTTIMER_ID);
+}
+/* PRQA S 6030 -- */
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
+
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+void Tm_SyncTimer(uint32 timerIdSrc, uint32 timerIdDst)
+{
+    Tm_ArtiApiStart(3, TM_SYNCTIMER_ID, timerIdSrc, timerIdDst);
+
+    if (Tm_InitState)
+    {
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+        if ((timerIdSrc >= TM_TIMER_INSTANCE_NUM) || (timerIdDst >= TM_TIMER_INSTANCE_NUM))
+        {
+            TM_DET_REPORT(TM_SYNCTIMER_ID, TM_E_PARAM_VALUE);
+        }
+        else if (Tm_ConfigPtr->preDefTimer[timerIdSrc].timerType != Tm_ConfigPtr->preDefTimer[timerIdDst].timerType)
+        {
+            TM_DET_REPORT(TM_SYNCTIMER_ID, TM_E_PARAM_SYNC);
+        }
+        else if (Tm_PreDefTimerValue[timerIdSrc] == TM_INVALID_TIMER_VALUE)
+        {
+            TM_DET_REPORT(TM_SYNCTIMER_ID, TM_E_STATE);
+        }
+        else
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
+        {
+            Tm_PreDefTimerValue[timerIdDst] = Tm_PreDefTimerValue[timerIdSrc];
+        }
+    }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+    else
+    {
+        TM_DET_REPORT(TM_SYNCTIMER_ID, TM_E_UNINIT);
+    }
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
+
+    Tm_ArtiApiStop(1, TM_SYNCTIMER_ID);
+}
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
+
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+Std_ReturnType Tm_BusyWait1us(uint8 WaitingTimeMin)
+{
+    Tm_ArtiApiStart(2, TM_BUSYWAIT1US_ID, WaitingTimeMin);
+
     Std_ReturnType ret = E_NOT_OK;
-    uint32         CurrentTime;
-
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if (NULL_PTR == TimerPtr)
+    if (Tm_InitState)
     {
-        TM_DET_REPORT(TM_RESETTIMER100US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt real time and assign to reference time of given clock */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_100US_32BIT, &CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
+        uint32 startCurrentTime = 0u;
+        ret                     = Gpt_GetPredefTimerValue(TM_PREDEF_TIMER_1US_32BIT, &startCurrentTime);
+        if (ret == E_OK)
         {
-            TimerPtr->ui32RefTime = CurrentTime;
+            uint32 currentTime = 0u;
+            do
+            {
+                ret = Gpt_GetPredefTimerValue(TM_PREDEF_TIMER_1US_32BIT, &currentTime);
+                if (ret == E_NOT_OK)
+                {
+                    TM_DET_REPORTRUNTIME(TM_BUSYWAIT1US_ID, TM_E_HARDWARE_TIMER);
+                    break;
+                }
+
+            } while ((currentTime - startCurrentTime) < WaitingTimeMin);
         }
         else
         {
-            /* gpt clock error */
-            (void)Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_RESETTIMER100US32BIT_ID, TM_E_HARDWARE_TIMER);
+            TM_DET_REPORTRUNTIME(TM_BUSYWAIT1US_ID, TM_E_HARDWARE_TIMER);
         }
     }
+#if (STD_ON == TM_DEV_ERROR_DETECT)
+    else
+    {
+        TM_DET_REPORT(TM_BUSYWAIT1US_ID, TM_E_UNINIT);
+    }
+#endif /*STD_ON == TM_DEV_ERROR_DETECT*/
+
+    Tm_ArtiApiStop(2, TM_BUSYWAIT1US_ID, ret);
+
     return ret;
 }
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503,1505 ++ */ /* VL_Tm_1503, VL_Tm_1505 */
-Std_ReturnType Tm_GetTimeSpan100us32bit(const Tm_PredefTimer100us32bitType* TimerPtr, uint32* TimeSpanPtr)
-{
-    Std_ReturnType ret = E_NOT_OK;
-    uint32         ui32CurrentTime;
-
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if ((NULL_PTR == TimerPtr) || (NULL_PTR == TimeSpanPtr))
-    {
-        TM_DET_REPORT(TM_GETTIMESPAN100US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* get current gpt time, subtract it from reference time */
-        ret = Gpt_GetPredefTimerValue(GPT_PREDEF_TIMER_100US_32BIT, &ui32CurrentTime);
-        if ((Std_ReturnType)E_OK == ret)
-        {
-            *TimeSpanPtr = (uint32)(ui32CurrentTime - TimerPtr->ui32RefTime);
-        }
-        else
-        {
-            /* gpt error, timeSpan = 0 */
-            *TimeSpanPtr = 0U;
-            (void)
-                Det_ReportRuntimeError(TM_MODULE_ID, TM_INSTANCE_ID, TM_GETTIMESPAN100US32BIT_ID, TM_E_HARDWARE_TIMER);
-        }
-    }
-    return ret;
-}
-/* PRQA S 1503,1505 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_ShiftTimer100us32bit(Tm_PredefTimer100us32bitType* TimerPtr, uint32 TimeValue)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if (NULL_PTR == TimerPtr)
-    {
-        TM_DET_REPORT(TM_SHIFTTIMER100US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* simply add TimeValue to refernce time */
-        TimerPtr->ui32RefTime = (uint32)(TimerPtr->ui32RefTime + TimeValue);
-    }
-}
-/* PRQA S 1503 -- */
-
-/* PRQA S 1503 ++ */ /* VL_Tm_1503 */
-void Tm_SyncTimer100us32bit(Tm_PredefTimer100us32bitType* TimerDstPtr, const Tm_PredefTimer100us32bitType* TimerSrcPtr)
-{
-#if (STD_ON == TM_DEV_ERROR_DETECT)
-    /* detect NULL_PTR */
-    if ((NULL_PTR == TimerDstPtr) || (NULL_PTR == TimerSrcPtr))
-    {
-        TM_DET_REPORT(TM_SYNCTIMER100US32BIT_ID, TM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == TM_DEV_ERROR_DETECT */
-    {
-        /* sync two clocks */
-        TimerDstPtr->ui32RefTime = TimerSrcPtr->ui32RefTime;
-    }
-}
-/* PRQA S 1503 -- */
-#endif /* STD_ON == TM_100US32BIT */
-
 #define TM_STOP_SEC_CODE
 #include "Tm_MemMap.h"
 

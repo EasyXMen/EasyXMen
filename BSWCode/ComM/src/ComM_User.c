@@ -31,41 +31,71 @@
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
+typedef struct
+{
+    ComM_ModeType RequestedComMode; /**< The requested communication mode for the user */
+#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
+    ComM_ModeType PreviousComMode; /**< The previous communication mode for the user, used for notification */
+#endif
+} ComM_UserVarType;
 
 /* ============================================ internal data definitions =========================================== */
 #define COMM_START_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
-COMM_LOCAL const ComM_UserConfigType* ComM_UserConfigs;
+COMM_LOCAL const ComM_UserConfigType* ComM_UserConfigsPtr;
 #define COMM_STOP_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
 
 #define COMM_START_SEC_VAR_CLEARED_8
 #include "ComM_MemMap.h"
-COMM_LOCAL ComM_ModeType ComM_UserRequestedComMode[COMM_USER_NUMBER];
+COMM_LOCAL ComM_UserVarType ComM_UserVars[COMM_USER_NUMBER];
 #define COMM_STOP_SEC_VAR_CLEARED_8
 #include "ComM_MemMap.h"
-/* ========================================= internal function declarations ========================================= */
 
+/* ========================================= internal function declarations ========================================= */
+#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
 #define COMM_START_SEC_CODE
 #include "ComM_MemMap.h"
+/**
+ * @brief The function returns the lowest current Communication Mode of the corresponding PNC or channel the affected
+ * user is assigned to.
+ * @param[in]    User      Handle of the user who requests a mode
+ * @retval       ComMode   See ComM_ModeType
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace        CPD-64958
+ */
+COMM_LOCAL ComM_ModeType ComM_UserGetCurrentMode(ComM_UserHandleType User);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
+
 /* PRQA S 1532, 2889 ++ */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 /* ========================================== external function definitions ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_UserInit(const ComM_UserConfigType* UserConfigs)
 {
     for (ComM_UserHandleType user = 0u; user < COMM_USER_NUMBER; ++user)
     {
-        ComM_UserRequestedComMode[user] = COMM_NO_COMMUNICATION;
+        ComM_UserVars[user].RequestedComMode = COMM_NO_COMMUNICATION;
+#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
+        ComM_UserVars[user].PreviousComMode = COMM_NO_COMMUNICATION;
+#endif
     }
-
-    ComM_UserConfigs = UserConfigs;
+    ComM_UserConfigsPtr = UserConfigs;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 Std_ReturnType ComM_UserRequestComMode(ComM_UserHandleType User, ComM_ModeType ComMode)
 {
     Std_ReturnType stdReturn = E_OK;
 
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigs[User];
+    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigsPtr[User];
 
     if (ComMode == COMM_FULL_COMMUNICATION)
     {
@@ -79,14 +109,18 @@ Std_ReturnType ComM_UserRequestComMode(ComM_UserHandleType User, ComM_ModeType C
         }
     }
 #endif
-    ComM_UserRequestedComMode[User] = ComMode;
+    ComM_UserVars[User].RequestedComMode = ComMode;
 
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_ModeType ComM_UserGetMaxComMode(ComM_UserHandleType User)
 {
-    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigs[User];
+    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigsPtr[User];
     ComM_ModeType              maxComMode    = COMM_FULL_COMMUNICATION;
 
     for (uint8 i = 0u; i < userConfigPtr->NumberOfChannels; ++i)
@@ -116,15 +150,23 @@ ComM_ModeType ComM_UserGetMaxComMode(ComM_UserHandleType User)
 #endif
     return maxComMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_ModeType ComM_UserGetRequestedComMode(ComM_UserHandleType User)
 {
-    return ComM_UserRequestedComMode[User];
+    return ComM_UserVars[User].RequestedComMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_ModeType ComM_UserGetCurrentComMode(ComM_UserHandleType User)
 {
-    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigs[User];
+    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigsPtr[User];
     ComM_ModeType              userComMode   = COMM_FULL_COMMUNICATION;
 
     for (uint8 i = 0u; i < userConfigPtr->NumberOfChannels; ++i)
@@ -137,16 +179,22 @@ ComM_ModeType ComM_UserGetCurrentComMode(ComM_UserHandleType User)
     }
     return userComMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+/* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 Std_ReturnType ComM_UserGetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
+/* PRQA S 6060 -- */
 {
     if (!ComM_PncEnabled)
     {
         return E_NOT_OK;
     }
 
-    ComM_ModeType comMode;
+    ComM_ModeType comMode  = (ComM_ModeType)COMM_PNC_NO_COMMUNICATION;
     boolean       assigned = FALSE;
 
     for (PNCHandleType pnc = 0u; pnc < COMM_PNC_NUMBER; ++pnc)
@@ -171,10 +219,77 @@ Std_ReturnType ComM_UserGetCurrentPNCComMode(ComM_UserHandleType User, ComM_Mode
     *ComMode = comMode;
     return E_OK;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
-ComM_ModeType ComM_UserGetCurrentMode(ComM_UserHandleType User)
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+void ComM_UserCurrentModeNotification(void)
+{
+    for (ComM_UserHandleType user = 0u; user < COMM_USER_NUMBER; ++user)
+    {
+        ComM_ModeType currentMode = ComM_UserGetCurrentMode(user);
+        if (ComM_UserVars[user].PreviousComMode != currentMode)
+        {
+            const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigsPtr[user];
+            if (userConfigPtr->SwitchCurrentMode != NULL_PTR)
+            {
+                if (userConfigPtr->SwitchCurrentMode(user, currentMode) == E_OK)
+                {
+                    ComM_UserVars[user].PreviousComMode = currentMode;
+                }
+            }
+        }
+    }
+}
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+Std_ReturnType ComM_UserSwitchCurrentMode(ComM_UserHandleType User, ComM_ModeType ComMode)
+{
+    Std_ReturnType             stdReturn;
+    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigsPtr[User];
+    switch (ComMode)
+    {
+    case COMM_FULL_COMMUNICATION:
+        stdReturn = userConfigPtr->PortSwitchCurrentMode(RTE_MODE_ComMMode_COMM_FULL_COMMUNICATION);
+        break;
+    case COMM_SILENT_COMMUNICATION:
+        stdReturn = userConfigPtr->PortSwitchCurrentMode(RTE_MODE_ComMMode_COMM_SILENT_COMMUNICATION);
+        break;
+    case COMM_NO_COMMUNICATION:
+        stdReturn = userConfigPtr->PortSwitchCurrentMode(RTE_MODE_ComMMode_COMM_NO_COMMUNICATION);
+        break;
+    default:
+        stdReturn = E_NOT_OK; /* unreachable */
+        break;
+    }
+    return stdReturn;
+}
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
+
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+ApplicationType ComM_UserGetApplication(ComM_UserHandleType User)
+{
+    return ComM_UserConfigsPtr[User].Application;
+}
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
+
+/* ========================================== internal function definitions ========================================= */
+#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL ComM_ModeType ComM_UserGetCurrentMode(ComM_UserHandleType User)
 {
     ComM_ModeType currentMode = COMM_FULL_COMMUNICATION;
 #if COMM_PNC_SUPPORT == STD_ON
@@ -183,39 +298,7 @@ ComM_ModeType ComM_UserGetCurrentMode(ComM_UserHandleType User)
     ComM_ModeType currentComMode = ComM_UserGetCurrentComMode(User);
     return (currentMode < currentComMode) ? currentMode : currentComMode;
 }
-
-void ComM_UserSwitchCurrentMode(ComM_UserHandleType User, ComM_ModeType ComMode)
-{
-    const ComM_UserConfigType* userConfigPtr = &ComM_UserConfigs[User];
-    if (userConfigPtr->SwitchCurrentMode != NULL_PTR)
-    {
-        switch (ComMode)
-        {
-        case COMM_FULL_COMMUNICATION:
-            userConfigPtr->SwitchCurrentMode(RTE_MODE_ComMMode_COMM_FULL_COMMUNICATION);
-            break;
-        case COMM_SILENT_COMMUNICATION:
-            userConfigPtr->SwitchCurrentMode(RTE_MODE_ComMMode_COMM_SILENT_COMMUNICATION);
-            break;
-        case COMM_NO_COMMUNICATION:
-            userConfigPtr->SwitchCurrentMode(RTE_MODE_ComMMode_COMM_NO_COMMUNICATION);
-            break;
-        default:
-            /* unreachable */
-            break;
-        }
-    }
-}
-#endif
-
-#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
-ApplicationType ComM_UserGetApplication(ComM_UserHandleType User)
-{
-    return ComM_UserConfigs[User].Application;
-}
-#endif
-
-/* ========================================== internal function definitions ========================================= */
-/* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"
+#endif
+/* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */

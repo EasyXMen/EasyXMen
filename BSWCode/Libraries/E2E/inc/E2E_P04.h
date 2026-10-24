@@ -94,6 +94,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Protects the array/buffer to be transmitted using the E2E profile 4.
  *               This includes checksum calculation, handling of counter and Data ID.
@@ -116,7 +118,11 @@ Std_ReturnType E2E_P04Protect(
     E2E_P04ProtectStateType* StatePtr,
     uint8*                   DataPtr,
     uint16                   Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the protection state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -129,7 +135,11 @@ Std_ReturnType E2E_P04Protect(
  */
 
 Std_ReturnType E2E_P04ProtectInit(E2E_P04ProtectStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Checks the Data received using the E2E profile 4.
  *               This includes CRC calculation, handling of Counter and Data ID.
@@ -152,7 +162,11 @@ Std_ReturnType E2E_P04Check(
     E2E_P04CheckStateType*   StatePtr,
     const uint8*             DataPtr,
     uint16                   Length);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the check state.
  * @param[out]   StatePtr : Pointer to port/data communication state.
@@ -165,7 +179,11 @@ Std_ReturnType E2E_P04Check(
  */
 
 Std_ReturnType E2E_P04CheckInit(E2E_P04CheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief       The function maps the check status of profile 4 to a generic check status, which can be
  *              used by E2E state machine check function. The E2E profile 4 delivers a more fine-granular
@@ -178,7 +196,8 @@ Std_ReturnType E2E_P04CheckInit(E2E_P04CheckStateType* StatePtr);
  * @trace       CPD-46892
  */
 E2E_PCheckStatusType E2E_P04MapStatusToSM(Std_ReturnType CheckReturn, E2E_P04CheckStatusType Status);
-
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 #ifdef __cplusplus
 
 #endif

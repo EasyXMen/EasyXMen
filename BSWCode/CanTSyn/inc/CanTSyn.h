@@ -30,7 +30,9 @@
  *  V2.2.0    2024-12-13 xiongfei.shi   1.Refactor and update to R23-11
  *                                      2.Removed offset Time Domains
  *                                      3.support multi-partition distribution
- *
+ *  V2.2.1    2026-06-03 xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
+ *            2026-07-03  junwei.he     CPT-19306,Within `CanTSyn_MainFunction`, the macro `CANTSYN_DOMAIN` is invoked
+ *                                      without checking whether initialization has been completed
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -59,6 +61,12 @@
       Reason: The software architecture is defined according to the AUTOSAR standard.
       Risk: Due to the fan distribution to many functions, understandability and testability can become overly complex.
       Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_MTR_CanTSyn_STVAR
+      Reason: The total number of variables is related to the user configuration, allowing
+    dynamic code to violate this under extreme conditions
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef CANTSYN_H_
@@ -83,64 +91,92 @@ extern "C" {
 #endif
 
 /* =============================================== version information ============================================== */
-/* Published Information */
-#define CANTSYN_VENDOR_ID                   (62u)
-#define CANTSYN_MODULE_ID                   (161u)
-#define CANTSYN_INSTANCE_ID                 (0u)
-#define CANTSYN_AR_RELEASE_MAJOR_VERSION    (4u)
-#define CANTSYN_AR_RELEASE_MINOR_VERSION    (9u)
-#define CANTSYN_AR_RELEASE_REVISION_VERSION (0u)
-#define CANTSYN_SW_MAJOR_VERSION            (2u)
-#define CANTSYN_SW_MINOR_VERSION            (2u)
-#define CANTSYN_SW_PATCH_VERSION            (0u)
+
+/**
+ * @name Information
+ * @{
+ * @brief Published Information
+ */
+#define CANTSYN_VENDOR_ID                   (62u)  /**< The vendor ID of the CanTSyn module */
+#define CANTSYN_MODULE_ID                   (161u) /**< The module ID of the CanTSyn module */
+#define CANTSYN_INSTANCE_ID                 (0u)   /**< The instance ID of the CanTSyn module */
+#define CANTSYN_AR_RELEASE_MAJOR_VERSION    (4u)   /**< The major version number of the AR */
+#define CANTSYN_AR_RELEASE_MINOR_VERSION    (9u)   /**< The minor version number of the AR */
+#define CANTSYN_AR_RELEASE_REVISION_VERSION (0u)   /**< The revision version number of the AR */
+#define CANTSYN_SW_MAJOR_VERSION            (2u)   /**< The major version number of the software */
+#define CANTSYN_SW_MINOR_VERSION            (2u)   /**< The minor version number of the software */
+#define CANTSYN_SW_PATCH_VERSION            (0u)   /**< The patch version number of the software */
+/** @} */
 
 /* ===================================================== macros ===================================================== */
-/* DET ERROR CODE */
+
+/**
+ * @name Det Error
+ * @{
+ * @brief Det Error Codes
+ */
 #if (CANTSYN_DEV_ERROR_DETECT == STD_ON)
-#define CANTSYN_E_INVALID_PDUID       ((uint8)0x01u)
-#define CANTSYN_E_UNINIT              ((uint8)0x02u)
-#define CANTSYN_E_NULL_POINTER        ((uint8)0x03u)
-#define CANTSYN_E_INIT_FAILED         ((uint8)0x04u)
-#define CANTSYN_E_PARAM               ((uint8)0x05u)
-#define CANTSYN_E_INV_CTRL_IDX        ((uint8)0x06u)
-#define CANTSYN_E_INVALID_PARTITION   ((uint8)0xF0u)
-#define CANTSYN_E_ALREADY_INITIALIZED ((uint8)0xF1u)
+#define CANTSYN_E_INVALID_PDUID       ((uint8)0x01u) /**< Invalid Pdu ID */
+#define CANTSYN_E_UNINIT              ((uint8)0x02u) /**< Module is uninitialized */
+#define CANTSYN_E_NULL_POINTER        ((uint8)0x03u) /**< A NULL pointer is passed to the function */
+#define CANTSYN_E_INIT_FAILED         ((uint8)0x04u) /**< Initialization failure */
+#define CANTSYN_E_PARAM               ((uint8)0x05u) /**< Invalid parameter */
+#define CANTSYN_E_INV_CTRL_IDX        ((uint8)0x06u) /**< Invalid controller index */
+#define CANTSYN_E_INVALID_PARTITION   ((uint8)0xF0u) /**< Invalid partition */
+#define CANTSYN_E_ALREADY_INITIALIZED ((uint8)0xF1u) /**< Module is already initialized */
+#define CANTSYN_E_FRESHNESSFAILURE    ((uint8)0x01u) /**< Freshness check failure */
 #endif
+/** @} */
 
-/* CanTSyn Module API ID */
-#define CANTSYN_SID_INIT                ((uint8)0x01u)
-#define CANTSYN_SID_GETVERSIONINFO      ((uint8)0x02u)
-#define CANTSYN_SID_SETTRANSMISSIONMODE ((uint8)0x03u)
-#define CANTSYN_SID_MAINFUNCTION        ((uint8)0x06u)
-#define CANTSYN_SID_TXCONFIRMATION      ((uint8)0x40u)
-#define CANTSYN_SID_RXINDICATION        ((uint8)0x42u)
+/**
+ * @name API ID
+ * @{
+ * @brief CanTSyn Module API ID
+ */
+#define CANTSYN_SID_INIT                      0x01u /**< Service ID for CanTSyn_Init */
+#define CANTSYN_SID_GETVERSIONINFO            0x02u /**< Service ID for CanTSyn_GetVersionInfo */
+#define CANTSYN_SID_SETTRANSMISSIONMODE       0x03u /**< Service ID for CanTSyn_SetTransmissionMode */
+#define CANTSYN_SID_MAINFUNCTION              0x06u /**< Service ID for CanTSyn_MainFunction */
+#define CANTSYN_SID_TXCONFIRMATION            0x40u /**< Service ID for CanTSyn_TxConfirmation */
+#define CANTSYN_SID_RXINDICATION              0x42u /**< Service ID for CanTSyn_RxIndication */
+#define CANTSYN_SID_ICVGENERATIONINDICATION   0x43u /**< Service ID for CanTSyn_IcvGenerationIndication */
+#define CANTSYN_SID_ICVVERIFICATIONINDICATION 0x44u /**< Service ID for CanTSyn_IcvVerificationIndication */
+/** @} */
 
-/* the default value for crc calculation */
+/** the default value for crc calculation */
 #define CANTSYN_CRC_DEFAULT_VALUE ((uint8)0xFFu)
 
-/* the difference between one second and one nanosecond */
+/** the difference between one second and one nanosecond */
 #define CANTSYN_1NS_SECOND (1000000000ULL)
 
-/* the difference between one hundred us and one second */
-#define CANTSYN_100US_SECOND ((uint16)10000U)
+/**
+ * @name masks
+ * @{
+ * @brief the bit masks
+ */
+#define CANTSYN_GLOBAL_TIME_BASE_MASK ((uint8)0x08u) /**< Global Time Base */
+#define CANTSYN_SYNC_TO_GATEWAY_MASK  ((uint8)0x04u) /**< Sync to Gateway */
+#define CANTSYN_TIMEOUT_MASK          ((uint8)0x01u) /**< Timeout */
+#define CANTSYN_OVS_BIT_MASK          ((uint8)0x03u) /**< OVS Bit */
+#define CANTSYN_SGW_BIT_MASK          ((uint8)0x04u) /**< SGW Bit */
+#define CANTSYN_FVL_BIT_MASK          ((uint8)0x7Fu) /**< Fresh Value Bit */
+/** @} */
 
-/* the bit masks */
-#define CANTSYN_GLOBAL_TIME_BASE_MASK     ((uint8)0x08u)
-#define CANTSYN_SYNC_TO_GATEWAY_MASK      ((uint8)0x04u)
-#define CANTSYN_TIMEOUT_MASK              ((uint8)0x01u)
-#define CANTSYN_OVS_BIT_MASK              ((uint8)0x03u)
-#define CANTSYN_SGW_BIT_MASK              ((uint8)0x04u)
-#define CANTSYN_SEQUENCE_COUNTER_BIT_MASK ((uint8)0x0Fu)
+/**
+ * @name sync type codes
+ * @{
+ * @brief the type code for time sync messages
+ */
+#define CANTSYN_SYNC_NOT_CRC_TYPE            ((uint8)0x10u) /**< SYNC message code without CRC */
+#define CANTSYN_SYNC_CRC_TYPE                ((uint8)0x20u) /**< SYNC message code with CRC */
+#define CANTSYN_FUP_NOT_CRC_TYPE             ((uint8)0x18u) /**< FUP message code without CRC */
+#define CANTSYN_FUP_CRC_TYPE                 ((uint8)0x28u) /**< FUP message code with CRC */
+#define CANTSYN_FUP_NOT_CRC_ICV_SECURED_TYPE ((uint8)0x78u) /**< FUP message code without CRC and ICV secured */
+#define CANTSYN_FUP_CRC_ICV_SECURED_TYPE     ((uint8)0x88u) /**< FUP message code with CRC and ICV secured */
+/** @} */
 
-/* the type code for time sync messages */
-#define CANTSYN_SYNC_NOT_CRC_TYPE ((uint8)0x10u)
-#define CANTSYN_SYNC_CRC_TYPE     ((uint8)0x20u)
-#define CANTSYN_FUP_NOT_CRC_TYPE  ((uint8)0x18u)
-#define CANTSYN_FUP_CRC_TYPE      ((uint8)0x28u)
-
+/** the maximum value of sequence counter */
 #define CANTSYN_SEQUENCE_COUNTER_MAX_VALUE ((uint8)0x0Fu)
-
-#define CANTSYN_DATALIST_SIZE ((uint8)16u)
 
 /* ================================================ type definitions ================================================ */
 
@@ -150,34 +186,46 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == CANTSYN_VERSIONINFO_API)
+#define CANTSYN_START_SEC_CODE
+#include "CanTSyn_MemMap.h"
 /**
  *  @brief         This service returns the version information of this module.
- *  @param[out]    versioninfo : Pointer to where to store the version information of this module
+ *  @param[out]    versioninfoPtr : Pointer to where to store the version information of this module
  *  @reentrant     TRUE
  *  @synchronous   TRUE
  *  @trace         CPD-75625
  */
 void CanTSyn_GetVersionInfo(Std_VersionInfoType* versioninfoPtr);
+#define CANTSYN_STOP_SEC_CODE
+#include "CanTSyn_MemMap.h"
 #endif
 
+#define CANTSYN_START_SEC_CODE
+#include "CanTSyn_MemMap.h"
 /**
  *  @brief         This API is used to turn on and off the TX capabilities of the CanTSyn.
  *  @param[in]     CtrlIdx : Index of the CAN channel
  *  @param[in]     Mode : CANTSYN_TX_OFF CANTSYN_TX_ON
  *  @reentrant     FALSE
  *  @synchronous   TRUE
- *  @trace         CPD-75626
+ *  @trace         CPD-85809
  */
 void CanTSyn_SetTransmissionMode(uint8 CtrlIdx, CanTSyn_TransmissionModeType Mode);
+#define CANTSYN_STOP_SEC_CODE
+#include "CanTSyn_MemMap.h"
 
+#define CANTSYN_START_SEC_CODE
+#include "CanTSyn_MemMap.h"
 /**
  *  @brief         This function initializes the Time Synchronization over CAN.
  *  @param[in]     configPtr : Pointer to selected configuration structure
  *  @reentrant     FALSE
  *  @synchronous   TRUE
- *  @trace         CPD-71890
+ *  @trace         CPD-85807
  */
 void CanTSyn_Init(const CanTSyn_ConfigType* configPtr);
+#define CANTSYN_STOP_SEC_CODE
+#include "CanTSyn_MemMap.h"
 
 #ifdef __cplusplus
 }

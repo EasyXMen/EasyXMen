@@ -36,6 +36,7 @@
 #if ETHSM_DEM_ENABLED == STD_ON
 #include "Dem.h" /* Import Dem_SetEventStatus */
 #endif
+#include "EthSM_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
@@ -44,45 +45,122 @@
 /* ========================================== internal function declarations ======================================== */
 ETHSM_LOCAL_INLINE ComM_ModeType EthSM_NetworkModeState2ComMode(EthSM_NetworkModeStateType state);
 /* PRQA S 5016 ++ */ /* VL_EthSM_FalsePositive */
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL const EthSM_NetworkType* EthSM_FindNetworkByNetworkHandle(NetworkHandleType networkHandle);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL const EthSM_NetworkType* EthSM_FindNetworkByCtrlIdx(uint8 ctrlIdx);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 /* PRQA S 5016 -- */ /* VL_EthSM_FalsePositive */
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_PrivateStateMainFunction(EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateOffline(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateWaitTrcvLink(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateWaitOnline(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateOnline(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateOnhold(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateWaitOffline(const EthSM_NetworkConfigType* configPtr, EthSM_NetworkVarType* varPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_StateChange(
     const EthSM_NetworkConfigType* configPtr,
     EthSM_NetworkVarType*          varPtr,
     EthSM_NetworkModeStateType     currentState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #if ETHSM_TCPIP_ENABLED == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL void EthSM_TcpIpRequestComMode(
     const EthSM_NetworkConfigType* configPtr,
     EthSM_NetworkVarType*          varPtr,
     TcpIp_StateType                tcpIpState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
 #ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidateComMMode
+#pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidatePointer
 #pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidateEthMode
 #pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidateTransceiverLinkState
-#pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidatePointer
-#if ETHSM_TCPIP_ENABLED == STD_ON
 #pragma PRQA_NO_SIDE_EFFECTS EthSM_ValidateTcpIpState
 #endif
-#endif
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidateNetworkContext(uint8 apiId, const EthSM_NetworkType* networkPtr, uint8 errorId);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidatePointer(uint8 apiId, const void* pointer);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidateComMMode(uint8 apiId, ComM_ModeType comMMode);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #if ETHSM_TCPIP_ENABLED == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidateTcpIpState(uint8 apiId, TcpIp_StateType tcpIpState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidateEthMode(uint8 apiId, Eth_ModeType ethMode);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
+
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 ETHSM_LOCAL boolean EthSM_ValidateTransceiverLinkState(uint8 apiId, EthTrcv_LinkStateType ethTrcvLinkState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
@@ -100,6 +178,7 @@ ETHSM_LOCAL boolean EthSM_ValidateTransceiverLinkState(uint8 apiId, EthTrcv_Link
 void EthSM_Init(void)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
+    EthSM_ArtiApiStart(1, ETHSM_SID_INIT);
 #if ETHSM_MULTIPLE_PARTITION_ENABLED == STD_ON
     ApplicationType application = GetApplicationID();
 #endif
@@ -139,16 +218,22 @@ void EthSM_Init(void)
         (void)Det_ReportError(ETHSM_MODULE_ID, 0u, ETHSM_SID_INIT, ETHSM_E_INVALID_PARTITION_CONTEXT);
     }
 #endif
+    EthSM_ArtiApiReturn(1, ETHSM_SID_INIT);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#if ETHSM_VERSION_INFO_API == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_GetVersionInfo.
  */
-#if ETHSM_VERSION_INFO_API == STD_ON
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void EthSM_GetVersionInfo(Std_VersionInfoType* versioninfo)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
+    EthSM_ArtiApiStart(2, ETHSM_SID_GETVERSIONINFO, versioninfo);
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
     if (EthSM_ValidatePointer(ETHSM_SID_GETVERSIONINFO, versioninfo))
 #endif
@@ -159,15 +244,21 @@ void EthSM_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = ETHSM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = ETHSM_SW_PATCH_VERSION;
     }
+    EthSM_ArtiApiReturn(1, ETHSM_SID_GETVERSIONINFO);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_RequestComMode.
  */
 Std_ReturnType EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeType ComM_Mode)
 {
-    Std_ReturnType                 stdReturn  = E_NOT_OK;
+    Std_ReturnType stdReturn = E_NOT_OK;
+    EthSM_ArtiApiStart(3, ETHSM_SID_REQUESTCOMMODE, NetworkHandle, ComM_Mode);
     const EthSM_NetworkType* const networkPtr = EthSM_FindNetworkByNetworkHandle(NetworkHandle);
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
     if (EthSM_ValidateNetworkContext(ETHSM_SID_REQUESTCOMMODE, networkPtr, ETHSM_E_INVALID_NETWORK_HANDLE)
@@ -208,9 +299,14 @@ Std_ReturnType EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeTy
 #endif
         stdReturn = E_OK;
     }
+    EthSM_ArtiApiReturn(2, ETHSM_SID_REQUESTCOMMODE, stdReturn);
     return stdReturn;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_GetCurrentComMode.
  */
@@ -218,7 +314,8 @@ Std_ReturnType EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeTy
 Std_ReturnType EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_ModeType* ComM_ModePtr)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
-    Std_ReturnType                 stdReturn  = E_NOT_OK;
+    Std_ReturnType stdReturn = E_NOT_OK;
+    EthSM_ArtiApiStart(3, ETHSM_SID_GETCURRENTCOMMODE, NetworkHandle, ComM_ModePtr);
     const EthSM_NetworkType* const networkPtr = EthSM_FindNetworkByNetworkHandle(NetworkHandle);
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
@@ -230,14 +327,20 @@ Std_ReturnType EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_Mod
         *ComM_ModePtr                               = EthSM_NetworkModeState2ComMode(networkModeState);
         stdReturn                                   = E_OK;
     }
+    EthSM_ArtiApiReturn(2, ETHSM_SID_GETCURRENTCOMMODE, stdReturn);
     return stdReturn;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_CtrlModeIndication.
  */
 void EthSM_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode)
 {
+    EthSM_ArtiApiStart(3, ETHSM_SID_CTRLMODEINDICATION, CtrlIdx, CtrlMode);
     const EthSM_NetworkType* const networkPtr = EthSM_FindNetworkByCtrlIdx(CtrlIdx);
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
@@ -247,13 +350,19 @@ void EthSM_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode)
     {
         networkPtr->VarPtr->EthMode = CtrlMode;
     }
+    EthSM_ArtiApiReturn(1, ETHSM_SID_CTRLMODEINDICATION);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_TrcvLinkStateChg.
  */
 void EthSM_TrcvLinkStateChg(uint8 CtrlIdx, EthTrcv_LinkStateType TransceiverLinkState)
 {
+    EthSM_ArtiApiStart(3, ETHSM_SID_TRCVLINKSTATECHG, CtrlIdx, TransceiverLinkState);
     const EthSM_NetworkType* const networkPtr = EthSM_FindNetworkByCtrlIdx(CtrlIdx);
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
@@ -263,9 +372,14 @@ void EthSM_TrcvLinkStateChg(uint8 CtrlIdx, EthTrcv_LinkStateType TransceiverLink
     {
         networkPtr->VarPtr->EthTrcvLinkState = TransceiverLinkState;
     }
+    EthSM_ArtiApiReturn(1, ETHSM_SID_TRCVLINKSTATECHG);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #if ETHSM_TCPIP_ENABLED == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_TcpIpModeIndication.
  */
@@ -273,6 +387,7 @@ void EthSM_TrcvLinkStateChg(uint8 CtrlIdx, EthTrcv_LinkStateType TransceiverLink
 void EthSM_TcpIpModeIndication(uint8 CtrlIdx, TcpIp_StateType TcpIpState)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
+    EthSM_ArtiApiStart(3, ETHSM_SID_TCPIPMODEINDICATION, CtrlIdx, TcpIpState);
     const EthSM_NetworkType* const networkPtr = EthSM_FindNetworkByCtrlIdx(CtrlIdx);
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
@@ -282,14 +397,20 @@ void EthSM_TcpIpModeIndication(uint8 CtrlIdx, TcpIp_StateType TcpIpState)
     {
         networkPtr->VarPtr->TcpIpState = TcpIpState;
     }
+    EthSM_ArtiApiReturn(1, ETHSM_SID_TCPIPMODEINDICATION);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * The implementation of EthSM_MainFunction.
  */
 void EthSM_MainFunction(const EthSM_NetworkType* networkPtr)
 {
+    EthSM_ArtiApiStart(1, ETHSM_SID_MAINFUNCTION);
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
     if (EthSM_ValidateNetworkContext(ETHSM_SID_MAINFUNCTION, networkPtr, ETHSM_E_INVALID_NETWORK_HANDLE))
 #endif
@@ -311,7 +432,10 @@ void EthSM_MainFunction(const EthSM_NetworkType* networkPtr)
             behaviour[varPtr->NetworkModeState](networkPtr->ConfigPtr, varPtr);
         }
     }
+    EthSM_ArtiApiReturn(1, ETHSM_SID_MAINFUNCTION);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
 /**
@@ -332,6 +456,8 @@ ETHSM_LOCAL_INLINE ComM_ModeType EthSM_NetworkModeState2ComMode(EthSM_NetworkMod
     return COMM_FULL_COMMUNICATION;
 }
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Find the network by network handle.
  * @param[in] networkHandle     Network handle to find
@@ -353,7 +479,11 @@ ETHSM_LOCAL const EthSM_NetworkType* EthSM_FindNetworkByNetworkHandle(NetworkHan
     }
     return NULL_PTR;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Find the network by controller index.
  * @param[in] ctrlIdx           Controller index to find
@@ -375,7 +505,11 @@ ETHSM_LOCAL const EthSM_NetworkType* EthSM_FindNetworkByCtrlIdx(uint8 ctrlIdx)
     }
     return NULL_PTR;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle the private state main function.
  * @param[in] varPtr     Pointer to the network variable
@@ -404,7 +538,11 @@ ETHSM_LOCAL void EthSM_PrivateStateMainFunction(EthSM_NetworkVarType* varPtr)
         break;
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_OFFLINE.
  * @param[in] configPtr  Pointer to the network configuration
@@ -435,7 +573,11 @@ ETHSM_LOCAL void EthSM_StateOffline(const EthSM_NetworkConfigType* configPtr, Et
         }
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_WAIT_TRCVLINK.
  * @param[in] configPtr  Pointer to the network configuration
@@ -472,7 +614,11 @@ ETHSM_LOCAL void EthSM_StateWaitTrcvLink(const EthSM_NetworkConfigType* configPt
         EthSM_StateChange(configPtr, varPtr, ETHSM_STATE_WAIT_ONLINE);
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_WAIT_ONLINE.
  * @param[in] configPtr  Pointer to the network configuration
@@ -516,7 +662,11 @@ ETHSM_LOCAL void EthSM_StateWaitOnline(const EthSM_NetworkConfigType* configPtr,
         EthSM_StateChange(configPtr, varPtr, ETHSM_STATE_ONLINE);
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_ONLINE.
  * @param[in] configPtr  Pointer to the network configuration
@@ -569,7 +719,11 @@ ETHSM_LOCAL void EthSM_StateOnline(const EthSM_NetworkConfigType* configPtr, Eth
         EthSM_StateChange(configPtr, varPtr, ETHSM_STATE_ONHOLD);
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_ONHOLD.
  * @param[in] configPtr  Pointer to the network configuration
@@ -613,7 +767,11 @@ ETHSM_LOCAL void EthSM_StateOnhold(const EthSM_NetworkConfigType* configPtr, Eth
         EthSM_StateChange(configPtr, varPtr, ETHSM_STATE_WAIT_TRCVLINK);
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle state transition in ETHSM_STATE_WAIT_OFFLINE.
  * @param[in] configPtr  Pointer to the network configuration
@@ -670,7 +828,11 @@ ETHSM_LOCAL void EthSM_StateWaitOffline(const EthSM_NetworkConfigType* configPtr
         }
     }
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Handle the state change of network state machine.
  * @param[in] configPtr  Pointer to the network configuration
@@ -717,8 +879,12 @@ ETHSM_LOCAL void EthSM_StateChange(
     }
     BswM_EthSM_CurrentState(configPtr->ComMChannelId, currentState);
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #if ETHSM_TCPIP_ENABLED == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Request the communication mode for TCP/IP if the TCP/IP is used.
  * @param[in] configPtr  Pointer to the network configuration
@@ -740,9 +906,13 @@ ETHSM_LOCAL void EthSM_TcpIpRequestComMode(
     }
     varPtr->TcpIpState = (tcpIpState == TCPIP_STATE_ONLINE) ? TCPIP_STATE_ONLINE : TCPIP_STATE_OFFLINE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
 #if ETHSM_DEV_ERROR_DETECT == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Validate the network context.
  * @param[in] apiId             API identifier
@@ -781,7 +951,11 @@ ETHSM_LOCAL boolean EthSM_ValidateNetworkContext(uint8 apiId, const EthSM_Networ
 
     return TRUE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Validate the pointer.
  * @param[in] apiId             API identifier
@@ -801,7 +975,11 @@ ETHSM_LOCAL boolean EthSM_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return TRUE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief Validate the communication mode.
  * @param[in] apiId             API identifier
@@ -822,8 +1000,12 @@ ETHSM_LOCAL boolean EthSM_ValidateComMMode(uint8 apiId, ComM_ModeType comMMode)
     (void)Det_ReportError(ETHSM_MODULE_ID, 0u, apiId, ETHSM_E_INVALID_NETWORK_MODE);
     return FALSE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #if ETHSM_TCPIP_ENABLED == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief Validate the TCP/IP state.
  * @param[in] apiId             API identifier
@@ -844,8 +1026,12 @@ ETHSM_LOCAL boolean EthSM_ValidateTcpIpState(uint8 apiId, TcpIp_StateType tcpIpS
     (void)Det_ReportError(ETHSM_MODULE_ID, 0u, apiId, ETHSM_E_INVALID_TCP_IP_MODE);
     return FALSE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Validate the Ethernet mode.
  * @param[in] apiId             API identifier
@@ -866,7 +1052,11 @@ ETHSM_LOCAL boolean EthSM_ValidateEthMode(uint8 apiId, Eth_ModeType ethMode)
     (void)Det_ReportError(ETHSM_MODULE_ID, 0u, apiId, ETHSM_E_INVALID_ETH_MODE);
     return FALSE;
 }
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief     Validate the transceiver link state.
  * @param[in] apiId             API identifier
@@ -886,8 +1076,8 @@ ETHSM_LOCAL boolean EthSM_ValidateTransceiverLinkState(uint8 apiId, EthTrcv_Link
     (void)Det_ReportError(ETHSM_MODULE_ID, 0u, apiId, ETHSM_E_INVALID_ETH_TRCV_LINK_STATE);
     return FALSE;
 }
-#endif /* ETHSM_DEV_ERROR_DETECT == STD_ON */
 #define ETHSM_STOP_SEC_CODE
 #include "EthSM_MemMap.h"
+#endif                     /* ETHSM_DEV_ERROR_DETECT == STD_ON */
 /* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 /* PRQA S 6060 -- */       /* VL_MTR_EthSM_STM19 */

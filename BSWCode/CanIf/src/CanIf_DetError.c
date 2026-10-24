@@ -41,6 +41,9 @@
 
 /* ========================================== internal function declarations ======================================== */
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * @brief              Development error validation
  * @synchronous        TRUE
@@ -52,6 +55,11 @@
  * @retval             E_NOT_OK: fail validation
  */
 CANIF_LOCAL Std_ReturnType CanIf_ValidatePartition(uint8 apiId, ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief              Development error validation
@@ -65,10 +73,15 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidatePartition(uint8 apiId, ApplicationType 
  * @retval             E_NOT_OK: fail validation
  */
 CANIF_LOCAL Std_ReturnType CanIf_ValidateController(uint8 apiId, ApplicationType partitionIndex, uint8 ctrlId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * @brief              Development error validation
  * @synchronous        TRUE
@@ -81,7 +94,12 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateController(uint8 apiId, ApplicationType
  * @retval             E_NOT_OK: fail validation
  */
 CANIF_LOCAL Std_ReturnType CanIf_ValidateTransceiver(uint8 apiId, ApplicationType partitionIndex, uint8 trcvId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief              Development error validation
@@ -95,6 +113,11 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateTransceiver(uint8 apiId, ApplicationTyp
  * @retval             E_NOT_OK: fail validation
  */
 CANIF_LOCAL Std_ReturnType CanIf_ValidateTxPdu(uint8 apiId, ApplicationType partitionIndex, PduIdType txPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief              Development error validation
@@ -108,6 +131,11 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateTxPdu(uint8 apiId, ApplicationType part
  * @retval             E_NOT_OK: fail validation
  */
 CANIF_LOCAL Std_ReturnType CanIf_ValidateRxPdu(uint8 apiId, ApplicationType partitionIndex, PduIdType rxPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief              Development error validation
@@ -121,6 +149,8 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateRxPdu(uint8 apiId, ApplicationType part
  */
 CANIF_LOCAL Std_ReturnType
     CanIf_ValidateTransmitPduInfo(const CanIf_TxPduConfigType* txPduConfigPtr, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -176,6 +206,11 @@ Std_ReturnType CanIf_ValidateInit(const CanIf_ConfigType* ConfigPtr)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateDeInit(void)
 {
@@ -207,6 +242,11 @@ Std_ReturnType CanIf_ValidateDeInit(void)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 {
@@ -243,6 +283,11 @@ Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_Controlle
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateGetControllerMode(uint8 ControllerId, const Can_ControllerStateType* ControllerModePtr)
 {
@@ -278,6 +323,11 @@ Std_ReturnType CanIf_ValidateGetControllerMode(uint8 ControllerId, const Can_Con
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduInfoType* PduInfoPtr)
 {
@@ -312,8 +362,13 @@ Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduInfoType*
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const PduInfoType* CanIfRxInfoPtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -348,9 +403,14 @@ Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const PduInfo
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -391,9 +451,14 @@ Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -440,7 +505,12 @@ Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest)
 {
@@ -486,6 +556,11 @@ Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduModeType Pd
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_PduModeType* PduModePtr)
 {
@@ -521,8 +596,13 @@ Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_PduModeT
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -591,9 +671,14 @@ Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType C
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -630,6 +715,11 @@ Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeTy
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTrcv_TrcvModeType* TransceiverModePtr)
 {
@@ -665,6 +755,11 @@ Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTrcv_Trcv
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType
     CanIf_ValidateGetTrcvWakeupReason(uint8 TransceiverId, const CanTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr)
@@ -701,6 +796,11 @@ Std_ReturnType
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWakeupMode)
 {
@@ -738,9 +838,14 @@ Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_Trcv
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_WAKEUP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSource)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -771,9 +876,14 @@ Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSource)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType WakeupSource)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -804,9 +914,14 @@ Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType WakeupSource)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -837,9 +952,14 @@ Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -870,6 +990,11 @@ Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId)
 {
@@ -901,9 +1026,14 @@ Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_SET_BAUDRATE_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -936,9 +1066,14 @@ Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudRateConf
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -973,9 +1108,14 @@ Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, Can_Err
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1010,6 +1150,11 @@ Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 ControllerId, uin
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr)
 {
@@ -1045,9 +1190,262 @@ Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 ControllerId, uin
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_ValidateEnableBusMirroring(uint8 ControllerId, boolean MirroringActive)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_ENABLEBUSMIRRORING_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    CANIF_NOUSED(MirroringActive);
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+    else if (E_OK != CanIf_ValidateController(apiId, partitionIndex, ControllerId))
+    {
+        /* do nothing */
+    }
+    else
+    {
+        result = E_OK;
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_GLOBAL_TIME_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_ValidateGetCurrentTime(uint8 Controller, Can_TimeStampType* timeStampPtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETCURRENTTIME_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+    /* instead of CanIf_ValidateController */
+    else if (NULL_PTR == CANIF_CTRL_PBCFG_REF)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (Controller >= CANIF_CANCONTROLLER_NUMBER)
+    {
+        errorId = CANIF_E_PARAM_CONTROLLERID;
+    }
+    else if (NULL_PTR == timeStampPtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        result = E_OK;
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_ValidateEnableEgressTimeStamp(PduIdType TxPduId)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_ENABLEEGRESSTIMESTAMP_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+#if (CANIF_MAX_TXPDU_NUMBER > 0u)
+    else if (TxPduId >= CANIF_MAX_TXPDU_NUMBER)
+    {
+        errorId = CANIF_E_PARAM_LPDU;
+    }
+#endif
+    else
+    {
+        PduIdType txPduIndex = CanIf_TxPduId2VarIndex(TxPduId);
+
+        if ((txPduIndex >= CANIF_TXPDU_NUMBER) || (txPduIndex >= CanIf_ConfigStd->TxPduConfigNumber))
+        {
+            errorId = CANIF_E_PARAM_LPDU;
+        }
+        else if (partitionIndex != CANIF_PARTITION_INDEX(&CANIF_TXPDU(txPduIndex)))
+        {
+            errorId = CANIF_E_INVALID_PARTITION;
+        }
+        else
+        {
+            result = E_OK;
+        }
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_ValidateGetEgressTimeStamp(PduIdType TxPduId, Can_TimeStampType* timeStampPtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETEGRESSTIMESTAMP_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+#if (CANIF_MAX_TXPDU_NUMBER > 0u)
+    else if (TxPduId >= CANIF_MAX_TXPDU_NUMBER)
+    {
+        errorId = CANIF_E_PARAM_LPDU;
+    }
+#endif
+    else if (NULL_PTR == timeStampPtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        PduIdType txPduIndex = CanIf_TxPduId2VarIndex(TxPduId);
+
+        if ((txPduIndex >= CANIF_TXPDU_NUMBER) || (txPduIndex >= CanIf_ConfigStd->TxPduConfigNumber))
+        {
+            errorId = CANIF_E_PARAM_LPDU;
+        }
+        else if (partitionIndex != CANIF_PARTITION_INDEX(&CANIF_TXPDU(txPduIndex)))
+        {
+            errorId = CANIF_E_INVALID_PARTITION;
+        }
+        else
+        {
+            result = E_OK;
+        }
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_ValidateGetIngressTimeStamp(PduIdType RxPduId, Can_TimeStampType* timeStampPtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETINGRESSTIMESTAMP_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CANIF_RXPDU_REF)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+#if (CANIF_MAX_RXPDU_NUMBER > 0u)
+    else if (RxPduId >= CANIF_MAX_RXPDU_NUMBER)
+    {
+        errorId = CANIF_E_PARAM_LPDU;
+    }
+#endif
+    else if (NULL_PTR == timeStampPtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        PduIdType rxPduIndex = CanIf_RxPduId2VarIndex(RxPduId);
+
+        if ((rxPduIndex >= CANIF_RXPDU_NUMBER) || (rxPduIndex >= CanIf_ConfigStd->RxPduConfigNumber))
+        {
+            errorId = CANIF_E_PARAM_LPDU;
+        }
+        else if (partitionIndex != CANIF_PARTITION_INDEX(&CANIF_RXPDU(rxPduIndex)))
+        {
+            errorId = CANIF_E_INVALID_PARTITION;
+        }
+        else
+        {
+            result = E_OK;
+        }
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1080,7 +1478,12 @@ Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const PduInfoTyp
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId)
 {
@@ -1127,10 +1530,15 @@ Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
 /* PRQA S 6030 ++ */ /* VL_MTR_CanIf_STMIF */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1214,9 +1622,14 @@ Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduIn
     return result;
 }
 /* PRQA S 6030 -- */
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1249,8 +1662,13 @@ Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1283,6 +1701,11 @@ Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 TransceiverId)
 {
@@ -1316,6 +1739,11 @@ Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 TransceiverId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 TransceiverId)
 {
@@ -1349,7 +1777,12 @@ Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 TransceiverId)
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 Std_ReturnType CanIf_ValidateControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 {
@@ -1385,8 +1818,13 @@ Std_ReturnType CanIf_ValidateControllerModeIndication(uint8 ControllerId, Can_Co
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 Std_ReturnType CanIf_ValidateTrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1421,11 +1859,16 @@ Std_ReturnType CanIf_ValidateTrcvModeIndication(uint8 TransceiverId, CanTrcv_Trc
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 #endif
 
 /* ========================================== internal function definitions ========================================= */
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 CANIF_LOCAL Std_ReturnType CanIf_ValidatePartition(uint8 apiId, ApplicationType partitionIndex)
 {
     Std_ReturnType result  = E_NOT_OK;
@@ -1452,6 +1895,11 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidatePartition(uint8 apiId, ApplicationType 
 #endif
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 CANIF_LOCAL Std_ReturnType CanIf_ValidateController(uint8 apiId, ApplicationType partitionIndex, uint8 ctrlId)
 {
@@ -1483,10 +1931,15 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateController(uint8 apiId, ApplicationType
 #endif
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 CANIF_LOCAL Std_ReturnType CanIf_ValidateTransceiver(uint8 apiId, ApplicationType partitionIndex, uint8 trcvId)
 {
     Std_ReturnType result  = E_NOT_OK;
@@ -1515,7 +1968,12 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateTransceiver(uint8 apiId, ApplicationTyp
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 CANIF_LOCAL Std_ReturnType CanIf_ValidateTxPdu(uint8 apiId, ApplicationType partitionIndex, PduIdType txPduId)
 {
@@ -1556,6 +2014,11 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateTxPdu(uint8 apiId, ApplicationType part
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 CANIF_LOCAL Std_ReturnType CanIf_ValidateRxPdu(uint8 apiId, ApplicationType partitionIndex, PduIdType rxPduId)
 {
@@ -1596,6 +2059,11 @@ CANIF_LOCAL Std_ReturnType CanIf_ValidateRxPdu(uint8 apiId, ApplicationType part
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 CANIF_LOCAL Std_ReturnType
     CanIf_ValidateTransmitPduInfo(const CanIf_TxPduConfigType* txPduConfigPtr, const PduInfoType* PduInfoPtr)

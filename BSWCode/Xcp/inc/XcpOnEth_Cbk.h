@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -35,6 +35,8 @@
 
 /* =========================================== external data declarations =========================================== */
 
+#define XCP_START_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 /* ========================================= external function declarations ========================================= */
 /**
  * @brief       The lower layer communication interface module confirms the transmission of a PDU, or the failure to
@@ -46,7 +48,11 @@
  * @trace       CPD-63959
  */
 extern void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define XCP_STOP_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 /**
  * @brief       Indication of a received PDU from a lower layer communication interface module.
  * @param[in]   RxPduId   : Receive the XCP message PDU ID.
@@ -56,5 +62,7 @@ extern void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace       CPD-63958
  */
 extern void Xcp_SoAdRxIndication(PduIdType RxPduId, const PduInfoType* RxPduPtr);
+#define XCP_STOP_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 
 #endif

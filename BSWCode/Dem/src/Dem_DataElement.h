@@ -151,6 +151,8 @@ typedef void (
 /* ========================================== internal function declarations ======================================== */
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_DATA_CBK_WITH_EVENTID))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with Event ID parameter function
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -164,9 +166,13 @@ DEM_LOCAL void Dem_DataElementCallbackWithEventId(
     Dem_DestinationBufferPtrType DestBuffer,
     Dem_DataElementClassNumType  DataIndex,
     Dem_EventIdType              EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_CBK) || defined(DEM_DATA_PROT_UINT8) || defined(DEM_DATA_PROT_UINT8_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint8 uint8_N or application callback
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -177,9 +183,13 @@ DEM_LOCAL void Dem_DataElementCallbackWithEventId(
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint8(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_BOOLEAN))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type boolean
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -190,9 +200,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackBoolean(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT8) || defined(DEM_DATA_PROT_SINT8_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint8 sint8_N
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -203,9 +217,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint8(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT16) || defined(DEM_DATA_PROT_UINT16_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint16 Motorola uint16_N Motorola
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -216,9 +234,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint16(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT16) || defined(DEM_DATA_PROT_SINT16_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint16 Motorola sint16_N Motorola
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -229,9 +251,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint16(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT16_N_INTEL) || defined(DEM_DATA_PROT_UINT16_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint16 Intel uint16_N Intel
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -242,9 +268,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint16Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT16_INTEL) || defined(DEM_DATA_PROT_SINT16_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint16 Intel sint16_N Intel
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -255,9 +285,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint16Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT32) || defined(DEM_DATA_PROT_UINT32_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint32 Motorola uint32_N Motorola
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -268,9 +302,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint32(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT32) || defined(DEM_DATA_PROT_SINT32_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint32 Motorola sint32_N Motorola
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -281,9 +319,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint32(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT32_INTEL) || defined(DEM_DATA_PROT_UINT32_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint32 Intel uint32_N Intel
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -294,9 +336,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint32Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT32_INTEL) || defined(DEM_DATA_PROT_SINT32_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint32 Intel sint32_N Intel
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -307,9 +353,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint32Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_FLOAT) || defined(DEM_DATA_PROT_FLOAT_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint32 Motorola sint32_N Motorola
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -320,9 +370,13 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackFloat(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_FLOAT_INTEL) || defined(DEM_DATA_PROT_FLOAT_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type uint32 Intel uint32_N Intel
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -333,7 +387,11 @@ DEM_LOCAL void
  */
 DEM_LOCAL void
     Dem_DataElementCallbackFloatInter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get environmental data through Data Element
@@ -344,10 +402,14 @@ DEM_LOCAL void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetEnvDataByDataElement(Dem_DataInfoConstPtrType DataInfoPtr, Dem_DataElementClassNumType DataIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_AGINGCTR_UPCNT_FIRST_ACTIVE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Up-counting Dem-internal aging counter
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -359,9 +421,13 @@ DEM_LOCAL void Dem_GetEnvDataByDataElement(Dem_DataInfoConstPtrType DataInfoPtr,
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyUpwardsFirstAgingCounter(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_AGINGCTR_UPCNT))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Up-counting Dem-internal aging counter
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -373,9 +439,13 @@ DEM_LOCAL boolean Dem_DataCopyUpwardsFirstAgingCounter(Dem_DataInfoConstPtrType 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyUpwardsAgingCounter(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_AGINGCTR_DOWNCNT))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Down-counting Dem-internal aging counter
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -387,9 +457,13 @@ DEM_LOCAL boolean Dem_DataCopyUpwardsAgingCounter(Dem_DataInfoConstPtrType CopyD
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyDownwardsAgingCounter(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_OCC3)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem-internal Operation Cycle Counter - Cycles since first failed
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -401,9 +475,13 @@ DEM_LOCAL boolean Dem_DataCopyDownwardsAgingCounter(Dem_DataInfoConstPtrType Cop
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyCyclesSinceFirstFailed(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem-internal Operation Cycle Counter - Cycles since last failed
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -415,9 +493,13 @@ DEM_LOCAL boolean Dem_DataCopyCyclesSinceFirstFailed(Dem_DataInfoConstPtrType Co
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyCyclesSinceLastFailed(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem-internal DTC Fault Detection Counter maximum value during current operation cycle
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -429,9 +511,13 @@ DEM_LOCAL boolean Dem_DataCopyCyclesSinceLastFailed(Dem_DataInfoConstPtrType Cop
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyMaxFdcThisCycle(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_J1939LAMP_STATUS))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Current state of applicable lamp(s) for this DTC in SAE J1939 DM31 format.
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -443,9 +529,13 @@ DEM_LOCAL boolean Dem_DataCopyMaxFdcThisCycle(Dem_DataInfoConstPtrType CopyDidIn
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyJ1939LampStatus(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem-internal DTC Fault Detection Counter maximum value since last clear
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -457,12 +547,12 @@ DEM_LOCAL boolean Dem_DataCopyJ1939LampStatus(Dem_DataInfoConstPtrType CopyDidIn
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataCopyMaxFdcSinceLastClear(Dem_DataInfoConstPtrType CopyDidInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Dest Buffer info Init
  * @param[in]     Size: The buffer size
@@ -526,7 +616,6 @@ DEM_LOCAL_INLINE void Dem_DataReportInitCopyDidInfo(
     DataInfoPtr->MemoryIndex       = MemoryIndex;
     DataInfoPtr->EventId           = EventId;
 }
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Get the Data Element Kind
@@ -549,7 +638,7 @@ DEM_LOCAL_INLINE uint8 Dem_GetDataElementKind(Dem_DataElementClassNumType DataIn
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
-DEM_LOCAL_INLINE uint8 Dem_GetDataElementSize(Dem_DataElementClassNumType DataIndex)
+DEM_LOCAL_INLINE uint16 Dem_GetDataElementSize(Dem_DataElementClassNumType DataIndex)
 {
     return Dem_GetDataSizeOfDataElement(DataIndex);
 }
@@ -591,7 +680,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckAndIncreaseDestBufferWriteIndex(Dem_Destinatio
     }
     return ret;
 }
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Check if the Data Element is internal data
@@ -608,7 +696,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckDataElementInternal(Dem_DataElementClassNumTyp
     return (Dem_GetDataElementKind(DataIndex) >= DEM_DATAELEMENT_INTERNAL_DATA); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
 #endif
-
 /**
  * @brief         Copy passed uint8 data to destination buffer at passed write index
  * @param[in]     Data: Process data
@@ -716,7 +803,6 @@ DEM_LOCAL_INLINE void Dem_WriteUint32ToBufferIntel(Dem_DestinationBufferPtrType 
         DestBuffer->Buffer[writeIndex + DEM_DATAELEMENT_OFFSET_3Byte] = Dem_GetHiHiByte(Data);
     }
 }
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_DATA_CBK_WITH_EVENTID))
 /**
@@ -733,7 +819,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckDataElementWithEventId(Dem_DataElementClassNum
 {
     return (Dem_GetDataElementKind(DataIndex) == DEM_DATA_CBK_WITH_EVENTID); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with Event ID parameter function
  */
@@ -742,7 +829,7 @@ DEM_LOCAL void Dem_DataElementCallbackWithEventId(
     Dem_DataElementClassNumType  DataIndex,
     Dem_EventIdType              EventId)
 {
-    uint8  dataSize   = Dem_GetDataElementSize(DataIndex);
+    uint16 dataSize   = Dem_GetDataElementSize(DataIndex);
     uint16 writeIndex = DestBuffer->WriteIndex;
     if (Dem_CheckAndIncreaseDestBufferWriteIndex(DestBuffer, dataSize) == TRUE)
     {
@@ -759,16 +846,19 @@ DEM_LOCAL void Dem_DataElementCallbackWithEventId(
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_DATA_CBK) || defined(DEM_DATA_PROT_UINT8) || defined(DEM_DATA_PROT_UINT8_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint8 uint8_N or application callback
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint8(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8  dataSize   = Dem_GetDataElementSize(DataIndex);
+    uint16 dataSize   = Dem_GetDataElementSize(DataIndex);
     uint16 writeIndex = DestBuffer->WriteIndex;
     if (Dem_CheckAndIncreaseDestBufferWriteIndex(DestBuffer, dataSize) == TRUE)
     {
@@ -785,16 +875,19 @@ DEM_LOCAL void
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_DATA_PROT_BOOLEAN))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type boolean
  */
 DEM_LOCAL void
     Dem_DataElementCallbackBoolean(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8  dataSize   = Dem_GetDataElementSize(DataIndex);
+    uint16 dataSize   = Dem_GetDataElementSize(DataIndex);
     uint16 writeIndex = DestBuffer->WriteIndex;
     if (Dem_CheckAndIncreaseDestBufferWriteIndex(DestBuffer, dataSize) == TRUE)
     {
@@ -816,16 +909,19 @@ DEM_LOCAL void
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_DATA_PROT_SINT8) || defined(DEM_DATA_PROT_SINT8_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type sint8 sint8_N
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint8(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = Dem_GetDataElementSize(DataIndex);
+    uint16 arraySize = Dem_GetDataElementSize(DataIndex);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     sint8 applData[DEM_DATA_SINT8_MAX_SIZE];
@@ -834,27 +930,30 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0u; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0u; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_SIGNED;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0u; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0u; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint8ToBuffer(DestBuffer, (uint8)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_DATA_PROT_UINT16) || defined(DEM_DATA_PROT_UINT16_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint16 Motorola uint16_N Motorola
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint16(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     uint16 applData[DEM_DATA_UINT16_MAX_SIZE];
@@ -863,56 +962,63 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_2Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint16ToBuffer(DestBuffer, applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_DATA_PROT_SINT16) || defined(DEM_DATA_PROT_SINT16_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type sint16 Motorola sint16_N Motorola
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint16(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
-    uint16 applData[DEM_DATA_SINT16_MAX_SIZE];
+    sint16 applData[DEM_DATA_SINT16_MAX_SIZE];
     /* PRQA S 0313 ++ */ /* VL_Dem_0313 */
     if (((*((Dem_ReadDataSint16FPtrType)Dem_GetDataElementFnc(DataIndex))))(&applData[0]) != E_OK)
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_SIGNED;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint16ToBuffer(DestBuffer, (uint16)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT16_N_INTEL) || defined(DEM_DATA_PROT_UINT16_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint16 Intel uint16_N Intel
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint16Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     uint16 applData[DEM_DATA_UINT16_MAX_SIZE];
@@ -921,56 +1027,64 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_2Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint16ToBufferIntel(DestBuffer, applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT16_INTEL) || defined(DEM_DATA_PROT_SINT16_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type sint16 Intel sint16_N Intel
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint16Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_1);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
-    uint16 applData[DEM_DATA_SINT16_MAX_SIZE];
+    sint16 applData[DEM_DATA_SINT16_MAX_SIZE];
     /* PRQA S 0313 ++ */ /* VL_Dem_0313 */
     if (((*((Dem_ReadDataSint16FPtrType)Dem_GetDataElementFnc(DataIndex))))(&applData[0]) != E_OK)
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_SIGNED;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint16ToBufferIntel(DestBuffer, (uint16)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT32) || defined(DEM_DATA_PROT_UINT32_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint32 Motorola uint32_N Motorola
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint32(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     uint32 applData[DEM_DATA_UINT32_MAX_SIZE];
@@ -979,27 +1093,31 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_4Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBuffer(DestBuffer, applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT32) || defined(DEM_DATA_PROT_SINT32_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type sint32 Motorola sint32_N Motorola
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint32(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     sint32 applData[DEM_DATA_SINT32_MAX_SIZE];
@@ -1008,27 +1126,31 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_SIGNED;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBuffer(DestBuffer, (uint32)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_UINT32_INTEL) || defined(DEM_DATA_PROT_UINT32_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint32 Intel uint32_N Intel
  */
 DEM_LOCAL void
     Dem_DataElementCallbackUint32Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     uint32 applData[DEM_DATA_UINT32_MAX_SIZE];
@@ -1037,27 +1159,31 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_4Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBufferIntel(DestBuffer, applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_SINT32_INTEL) || defined(DEM_DATA_PROT_SINT32_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type sint32 Intel sint32_N Intel
  */
 DEM_LOCAL void
     Dem_DataElementCallbackSint32Inter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     sint32 applData[DEM_DATA_SINT32_MAX_SIZE];
@@ -1066,27 +1192,31 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
             applData[iloop] = DEM_DATAELEMENT_INVALID_SIGNED;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBufferIntel(DestBuffer, (uint32)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_FLOAT) || defined(DEM_DATA_PROT_FLOAT_N))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call the Data Element with data type sint32 Motorola sint32_N Motorola
  */
 DEM_LOCAL void
     Dem_DataElementCallbackFloat(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     float32 applData[DEM_DATA_FLOAT_MAX_SIZE];
@@ -1095,27 +1225,31 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
-            applData[iloop] = DEM_DATAELEMENT_INVALID_4Byte;
+            applData[iloop] = (float32)DEM_DATAELEMENT_INVALID_4Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBuffer(DestBuffer, (uint32)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DATA_PROT_FLOAT_INTEL) || defined(DEM_DATA_PROT_FLOAT_N_INTEL))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call the Data Element with data type uint32 Intel uint32_N Intel
  */
 DEM_LOCAL void
     Dem_DataElementCallbackFloatInter(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
+    uint16 arraySize = (Dem_GetDataElementSize(DataIndex) >> DEM_DATAELEMENT_Shift_2);
     /** Callback interface non-null judgment by the tool to verify the completion of the code no longer deal with the
      * relevant content */
     float32 applData[DEM_DATA_FLOAT_MAX_SIZE];
@@ -1124,21 +1258,24 @@ DEM_LOCAL void
     /* PRQA S 0313 -- */
     {
         /** In case the function failed, fill with padding bytes */
-        for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+        for (uint16 iloop = 0; iloop < arraySize; ++iloop)
         {
-            applData[iloop] = DEM_DATAELEMENT_INVALID_4Byte;
+            applData[iloop] = (float32)DEM_DATAELEMENT_INVALID_4Byte;
         }
         Dem_DetReportRuntimeError(DEM_SID_INTERNALAPIID, DEM_E_NODATAAVAILABLE);
     }
-    for (uint8 iloop = 0; iloop < arraySize; ++iloop)
+    for (uint16 iloop = 0; iloop < arraySize; ++iloop)
     {
         Dem_WriteUint32ToBufferIntel(DestBuffer, (uint32)applData[iloop]);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get environmental data through Data Element
  */
@@ -1295,8 +1432,9 @@ DEM_LOCAL void Dem_GetEnvDataByDataElement(Dem_DataInfoConstPtrType DataInfoPtr,
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
@@ -1323,7 +1461,6 @@ DEM_LOCAL_INLINE void Dem_DataReportSkipDid(Dem_DataInfoPtrType CopyDidInfo, Dem
 }
 #endif
 #endif
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         Obtaining environmental data via DID
@@ -1349,7 +1486,6 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByDid(Dem_DataInfoConstPtrType DataInfoPtr, 
 #endif
 }
 #endif
-
 #if (DEM_PID_CLASS_NUMBER > 0u)
 /**
  * @brief         Obtaining environmental data via PID
@@ -1375,9 +1511,7 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByPid(Dem_DataInfoPtrType DataInfoPtr, uint8
 #endif
 }
 #endif
-
 #if ((DEM_MAX_SIZE_J1939FREEZEFRAME > 0u) || (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u))
-
 /**
  * @brief         Obtaining environmental data via SPN
  * @param[in]     DataInfoPtr: Pointer to data information
@@ -1398,7 +1532,6 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataBySPN(Dem_DataInfoConstPtrType DataInfoPtr, 
 #endif
 }
 #endif
-
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
 /**
  * @brief         Obtaining environmental data via ED
@@ -1425,7 +1558,6 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByEDR(Dem_DataInfoConstPtrType DataInfoPtr, 
 #endif
 }
 #endif
-
 /**
  * @brief         Data Write to Destination Buffer
  * @param[in]     SourceBuffer: Pointer to source buffer
@@ -1446,7 +1578,6 @@ DEM_LOCAL_INLINE void Dem_DataWriteDestinationBuffer(
         Dem_MemCpy(&DestinationBuffer->Buffer[writeIndex], SourceBuffer, Size);
     }
 }
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Retrieves the user data stored in the event memory entry
@@ -1462,7 +1593,7 @@ DEM_LOCAL_INLINE void Dem_DataWriteDestinationBuffer(
 DEM_LOCAL_INLINE boolean
     Dem_DataReportCopyStoredUserData(Dem_DataInfoPtrType CopyDidInfoPtr, Dem_DataElementClassNumType DataIndex)
 {
-    uint8 dataSize = Dem_GetDataSizeOfDataElement(DataIndex);
+    uint16 dataSize = Dem_GetDataSizeOfDataElement(DataIndex);
     Dem_DataWriteDestinationBuffer(
         CopyDidInfoPtr->DestinationBuffer,
         &CopyDidInfoPtr->SourceBuffer[CopyDidInfoPtr->ReadIndex],
@@ -1470,8 +1601,9 @@ DEM_LOCAL_INLINE boolean
     CopyDidInfoPtr->ReadIndex += dataSize;
     return TRUE;
 }
-
 #if (defined(DEM_AGINGCTR_UPCNT_FIRST_ACTIVE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Up-counting Dem-internal aging counter
  */
@@ -1495,7 +1627,7 @@ DEM_LOCAL boolean Dem_DataCopyUpwardsFirstAgingCounter(Dem_DataInfoConstPtrType 
      * counter has a value of 0 and the event status bits TestFailedThisOperationCycle and
      * TestNotCompletedThisOperationCycle are set to False, a value of 1 is reported upon reading the Dem internal
      * aging counter.*/
-    if ((agingCounter == 0x00u))
+    if (agingCounter == 0x00u)
     {
         Dem_UdsStatusByteType eventStatus = Dem_GetEventUDSStatus(eventId);
         if (((Dem_UDSStatusCheckTFTOC(eventStatus)) == FALSE) && (Dem_UDSStatusCheckTNCTOC(eventStatus) == FALSE))
@@ -1507,9 +1639,13 @@ DEM_LOCAL boolean Dem_DataCopyUpwardsFirstAgingCounter(Dem_DataInfoConstPtrType 
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, agingCounter);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_AGINGCTR_UPCNT))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Up-counting Dem-internal aging counter
  */
@@ -1531,9 +1667,13 @@ DEM_LOCAL boolean Dem_DataCopyUpwardsAgingCounter(Dem_DataInfoConstPtrType CopyD
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, agingCounter);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_AGINGCTR_DOWNCNT))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Down-counting Dem-internal aging counter
  */
@@ -1559,6 +1699,8 @@ DEM_LOCAL boolean Dem_DataCopyDownwardsAgingCounter(Dem_DataInfoConstPtrType Cop
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, agingCounter);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_CURRENT_FDC))
@@ -1587,6 +1729,8 @@ DEM_LOCAL_INLINE boolean Dem_DataCopyCurrentFdc(Dem_DataInfoConstPtrType CopyDid
 #endif
 
 #if ((defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_OCC3)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Dem-internal Operation Cycle Counter - Cycles since first failed
  */
@@ -1612,9 +1756,13 @@ DEM_LOCAL boolean Dem_DataCopyCyclesSinceFirstFailed(Dem_DataInfoConstPtrType Co
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, cycleCounter);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Dem-internal Operation Cycle Counter - Cycles since last failed
  */
@@ -1640,6 +1788,8 @@ DEM_LOCAL boolean Dem_DataCopyCyclesSinceLastFailed(Dem_DataInfoConstPtrType Cop
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, cycleCounter);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_DTC_PRIORITY))
@@ -1699,6 +1849,8 @@ DEM_LOCAL_INLINE boolean Dem_DataCopyFailedCycles(Dem_DataInfoConstPtrType CopyD
 #endif
 
 #if (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Dem-internal DTC Fault Detection Counter maximum value during current operation cycle
  */
@@ -1724,9 +1876,13 @@ DEM_LOCAL boolean Dem_DataCopyMaxFdcThisCycle(Dem_DataInfoConstPtrType CopyDidIn
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, (uint8)fdc);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_J1939LAMP_STATUS))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Current state of applicable lamp(s) for this DTC in SAE J1939 DM31 format.
  */
@@ -1746,9 +1902,13 @@ DEM_LOCAL boolean Dem_DataCopyJ1939LampStatus(Dem_DataInfoConstPtrType CopyDidIn
 #endif
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief  Dem-internal DTC Fault Detection Counter maximum value since last clear
  */
@@ -1766,6 +1926,8 @@ DEM_LOCAL boolean Dem_DataCopyMaxFdcSinceLastClear(Dem_DataInfoConstPtrType Copy
     Dem_WriteUint8ToBuffer(CopyDidInfoPtr->DestinationBuffer, (uint8)fdc);
     return TRUE;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_MONITOR_DATA_0))
@@ -2019,7 +2181,6 @@ DEM_LOCAL_INLINE boolean Dem_DataCopyAgedCounter(Dem_DataInfoConstPtrType CopyDi
 }
 #endif
 #endif
-
 #if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Copy stored data element into a buffer.
@@ -2035,7 +2196,7 @@ DEM_LOCAL_INLINE boolean Dem_DataCopyAgedCounter(Dem_DataInfoConstPtrType CopyDi
 DEM_LOCAL_INLINE boolean
     Dem_DataReportCopyStoredDataElement(Dem_DataInfoConstPtrType CopyDidInfoPtr, Dem_DataElementClassNumType DataIndex)
 {
-    boolean ret;
+    boolean ret = FALSE;
     if (Dem_CheckDataElementInternal(DataIndex) == FALSE)
     {
         /* PRQA S 0311 ++ */ /* VL_Dem_0311 */
@@ -2227,7 +2388,6 @@ DEM_LOCAL_INLINE boolean
     return ret;
 }
 #endif
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         Copies DID data into a buffer.
@@ -2261,7 +2421,6 @@ DEM_LOCAL_INLINE boolean Dem_DataReportCopyDid(Dem_DataInfoConstPtrType DataInfo
     return ret;
 }
 #endif
-
 #if (DEM_PID_CLASS_NUMBER > 0u)
 /**
  * @brief         Copies PID data into a buffer.
@@ -2295,7 +2454,4 @@ DEM_LOCAL_INLINE boolean Dem_DataReportCopyPid(Dem_DataInfoPtrType DataInfoPtr, 
     return ret;
 }
 #endif
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

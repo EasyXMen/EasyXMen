@@ -32,6 +32,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This call informs the Dcm module about a ComM mode change to COMM_NO_COMMUNICATION.
  * @param[in]     NetworkId : Identifier of the network concerned by the mode change
@@ -41,6 +43,10 @@ extern "C" {
  * @trace         CPD-60717
  */
 void Dcm_ComM_NoComModeEntered(uint8 NetworkId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This call informs the Dcm module about a ComM mode change to COMM_SILENT_COMMUNICATION.
@@ -51,6 +57,10 @@ void Dcm_ComM_NoComModeEntered(uint8 NetworkId);
  * @trace         CPD-60719
  */
 void Dcm_ComM_SilentComModeEntered(uint8 NetworkId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This call informs the Dcm module about a ComM mode change to COMM_FULL_COMMUNICATION.
@@ -61,6 +71,8 @@ void Dcm_ComM_SilentComModeEntered(uint8 NetworkId);
  * @trace         CPD-60720
  */
 void Dcm_ComM_FullComModeEntered(uint8 NetworkId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 #ifdef __cplusplus
 }

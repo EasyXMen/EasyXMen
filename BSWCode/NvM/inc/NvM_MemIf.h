@@ -43,6 +43,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 #if (STD_OFF == NVM_POLLING_MODE)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       Function to be used by the underlying memory abstraction to signal end of job without error
  * @reentrant   Non Reentrant
@@ -50,6 +52,10 @@ extern "C" {
  * @trace       CPD-76618
  */
 extern void NvM_JobEndNotification(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Function to be used by the underlying memory abstraction to signal end of job with error
@@ -58,6 +64,8 @@ extern void NvM_JobEndNotification(void);
  * @trace       CPD-76619
  */
 extern void NvM_JobErrorNotification(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 
 #ifdef __cplusplus

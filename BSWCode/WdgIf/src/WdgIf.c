@@ -27,47 +27,17 @@
 #if (STD_ON == WDGIF_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif /* STD_ON == WDGIF_DEV_ERROR_DETECT */
-
-/* ===================================================== macros ===================================================== */
-#define WDGIF_C_AR_MAJOR_VERSION 4U
-#define WDGIF_C_AR_MINOR_VERSION 9U
-#define WDGIF_C_AR_PATCH_VERSION 0U
-#define WDGIF_C_SW_MAJOR_VERSION 2U
-#define WDGIF_C_SW_MINOR_VERSION 2U
-#define WDGIF_C_SW_PATCH_VERSION 1U
-
-/* ------------------------------------------------- Version  Check ------------------------------------------------- */
-#if (WDGIF_C_AR_MAJOR_VERSION != WDGIF_H_AR_MAJOR_VERSION)
-#error "WdgIf.c:Mismatch in Specification Major Version"
-#endif /*WDGIF_C_AR_MAJOR_VERSION != WDGIF_H_AR_MAJOR_VERSION*/
-#if (WDGIF_C_AR_MINOR_VERSION != WDGIF_H_AR_MINOR_VERSION)
-#error "WdgIf.c:Mismatch in Specification Minor Version"
-#endif /*WDGIF_C_AR_MINOR_VERSION != WDGIF_H_AR_MINOR_VERSION*/
-#if (WDGIF_C_AR_PATCH_VERSION != WDGIF_H_AR_PATCH_VERSION)
-#error "WdgIf.c:Mismatch in Specification Patch Version"
-#endif /*WDGIF_C_AR_PATCH_VERSION != WDGIF_H_AR_PATCH_VERSION*/
-#if (WDGIF_C_SW_MAJOR_VERSION != WDGIF_H_SW_MAJOR_VERSION)
-#error "WdgIf.c:Mismatch in Specification Major Version"
-#endif /* WDGIF_C_SW_MAJOR_VERSION != WDGIF_H_SW_MAJOR_VERSION */
-#if (WDGIF_C_SW_MINOR_VERSION != WDGIF_H_SW_MINOR_VERSION)
-#error "WdgIf.c:Mismatch in Specification Minor Version"
-#endif /* WDGIF_C_SW_MINOR_VERSION != WDGIF_H_SW_MINOR_VERSION */
-
-/* ================================================ type definitions ================================================ */
-
-/* ========================================== internal function declarations ======================================== */
-
-/* ============================================ internal data definitions =========================================== */
-
-/* ============================================ external data definitions =========================================== */
+#include "WdgIf_Arti.h"
 
 /* ========================================== external function definitions ========================================= */
+
 #define WDGIF_START_SEC_CODE
 #include "WdgIf_MemMap.h"
-
 /*PRQA S 1532 ++*/ /*VL_QAC_OneFunRef*/
 Std_ReturnType WdgIf_SetMode(uint8 DeviceIndex, WdgIf_ModeType WdgMode)
 {
+    WdgIf_ArtiApiStart(3, WDGIF_SETMODE_ID, DeviceIndex, WdgMode);
+
     Std_ReturnType ret = E_OK;
 #if (WDGIF_NUMBER_OF_DEVICES > 1)
     const Wdg_GeneralType* gen;
@@ -83,7 +53,7 @@ Std_ReturnType WdgIf_SetMode(uint8 DeviceIndex, WdgIf_ModeType WdgMode)
     {
 #if (WDGIF_NUMBER_OF_DEVICES <= 1)
         {
-            ret = WdgIf_SetMode_Map(WdgMode);
+            ret = WdgIf_SetModeMap(WdgMode);
         }
 #else  /*WDGIF_NUMBER_OF_DEVICES > 1*/
         {
@@ -95,12 +65,22 @@ Std_ReturnType WdgIf_SetMode(uint8 DeviceIndex, WdgIf_ModeType WdgMode)
         }
 #endif /*WDGIF_NUMBER_OF_DEVICES <= 1*/
     }
-    return ret;
-} /*PRQA S 1532 --*/
 
+    WdgIf_ArtiApiStop(2, WDGIF_SETMODE_ID, ret);
+
+    return ret;
+}
+/*PRQA S 1532 --*/
+#define WDGIF_STOP_SEC_CODE
+#include "WdgIf_MemMap.h"
+
+#define WDGIF_START_SEC_CODE
+#include "WdgIf_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void WdgIf_SetTriggerCondition(uint8 DeviceIndex, uint16 Timeout)
 {
+    WdgIf_ArtiApiStart(3, WDGIF_TRIGGER_ID, DeviceIndex, Timeout);
+
 #if (WDGIF_NUMBER_OF_DEVICES > 1)
     const Wdg_GeneralType* gen;
 #endif /*WDGIF_NUMBER_OF_DEVICES > 1*/
@@ -114,7 +94,7 @@ void WdgIf_SetTriggerCondition(uint8 DeviceIndex, uint16 Timeout)
     {
 #if (WDGIF_NUMBER_OF_DEVICES <= 1)
         {
-            WdgIf_SetTriggerCondition_Map(Timeout);
+            WdgIf_SetTriggerConditionMap(Timeout);
         }
 #else  /*WDGIF_NUMBER_OF_DEVICES > 1*/
         {
@@ -126,12 +106,20 @@ void WdgIf_SetTriggerCondition(uint8 DeviceIndex, uint16 Timeout)
         }
 #endif /*WDGIF_NUMBER_OF_DEVICES <= 1*/
     }
+
+    WdgIf_ArtiApiStop(1, WDGIF_TRIGGER_ID);
 }
 /* PRQA S 1532 -- */
+#define WDGIF_STOP_SEC_CODE
+#include "WdgIf_MemMap.h"
 
 #if (STD_ON == WDGIF_VERSION_INFO_API)
+#define WDGIF_START_SEC_CODE
+#include "WdgIf_MemMap.h"
 void WdgIf_GetVersionInfo(Std_VersionInfoType* versionInfoPtr)
 {
+    WdgIf_ArtiApiStart(2, WDGIF_GETVERSIONINFO_ID, versionInfoPtr);
+
 #if (STD_ON == WDGIF_DEV_ERROR_DETECT)
     if (NULL_PTR == versionInfoPtr)
     {
@@ -143,12 +131,13 @@ void WdgIf_GetVersionInfo(Std_VersionInfoType* versionInfoPtr)
         versionInfoPtr->vendorID = WDGIF_VENDOR_ID;
         versionInfoPtr->moduleID = WDGIF_MODULE_ID;
 
-        versionInfoPtr->sw_major_version = WDGIF_C_SW_MAJOR_VERSION;
-        versionInfoPtr->sw_minor_version = WDGIF_C_SW_MINOR_VERSION;
-        versionInfoPtr->sw_patch_version = WDGIF_C_SW_PATCH_VERSION;
+        versionInfoPtr->sw_major_version = WDGIF_SW_MAJOR_VERSION;
+        versionInfoPtr->sw_minor_version = WDGIF_SW_MINOR_VERSION;
+        versionInfoPtr->sw_patch_version = WDGIF_SW_PATCH_VERSION;
     }
-}
-#endif
 
+    WdgIf_ArtiApiStop(1, WDGIF_GETVERSIONINFO_ID);
+}
 #define WDGIF_STOP_SEC_CODE
 #include "WdgIf_MemMap.h"
+#endif

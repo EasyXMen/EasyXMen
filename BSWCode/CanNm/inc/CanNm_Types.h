@@ -176,12 +176,11 @@ typedef struct
 #endif
 
 #if CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON
-    uint8   CarWakeUpBitPosition;   /**< Specifies the Bit position of the CWU within the NM PDU. @range 0..255 */
-    uint8   CarWakeUpBytePosition;  /**< Specifies the Byte position of the CWU within the NM PDU. @range 0..255 */
-    boolean CarWakeUpFilterEnabled; /**< Specifies if CWU filtering is supported @range TRUE/FALSE */
-
+    uint8 CarWakeUpBitPosition;  /**< Specifies the Bit position of the CWU within the NM PDU. @range 0..255 */
+    uint8 CarWakeUpBytePosition; /**< Specifies the Byte position of the CWU within the NM PDU. @range 0..255 */
 #if CANNM_CAR_WAKEUP_FILTER_ENABLED == STD_ON
-    uint8 CarWakeUpFilterNodeId; /**< Source node identifier for CWU filtering. @range 0..255 */
+    boolean CarWakeUpFilterEnabled; /**< Specifies if CWU filtering is supported @range TRUE/FALSE */
+    uint8   CarWakeUpFilterNodeId;  /**< Source node identifier for CWU filtering. @range 0..255 */
 #endif
 
     boolean CarWakeUpRxEnabled; /**< Enables or disables support of CarWakeUp bit evaluation in received NM PDUs. @range
@@ -272,7 +271,7 @@ typedef struct
 /**
  * @brief This container is used to configure the UserNm PDU.
  */
-typedef struct
+typedef struct CanNm_UserDataTxPduTag
 {
     PduIdType TxUserDataPduId; /**< This parameter defines the Handle ID of the NM User Data I-PDU. @range 0..65535 */
     PduIdType UpperLayerPduId; /**< The macro value of the configuration when CanNmTxUserDataPduRef is referenced by the

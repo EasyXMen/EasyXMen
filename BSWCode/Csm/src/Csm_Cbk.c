@@ -25,7 +25,6 @@
 /* =================================================== inclusions =================================================== */
 #include "Csm_Cbk.h"
 #include "Csm_Internal.h"
-
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -58,6 +57,8 @@ void Csm_CallbackNotification(
 /* PRQA S 3432 -- */
 /* PRQA S 1532 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_CBK_NOTIFY, job, result);
+
     const Csm_JobsCfgType*   jobCfgPtr;
     uint32                   cbkId;
     Crypto_OperationModeType mode;
@@ -69,7 +70,7 @@ void Csm_CallbackNotification(
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
     {
         jobCfgPtr = &(Csm_JobCfg[job->jobId]);
-        cbkId     = jobCfgPtr->jobPrimitiveInfo->callbackId;
+        cbkId     = jobCfgPtr->jobPtr->jobPrimitiveInfo->callbackId;
         mode      = job->jobPrimitiveInputOutput.mode;
         if (Csm_JobPostponeFlag[job->jobId]) /* PRQA S 2109 */ /* VL_Csm_2109 */
         {
@@ -77,7 +78,7 @@ void Csm_CallbackNotification(
             /*[SWS_Csm_01087]*/
             if (NULL_PTR != Csm_CbkCfg[cbkId].cbkFnc)
             {
-                Csm_CbkCfg[cbkId].cbkFnc(job, CRYPTO_E_JOB_CANCELED);
+                Csm_CbkCfg[cbkId].cbkFnc(job->jobId, CRYPTO_E_JOB_CANCELED);
             }
 #else
             (void)(result);
@@ -95,16 +96,16 @@ void Csm_CallbackNotification(
                 /*[SWS_Csm_01044]*/
                 if (NULL_PTR != Csm_CbkCfg[cbkId].cbkFnc)
                 {
-                    Csm_CbkCfg[cbkId].cbkFnc(job, result);
+                    Csm_CbkCfg[cbkId].cbkFnc(job->jobId, result);
                 }
 #endif /*CSM_CBKFUNCS_NUM > 0u*/
-                Csm_JobStates[job->jobId] = CRYPTO_JOBSTATE_IDLE;
-
                 /*[SWS_Csm_91017]*/
                 /*TODO*/
             }
         }
     }
+
+    Csm_ArtiApiStop(1, CSM_SID_CBK_NOTIFY);
 }
 #define CSM_STOP_SEC_CODE
 #include "Csm_MemMap.h"

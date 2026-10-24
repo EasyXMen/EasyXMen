@@ -69,6 +69,11 @@
  *                                      CPD-16384, Fix the null buffer
  *                                      CPD-17183, Delete partition protect in get status api
  * V03.00.09 2026-02-09  peng.wu        CPT-18018, Fix the error in the pre-compilation switch for getting Ram Address
+                         peng.wu        CPT-18522,18523, Fix the missing dem error report
+                         peng.wu        CPT-18531, Fix when CRCs are the same but the status is not set to Skip
+                         peng.wu        Optimize the code
+ * V03.00.10 2026-06-05  tao.yu         add arti
+             2026-07-29  peng.wu        CPT-19506, CPT-19508 Fix the queue mechanism
  *
  ==================================================================================================================== */
 /* PRQA S 2053 -- */
@@ -78,6 +83,11 @@
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:NvM<br>
   RuleSorce:puhua_rules-2024.12.rcf
+
+    \li VL_NvM_2814
+      Reason: Need to look up data through a configured array.
+      Risk: This array is configuration data and will always be generated, there is no null pointer case, no risk.
+      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
 
     \li VL_NvM_2824
       Reason: Operations are performed through blocks in the configured array.
@@ -160,6 +170,16 @@
       Prevention:Correctness and reliability have been guaranteed through unit and functional testing.
 
     \li VL_NvM_1512
+      Reason: multiple declaration is necessary for RTE
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_3451
+      Reason: multiple declaration is necessary for RTE
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_3449
       Reason: multiple declaration is necessary for RTE
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
@@ -249,10 +269,7 @@
 
     \li VL_NvM_1881
       Reason: The operands of this equality operator are expressions of different 'essential type' categories (%1s and
-  %2s). Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_1502
-      Reason: Configuration variables design needs
+  %2s).
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -272,33 +289,54 @@
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 
-     \li VL_NvM_2741
+    \li VL_NvM_2741
       Reason: This 'if' controlling expression is a constant expression and its value is 'true'.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-     \li VL_NvM_1531
+    \li VL_NvM_1531
       Reason: The object '%1s' is referenced in only one translation unit - but not the one in which it is defined.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-     \li VL_MTR_NvM_STLIN
+    \li VL_MTR_NvM_STLIN
       Reason: Splitting them into smaller parts will lead to performance degradation.
       Risk: No risk.
       Prevention: Design and code review + clear structure and well-commented code.
 
-     \li VL_MTR_NvM_STST3
+    \li VL_MTR_NvM_STST3
       Reason: Splitting them into smaller parts will lead to performance degradation.
       Risk: No risk.
       Prevention: Design and code review + clear structure and well-commented code.
+
+    \li VL_NvM_1502
+      Reason: Configuration variables design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_NvM_2053
-      Reason: Special code design of the NvM.
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_1707
+      Reason: Function '${name}' is not using the same aliases.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_2962
+      Reason: This value is configured in the configuration file.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_NvM_3408
-      Reason:Configuration parameter, design needs.
+      Reason: There is no declaration before the definition.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 */
@@ -325,9 +363,9 @@ extern "C" {
 #define NVM_AR_RELEASE_REVISION_VERSION (0u) /**< Value of Autosar patch version */
 
 /** Software version information */
-#define NVM_SW_MAJOR_VERSION (3u) /**< Value of module major version */
-#define NVM_SW_MINOR_VERSION (0u) /**< Value of module minor version */
-#define NVM_SW_PATCH_VERSION (9u) /**< Value of module patch version */
+#define NVM_SW_MAJOR_VERSION (3u)  /**< Value of module major version */
+#define NVM_SW_MINOR_VERSION (0u)  /**< Value of module minor version */
+#define NVM_SW_PATCH_VERSION (10u) /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
 
@@ -340,23 +378,28 @@ extern "C" {
  * @brief Container for a management structure to configure the composition of a given NVRAM Block Management Type
  * @range NA
  */
+#define NVM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "NvM_MemMap.h"
 extern const NvM_BlockDescriptorType NvM_BlockDescriptor[NVM_BLOCK_NUM_ALL];
+#define NVM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "NvM_MemMap.h"
 
+#if (STD_OFF == NVM_BSWM_MULTIBLOCK_JOBSTATUS_INFORMATION)
+#define NVM_START_SEC_CONFIG_DATA_PTR
+#include "NvM_MemMap.h"
 /**
  * @brief Container for NvmMultiBlockCallback @range NA
  */
 extern const NvM_MultiBlockCallbackType NvmMultiBlockCallback;
-
-#if (NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR > 0)
-/**
- * @brief Mirror buffer for synchronization mechanism @range NA
- */
-extern uint8 NVM_RamMirror[NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR];
+#define NVM_STOP_SEC_CONFIG_DATA_PTR
+#include "NvM_MemMap.h"
 #endif
 
 /* ========================================= external function declarations ========================================= */
 /* PRQA S 1512 EOF */          /* VL_NvM_1512 */
-/* PRQA S 3449,3451,3209 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration,VL_NvM_3209 */
+/* PRQA S 3449,3451,3209 ++ */ /* VL_NvM_3449,VL_NvM_3451,VL_NvM_3209 */
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       Service for resetting all internal variables
  * @param[in]   ConfigPtr: Pointer to the selected configuration set
@@ -365,8 +408,12 @@ extern uint8 NVM_RamMirror[NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR];
  * @trace       CPD-76597
  */
 extern void NvM_Init(const NvM_ConfigType* ConfigPtr);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_VERSION_INFO_API)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Service to get the version information of the NvM module
  * @param[out]  VersionInfo: Pointer to where to store the version information of this module
@@ -375,7 +422,11 @@ extern void NvM_Init(const NvM_ConfigType* ConfigPtr);
  * @trace       CPD-76598
  */
 extern void NvM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to read the block dependent error/status information
@@ -388,10 +439,14 @@ extern void NvM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @synchronous TRUE
  * @trace       CPD-76599
  */
-/* PRQA S 1513 ++ */ /* VL_QAC_MultiDeclaration */
+/* PRQA S 1513 ++ */ /* VL_NvM_1513 */
 extern Std_ReturnType NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestResultType* RequestResultPtr);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_SET_RAM_BLOCK_STATUS_API)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Service for setting the RAM block status of a permanent RAM block or the status of
  *              the explicit synchronization of a NVRAM block
@@ -406,10 +461,14 @@ extern Std_ReturnType NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestRes
  * @synchronous TRUE
  * @trace       CPD-76600
  */
-/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
+/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
 extern Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChanged);
-/* PRQA S 0624 -- */
+/* PRQA S 0624,1707 -- */
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       Service to cancel a running NvM_WriteAll request
  * @reentrant   Non Reentrant
@@ -417,6 +476,10 @@ extern Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean Blo
  * @trace       CPD-76601
  */
 extern void NvM_CancelWriteAll(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Initiates a multi block read request
@@ -425,6 +488,10 @@ extern void NvM_CancelWriteAll(void);
  * @trace       CPD-76602
  */
 extern void NvM_ReadAll(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Initiates a multi block write request
@@ -433,8 +500,12 @@ extern void NvM_ReadAll(void);
  * @trace       CPD-76603
  */
 extern void NvM_WriteAll(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       The function initiates a multi block first initialization request
  * @reentrant   Non Reentrant
@@ -442,7 +513,11 @@ extern void NvM_WriteAll(void);
  * @trace       CPD-76604
  */
 extern void NvM_FirstInitAll(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to copy the data of the permanent RAM block to its corresponding NV block
@@ -455,6 +530,10 @@ extern void NvM_FirstInitAll(void);
  * @trace       CPD-76605
  */
 extern Std_ReturnType NvM_WritePRAMBlock(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to restore the default data to its corresponding permanent RAM block
@@ -467,8 +546,12 @@ extern Std_ReturnType NvM_WritePRAMBlock(NvM_BlockIdType BlockId);
  * @trace       CPD-76606
  */
 extern Std_ReturnType NvM_RestorePRAMBlockDefaults(NvM_BlockIdType BlockId);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Service for setting the DataIndex of a dataset NVRAM block
  * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
@@ -481,6 +564,10 @@ extern Std_ReturnType NvM_RestorePRAMBlockDefaults(NvM_BlockIdType BlockId);
  * @trace       CPD-76607
  */
 extern Std_ReturnType NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service for getting the currently set DataIndex of a dataset NVRAM block
@@ -493,9 +580,13 @@ extern Std_ReturnType NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex)
  * @synchronous TRUE
  * @trace       CPD-76608
  */
-/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
+/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
 extern Std_ReturnType NvM_GetDataIndex(NvM_BlockIdType BlockId, uint8* DataIndexPtr);
-/* PRQA S 0624 -- */
+/* PRQA S 0624,1707 -- */
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to copy the data of the NV block to its corresponding permanent RAM block
@@ -508,6 +599,10 @@ extern Std_ReturnType NvM_GetDataIndex(NvM_BlockIdType BlockId, uint8* DataIndex
  * @trace       CPD-76609
  */
 extern Std_ReturnType NvM_ReadPRAMBlock(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to copy the data of the NV block to its corresponding RAM block
@@ -521,6 +616,10 @@ extern Std_ReturnType NvM_ReadPRAMBlock(NvM_BlockIdType BlockId);
  * @trace       CPD-76610
  */
 extern Std_ReturnType NvM_ReadBlock(NvM_BlockIdType BlockId, void* NvM_DstPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to copy the data of the RAM block to its corresponding NV block
@@ -534,6 +633,10 @@ extern Std_ReturnType NvM_ReadBlock(NvM_BlockIdType BlockId, void* NvM_DstPtr);
  * @trace       CPD-76611
  */
 extern Std_ReturnType NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_SrcPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to restore the default data to its corresponding RAM block
@@ -547,6 +650,10 @@ extern Std_ReturnType NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_Sr
  * @trace       CPD-76612
  */
 extern Std_ReturnType NvM_RestoreBlockDefaults(NvM_BlockIdType BlockId, void* NvM_DestPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to cancel all jobs pending for a NV block
@@ -559,6 +666,10 @@ extern Std_ReturnType NvM_RestoreBlockDefaults(NvM_BlockIdType BlockId, void* Nv
  * @trace       CPD-76613
  */
 extern Std_ReturnType NvM_CancelJobs(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Initiates a multi block validation request
@@ -567,10 +678,14 @@ extern Std_ReturnType NvM_CancelJobs(NvM_BlockIdType BlockId);
  * @trace       CPD-76614
  */
 extern void NvM_ValidateAll(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Service for setting/resetting the write protection for a NV block
  * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
@@ -583,9 +698,13 @@ extern void NvM_ValidateAll(void);
  * @synchronous TRUE
  * @trace       CPD-76615
  */
-/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
+/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
 extern Std_ReturnType NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean ProtectionEnabled);
-/* PRQA S 0624 -- */
+/* PRQA S 0624,1707 -- */
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to invalidate a NV block
@@ -598,6 +717,10 @@ extern Std_ReturnType NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean Pr
  * @trace       CPD-76616
  */
 extern Std_ReturnType NvM_InvalidateNvBlock(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Service to erase a NV block
@@ -610,6 +733,8 @@ extern Std_ReturnType NvM_InvalidateNvBlock(NvM_BlockIdType BlockId);
  * @trace       CPD-76617
  */
 extern Std_ReturnType NvM_EraseNvBlock(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 /* PRQA S 3449,3451,3209 -- */
 /* PRQA S 1513 -- */

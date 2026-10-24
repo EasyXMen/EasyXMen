@@ -91,7 +91,11 @@ extern "C" {
  */
 
 /* Modules initialization */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void lwip_init(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

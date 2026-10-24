@@ -125,6 +125,8 @@ typedef struct
 } IStdLib_HeapManager;
 
 /* ========================================== internal function declarations ======================================== */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        get LSBIT
  * @param[in]    i : the data to get LSBIT
@@ -134,6 +136,11 @@ typedef struct
  * @trace        -
  */
 ISTDLIB_LOCAL uint32 IStdLib_MemHeapLSBIT(uint32 i);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        get MSBIT
  * @param[in]    i : the data to get MSBIT
@@ -143,6 +150,11 @@ ISTDLIB_LOCAL uint32 IStdLib_MemHeapLSBIT(uint32 i);
  * @trace        -
  */
 ISTDLIB_LOCAL uint32 IStdLib_MemHeapMSBIT(uint32 i);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        get the next index from fil and sli
  * @param[inout] size : request mem size
@@ -153,6 +165,11 @@ ISTDLIB_LOCAL uint32 IStdLib_MemHeapMSBIT(uint32 i);
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_MemHeapMatchNextIndex(uint32* size, uint32* fli, uint32* sli);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        get the index from fil and sli
  * @param[in]    size : request mem size
@@ -163,6 +180,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapMatchNextIndex(uint32* size, uint32* fli, uint
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_MemHeapMatchIndex(size_type size, uint32* fli, uint32* sli);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        find first free block
  * @param[in]    manager : manager block
@@ -177,6 +199,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapMatchIndex(size_type size, uint32* fli, uint32
 ISTDLIB_LOCAL IStdLib_BlockType*
     IStdLib_MemHeapFindFirstFreeBlock(const IStdLib_HeapManager* manager, uint32* fli, uint32* sli);
 /* PRQA S 5016 -- */
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        extract the free block depending on fli and sli
  * @param[inout] manager : manager block
@@ -189,6 +216,11 @@ ISTDLIB_LOCAL IStdLib_BlockType*
  */
 ISTDLIB_LOCAL void
     IStdLib_MemHeapExtractBlockDirect(IStdLib_HeapManager* manager, IStdLib_BlockType* block, uint32 fli, uint32 sli);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        extract the block depending on the addr of block
  * @param[inout] manager : manager block
@@ -198,6 +230,11 @@ ISTDLIB_LOCAL void
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlock(IStdLib_HeapManager* manager, IStdLib_BlockType* block);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        insert the block to manager
  * @param[inout] manager : manager block
@@ -207,6 +244,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlock(IStdLib_HeapManager* manager, ISt
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_MemHeapInsertBlock(IStdLib_HeapManager* manager, IStdLib_BlockType* block);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        get the free block depending on size
  * @param[in]    manager : manager block
@@ -221,6 +263,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapInsertBlock(IStdLib_HeapManager* manager, IStd
 ISTDLIB_LOCAL IStdLib_BlockType*
     IStdLib_MemHeapSplitBlock(const IStdLib_HeapManager* manager, const IStdLib_BlockType* block, uint32 size);
 /* PRQA S 5016 -- */
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        bit set operation
  * @param[inout] val : value
@@ -230,6 +277,11 @@ ISTDLIB_LOCAL IStdLib_BlockType*
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_setBit8(uint8* val, uint32 bit);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        bit set operation
  * @param[inout] val : value
@@ -239,6 +291,11 @@ ISTDLIB_LOCAL void IStdLib_setBit8(uint8* val, uint32 bit);
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_setBit16(uint16* val, uint32 bit);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        bit clear operation
  * @param[inout] val : value
@@ -248,6 +305,11 @@ ISTDLIB_LOCAL void IStdLib_setBit16(uint16* val, uint32 bit);
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_clearBit8(uint8* val, uint32 bit);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        bit clear operation
  * @param[inout] val : value
@@ -257,7 +319,11 @@ ISTDLIB_LOCAL void IStdLib_clearBit8(uint8* val, uint32 bit);
  * @trace        -
  */
 ISTDLIB_LOCAL void IStdLib_clearBit16(uint16* val, uint32 bit);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* get the next block addr */
 /**
  * @brief        get the next block addr
@@ -269,6 +335,11 @@ ISTDLIB_LOCAL void IStdLib_clearBit16(uint16* val, uint32 bit);
  */
 /* PRQA S 5016 ++ */ /* VL_IStdLib_Mutable */
 ISTDLIB_LOCAL IStdLib_BlockType* IStdLib_getBlock(size_t addrBlock, size_type offset);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* PRQA S 5016 -- */
 
 /**
@@ -280,7 +351,11 @@ ISTDLIB_LOCAL IStdLib_BlockType* IStdLib_getBlock(size_t addrBlock, size_type of
  * @trace        -
  */
 ISTDLIB_LOCAL size_type IStdLib_getBlockOffset(const IStdLib_BlockType* block, const IStdLib_HeapManager* manager);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        block offset address and physical address conversion
  * @param[in]    offset  : the addr offset
@@ -291,6 +366,11 @@ ISTDLIB_LOCAL size_type IStdLib_getBlockOffset(const IStdLib_BlockType* block, c
  */
 /* PRQA S 5016 ++ */ /* VL_IStdLib_Mutable */
 ISTDLIB_LOCAL IStdLib_BlockType* IStdLib_getBlockAddr(size_type offset, const IStdLib_HeapManager* manager);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* PRQA S 5016 -- */
 
 /**
@@ -307,6 +387,11 @@ ISTDLIB_LOCAL void IStdLib_linkPrevBlock(
     const IStdLib_BlockType*   preBlock,
     const IStdLib_HeapManager* manager);
 
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        the init of IStdLib_MemHeapMalloc.
  * @param[in]    size  : the addr offset
@@ -316,7 +401,11 @@ ISTDLIB_LOCAL void IStdLib_linkPrevBlock(
  * @trace        -
  */
 ISTDLIB_LOCAL StatusType IStdLib_initofMalloc(const IStdLib_HeapManager* manager, uint32 size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        the init of IStdLib_MemHeapFree.
  * @param[in]    ptr  : the addr offset
@@ -326,7 +415,11 @@ ISTDLIB_LOCAL StatusType IStdLib_initofMalloc(const IStdLib_HeapManager* manager
  * @trace        -
  */
 ISTDLIB_LOCAL StatusType IStdLib_initofFree(const IStdLib_HeapManager* manager, const void* ptr);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        the init of IStdLib_MemHeapInit.
  * @param[in]    size  : the addr offset
@@ -336,7 +429,11 @@ ISTDLIB_LOCAL StatusType IStdLib_initofFree(const IStdLib_HeapManager* manager, 
  * @trace        -
  */
 ISTDLIB_LOCAL StatusType IStdLib_initofHeapInit(const IStdLib_HeapManager* manager, uint32 size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        the init of IStdLib_MemHeapGetCurFreeMaxBlockSize
  * @param[in]    size  : the addr offset
@@ -346,6 +443,9 @@ ISTDLIB_LOCAL StatusType IStdLib_initofHeapInit(const IStdLib_HeapManager* manag
  * @trace        -
  */
 ISTDLIB_LOCAL StatusType IStdLib_initofGetSize(const IStdLib_HeapManager* manager, const uint32* size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
 /* ============================================ internal data definitions =========================================== */
 #define ISTDLIB_START_SEC_CONST_32
 #include "IStdLib_MemMap.h"
@@ -427,7 +527,11 @@ uint8 IStdLib_MemHeapInit(void* ramHeap, uint32 size) /*PRQA S 2889,6060*/ /*VL_
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 void* IStdLib_MemHeapMalloc(void* ramHeap, uint32 size)
 {
     StatusType           ret = ISTDLIB_MEMHEAP_OK;
@@ -485,7 +589,8 @@ void* IStdLib_MemHeapMalloc(void* ramHeap, uint32 size)
             }
 #endif
             ptr = (void*)block->ptr.buffer; /* PRQA S 0314 */ /* VL_IStdLib_0314 */
-            /*PRQA S 0306 ++ */                               /*VL_IStdLib_0306*/
+
+            /*PRQA S 0306 ++ */ /*VL_IStdLib_0306*/
             if (!(((size_t)block >= ((size_t)manager + (size_t)sizeof(IStdLib_HeapManager)))
                   && (((size_t)block) < ((size_t)manager + manager->manageSize - (size_t)sizeof(IStdLib_BlockHeadType)))
                   && (((size_t)block + block->head.size)
@@ -500,11 +605,14 @@ void* IStdLib_MemHeapMalloc(void* ramHeap, uint32 size)
             }
         }
     }
-
     (void)ret;
     return ptr;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 void* IStdLib_MemHeapCalloc(void* ramHeap, uint32 count, uint32 size) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     void* ptr = IStdLib_MemHeapMalloc(ramHeap, count * size);
@@ -514,6 +622,11 @@ void* IStdLib_MemHeapCalloc(void* ramHeap, uint32 count, uint32 size) /* PRQA S 
     }
     return ptr;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /* PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 uint8 IStdLib_MemHeapFree(void* ramHeap, const void* ptr)
 /* PRQA S 2889,6060 -- */
@@ -591,9 +704,12 @@ uint8 IStdLib_MemHeapFree(void* ramHeap, const void* ptr)
     }
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
 #if ISTDLIB_MEMHEAP_STATISTIC == STD_ON
-
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetManageSize(const void* ramHeap, uint32* size)
 {
     StatusType                 ret     = ISTDLIB_MEMHEAP_OK;
@@ -630,7 +746,11 @@ uint8 IStdLib_MemHeapGetManageSize(const void* ramHeap, uint32* size)
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetRealMaxSize(const void* ramHeap, uint32* size)
 {
     StatusType                 ret     = ISTDLIB_MEMHEAP_OK;
@@ -667,7 +787,11 @@ uint8 IStdLib_MemHeapGetRealMaxSize(const void* ramHeap, uint32* size)
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetUsedSize(const void* ramHeap, uint32* size)
 {
     StatusType                 ret     = ISTDLIB_MEMHEAP_OK;
@@ -704,7 +828,11 @@ uint8 IStdLib_MemHeapGetUsedSize(const void* ramHeap, uint32* size)
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 uint8 IStdLib_MemHeapGetCurFreeMaxBlockSize(const void* ramHeap, uint32* size)
 /*PRQA S 2889,6060 -- */
@@ -745,7 +873,11 @@ uint8 IStdLib_MemHeapGetCurFreeMaxBlockSize(const void* ramHeap, uint32* size)
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetMaxMallocSize(const void* ramHeap, uint32* size)
 {
     StatusType                 ret     = ISTDLIB_MEMHEAP_OK;
@@ -782,10 +914,13 @@ uint8 IStdLib_MemHeapGetMaxMallocSize(const void* ramHeap, uint32* size)
 
     return ret;
 }
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL uint32 IStdLib_MemHeapLSBIT(uint32 i)
 {
     uint32 a;
@@ -796,7 +931,11 @@ ISTDLIB_LOCAL uint32 IStdLib_MemHeapLSBIT(uint32 i)
     a = a + IStdLib_MemHeapTab[x >> a];
     return a;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL uint32 IStdLib_MemHeapMSBIT(uint32 i)
 {
     uint32 a;
@@ -807,7 +946,11 @@ ISTDLIB_LOCAL uint32 IStdLib_MemHeapMSBIT(uint32 i)
     a = a + IStdLib_MemHeapTab[x >> a];
     return a;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_MemHeapMatchNextIndex(uint32* size, uint32* fli, uint32* sli)
 {
     uint32 slBlockSize;
@@ -835,7 +978,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapMatchNextIndex(uint32* size, uint32* fli, uint
         *size &= (size_type)(~(size_type)slBlockSize);
     }
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_MemHeapMatchIndex(size_type size, uint32* fli, uint32* sli)
 {
     if (size < ISTDLIB_SMALL_BLOCK)
@@ -857,7 +1004,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapMatchIndex(size_type size, uint32* fli, uint32
         *fli -= ISTDLIB_FLI_OFFSET;
     }
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL IStdLib_BlockType*
     IStdLib_MemHeapFindFirstFreeBlock(const IStdLib_HeapManager* manager, uint32* fli, uint32* sli)
 {
@@ -885,6 +1036,11 @@ ISTDLIB_LOCAL IStdLib_BlockType*
     }
     return block;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /*PRQA S 2889,6060 ++ */ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
 ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlockDirect(
     /*PRQA S 2889,6060 -- */
@@ -913,7 +1069,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlockDirect(
     block->ptr.free.prev = 0u;
     block->ptr.free.next = 0u;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlock(IStdLib_HeapManager* manager, IStdLib_BlockType* block)
 {
     IStdLib_BlockType* tempBlock;
@@ -954,7 +1114,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapExtractBlock(IStdLib_HeapManager* manager, ISt
     block->ptr.free.prev = 0u;
     block->ptr.free.next = 0u;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_MemHeapInsertBlock(
     IStdLib_HeapManager* manager,
     IStdLib_BlockType*   block) /*PRQA S 2889,6060*/ /*VL_QAC_MultiReturn,VL_MTR_IStdLib_STM19*/
@@ -984,7 +1148,11 @@ ISTDLIB_LOCAL void IStdLib_MemHeapInsertBlock(
     IStdLib_setBit8(&manager->sli[fli], sli);
     IStdLib_setBit16(&manager->fli, fli);
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL IStdLib_BlockType*
     IStdLib_MemHeapSplitBlock(const IStdLib_HeapManager* manager, const IStdLib_BlockType* block, uint32 size)
 {
@@ -1016,46 +1184,78 @@ ISTDLIB_LOCAL IStdLib_BlockType*
 
     return splitBlock;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_setBit8(uint8* val, uint32 bit)
 {
     *val = (*val | (uint8)((uint8)1u << (bit)));
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_setBit16(uint16* val, uint32 bit)
 {
     *val = (*val | (uint16)((uint16)1u << (bit)));
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_clearBit8(uint8* val, uint32 bit)
 {
     *val = (*val & (uint8)(~(uint8)((uint8)1u << (bit))));
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_clearBit16(uint16* val, uint32 bit)
 {
     *val = (*val & (uint16)(~(uint16)((uint16)1u << (bit))));
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL IStdLib_BlockType* IStdLib_getBlock(size_t addrBlock, size_type offset)
 {
     return ((IStdLib_BlockType*)((addrBlock) + (size_t)(offset))); /*PRQA S 0306 */ /*VL_IStdLib_0306*/
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL size_type IStdLib_getBlockOffset(const IStdLib_BlockType* block, const IStdLib_HeapManager* manager)
 {
     /*PRQA S 0306 ++ */ /*VL_IStdLib_0306*/
     return (((block) == NULL_PTR) ? (size_type)0u : (size_type)((size_t)(block) - (size_t)(manager)));
     /*PRQA S 0306 -- */
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL IStdLib_BlockType* IStdLib_getBlockAddr(size_type offset, const IStdLib_HeapManager* manager)
 {
     /*PRQA S 0306 ++ */ /*VL_IStdLib_0306*/
     return ((IStdLib_BlockType*)((offset == 0u) ? (size_t)0uL : ((size_t)(manager) + (size_t)(offset))));
     /*PRQA S 0306 -- */
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL void IStdLib_linkPrevBlock(
     IStdLib_BlockType*         curBlock,
     const IStdLib_BlockType*   preBlock,
@@ -1063,7 +1263,11 @@ ISTDLIB_LOCAL void IStdLib_linkPrevBlock(
 {
     ((curBlock)->head.prev = IStdLib_getBlockOffset(preBlock, manager));
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL StatusType IStdLib_initofMalloc(const IStdLib_HeapManager* manager, uint32 size)
 {
     StatusType ret = ISTDLIB_MEMHEAP_OK;
@@ -1094,7 +1298,11 @@ ISTDLIB_LOCAL StatusType IStdLib_initofMalloc(const IStdLib_HeapManager* manager
 
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL StatusType IStdLib_initofFree(const IStdLib_HeapManager* manager, const void* ptr)
 {
     StatusType ret = ISTDLIB_MEMHEAP_OK;
@@ -1127,7 +1335,11 @@ ISTDLIB_LOCAL StatusType IStdLib_initofFree(const IStdLib_HeapManager* manager, 
     }
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL StatusType IStdLib_initofHeapInit(const IStdLib_HeapManager* manager, uint32 size)
 {
     StatusType ret = ISTDLIB_MEMHEAP_OK;
@@ -1161,7 +1373,11 @@ ISTDLIB_LOCAL StatusType IStdLib_initofHeapInit(const IStdLib_HeapManager* manag
     }
     return ret;
 }
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 ISTDLIB_LOCAL StatusType IStdLib_initofGetSize(const IStdLib_HeapManager* manager, const uint32* size)
 {
     StatusType ret = ISTDLIB_MEMHEAP_OK;

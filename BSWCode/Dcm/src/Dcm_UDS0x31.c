@@ -84,6 +84,8 @@ DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_SecureCodingOpStatus;
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         find the configured rid index
  * @param[in]     rid          : the input rid
@@ -100,8 +102,12 @@ DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_SecureCodingOpStatus;
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x31_FindRoutineIndex(uint16 rid, uint16* routineIndex, Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_OBD_RID_MIRROR)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         process OBD type rid
  * @param[inout]  pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -121,9 +127,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleOBDRID(
     Dcm_MsgContextType*           pMsgContext,
     uint16*                       totalLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_SECURE_CODING_VALIDATION_ROUTINE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         process secure coding rid
  * @param[in]     OpStatus     : Indicates the current operation status
@@ -145,6 +155,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
     uint16                        routineIndex,
     const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle secure coding for DCM_INITIAL opstatus
@@ -159,6 +173,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextType* pMsgContext, uint16 routineIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle secure coding for DCM_PENDING opstatus
@@ -171,6 +189,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextTyp
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingPending(uint8* resData);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         finish secure coding
@@ -183,7 +205,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingPending(uint8* resData);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingFinish(uint8* resData);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle UDS 0x31 subfunctions, check condition
@@ -207,6 +233,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleSubFunction(
     uint8                         subFunction,
     const Dcm_DspRoutineSubType** routineSub,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check routine common authroization
@@ -228,6 +258,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_CheckRoutineCommonAuth(
     uint16 routineIndex
 #endif
 );
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process regular type rid
@@ -250,6 +284,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleRegularRID(
     uint16                        routineIndex,
     uint16*                       totalLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process routine callout
@@ -274,6 +312,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_RoutineCallout(
     uint16                        routineIndex,
     uint16*                       totalLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check inSignal request length
@@ -291,6 +333,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_InSignalCheck(
     Dcm_MsgLenType                reqDataLen,
     const Dcm_DspRoutineSubType*  routineSub,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check outSignal response length
@@ -310,6 +356,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_OutSignalCheck(
     uint16                        currentDataLength,
     uint16*                       totalLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -404,8 +452,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_OBD_RID_MIRROR)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleOBDRID(
     Dcm_MsgContextType*           pMsgContext,
     uint16*                       totalLength,
@@ -450,9 +501,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleOBDRID(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_SECURE_CODING_VALIDATION_ROUTINE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint16                        routineIndex,
@@ -501,7 +555,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextType* pMsgContext, uint16 routineIndex)
 {
     Crypto_VerifyResultType verifyResult;
@@ -527,7 +584,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextTyp
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingPending(uint8* resData)
 {
     Std_ReturnType result = E_OK;
@@ -554,7 +614,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingPending(uint8* resData)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingFinish(uint8* resData)
 {
     uint16                       index;
@@ -600,8 +663,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingFinish(uint8* resData)
 
     return finalResult;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleSubFunction(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -680,7 +746,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleSubFunction(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_CheckRoutineCommonAuth(
     const Dcm_DspCommonAuthorizationType* commonAuthorization,
     Dcm_NegativeResponseCodeType*         ErrorCode
@@ -724,7 +793,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_CheckRoutineCommonAuth(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleRegularRID(
     Dcm_ExtendedOpStatusType      OpStatus,
     const Dcm_MsgContextType*     pMsgContext,
@@ -830,7 +902,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleRegularRID(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040,6010,6030 ++ */ /* VL_MTR_Dcm_STPAR,VL_MTR_Dcm_STCYC,VL_MTR_Dcm_STMIF */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_RoutineCallout(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -929,7 +1004,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_RoutineCallout(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_InSignalCheck(
     Dcm_MsgLenType                reqDataLen,
     const Dcm_DspRoutineSubType*  routineSub,
@@ -958,7 +1036,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_InSignalCheck(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_OutSignalCheck(
     const Dcm_DspRoutineSubType*  routineSub,
     uint16                        currentDataLength,

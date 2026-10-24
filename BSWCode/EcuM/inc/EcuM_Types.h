@@ -38,7 +38,7 @@ extern "C" {
 /** timer configuration of the GPT module */
 #define ECUM_TIMER_USE_GPT 0u
 /** timer configuration of the OS module */
-#define ECUM_TIMER_USE_OS 1u
+#define ECUM_TIMER_USE_OS  1u
 
 #ifndef ECUM_E_EARLIER_ACTIVE
 /*ERROR Code of Std_ReturnType for an earlier alarm is already set*/
@@ -54,33 +54,33 @@ extern "C" {
 #endif /* ECUM_E_NOT_ACTIVE */
 
 /** a service was successful executed */
-#define ECUM_E_OK 0xFFu
+#define ECUM_E_OK                              0xFFu
 /** A service was called prior to initialization */
-#define ECUM_E_UNINIT 0u
+#define ECUM_E_UNINIT                          0u
 /** A function was called which was disabled by configuration */
-#define ECUM_E_SERVICE_DISABLED 1u
+#define ECUM_E_SERVICE_DISABLED                1u
 /** A invalid pointer was passed as an argument */
-#define ECUM_E_NULL_POINTER 2u
+#define ECUM_E_PARAM_POINTER                   2u
 /** A parameter was invalid (unspecific) */
-#define ECUM_E_INVALID_PAR 3u
+#define ECUM_E_INVALID_PAR                     3u
 /** A state, passed as an argument to a service, was out of range (specific parameter test) */
-#define ECUM_E_STATE_PAR_OUT_OF_RANGE 4u
+#define ECUM_E_STATE_PAR_OUT_OF_RANGE          4u
 /** An unknown wakeup source was passed as a parameter to an API */
-#define ECUM_E_UNKNOWN_WAKEUP_SOURCE 5u
+#define ECUM_E_UNKNOWN_WAKEUP_SOURCE           5u
 /** The initialization failed */
-#define ECUM_E_INIT_FAILED 6u
+#define ECUM_E_INIT_FAILED                     6u
 /** The RAM check during wakeup failed */
-#define ECUM_E_RAM_CHECK_FAILED 7u
+#define ECUM_E_RAM_CHECK_FAILED                7u
 /** Postbuild configuration data is inconsistent */
 #define ECUM_E_CONFIGURATION_DATA_INCONSISTENT 8u
 /** On multiple requests by the same ID for requestRun() */
-#define ECUM_E_MULTIPLE_RUN_REQUESTS 9u
+#define ECUM_E_MULTIPLE_RUN_REQUESTS           9u
 /** On releasing without a matching request for releaseRun */
-#define ECUM_E_MISMATCHED_RUN_RELEASE 10u
+#define ECUM_E_MISMATCHED_RUN_RELEASE          10u
 /** Call to OS_Start failed */
-#define ECUM_E_CALL_OS_FAILED 11u
+#define ECUM_E_CALL_OS_FAILED                  11u
 /** After a wake up, no wake up event was set in the given time (see EcuMCheckWakeupTimeout) */
-#define ECUM_E_WAKEUP_TIMEOUT 12u
+#define ECUM_E_WAKEUP_TIMEOUT                  12u
 
 /** Reinit EcuM module */
 #define ECUM_E_REINIT 0x20u
@@ -91,17 +91,17 @@ extern "C" {
 /** EcuM Mode Type definition */
 typedef uint8 Rte_ModeType_EcuM_Mode;
 /** Transition mode for EcuM */
-#define RTE_TRANSITION_EcuM_Mode 5u
+#define RTE_TRANSITION_EcuM_Mode    5u
 /** EcuM startup mode */
-#define RTE_MODE_EcuM_Mode_STARTUP 0u
+#define RTE_MODE_EcuM_Mode_STARTUP  0u
 /** EcuM run mode */
-#define RTE_MODE_EcuM_Mode_RUN 1u
+#define RTE_MODE_EcuM_Mode_RUN      1u
 /** EcuM post run mode */
 #define RTE_MODE_EcuM_Mode_POST_RUN 2u
 /** EcuM shutdown mode */
 #define RTE_MODE_EcuM_Mode_SHUTDOWN 3u
 /** EcuM sleep mode */
-#define RTE_MODE_EcuM_Mode_SLEEP 4u
+#define RTE_MODE_EcuM_Mode_SLEEP    4u
 #endif
 #endif /*ECUM_MODE_HANDING == STD_ON*/
 /* ========================================== internal function definitions ========================================= */

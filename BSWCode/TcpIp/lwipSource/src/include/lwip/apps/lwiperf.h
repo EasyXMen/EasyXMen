@@ -40,6 +40,8 @@
 #include "lwip/opt.h"
 #include "lwip/ip_addr.h"
 
+#if LWIP_TCP_IPERF
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -104,6 +106,8 @@ void  lwiperf_abort(void* lwiperf_session);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif /* LWIP_HDR_APPS_LWIPERF_H */

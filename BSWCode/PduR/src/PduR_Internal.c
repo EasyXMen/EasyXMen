@@ -58,10 +58,35 @@ boolean PduR_RoutingPathGroupEnabled[PDUR_ROUTING_PATH_GROUP_MAX];
 #include "PduR_MemMap.h"
 /* PRQA S 1532,1531 ++ */ /* VL_QAC_OneFunRef,VL_QAC_OneRefSymbol */
 PduR_RouteStatusType PduR_DestinationRouteStatus[PDUR_ROUTINGPATH_MAX];
+/* PRQA S 1532,1531 -- */
+#define PDUR_STOP_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+/* PRQA S 1532,1531 ++ */ /* VL_QAC_OneFunRef,VL_QAC_OneRefSymbol */
 PduR_RouteStatusType PduR_SourceRouteStatus[PDUR_ROUTINGPATH_MAX];
 /* PRQA S 1532,1531 -- */
 #define PDUR_STOP_SEC_VAR_CLEARED_32
 #include "PduR_MemMap.h"
+
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+#define PDUR_START_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+/* PRQA S 1532,1531 ++ */ /* VL_QAC_OneFunRef,VL_QAC_OneRefSymbol */
+PduLengthType PduR_SourceMultiCastTpTransmittedCnt[PDUR_ROUTINGPATH_MAX];
+/* PRQA S 1532,1531 -- */
+#define PDUR_STOP_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+/* PRQA S 1532,1531 ++ */ /* VL_QAC_OneFunRef,VL_QAC_OneRefSymbol */
+PduLengthType PduR_DestinationMultiCastTpTransmittedCnt[PDUR_ROUTINGPATH_MAX];
+/* PRQA S 1532,1531 -- */
+#define PDUR_STOP_SEC_VAR_CLEARED_32
+#include "PduR_MemMap.h"
+#endif
 #endif
 /**
  * @brief PduR PB Queue Run Time point parameter
@@ -76,9 +101,9 @@ PduR_QueueRuntimeType PduR_RuntimeQueues[PDUR_NUMBER_OF_QUEUES_MAX];
 /* ========================================= internal function declarations ========================================= */
 
 /* ========================================== external function definition ========================================== */
+#if (PDUR_ROUTING_PATH_GROUP_MAX > 0u)
 #define PDUR_START_SEC_CODE
 #include "PduR_MemMap.h"
-#if (PDUR_ROUTING_PATH_GROUP_MAX > 0u)
 /**
  * Init all route path and path group status
  */
@@ -125,9 +150,13 @@ void PduR_RoutingPathGroupInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Get the object function index in muliti-patition
  */
@@ -167,6 +196,11 @@ uint8 PduR_GetPartitionFuncIndex(
     }
     return funcIndex;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * To save the pdu info when the route is Inter-Partition and no queue set
  */
@@ -198,9 +232,9 @@ PduInfoType* PduR_PduDeepCopy(PduIdType id, const PduInfoType* srcPduInfoPtr, Pd
     }
     return infoPtr;
 }
-#endif
 #define PDUR_STOP_SEC_CODE
 #include "PduR_MemMap.h"
+#endif
 /* ========================================== internal function definition ========================================== */
 
 #endif

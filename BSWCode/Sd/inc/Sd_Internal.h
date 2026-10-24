@@ -36,466 +36,112 @@ extern "C" {
 #endif
 /* ===================================================== macros ===================================================== */
 
-/**
- * Macro to enable or disable IPv6 support.
- */
-#define SD_IPV6_ENABLE STD_OFF
-
-/**
- * Padding value for Client ID in SOME/IP-SD message header.
- */
-#define SD_CLIENT_ID_PADDING_VALUE 0x00u
-
-/**
- * Padding value for Protocol Version in SOME/IP-SD message header.
- */
-#define SD_PROTOCAL_VERSION_PADDING_VALUE 0x01u
-
-/**
- * Padding value for Interface Version in SOME/IP-SD message header.
- */
-#define SD_INTERFACE_VERSION_PADDING_VALUE 0x01u
-
-/**
- * Padding value for Message Type in SOME/IP-SD message header.
- */
-#define SD_MESSAGE_TYPE_PADDING_VALUE 0x02u
-
-/**
- * Padding value for Return Code in SOME/IP-SD message header.
- */
-#define SD_RETURN_CODE_PADDING_VALUE 0x00u
-
-/**
- * Type field value for Find Service entry.
- */
-#define SD_ENTRY_TYPE_FIND_SERVICE 0x00u
-
-/**
- * Type field value for Offer Service entry.
- */
-#define SD_ENTRY_TYPE_OFFER_SERVICE 0x01u
-
-/**
- * Private type field value for Stop Offer Service entry.
- */
-#define SD_ENTRY_TYPE_STOP_OFFER_SERVICE 0xF1u
-
-/**
- * Type field value for Subscribe Event Group entry.
- */
-#define SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP 0x06u
-
-/**
- * Type field value for Subscribe Event Group Ack entry.
- */
-#define SD_ENTRY_TYPE_SUBSCRIBE_EVENTGROUP_ACK 0x07u
-
-/**
- * Option type value for Configuration Option.
- */
-#define SD_CONFIGURATION_OPTION 0x01u
-
-/**
- * Option type value for IPv4 Endpoint Option.
- */
-#define SD_IPV4_ENDPOINT_OPTION 0x04u
-
-/**
- * Option type value for IPv6 Endpoint Option.
- */
-#define SD_IPV6_ENDPOINT_OPTION 0x06u
-
-/**
- * Option type value for IPv4 Multicast Option.
- */
-#define SD_IPV4_MULTICAST_OPTION 0x14u
-
-/**
- * Option type value for IPv6 Multicast Option.
- */
-#define SD_IPV6_MULTICAST_OPTION 0x16u
-
-/**
- * Option type value for IPv4 SD Endpoint Option.
- */
-#define SD_IPV4_SD_ENDPOINT_OPTION 0x24u
-
-/**
- * Option type value for IPv6 SD Endpoint Option.
- */
-#define SD_IPV6_SD_ENDPOINT_OPTION 0x26u
-
-/**
- * Length of IPv4 Endpoint Option.
- */
-#define SD_IPV4_ENDPOINT_OPTION_LENGTH 0x09u
-
-/**
- * Length of IPv6 Endpoint Option.
- */
-#define SD_IPV6_ENDPOINT_OPTION_LENGTH 0x15u
-
-/**
- * Length of IPv4 Multicast Option.
- */
-#define SD_IPV4_MULTICAST_OPTION_LENGTH 0x09u
-
-/**
- * Length of IPv6 Multicast Option.
- */
-#define SD_IPV6_MULTICAST_OPTION_LENGTH 0x15u
-
-/**
- * Length of IPv4 SD Endpoint Option.
- */
-#define SD_IPV4_SD_ENDPOINT_OPTION_LENGTH 0x09u
-
-/**
- * Length of IPv6 SD Endpoint Option.
- */
-#define SD_IPV6_SD_ENDPOINT_OPTION_LENGTH 0x15u
-
-/**
- * Layer 4 Protocol value for TCP.
- */
-#define SD_L4_PROTO_TCP 0x06u
-
-/**
- * Layer 4 Protocol value for UDP.
- */
-#define SD_L4_PROTO_UDP 0x11u
-
-/**
- * Position of "Length of Entries Array" in SD message.
- */
-#define SD_ENTRIES_ARRAY_LENGTH_INDEX 12u
-
-/**
- * Position of the first entry in SD message.
- */
-#define SD_FIRST_ENTRY_INDEX 16u
-
-/**
- * Size of each entry in SD message.
- */
-#define SD_ENTRY_SIZE 16u
-
-/**
- * Length of the "Length of Options Array" field.
- */
-#define SD_LENGTH_OF_OPTIONS_ARRAY_FIELD_LEN 4u
-
-/**
- * Length of the "Option Length" field.
- */
-#define SD_OPTION_LENGTH_FIELD_LEN 2u
-
-/**
- * Length of the "Option Type" field.
- */
-#define SD_OPTION_TYPE_FIELD_LEN 1u
-
-/**
- * Offset of the "Length" field in an option.
- */
-#define SD_LENGTH_OFFSET 0u
-
-/**
- * Offset of the "Type" field in an option.
- */
-#define SD_TYPE_OFFSET 2u
-
-/**
- * Offset of the "IP Address" field in an option.
- */
-#define SD_IPADDR_OFFSET 4u
-
-/**
- * Offset of the "Layer 4 Protocol" field in an IPv4 option.
- */
-#define SD_L4PROTO_OFFSET_IPV4 9u
-
-/**
- * Offset of the "Port Number" field in an IPv4 option.
- */
-#define SD_PORTNUMBER_OFFSET_IPV4 10u
-
-/**
- * Offset of the "Layer 4 Protocol" field in an IPv6 option.
- */
-#define SD_L4PROTO_OFFSET_IPV6 21u
-
-/**
- * Offset of the "Port Number" field in an IPv6 option.
- */
-#define SD_PORTNUMBER_OFFSET_IPV6 22u
-
-/**
- * Index of the "Flags" field in SD message header.
- */
-#define SD_HEADER_FLAGS_INDEX 8u
-
-/**
- * Mask for the Unicast Flag in the "Flags" field.
- */
-#define SD_FLAGS_UNICAST_FLAG_MASK 0x40u
-
-/**
- * Maximum number of entries that can be sent in one frame.
- */
-#define SD_MAX_ENTRIES_PER_FRAME 20u
-
-/**
- * Macro to send an entry immediately.
- */
-#define SD_SEND_ENTRY_IMMEDIATELY 0UL
-
-/**
- * Multiplier for random number calculation.
- */
-#define SD_RANDOM_MULTIPLIER 1664525u
-
-/**
- * Increment for random number calculation.
- */
-#define SD_RANDOM_INCREMENT 1013904223u
-
-/**
- * Macro to indicate unused variables.
- */
-#define SD_UNUSED(x) (void)(x)
-
-/**
- * Maximum length of an array used in certain contexts.
- */
-#define SD_ARRAY_LEN_70 70
-
-/**
- * Standard array length of 16 elements.
- */
-#define SD_ARRAY_LEN_16 16
-
-/**
- * Small array length of 3 elements.
- */
-#define SD_ARRAY_LEN_3 3
-
-/**
- * Length of the "Length of Entries Array" field in the SD message.
- */
-#define SD_MESSAGE_ENTRYLEN_FILED_LEN 4u
-
-/**
- * Length of the "Length of Options Array" field in the SD message.
- */
-#define SD_MESSAGE_OPTIONLEN_FILED_LEN 4UL
-
-/**
- * Length of the TTL (Time to Live) field in the SD message entry.
- */
-#define SD_MESSAGE_ENTRY_TTL_FIELD_LEN 3u
-
-/**
- * Total length of an SD message entry.
- */
-#define SD_MESSAGE_ENTRY_TOTAL_LEN 16u
-
-/**
- * Length of an IPv4 option in the SD message.
- */
-#define SD_MESSAGE_IPV4_OPTION_LEN 12u
-
-/**
- * Length of an IPv6 option in the SD message.
- */
-#define SD_MESSAGE_IPV6_OPTION_LEN 24u
-
-/**
- * Length of the first three bytes in the Type 1 option.
- */
-#define SD_MESSAGE_TYPE1_OPTION_FIRST_THREE_BYTE_LEN 3UL
-
-/**
- * Length of the first five bytes in the Type 1 option.
- */
-#define SD_MESSAGE_TYPE1_OPTION_FIRST_FIVE_BYTE_LEN 5u
-
-/**
- * Length of the hostname configuration in the Type 1 option.
- */
-#define SD_MESSAGE_TYPE1_OPTION_HOSTNAME_CFG_LEN 10u
-
-/**
- * Maximum number of reference options per entry.
- */
-#define SD_ENTRY_MAX_REF_OPTION_NUM 3u
-
-/**
- * Length of the SD message header.
- */
-#define SD_HEADER_LEN 12UL
-
-/**
- * Length of an IPv4 address.
- */
-#define SD_IPV4_ADDRESS_LEN 4u
-
-/**
- * Length of an IPv6 address.
- */
-#define SD_IPV6_ADDRESS_LEN 16u
-
-/**
- * Maximum length of an IP address.
- */
-#define SD_IP_ADDRESS_MAX_LEN 16UL
-
-/**
- * Length of a hostname string.
- */
-#define SD_STRING_HOSTNAME_LEN 8u
-
-/**
- * Length for four-byte endianness swap.
- */
-#define SD_ENDIAN_SWAP_FOUR_BYTE_LEN 4u
-
-/**
- * Length for two-byte endianness swap.
- */
-#define SD_ENDIAN_SWAP_TWO_BYTE_LEN 2u
-
-/**
- * Offset of the "Option Type" field in an option.
- */
-#define SD_OPTION_TYPE_FILED_OFFSET 2UL
-
-/**
- * Offset of the reserved field in an option.
- */
-#define SD_OPTION_RESERVED_FILED_OFFSET 3u
-
-/**
- * Offset of the first key in the Type 1 option.
- */
-#define SD_TYPE1_OPTION_FIRST_KEY_OFFSET 4u
-
-/**
- * Maximum number of subscribe clients.
- */
-#define SD_MAX_SUBSCRIBE_CLIENT_NUM 16u
-
-/**
- * Maximum number of remote services.
- */
-#define SD_MAX_REMOTE_SERVICE_NUM 16u
-
-/**
- * Reserved value for the subscribe counter field.
- */
-#define SD_SUBSCRIBE_COUNTER_FIELD_RESERVED 0xffu
-
-/**
- * Reserved value for the reboot flag.
- */
-#define SD_REBOOT_FLAG_RESERVED 0xffu
-
-/**
- * Reserved value for the network mask.
- */
-#define SD_NETWORK_MASK_VALUE_RESERVED 0xffu
-
-/**
- * Index 0 for entry reference options.
- */
-#define SD_ENTRY_REF_OPTION_INDEX_0 0
-
-/**
- * Index 1 for entry reference options.
- */
-#define SD_ENTRY_REF_OPTION_INDEX_1 1
-
-/**
- * Index 2 for entry reference options.
- */
-#define SD_ENTRY_REF_OPTION_INDEX_2 2
-
-/**
- * Magic integer value 0x07.
- */
-#define SD_MAGIC_INT_0X07 0x07u
-
-/**
- * Magic character '='.
- */
-#define SD_MAGIC_CHAR_EQUAL '='
-
-/**
- * Value of the length field in an IPv4 option.
- */
-#define SD_IPV4_OPTION_LENGTH_FIELD_VALUE 0x09u
-
-/**
- * Conversion fraction from seconds to milliseconds.
- */
-#define SD_SEC_TO_MS_CONVERSION_FRACTION 1000ULL
-
-/**
- * Conversion fraction from bytes to bits.
- */
-#define SD_BYTE_TO_BIT_CONVERSION_FRACTION 3u
-
-/**
- * Fraction for 16-byte alignment.
- */
-#define SD_16_BYTE_ALIGNED_FRACTION 0x0fUL
-
-/**
- * Message type value for notification.
- */
-#define SD_MESSAGE_TYPE_NOTIFY 0x02u
-
-/**
- * TTL value indicating forever.
- */
-#define SD_MESSAGE_ENTRY_TTL_FOREVER 0xffffffUL
-
-/**
- * Minor version value indicating any.
- */
-#define SD_MESSAGE_MINOR_VERSION_ANY 0xffffffffUL
-
-/**
- * Major version value indicating any.
- */
-#define SD_MESSAGE_MAJOR_VERSION_ANY 0xffu
-
-/**
- * Service ID value indicating any.
- */
-#define SD_MESSAGE_SERVICE_ID_ANY 0xffffu
-
-/**
- * Instance ID value indicating any.
- */
-#define SD_MESSAGE_INSTANCE_ID_ANY 0xffffu
-
-#define SD_ENTRY_NUM_OF_OPTION_FIELD_BIT_LEN 4
-
-#define SD_HEADER_RESERVED_FIELD_BIT_LEN 6
-
-#define SD_ENTRY_COUNTER_FIELD_BIT_LEN 4
-
-#define SD_ENTRY_RESERVED_FIELD_BIT_LEN 4
-
-#define SD_ENTRY_RESERVED_FIELD_HIGH_BIT_LEN 8
-
-#define SD_OPTION_RESERVED_FIELD_BIT_LEN 8
-
-#define SD_TYPE1_ENTRY_TTL_FIELD_LENGTH 3
-
-#define SD_OPT_START_POSTITION_LEN 3
+#define SD_IPV6_ENABLE             STD_OFF /**<Macro to enable or disable IPv6 support.*/
+#define SD_CLIENT_ID_PADDING_VALUE 0x00u   /**<Padding value for Client ID in SOME/IP-SD message header.*/
+
+#define SD_PROTOCAL_VERSION_PADDING_VALUE 0x01u /**<Padding value for Protocol Version in SOME/IP-SD message header.*/
+#define SD_INTERFACE_VERSION_PADDING_VALUE                              \
+    0x01u /**<Padding value for Interface Version in SOME/IP-SD message \
+             header.*/
+
+#define SD_MESSAGE_TYPE_PADDING_VALUE          0x02u /**<Padding value for Message Type in SOME/IP-SD message header.*/
+#define SD_RETURN_CODE_PADDING_VALUE           0x00u /**<Padding value for Return Code in SOME/IP-SD message header.*/
+#define SD_ENTRY_TYPE_FIND_SERVICE             0x00u /**<Type field value for Find Service entry.*/
+#define SD_ENTRY_TYPE_OFFER_SERVICE            0x01u /**<Type field value for Offer Service entry.*/
+#define SD_ENTRY_TYPE_STOP_OFFER_SERVICE       0xF1u /**<Private type field value for Stop Offer Service entry.*/
+#define SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP    0x06u /**<Type field value for Subscribe Event Group entry.*/
+#define SD_ENTRY_TYPE_SUBSCRIBE_EVENTGROUP_ACK 0x07u /**<Type field value for Subscribe Event Group Ack entry.*/
+#define SD_CONFIGURATION_OPTION                0x01u /**<Option type value for Configuration Option.*/
+
+#define SD_IPV4_ENDPOINT_OPTION           0x04u /**<Option type value for IPv4 Endpoint Option.*/
+#define SD_IPV6_ENDPOINT_OPTION           0x06u /**<Option type value for IPv6 Endpoint Option.*/
+#define SD_IPV4_MULTICAST_OPTION          0x14u /**<Option type value for IPv4 Multicast Option.*/
+#define SD_IPV6_MULTICAST_OPTION          0x16u /**<Option type value for IPv6 Multicast Option.*/
+#define SD_IPV4_SD_ENDPOINT_OPTION        0x24u /**<Option type value for IPv4 SD Endpoint Option.*/
+#define SD_IPV6_SD_ENDPOINT_OPTION        0x26u /**<Option type value for IPv6 SD Endpoint Option.*/
+#define SD_IPV4_ENDPOINT_OPTION_LENGTH    0x09u /**<Length of IPv4 Endpoint Option.*/
+#define SD_IPV6_ENDPOINT_OPTION_LENGTH    0x15u /**<Length of IPv6 Endpoint Option.*/
+#define SD_IPV4_MULTICAST_OPTION_LENGTH   0x09u /**<Length of IPv4 Multicast Option.*/
+#define SD_IPV6_MULTICAST_OPTION_LENGTH   0x15u /**<Length of IPv6 Multicast Option.*/
+#define SD_IPV4_SD_ENDPOINT_OPTION_LENGTH 0x09u /**<Length of IPv4 SD Endpoint Option.*/
+#define SD_IPV6_SD_ENDPOINT_OPTION_LENGTH 0x15u /**<Length of IPv6 SD Endpoint Option.*/
+
+#define SD_L4_PROTO_TCP                      0x06u       /**<Layer 4 Protocol value for TCP.*/
+#define SD_L4_PROTO_UDP                      0x11u       /**<Layer 4 Protocol value for UDP.*/
+#define SD_ENTRIES_ARRAY_LENGTH_INDEX        12u         /**<Position of "Length of Entries Array" in SD message.*/
+#define SD_FIRST_ENTRY_INDEX                 16u         /**<Position of the first entry in SD message.*/
+#define SD_ENTRY_SIZE                        16u         /**<Size of each entry in SD message.*/
+#define SD_LENGTH_OF_OPTIONS_ARRAY_FIELD_LEN 4u          /**<Length of the "Length of Options Array" field.*/
+#define SD_OPTION_LENGTH_FIELD_LEN           2u          /**<Length of the "Option Length" field.*/
+#define SD_OPTION_TYPE_FIELD_LEN             1u          /**<Length of the "Option Type" field.*/
+#define SD_LENGTH_OFFSET                     0u          /**<Offset of the "Length" field in an option.*/
+#define SD_TYPE_OFFSET                       2u          /**<Offset of the "Type" field in an option.*/
+#define SD_IPADDR_OFFSET                     4u          /**<Offset of the "IP Address" field in an option.*/
+#define SD_L4PROTO_OFFSET_IPV4               9u          /**<Offset of the "Layer 4 Protocol" field in an IPv4 option.*/
+#define SD_PORTNUMBER_OFFSET_IPV4            10u         /**<Offset of the "Port Number" field in an IPv4 option.*/
+#define SD_L4PROTO_OFFSET_IPV6               21u         /**<Offset of the "Layer 4 Protocol" field in an IPv6 option.*/
+#define SD_PORTNUMBER_OFFSET_IPV6            22u         /**<Offset of the "Port Number" field in an IPv6 option.*/
+#define SD_HEADER_FLAGS_INDEX                8u          /**<Index of the "Flags" field in SD message header.*/
+#define SD_FLAGS_UNICAST_FLAG_MASK           0x40u       /**<Mask for the Unicast Flag in the "Flags" field.*/
+#define SD_MAX_ENTRIES_PER_FRAME             20u         /**<Maximum number of entries that can be sent in one frame.*/
+#define SD_SEND_ENTRY_IMMEDIATELY            0UL         /**<Macro to send an entry immediately.*/
+#define SD_RANDOM_MULTIPLIER                 1664525u    /**<Multiplier for random number calculation.*/
+#define SD_RANDOM_INCREMENT                  1013904223u /**<Increment for random number calculation.*/
+#define SD_UNUSED(x)                         (void)(x)   /**<Macro to indicate unused variables.*/
+#define SD_ARRAY_LEN_70                      70          /**<Maximum length of an array used in certain contexts.*/
+#define SD_ARRAY_LEN_16                      16          /**<Standard array length of 16 elements.*/
+#define SD_ARRAY_LEN_3                       3           /**<Small array length of 3 elements.*/
+
+#define SD_MESSAGE_TYPE1_OPTION_HOSTNAME_CFG_LEN     10u /**<Length of the hostname configuration in the Type 1 option.*/
+#define SD_MESSAGE_TYPE1_OPTION_FIRST_THREE_BYTE_LEN 3UL /**<Length of the first three bytes in the Type 1 option.*/
+#define SD_MESSAGE_TYPE1_OPTION_FIRST_FIVE_BYTE_LEN  5u  /**<Length of the first five bytes in the Type 1 option.*/
+#define SD_MESSAGE_ENTRYLEN_FILED_LEN                4u /**<Length of the "Length of Entries Array" field in the SD message.*/
+#define SD_MESSAGE_OPTIONLEN_FILED_LEN               4UL /**<Length of the "Length of Options Array" field in the SD message.*/
+#define SD_MESSAGE_ENTRY_TTL_FIELD_LEN               3u /**<Length of the TTL (Time to Live) field in the SD message entry.*/
+#define SD_MESSAGE_ENTRY_TOTAL_LEN                   16u /**<Total length of an SD message entry.*/
+#define SD_MESSAGE_IPV4_OPTION_LEN                   12u /**<Length of an IPv4 option in the SD message.*/
+#define SD_MESSAGE_IPV6_OPTION_LEN                   24u /**<Length of an IPv6 option in the SD message.*/
+
+#define SD_ENTRY_MAX_REF_OPTION_NUM          3u           /**<Maximum number of reference options per entry.*/
+#define SD_HEADER_LEN                        12UL         /**<Length of the SD message header.*/
+#define SD_IPV4_ADDRESS_LEN                  4u           /**<Length of an IPv4 address.*/
+#define SD_IPV6_ADDRESS_LEN                  16u          /**<Length of an IPv6 address.*/
+#define SD_IP_ADDRESS_MAX_LEN                16UL         /**<Maximum length of an IP address.*/
+#define SD_STRING_HOSTNAME_LEN               8u           /**<Length of a hostname string.*/
+#define SD_ENDIAN_SWAP_FOUR_BYTE_LEN         4u           /**<Length for four-byte endianness swap.*/
+#define SD_ENDIAN_SWAP_TWO_BYTE_LEN          2u           /**<Length for two-byte endianness swap.*/
+#define SD_OPTION_TYPE_FILED_OFFSET          2UL          /**<Offset of the "Option Type" field in an option.*/
+#define SD_OPTION_RESERVED_FILED_OFFSET      3u           /**<Offset of the reserved field in an option.*/
+#define SD_TYPE1_OPTION_FIRST_KEY_OFFSET     4u           /**<Offset of the first key in the Type 1 option.*/
+#define SD_MAX_SUBSCRIBE_CLIENT_NUM          16u          /**<Maximum number of subscribe clients.*/
+#define SD_MAX_REMOTE_SERVICE_NUM            16u          /**<Maximum number of remote services.*/
+#define SD_SUBSCRIBE_COUNTER_FIELD_RESERVED  0xffu        /**<Reserved value for the subscribe counter field.*/
+#define SD_REBOOT_FLAG_RESERVED              0xffu        /**<Reserved value for the reboot flag.*/
+#define SD_NETWORK_MASK_VALUE_RESERVED       0xffu        /**<Reserved value for the network mask.*/
+#define SD_ENTRY_REF_OPTION_INDEX_0          0            /**<Index 0 for entry reference options.*/
+#define SD_ENTRY_REF_OPTION_INDEX_1          1            /**<Index 1 for entry reference options.*/
+#define SD_ENTRY_REF_OPTION_INDEX_2          2            /**<Index 2 for entry reference options.*/
+#define SD_MAGIC_INT_0X07                    0x07u        /**<Magic integer value 0x07.*/
+#define SD_MAGIC_CHAR_EQUAL                  '='          /**<Magic character '='.*/
+#define SD_IPV4_OPTION_LENGTH_FIELD_VALUE    0x09u        /**<Value of the length field in an IPv4 option.*/
+#define SD_SEC_TO_MS_CONVERSION_FRACTION     1000ULL      /**<Conversion fraction from seconds to milliseconds.*/
+#define SD_BYTE_TO_BIT_CONVERSION_FRACTION   3u           /**<Conversion fraction from bytes to bits.*/
+#define SD_16_BYTE_ALIGNED_FRACTION          0x0fUL       /**<Fraction for 16-byte alignment.*/
+#define SD_MESSAGE_TYPE_NOTIFY               0x02u        /**<Message type value for notification.*/
+#define SD_MESSAGE_ENTRY_TTL_FOREVER         0xffffffUL   /**<TTL value indicating forever.*/
+#define SD_MESSAGE_MINOR_VERSION_ANY         0xffffffffUL /**<Minor version value indicating any.*/
+#define SD_MESSAGE_MAJOR_VERSION_ANY         0xffu        /**<Major version value indicating any.*/
+#define SD_MESSAGE_SERVICE_ID_ANY            0xffffu      /**<Service ID value indicating any.*/
+#define SD_MESSAGE_INSTANCE_ID_ANY           0xffffu      /**<Instance ID value indicating any.*/
+#define SD_ENTRY_NUM_OF_OPTION_FIELD_BIT_LEN 4            /**<Number of bits for entry option field.*/
+#define SD_HEADER_RESERVED_FIELD_BIT_LEN     6            /**<Number of reserved bits in header.*/
+#define SD_ENTRY_COUNTER_FIELD_BIT_LEN       4            /**<Number of bits for entry counter field.*/
+#define SD_ENTRY_RESERVED_FIELD_BIT_LEN      4            /**<Number of reserved bits in entry.*/
+#define SD_ENTRY_RESERVED_FIELD_HIGH_BIT_LEN 8            /**<Number of high reserved bits in entry.*/
+#define SD_OPTION_RESERVED_FIELD_BIT_LEN     8            /**<Number of reserved bits in option.*/
+#define SD_TYPE1_ENTRY_TTL_FIELD_LENGTH      3            /**<Length of Type 1 entry TTL field.*/
+#define SD_OPT_START_POSTITION_LEN           3            /**<Length of option start position.*/
+#define SD_ENTRY_HEADER_MIN_LEN              12UL         /**<Minimum length of an SD message entry header.*/
 
 /* ================================================ type definitions ================================================ */
 /* PRQA S 0635 EOF */ /* VL_Sd_BitField */

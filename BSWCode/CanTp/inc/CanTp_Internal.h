@@ -116,6 +116,7 @@ CANTP_LOCAL_INLINE uint16 CanTp_InternalTxNSduIndex(const PduIdType txNSduId)
     }
     return index;
 }
+
 /**
  * @brief       Get corresponding internal rxpdu index when receiption
  * @param[in]   rxPduId  : The identity of the corresponding RxPdu for external
@@ -191,6 +192,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetRxNSduIndex_FC(const PduIdType txPduId)
 #endif
     return CanTp_ConfigPtr->TxPduMap[index].RxNSduFc_index;
 }
+
 /**
  * @brief       Get corresponding TxNSdu index when transmition
  * @param[in]   txPduId  : The identity of the corresponding TxPdu
@@ -224,6 +226,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetRxNSduIndex(const PduIdType rxPduId)
 #endif
     return CanTp_ConfigPtr->RxPduMap[index].RxNSdu_index;
 }
+
 /* PRQA S 4461 -- */
 
 /**
@@ -240,6 +243,7 @@ CANTP_LOCAL_INLINE const CanTp_RxNSduType* CanTp_GetRxNSduCfg(const PduIdType rx
     const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxNSduId];
     return rxNSduCfgPtr;
 }
+
 /**
  * @brief       Get the corresponding configuration of the TxNSdu
  * @param[in]   txNSduInd  : the corresponding TxNSdu index
@@ -386,6 +390,7 @@ CANTP_LOCAL_INLINE void CanTp_MemCpy(uint8* dst, const uint8* src, uint32 len)
         dst[Index] = src[Index];
     }
 }
+
 /**
  * @brief        Default implementation of memory set function.
  * @param[in]    val    the value that will be used to fill dst.
@@ -414,6 +419,8 @@ CANTP_LOCAL_INLINE void CanTp_MemSet(uint8* dst, uint8 val, uint32 len)
 #endif
 /* ========================================= external function declarations ========================================= */
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Get Frame PCI Type
  * @param[in]   rxpduId    : Identification of the received N-PDU
@@ -424,7 +431,11 @@ CANTP_LOCAL_INLINE void CanTp_MemSet(uint8* dst, uint8 val, uint32 len)
  * @trace       CPD-73106
  */
 extern CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const PduInfoType* pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Assemble Padding data information of the Nsdu
  * @param[in]   txpduInfo       : pointer to the lower L-PDU data
@@ -435,7 +446,11 @@ extern CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const P
  * @trace       CPD-73108
  */
 extern void CanTp_AssemblePaddingData(CanTp_TxStatusType* txStatus, PduInfoType* txpduInfo, uint8 assembledLength);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Assemble PCI information of the Nsdu
  * @param[in]   txNSduCfgPtr  : pointer to the transmitted N-PDU configuration
@@ -446,7 +461,11 @@ extern void CanTp_AssemblePaddingData(CanTp_TxStatusType* txStatus, PduInfoType*
  * @trace       CPD-73109
  */
 extern void CanTp_TxConstructPCI(CanTp_TxStatusType* txStatus, uint8* dataOffset);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Match frame length
  * @param[in]   frameDL      : frame length
@@ -456,7 +475,11 @@ extern void CanTp_TxConstructPCI(CanTp_TxStatusType* txStatus, uint8* dataOffset
  * @trace       CPD-73110
  */
 extern PduLengthType CanTp_MatchDLC(PduLengthType frameDL);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Check SF Frame datalength
  * @param[in]   pduInfoPtr    : pointer to the received N-PDU data
@@ -481,7 +504,11 @@ extern boolean CanTp_CheckReceivedSFDL(
     CanTp_RxStatusType* rxStatus
 #endif
 );
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Check FF Frame datalength
  * @param[in]   pduInfoPtr    : pointer to the received N-PDU data
@@ -502,7 +529,11 @@ CanTp_CheckResultType CanTp_CheckReceivedFFDL(
     const CanTp_RxNSduType* rxNSduCfgPtr,
     PduLengthType*          totalLength,
     uint8*                  dataOffset);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Get Current Bs
  * @param[in]   rxNSduId    : the received N-PDU identity.
@@ -513,7 +544,11 @@ CanTp_CheckResultType CanTp_CheckReceivedFFDL(
  * @trace       CPD-73113
  */
 extern uint8 CanTp_GetRxCurrentBs(PduIdType rxNSduId, const CanTp_GPartInfoType* globalInfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       get Current STmin
  * @param[in]   rxNsduId    : the identity of the corresponding RxNsdu
@@ -530,6 +565,11 @@ extern uint8 CanTp_GetRxCurrentSTmin(
     const CanTp_GPartInfoType* globalInfo
 #endif
 );
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Compare remaining buffer with Bs
  * @param[in]   rxStatus      : pointer to the received N-PDU status
@@ -542,8 +582,12 @@ extern uint8 CanTp_GetRxCurrentSTmin(
  * @trace       CPD-73115
  */
 extern Std_ReturnType CanTp_CompareRxBufferWithBs(const CanTp_RxStatusType* rxStatus, PduLengthType bufferSize);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Save MetaData information when setup tx session.
  * @param[in]   txStatus      : pointer to the transimitted N-PDU status.
@@ -560,7 +604,11 @@ extern void CanTp_SaveTxMetaDataInfo(
     CanTp_TxStatusType*     txStatus,
     const CanTp_TxNSduType* txNSduCfgPtr,
     const PduInfoType*      pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Construct the addressing information contained in the MetaData of the N-PDU when transmit.
  * @param[in]   txStatus      : pointer to the transimitted N-PDU status.
@@ -575,7 +623,11 @@ extern void CanTp_ConstructTxMetaDataInfo(
     const CanTp_TxStatusType* txStatus,
     const CanTp_TxNSduType*   txNSduCfgPtr,
     PduInfoType*              pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Check the addressing information contained in the MetaData of the N-PDU when receiving CF.
  * @param[in]   rxNSduCfgPtr  : pointer to the received N-PDU status.
@@ -592,7 +644,11 @@ extern Std_ReturnType CanTp_CheckRxCFMetaData(
     CanTp_RxStatusType*     rxStatus,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     const PduInfoType*      pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Check the addressing information contained in the MetaData of the N-PDU when receiving FC.
  * @param[in]   txNSduCfgPtr  : pointer to the transimitted N-PDU status.
@@ -609,7 +665,11 @@ extern Std_ReturnType CanTp_CheckRxFCMetaData(
     CanTp_TxStatusType*     txStatus,
     const CanTp_TxNSduType* txNSduCfgPtr,
     const PduInfoType*      pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Save MetaData information when receiving FF,SF
  * @param[in]   rxStatus      : pointer to the received N-PDU status
@@ -626,6 +686,11 @@ extern Std_ReturnType CanTp_SaveRxMetaDataInfo(
     CanTp_RxStatusType*     rxStatus,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     const PduInfoType*      pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief       Fill the addressing information contained in the MetaData of the N-PDU when transmitS Fc.
  * @param[in]   rxNSduCfgPtr  : The corresponding configuration of the RxNsdu
@@ -640,6 +705,8 @@ extern void CanTp_ConstructTxFcMetaDataInfo(
     const CanTp_RxStatusType* rxStatus,
     const CanTp_RxNSduType*   rxNSduCfgPtr,
     PduInfoType*              pduInfoPtr);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
 /* ===================================== external function declarations ========================================= */
 #ifdef __cplusplus

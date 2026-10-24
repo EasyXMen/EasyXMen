@@ -53,6 +53,8 @@ boolean Dcm_ProcessingClearingDiagInfo; /* PRQA S 1514 */ /* VL_QAC_OneRefSymbol
 #define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         prepare clear DTC by select and check clear conditions
  * @param[in]     OpStatus  : Indicates the current operation status
@@ -74,6 +76,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x14_PrepareClear(
     uint8                         clientId,
     const uint8*                  reqData,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process clearDTC
@@ -90,6 +96,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x14_PrepareClear(
  * @trace         -
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x14_ProcessClear(uint8 clientId, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -218,7 +226,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x14_PrepareClear(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* actual process of clearDTC */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x14_ProcessClear(uint8 clientId, Dcm_NegativeResponseCodeType* ErrorCode)
 {

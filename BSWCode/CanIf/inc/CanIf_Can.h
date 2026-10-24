@@ -60,7 +60,11 @@ extern "C" {
  * @reentrant       Reentrant for different PduIds. Non reentrant for the same PduId.
  * @trace           CPD-61415
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 /**
@@ -70,7 +74,11 @@ extern Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduI
  * @reentrant       Reentrant
  * @trace           CPD-61416
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_TxConfirmation(PduIdType CanTxPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief           This service indicates a successful reception of a received CAN Rx L-PDU to
@@ -81,7 +89,11 @@ extern void CanIf_TxConfirmation(PduIdType CanTxPduId);
  * @reentrant       Reentrant
  * @trace           CPD-61417
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief           This service indicates a Controller BusOff event referring to the corresponding
@@ -92,7 +104,11 @@ extern void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* Pdu
  * @reentrant       Reentrant
  * @trace           CPD-61418
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_ControllerBusOff(uint8 ControllerId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief           This service indicates a controller state transition referring to the
@@ -104,7 +120,11 @@ extern void CanIf_ControllerBusOff(uint8 ControllerId);
  * @reentrant       Reentrant
  * @trace           CPD-61422
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #ifdef __cplusplus
 }

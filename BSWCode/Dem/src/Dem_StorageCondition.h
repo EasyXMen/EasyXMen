@@ -33,6 +33,8 @@
 #define DEM_SC_VALID_ALL (0xFFu) /**< Initialization valid state */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the storage condition Fulfilled
  * @param[in]     StorageConditionID: Storage condition Id
@@ -41,6 +43,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SetStorageConditionFulfilled(uint8 StorageConditionID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reset the storage condition Fulfilled
@@ -50,6 +56,10 @@ DEM_LOCAL void Dem_SetStorageConditionFulfilled(uint8 StorageConditionID);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ResetStorageConditionFulfilled(uint8 StorageConditionID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the storage conditions and storage condition groups
@@ -58,10 +68,9 @@ DEM_LOCAL void Dem_ResetStorageConditionFulfilled(uint8 StorageConditionID);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_StorageConditionInit(void);
-/* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
+#define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
-
+/* ========================================== internal function definitions ========================================= */
 /**
  * @brief         Get Init Status of storage condition
  * @param[in]     StorageConditionID: Storage condition Id
@@ -154,7 +163,8 @@ DEM_LOCAL_INLINE void Dem_StorageConditionPreInit(void)
     Dem_MemSet(Dem_GetSCStatus(), DEM_SC_VALID_ALL, DEM_STORAGE_CONDITION_ID_BYTE);
     Dem_MemSet(Dem_GetSCGCounter(), 0u, DEM_STORAGE_CONDITION_GROUP_NUMBER);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets the storage condition Fulfilled
  */
@@ -191,7 +201,10 @@ DEM_LOCAL void Dem_SetStorageConditionFulfilled(uint8 StorageConditionID)
     Dem_LeaveCritical_StateManager();
     /** Leave Critical Section: StateManager */
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reset the storage condition Fulfilled
  */
@@ -217,7 +230,10 @@ DEM_LOCAL void Dem_ResetStorageConditionFulfilled(uint8 StorageConditionID)
     Dem_LeaveCritical_StateManager();
     /** Leave Critical Section: StateManager */
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the storage conditions and storage condition groups
  */
@@ -248,8 +264,6 @@ DEM_LOCAL void Dem_StorageConditionInit(void)
 #include "Dem_MemMap.h"
 #endif
 
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Get the current state of the request operation cycle
  * @param[in]     EventId: Event Id
@@ -277,6 +291,4 @@ DEM_LOCAL_INLINE boolean Dem_CheckSCFulfilled(Dem_EventIdType EventId)
     return ret;
 }
 
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

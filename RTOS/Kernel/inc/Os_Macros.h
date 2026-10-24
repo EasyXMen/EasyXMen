@@ -12,244 +12,319 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Macros.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Os marco definition                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Macros.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for macros declarations
+ **
+ ***********************************************************************************************************************/
+
 #ifndef OS_MACROS_H
 #define OS_MACROS_H
-/*=======[I N C L U D E S]====================================================*/
-#include "Arch_Define.h"
-/*=======[M A C R O S]========================================================*/
-/* Define Scalability Class */
-#define OS_NOSC 0x0U /* No conformance classes */
-#define OS_SC1  0x1U /* Define Scalability Class 1 */
-#define OS_SC2  0x2U /* Define Scalability Class 2 */
-#define OS_SC3  0x3U /* Define Scalability Class 3 */
-#define OS_SC4  0x4U /* Define Scalability Class 4 */
 
-/* Defines for all conformance classes */
-#define OS_BCC1 0x1U /* BCC1 */
-#define OS_BCC2 0x2U /* BCC2 */
-#define OS_ECC1 0x3U /* ECC1 */
-#define OS_ECC2 0x4U /* ECC2 */
+/* =================================================== inclusions =================================================== */
 
-/* Define the status of kernel */
-#define OS_STATUS_STANDARD 0x00U /* Define the status of kernel */
-#define OS_STATUS_EXTENDED 0x01U /* Define the status of kernel */
+/* ===================================================== macros ===================================================== */
+/**
+ * @brief Define Scalability Class.
+ */
+#define OS_NOSC 0x0U /** No conformance classes */
+#define OS_SC1  0x1U /** Define Scalability Class 1 */
+#define OS_SC2  0x2U /** Define Scalability Class 2 */
+#define OS_SC3  0x3U /** Define Scalability Class 3 */
+#define OS_SC4  0x4U /** Define Scalability Class 4 */
 
-/* Define the scheduling strategy of kernel*/
-#define OS_PREEMPTIVE_NON   0x0U /* no preemption. */
-#define OS_PREEMPTIVE_FULL  0x1U /* full preemption. */
-#define OS_PREEMPTIVE_MIXED 0x2U /* mixed preemption. */
+/**
+ * @brief Defines for all conformance classes.
+ */
+#define OS_BCC1 0x1U /** BCC1 */
+#define OS_BCC2 0x2U /** BCC2 */
+#define OS_ECC1 0x3U /** ECC1 */
+#define OS_ECC2 0x4U /** ECC2 */
 
-/* Define the invalid parameter */
-#define OS_OBJECT_INVALID   0xFFFFU                    /* invalid OBJECT. */
-#define OS_CORE_INVALID     ((Os_CoreIdType)0xFFFFU)   /* invalid CORE. */
-#define OS_TASK_INVALID     ((Os_TaskType)0xFFFFU)     /* invalid TASK. */
-#define OS_ALARM_INVALID    ((Os_AlarmType)0xFFU)      /* invalid ALARM. */
-#define OS_PRIORITY_INVALID ((Os_PriorityType)0xFFFFU) /* invalid PRIORITY. */
+/**
+ * @brief Define the status of kernel.
+ */
+#define OS_STATUS_STANDARD 0x00U /** Define the status of kernel */
+#define OS_STATUS_EXTENDED 0x01U /** Define the status of kernel */
 
-/* Define the APP modes */
-#define OS_NULL_APPMODE ((Os_AppModeType)0x0000U) /* no APP modes. */
-#define OS_ALL_APPMODE  ((Os_AppModeType)0xFFFFU) /* all APP modes. */
+/**
+ * @brief Define the scheduling strategy of kernel.
+ */
+#define OS_PREEMPTIVE_NON   0x0U /** no preemption. */
+#define OS_PREEMPTIVE_FULL  0x1U /** full preemption. */
+#define OS_PREEMPTIVE_MIXED 0x2U /** mixed preemption. */
 
-/* AutoSar: Ivalid ScheduleTable ID. */
+/**
+ * @brief Define the invalid parameter.
+ */
+#define OS_CORE_INVALID     ((Os_CoreIdType)0xFFFFU)   /** invalid CORE. */
+#define OS_TASK_INVALID     ((Os_TaskType)0xFFFFU)     /** invalid TASK. */
+#define OS_PRIORITY_INVALID ((Os_PriorityType)0xFFFFU) /** invalid PRIORITY. */
+
+/**
+ * @brief Define the APP modes.
+ */
+#define OS_NULL_APPMODE ((Os_AppModeType)0x0000U) /** no APP modes. */
+#define OS_ALL_APPMODE  ((Os_AppModeType)0xFFFFU) /** all APP modes. */
+
+/**
+ * @brief Ivalid ScheduleTable ID.
+ */
 #define OS_SCHEDTABLE_INVALID ((Os_ScheduleTableType)0xFFFFU)
-/* AutoSar 8.4.3: Ivalid ISRID. */
-#define INVALID_ISR ((Os_IsrType)0xFFFFU)
-/* AutoSar: Ivalid Os_TickType. */
+
+/**
+ * @brief Ivalid Os_TickType.
+ */
 #define OS_TICK_INVALID ((Os_TickType)0U)
-/* AutoSar: Ivalid Os_CounterType. */
+
+/**
+ * @brief Ivalid Os_CounterType.
+ */
 #define OS_COUNTER_INVALID ((Os_CounterType)0xFFFFU)
-/* AutoSar: Os-Application 8.3.1 */
+
+/**
+ * @brief Ivalid Application.
+ */
 #define INVALID_OSAPPLICATION ((Os_ApplicationType)0xFFFFU)
 #define OS_APPLICATION_VALID  ((Os_ApplicationType)0xFFFEU)
-/* AutoSar: Ivalid SpinlockIdType. */
-#define OS_SPINLOCK_INVALID ((SpinlockIdType)0xFFFFU)
-/* For print. */
 
-/* Null parameter. */
+/**
+ * @brief Ivalid SpinlockIdType.
+ */
+#define OS_SPINLOCK_INVALID ((SpinlockIdType)0xFFFFU)
+
+/**
+ * @brief Null parameter.
+ */
 #define NULL_PARA ((uint32)0xFFFFFFFFU)
 
-/*The task status for external*/
-#define SUSPENDED TASK_STATE_SUSPENDED
-#define READY     TASK_STATE_READY
-#define RUNNING   TASK_STATE_RUNNING
-#define WAITING   TASK_STATE_WAITING
+/**
+ * @brief The task status for external.
+ */
+#define SUSPENDED OS_TASK_STATE_SUSPENDED
+#define READY     OS_TASK_STATE_READY
+#define RUNNING   OS_TASK_STATE_RUNNING
+#define WAITING   OS_TASK_STATE_WAITING
 
-/* Stack initialization filling parameters. */
+/**
+ * @brief Stack initialization filling parameters.
+ */
 #define OS_STACK_FILL_PATTERN 0xCCCCCCCCU
 
-/* It doesn't care what hooks are called by. */
+/**
+ * @brief Define stack monitoring check bit width.
+ */
+#define CFG_STACK_CHECK_WITH_32_BYTE 8U
+#define OS_STACK_GUARD_DEFAULT_SIZE  CFG_STACK_CHECK_WITH_32_BYTE
+
+/**
+ * @brief Define stack monitoring check method.
+ */
+#define OS_STACK_MONITOR_BIDIRECTIONAL_CHECK TRUE
+
+/**
+ * @brief It doesn't care what hooks are called by.
+ */
 #define OS_NO_CARE 0U
-/* Time-protected hook, called in task. */
+
+/**
+ * @brief Time-protected hook, called in task.
+ */
 #define OS_TMPROT_HOOK_TASK 1U
-/* Time-protected hook, called in ISR. */
+
+/**
+ * @brief Time-protected hook, called in ISR.
+ */
 #define OS_TMPROT_HOOK_ISR 2U
-/* Time-protected hooks are called outside task and ISR. */
+
+/**
+ * @brief Time-protected hooks are called outside task and ISR.
+ */
 #define OS_TMPROT_HOOK_OSAPP 3U
 
-/*Service Protection Level Bit*/
-#define OS_LEVEL_BIT_ERRORHOOK_APP  0x0400U /* 100 0000 0000*/
-#define OS_LEVEL_BIT_TASK           0x0200U /* 010 0000 0000*/
-#define OS_LEVEL_BIT_ISR1           0x0100U /* 001 0000 0000*/
-#define OS_LEVEL_BIT_ISR2           0x0080U /* 000 1000 0000*/
-#define OS_LEVEL_BIT_ERRORHOOK      0x0040U /* 000 0100 0000*/
-#define OS_LEVEL_BIT_PRETASKHOOK    0x0020U /* 000 0010 0000*/
-#define OS_LEVEL_BIT_POSTTASKHOOK   0x0010U /* 000 0001 0000*/
-#define OS_LEVEL_BIT_STARTUPHOOK    0x0008U /* 000 0000 1000*/
-#define OS_LEVEL_BIT_SHUTDOWNHOOK   0x0004U /* 000 0000 0100*/
-#define OS_LEVEL_BIT_ALARMCALLBACK  0x0002U /* 000 0000 0010*/
-#define OS_LEVEL_BIT_PROTECTIONHOOK 0x0001U /* 000 0000 0001*/
-
-/*Service calls condtion in context*/
-#define OS_CONTEXT_ACTIVATE_TASK                 0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_ACTIVATE_TASK_ASYN            0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_TERMINATE_TASK                0x0200U /* 010 0000 0000*/
-#define OS_CONTEXT_CHAIN_TASK                    0x0200U /* 010 0000 0000*/
-#define OS_CONTEXT_SCHEDULE                      0x0200U /* 010 0000 0000*/
-#define OS_CONTEXT_GET_TASK_ID                   0x06F1U /* 110 1111 0001*/
-#define OS_CONTEXT_GET_TASK_STATE                0x06F0U /* 110 1111 0000*/
-#define OS_CONTEXT_DISABLE_ALL_INTERRUPTS        0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_ENABLE_ALL_INTERRUPTS         0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_SUSPEND_ALL_INTERRUPTS        0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_RESUME_ALL_INTERRUPTS         0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_SUSPEND_OS_INTERRUPTS         0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_RESUME_OS_INTERRUPTS          0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_DISABLE_INTERRUPT_SOURCE      0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_ENABLE_INTERRUPT_SOURCE       0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_CLEAR_PENDING_INTERRUPT       0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_GET_RESOURCE                  0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_RELEASE_RESOURCE              0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_SET_EVENT                     0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_SET_EVENT_ASYN                0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_CLEAR_EVENT                   0x0280U /* 010 0000 0000*/
-#define OS_CONTEXT_GET_EVENT                     0x06F0U /* 110 1111 0000*/
-#define OS_CONTEXT_WAIT_EVENT                    0x0200U /* 010 0000 0000*/
-#define OS_CONTEXT_GET_ALARM_BASE                0x06F0U /* 110 1111 0000*/
-#define OS_CONTEXT_GET_ALARM                     0x06F0U /* 110 1111 0000*/
-#define OS_CONTEXT_SET_REL_ALARM                 0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_SET_ABS_ALARM                 0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_CANCEL_ALARM                  0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_GET_ACTIV_APPLICATION_MODE    0x06FCU /* 110 1111 1100*/
-#define OS_CONTEXT_START_OS                      0x0000U /* 000 0000 0000*/
-#define OS_CONTEXT_SHUTDOWN_OS                   0x06C8U /* 110 1100 1000*/
-#define OS_CONTEXT_GET_APPLICATION_ID            0x06FDU /* 110 1111 1101*/
-#define OS_CONTEXT_GET_ISR_ID                    0x06C1U /* 110 1100 0001*/
-#define OS_CONTEXT_CALL_TRUSTED_FUNCTION         0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_CHECK_ISR_MEMORY_ACCESS       0x06C1U /* 110 1100 0001*/
-#define OS_CONTEXT_CHECK_TASK_MEMORY_ACCESS      0x06C1U /* 110 1100 0001*/
-#define OS_CONTEXT_CHECK_OBJECT_ACCESS           0x06C1U /* 110 1100 0001*/
-#define OS_CONTEXT_CHECK_OBJECT_OWNERSHIP        0x06C1U /* 110 1100 0001*/
-#define OS_CONTEXT_START_ST_REL                  0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_START_ST_ABS                  0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_STOP_SCHEDULE_TABLE           0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_NEXT_SCHEDULE_TABLE           0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_START_ST_SYN                  0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_SYNC_SCHEDULE_TABLE           0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_GET_SCHEDULE_TABLE_STATUS     0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_SET_SCHEDULE_TABLE_ASYNC      0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_INCREMENT_COUNTER             0x0280U /* 010 1000 0000*/
-#define OS_CONTEXT_GET_COUNTER_VALUE             0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_GET_ELAPSED_COUNTER_VALUE     0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_TERMINATE_APPLICATION         0x0680U /* 110 1000 0000*/
-#define OS_CONTEXT_ALLOW_ACCESS                  0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_GET_APPLICATION_STATE         0x06FDU /* 110 1111 1101*/
-#define OS_CONTEXT_CONTROL_IDLE                  0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_GET_CURRENT_APPLICATION_ID    0x06FDU /* 110 1111 1101*/
-#define OS_CONTEXT_GET_NUMBER_OF_ACTIVATED_CORES 0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_GET_CORE_ID                   0x07FFU /* 111 1111 1111*/
-#define OS_CONTEXT_START_CORE                    0x0000U /* 000 0000 0000*/
-#define OS_CONTEXT_START_NON_AUTOSAR_CORE        0x1000U /* 100 0000 0000*/
-#define OS_CONTEXT_GET_SPINLOCK                  0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_RELEASE_SPINLOCK              0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_TRY_TO_GET_SPINLOCK           0x0280U /* 110 1000 0000*/
-#define OS_CONTEXT_SHUTDOWN_ALLCORES             0x06C8U /* 110 1100 1000*/
-#define OS_CONTEXT_OPEARTION_PERIPHERAL          0x0280U /* 010 1000 0000*/
-
-/*Memory Protection option*/
-/* Set the specified bit. */
+/**
+ * @brief Set the specified bit.
+ */
 #define OS_BIT_SET(Number, pos) ((Number) | (pos))
-/* Clear the specified bit. */
+
+/**
+ * @brief Clear the specified bit.
+ */
 #define OS_BIT_CLEAR(Number, pos) ((Number) & ~(pos))
-/* Get the status of the specified bit. */
+
+/**
+ * @brief Get the status of the specified bit.
+ */
 #define OS_BIT_GET(Number, pos) (((Number) & (pos)))
 
-/* operate enable bit in the memory protection register. */
-#define NO_PERMISSION 0U /* Do not have permission. */
-#define READBIT       1U /* read enable bit. */
-#define WRITEBIT      2U /* write enable bit. */
-#define EXECUTBIT     4U /* execute enable bit. */
-#define STACKSPACEBIT 8U /* stack space enable bit. */
+/**
+ * @brief operate enable bit in the memory protection register.
+ */
+#define OS_NO_PERMISSION 0U /** Do not have permission. */
+#define OS_READBIT       1U /** read enable bit. */
+#define OS_WRITEBIT      2U /** write enable bit. */
+#define OS_EXECUTBIT     4U /** execute enable bit. */
+#define OS_STACKSPACEBIT 8U /** stack space enable bit. */
 
-/* Determine if the memory area is readable. */
-#define OSMEMORY_IS_READABLE(Number) OS_BIT_GET(Number, READBIT)
-/* Determine if the memory area is writable. */
-#define OSMEMORY_IS_WRITEABLE(Number) OS_BIT_GET(Number, WRITEBIT) /* PRQA S 3472 */ /* VL_Os_3472 */
-/* Determine if the memory area is executable. */
-#define OSMEMORY_IS_EXECUTABLE(Number) OS_BIT_GET(Number, EXECUTBIT)
-/* Determine if the memory area is stack space. */
-#define OSMEMORY_IS_STACKSPACE(Number) OS_BIT_GET(Number, STACKSPACEBIT)
+/**
+ * @brief Define the bit mask.
+ */
+#define OS_HIGH_16_BITS_MASK 0xFFFF0000U
+#define OS_HIGH_8_BITS_MASK  0xFF00U
+#define OS_HIGH_4_BITS_MASK  0xF0U
+#define OS_LOW_8_BITS_MASK   0x00FFU
+/**
+ * @brief Magic number.
+ */
+#define OS_SIXTEEN           16U
+#define OS_EIGHT             8U
+#define OS_FOUR              4U
+#define OS_THREE             3U
+#define OS_TWO               2U
+#define OS_ONE               1U
 
-/* Set the memory area to be readable. */
+/**
+ * @brief Define the top and bottom of the stack.
+ */
+#define OS_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define OS_STACK_TOP(stack, guardSize) \
+    (Os_StackPtrType)(                 \
+        stack + OS_ARRAY_SIZE(stack) - (guardSize) - OS_HAL_STACK_RESERVE) /* PRQA S 3410 */ /* VL_Os_3410 */
+// #define OS_STACK_TOP(stack, guardSize) ((Os_StackPtrType)((&(stack)[0]) + (sizeof(stack) / sizeof((stack)[0])) -
+// ((guardSize) - OS_HAL_STACK_RESERVE)))
+#define OS_STACK_BOTTOM(stack) ((Os_StackPtrType)(stack))
+
+/**
+ * @brief Determine if the memory area is readable.
+ */
+#define OSMEMORY_IS_READABLE(Number) OS_BIT_GET(Number, OS_READBIT)
+
+/**
+ * @brief Determine if the memory area is writable.
+ */
 /* PRQA S 3472 ++ */ /* VL_Os_3472 */
-#define OSMEMORY_SET_READABLE(Number) OS_BIT_SET(Number, READBIT)
-/* Set the memory area to be writable. */
-#define OSMEMORY_SET_WRITEABLE(Number) OS_BIT_SET(Number, WRITEBIT)
-/* Set the memory area to be executable. */
-#define OSMEMORY_SET_EXECUTABLE(Number) OS_BIT_SET(Number, EXECUTBIT)
-/* Set the memory area to stack space. */
-#define OSMEMORY_SET_STACKSPACE(Number) OS_BIT_SET(Number, STACKSPACEBIT)
-/* PRQA S 3472 -- */
-/* Indicates that memory protection is sent out without access. */
-#define OSMEMORY_SET_NOACCESS(Number) (NO_PERMISSION)
+#define OSMEMORY_IS_WRITEABLE(Number) OS_BIT_GET(Number, OS_WRITEBIT)
 
-/* MultiCore ID */
-/* Get the core id of the object. */
-/* PRQA S 3472 ++ */ /* VL_Os_3472 */
-#define Os_GetObjCoreId(objGlobalId) ((0xF000u & (objGlobalId)) >> 12U)
-/* Get the local id of the object. */
+/**
+ * @brief Determine if the memory area is executable.
+ */
+#define OSMEMORY_IS_EXECUTABLE(Number) OS_BIT_GET(Number, OS_EXECUTBIT)
+
+/**
+ * @brief Determine if the memory area is stack space.
+ */
+#define OSMEMORY_IS_STACKSPACE(Number) OS_BIT_GET(Number, OS_STACKSPACEBIT)
+
+/**
+ * @brief Set the memory area to be readable.
+ */
+#define OSMEMORY_SET_READABLE(Number) OS_BIT_SET(Number, OS_READBIT)
+
+/**
+ * @brief Set the memory area to be writable.
+ */
+#define OSMEMORY_SET_WRITEABLE(Number) OS_BIT_SET(Number, OS_WRITEBIT)
+
+/**
+ * @brief Set the memory area to be executable.
+ */
+#define OSMEMORY_SET_EXECUTABLE(Number) OS_BIT_SET(Number, OS_EXECUTBIT)
+
+/**
+ * @brief Set the memory area to stack space.
+ */
+#define OSMEMORY_SET_STACKSPACE(Number) OS_BIT_SET(Number, OS_STACKSPACEBIT)
+
+/**
+ * @brief Indicates that memory protection is sent out without access.
+ */
+#define OSMEMORY_SET_NOACCESS(Number) (OS_NO_PERMISSION)
+
+/**
+ * @brief Get the local id of the object.
+ */
 #define Os_GetObjLocalId(objGlobalId) (0x0FFFu & (objGlobalId))
 /* PRQA S 3472 -- */
 
-/* Define the MACROS that used to extending*/
-/* Build the task name. */
+/**
+ * @brief Build the task name.
+ */
 /*PRQA S 0342 ++ */ /* VL_Os_0342 */
 #define TASK(name) void Os_TaskEntry_##name(void)
 /*PRQA S 0342 -- */
-/* Build an interrupt name. */
+
+/**
+ * @brief Build the interrupt name.
+ */
 #define ISR(name) void name(void)
-/* Declare the callback function. */
+
+/**
+ * @brief Declare the callback function.
+ */
 #define ALARMCALLBACK(name) void name(void)
 
+/**
+ * @brief Declare the callback function of alarm.
+ */
 /* PRQA S 3412 ++ */ /* VL_Os_3412 */
-/* Declare the callback function of alarm. */
 #define DeclareAlarmCallback(name) extern void name(void)
-/* Declare a task. */
+
+/**
+ * @brief Declare a task.
+ */
 /*PRQA S 0342 ++ */ /* VL_Os_0342 */
 #define DeclareTask(TaskId) extern void Os_TaskEntry_##TaskId(void)
 /*PRQA S 0342 -- */
-/* Declare an interrupt. */
+
+/**
+ * @brief Declare a interrupt.
+ */
 #define DeclareISR(name) extern void name(void)
 /* PRQA S 3412 -- */
 
+/**
+ * @brief Declare a alarm.
+ */
 #define DeclareAlarm(AlarmId)
+
+/**
+ * @brief Declare a event.
+ */
 #define DeclareEvent(EventId)
+
+/**
+ * @brief Declare a resource.
+ */
 #define DeclareResource(ResourceId)
+
+/**
+ * @brief Declare a counter.
+ */
 #define DeclareCounter(CounterId)
 
+/**
+ * @brief Unused parameter.
+ */
 #define UNUSED_PARAMETER(VariableName) (void)(VariableName)
 
-#endif /* OS_MACROS_H */
+/**
+ * @brief Local function.
+ */
+#ifndef OS_LOCAL
+#define OS_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
+#endif
+
+/**
+ * @brief Local inline function.
+ */
+#ifndef OS_LOCAL_INLINE
+#define OS_LOCAL_INLINE static inline
+#endif
+
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/

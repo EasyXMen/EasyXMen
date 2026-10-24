@@ -113,13 +113,19 @@ typedef struct
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
+#define ETHSM_START_SEC_CONFIG_DATA_PTR
+#include "EthSM_MemMap.h"
 /**
  * @brief Array of EthSM network instances
  * @trace CPD-73911
  */
 extern const EthSM_NetworkType EthSM_Networks[ETHSM_NETWORK_NUM];
+#define ETHSM_STOP_SEC_CONFIG_DATA_PTR
+#include "EthSM_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       Cyclic Main Function which is called from the Scheduler.
  * @param[in]   networkPtr  Pointer to the network instance
@@ -128,5 +134,7 @@ extern const EthSM_NetworkType EthSM_Networks[ETHSM_NETWORK_NUM];
  * @trace       CPD-73929
  */
 void EthSM_MainFunction(const EthSM_NetworkType* networkPtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #endif /* ETHSM_INTERNAL_H_ */

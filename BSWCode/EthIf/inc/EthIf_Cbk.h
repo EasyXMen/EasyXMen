@@ -43,6 +43,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define ETHIF_START_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
 /**
  * @brief           Receive indication of an Ethernet frame which was received by the indexed controller.
  * @param[in]       TrcvIdx :Index of the physical Ethernet controller within the context of the Ethernet Interface.
@@ -73,7 +75,11 @@ extern void EthIf_RxIndication(
     Eth_BufIdxType RxHandleId
 #endif
 );
+#define ETHIF_STOP_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
 /**
  * @brief           Confirms frame transmission by the indexed controller.
  * @param[in]       CtrlIdx :Index of the physical Ethernet controller within the context of the Ethernet Interface.
@@ -84,7 +90,6 @@ extern void EthIf_RxIndication(
  * @synchronous     TRUE
  * @trace           CPD-63700
  */
-
 extern void EthIf_TxConfirmation(
     uint8          CtrlIdx,
     Eth_BufIdxType BufIdx
@@ -93,7 +98,11 @@ extern void EthIf_TxConfirmation(
     Std_ReturnType Result
 #endif
 );
+#define ETHIF_STOP_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Called asynchronously when mode has been read out.
  * @param[in]       CtrlIdx :Index of the physical Ethernet controller within the context of the Ethernet Interface.
@@ -104,7 +113,11 @@ extern void EthIf_TxConfirmation(
  * @trace           CPD-63701
  */
 extern void EthIf_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Called asynchronously when a mode change has been read out.
  * @param[in]       TrcvIdx :Index of the Ethernet transceiver within the context of the Ethernet Interface.
@@ -115,7 +128,11 @@ extern void EthIf_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode);
  * @trace           CPD-63702
  */
 extern void EthIf_TrcvModeIndication(uint8 TrcvIdx, Eth_ModeType TrcvMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           The EthIf shall determine the expected notifications based on the EthSwtPort configuration. In
  *                  case the EthSwtPort references an EthTrcv the EthIf expects a notification from the EthTrcv via
@@ -130,7 +147,11 @@ extern void EthIf_TrcvModeIndication(uint8 TrcvIdx, Eth_ModeType TrcvMode);
  * @trace           CPD-63703
  */
 void EthIf_SwitchPortModeIndication(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType PortMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           This API is called by the corresponding EthTrcv, if a sleep indication was detected on the network.
  * @param[in]       TrcvIdx : Index of the Ethernet transceiver within the context of the Ethernet Interface.
@@ -140,6 +161,8 @@ void EthIf_SwitchPortModeIndication(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_Mo
  * @trace           CPD-63704
  */
 void EthIf_SleepIndication(uint8 TrcvIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #ifdef __cplusplus
 }

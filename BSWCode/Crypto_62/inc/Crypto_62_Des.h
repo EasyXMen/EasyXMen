@@ -38,7 +38,7 @@ extern "C" {
 
 /* ================================================ type definitions ================================================ */
 /** @brief 3DES context structure. */
-typedef struct
+typedef struct Crypto_Des3Data_Tag
 {
     uint32 sk[CRYPTO_CONST_96]; /*!<  3DES subkeys      */
 } Crypto_Des3Data;
@@ -54,7 +54,7 @@ typedef struct
 
 /* ========================================= external function declarations ========================================= */
 /**
- * @brief   Encrypts or decrypts a single block of data using 3DES in ECB mode.
+ * @brief   Encrypts or decrypts a single block of data using 3DES.
  *
  * @param[in]     ctx     Pointer to the 3DES context structure.
  * @param[in]     input   Pointer to the input data block (8 bytes).
@@ -62,7 +62,11 @@ typedef struct
  *
  * @return  None.
  */
-void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8]);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_3Des_Crypt_Internal(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption key for DES.
@@ -74,7 +78,11 @@ void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the decryption key for DES.
@@ -86,7 +94,11 @@ Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char ke
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char key[CRYPTO_CONST_8]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption and decryption keys for 3DES.
@@ -97,10 +109,14 @@ Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char ke
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des3_Set2key(
     uint32              esk[CRYPTO_CONST_96],
     uint32              dsk[CRYPTO_CONST_96],
     const unsigned char key[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the decryption key for DES.
@@ -112,7 +128,11 @@ void Crypto_Des3_Set2key(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16]);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption key for DES.
@@ -124,7 +144,11 @@ Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16]);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption and decryption keys for 3DES.
@@ -135,10 +159,14 @@ Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des3_Set3key(
     uint32              esk[CRYPTO_CONST_96],
     uint32              dsk[CRYPTO_CONST_96],
     const unsigned char key[CRYPTO_CONST_24]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption keys for 3DES.
@@ -148,7 +176,11 @@ void Crypto_Des3_Set3key(
  *
  * @return  None.
  */
-void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_8 * CRYPTO_CONST_3]);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_8 * CRYPTO_CONST_3]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the decryption keys for 3DES.
@@ -160,7 +192,31 @@ void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPT
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Des3_Set3key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_8 * CRYPTO_CONST_3]);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set3key_Dec(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_8 * CRYPTO_CONST_3]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/**
+ * @brief   Encrypts or decrypts data using 3DES in ECB mode.
+ *
+ * @param[in]     ctx     Pointer to the 3DES context structure.
+ * @param[in]     mode    Operation mode (encrypt/decrypt).
+ * @param[in]     length  Length of the input data.
+ * @param[in]     input   Pointer to the input data.
+ * @param[out]    output  Pointer to the output data.
+ *
+ * @return  Status of the operation.
+ *          - E_OK: Operation successful.
+ *          - E_NOT_OK: Operation failed.
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using 3DES in CBC mode.
@@ -176,14 +232,17 @@ Std_ReturnType Crypto_Des3_Set3key_Dec(Crypto_Des3Data* ctx, const unsigned char
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_3Des_Crypt_Cbc(
     Crypto_Des3Data* ctx,
     uint8            mode,
     uint32           length,
     uint8            iv[CRYPTO_CONST_8],
     const uint8*     input,
-    uint8*           output,
-    uint32*          outputLength);
+    uint8*           output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the CMAC using 3DES.
@@ -198,8 +257,12 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_3Des_Crypt_Cmac(Crypto_Des3Data* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption key for DES.
@@ -209,7 +272,11 @@ Std_ReturnType
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KEY_SIZE]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

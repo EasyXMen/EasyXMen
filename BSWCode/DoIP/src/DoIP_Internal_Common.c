@@ -60,7 +60,10 @@ PduLengthType DOIP_MIN(PduLengthType x, PduLengthType y)
 {
     return (((x) < (y)) ? (x) : (y));
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check version field.
  */
@@ -74,7 +77,10 @@ boolean DOIP_GENERICHEADER_CHECK(const uint8* header, PduLengthType sduLen)
         && (sduLen >= DOIP_HEADER_LEN));
     /* PRQA S 3120,2824,4404 -- */
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Transfer byte to short.
  */
@@ -84,7 +90,10 @@ uint16 DOIP_U8_2_U16(const uint8* array)
     return ((uint16)((uint16)array[0] << 8u) + array[1]);
     /* PRQA S 3120,2824 -- */
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Transfer byte to int.
  */
@@ -94,7 +103,10 @@ uint32 DOIP_U8_2_U32(const uint8* array)
     return (((uint32)array[0] << 24u) + ((uint32)array[1] << 16u) + ((uint32)array[2] << 8u) + ((uint32)array[3]));
     /* PRQA S 3120,2824 -- */
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Transfer short to byte.
  */
@@ -105,7 +117,10 @@ void DoIP_u16_2_u8(uint8* array, uint16 data)
     array[1] = (uint8)data;
     /* PRQA S 3120,2824 -- */
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Transfer int to byte.
  */
@@ -118,7 +133,10 @@ void DoIP_u32_2_u8(uint8* array, uint32 data)
     array[3] = (uint8)data;
     /* PRQA S 3120,2824 --*/
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Copy data.
  */
@@ -130,7 +148,10 @@ void DoIP_MemCpy(uint8* dest, const uint8* src, PduLengthType len) /* PRQA S 153
         dest[len] = src[len]; /* PRQA S 2824 */ /* VL_DoIP_ArithNullptr */
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Close connection.
  */
@@ -144,7 +165,10 @@ void DoIP_CloseSoCon(SoAd_SoConIdType soConId, boolean isAbort) /* PRQA S 4603*/
 
 #endif
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Open Or close connection.
  */

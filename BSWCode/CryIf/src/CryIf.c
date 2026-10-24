@@ -26,7 +26,6 @@
 
 /* PRQA S 3432 ++ */ /* VL_CryIf_3432 */
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-
 #include "CryIf_Cbk.h"
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
 #include "Det.h"
@@ -34,25 +33,8 @@
 #include "Csm_Cbk.h"
 #include "Csm_Types.h"
 #include "Crypto_62.h"
+#include "CryIf_Arti.h"
 /* ===================================================== macros ===================================================== */
-/*cryif cersion check*/
-#define CRYIF_C_AR_MAJOR_VERSION 4U
-#define CRYIF_C_AR_MINOR_VERSION 9U
-#define CRYIF_C_AR_PATCH_VERSION 0U
-#define CRYIF_C_SW_MAJOR_VERSION 2U
-#define CRYIF_C_SW_MINOR_VERSION 2U
-#define CRYIF_C_SW_PATCH_VERSION 0U
-
-#if (                                                                                                                \
-    (CRYIF_C_AR_MAJOR_VERSION != CRYIF_H_AR_MAJOR_VERSION) || (CRYIF_C_AR_MINOR_VERSION != CRYIF_H_AR_MINOR_VERSION) \
-    || (CRYIF_C_AR_PATCH_VERSION != CRYIF_H_AR_PATCH_VERSION)                                                        \
-    || (CRYIF_C_SW_MAJOR_VERSION != CRYIF_H_SW_MAJOR_VERSION)                                                        \
-    || (CRYIF_C_SW_MINOR_VERSION != CRYIF_H_SW_MINOR_VERSION)                                                        \
-    || (CRYIF_C_SW_PATCH_VERSION != CRYIF_H_SW_PATCH_VERSION))
-
-#error "CryIf.c version mismatching with CryIf.h"
-#endif
-
 /* ================================================ type definitions ================================================ */
 
 /* ============================================ internal data definitions =========================================== */
@@ -73,35 +55,46 @@
  * @trace       CPD-71589
  */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 CRYIF_LOCAL inline void CRYIF_DET_REPORT(uint8 ApiId, uint8 ErrorId)
 {
     (void)Det_ReportError(CRYIF_MODULE_ID, CRYIF_INSTANCE_ID, (ApiId), (ErrorId));
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 #endif
 
 /* ========================================= internal function declarations ========================================= */
+#if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
 #define CRYIF_START_SEC_CODE
 #include "CryIf_MemMap.h"
-#if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
 /*******************************************************************************/
 /**
- * @brief          Retrieves the driver ID associated with a given key ID.
- *                 This function searches the CryIf_KeyCfg array for a key ID
- *                 that matches the provided keyid parameter. If a match is
- *                 found, it returns the corresponding CryptoChannelId from the
- *                 CryIf_KeyCfg array, decremented by 1.
- * @param[in]      keyid : Key ID to search for in the CryIf_KeyCfg array.
- *                 This parameter is a unique identifier for a key configuration.
+ * @brief          Maps a CryIf key ID to a CryIf_DriverApi[] index.
+ * @details        Intended behavior: resolve keyid to the target crypto driver /
+ *                 channel index used for key operations under multi-driver support.
+ *                 Current status (CPT-19718): CryptoChannelId was removed from
+ *                 CryIf_KeyCfgType; key-to-driver mapping (e.g. CryIf_KeyChannelId[]
+ *                 or equivalent) is not implemented yet. Do not extend
+ *                 CryIf_KeyCfgType for this purpose. Until the mapping is restored,
+ *                 this function returns 0u (CryIf_DriverApi[0]) as a temporary stub
+ *                 so single-driver / channel-0 configurations remain usable.
+ * @param[in]      keyid : CryIf key ID to resolve.
  * @return         uint8
- * @retval         driverid: The driver ID associated with the given key ID,
- *                 or 0xFF if the key ID is not found in the CryIf_KeyCfg array.
+ * @retval         0u: temporary stub index into CryIf_DriverApi[] (pending mapping).
  * @reentrant      Reentrant
  * @synchronous    TRUE
  * @trace       CPD-71590
  */
 /*******************************************************************************/
 CRYIF_LOCAL uint8 CryIf_GetDriverId(uint32 keyid);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 #endif
+
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief          Retrieves the driver key ID associated with a given key ID.
@@ -136,6 +129,12 @@ CRYIF_LOCAL boolean CryIf_InitStatus; /* PRQA S 3218,3229 */ /* VL_CryIf_3218,VL
 #define CRYIF_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_VAR_INIT_32
+#include "CryIf_MemMap.h"
+CRYIF_LOCAL uint32 CryIf_CurrentLockedKeyId = CRYIF_KEY_INVALID_ID; /* PRQA S 3218 */ /* VL_CryIf_3218 */
+#define CRYIF_STOP_SEC_VAR_INIT_32
+#include "CryIf_MemMap.h"
+
 /* ========================================== external function definitions ========================================= */
 
 #define CRYIF_START_SEC_CODE
@@ -148,6 +147,8 @@ CRYIF_LOCAL boolean CryIf_InitStatus; /* PRQA S 3218,3229 */ /* VL_CryIf_3218,VL
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void CryIf_Init(const CryIf_ConfigType* configPtr)
 {
+    CryIf_ArtiApiStart(2, CRYIF_SID_INIT, configPtr);
+
 /* PRQA S 1503 -- */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_91019] */
@@ -164,9 +165,17 @@ void CryIf_Init(const CryIf_ConfigType* configPtr)
         /* @req [SWS_CryIf_00015] */
         CryIf_InitStatus = (boolean)TRUE;
     }
+
+    CryIf_ArtiApiStop(1, CRYIF_SID_INIT);
+
     return;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
+
 #if (STD_ON == CRYIF_VERSION_INFO_API)
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief Returns the version information of this module.
@@ -174,6 +183,8 @@ void CryIf_Init(const CryIf_ConfigType* configPtr)
 /*******************************************************************************/
 void CryIf_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    CryIf_ArtiApiStart(2, CRYIF_SID_GETVERSIONINFO, versioninfo);
+
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00016] */
     if (CryIf_InitStatus != (boolean)TRUE)
@@ -190,13 +201,21 @@ void CryIf_GetVersionInfo(Std_VersionInfoType* versioninfo)
     {
         versioninfo->moduleID         = CRYIF_MODULE_ID;
         versioninfo->vendorID         = CRYIF_VENDOR_ID;
-        versioninfo->sw_major_version = CRYIF_H_SW_MAJOR_VERSION;
-        versioninfo->sw_minor_version = CRYIF_H_SW_MINOR_VERSION;
-        versioninfo->sw_patch_version = CRYIF_H_SW_PATCH_VERSION;
+        versioninfo->sw_major_version = CRYIF_SW_MAJOR_VERSION;
+        versioninfo->sw_minor_version = CRYIF_SW_MINOR_VERSION;
+        versioninfo->sw_patch_version = CRYIF_SW_PATCH_VERSION;
     }
+
+    CryIf_ArtiApiStop(1, CRYIF_SID_GETVERSIONINFO);
+
     return;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 #endif
+
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This interface dispatches the received jobs to the configured crypto driver object.
@@ -206,6 +225,8 @@ void CryIf_GetVersionInfo(Std_VersionInfoType* versioninfo)
 Std_ReturnType CryIf_ProcessJob(uint32 channelId, Crypto_JobType* job)
 /* PRQA S 6030 -- */
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_PROCESSJOB, channelId, job);
+
     Std_ReturnType         ret = E_NOT_OK;
     Crypto_ServiceInfoType Serviceid;
 
@@ -284,9 +305,16 @@ Std_ReturnType CryIf_ProcessJob(uint32 channelId, Crypto_JobType* job)
 #endif
         }
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_PROCESSJOB, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This interface dispatches the job cancellation function to the configured crypto driver object.
@@ -294,6 +322,8 @@ Std_ReturnType CryIf_ProcessJob(uint32 channelId, Crypto_JobType* job)
 /*******************************************************************************/
 Std_ReturnType CryIf_CancelJob(uint32 channelId, Crypto_JobType* job)
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_CANCELJOB, channelId, job);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00129] */
@@ -324,9 +354,14 @@ Std_ReturnType CryIf_CancelJob(uint32 channelId, Crypto_JobType* job)
         ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_CancelJob_Name(channelId, job);
 #endif
     }
+    CryIf_ArtiApiStop(2, CRYIF_SID_CANCELJOB, ret);
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the set key element function to the configured crypto driver object.
@@ -336,6 +371,8 @@ Std_ReturnType CryIf_CancelJob(uint32 channelId, Crypto_JobType* job)
 Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength)
 /* PRQA S 6030,6060 -- */
 {
+    CryIf_ArtiApiStart(5, CRYIF_SID_KEYELEMENT_SET, cryIfKeyId, keyElementId, keyPtr, keyLength);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00049] */
@@ -358,10 +395,6 @@ Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const
     {
         CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_SET, CRYIF_E_PARAM_VALUE);
     }
-    else if (keyElementId >= CRYIF_KEYELEMENT_MAX_CONFIGURED)
-    {
-        CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_SET, CRYIF_E_PARAM_HANDLE);
-    }
     else
 #endif
     {
@@ -379,8 +412,13 @@ Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const
                   .Crypto_KeyElementSet_Name(CryIf_GetDriverKeyId(cryIfKeyId), keyElementId, keyPtr, keyLength);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYELEMENT_SET, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /*******************************************************************************/
 /**
@@ -388,8 +426,12 @@ Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const
  */
 /*******************************************************************************/
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeySetValid(uint32 cryIfKeyId)
 {
+    CryIf_ArtiApiStart(2, CRYIF_SID_KEYSETVALID, cryIfKeyId);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00056] */
@@ -417,16 +459,25 @@ Std_ReturnType CryIf_KeySetValid(uint32 cryIfKeyId)
         ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_KeySetValid_Name(CryIf_GetDriverKeyId(cryIfKeyId));
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYSETVALID, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the set key valid function to the configured crypto driver object.
  */
 /*******************************************************************************/
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeySetInValid(uint32 cryIfKeyId)
 {
+    CryIf_ArtiApiStart(2, CRYIF_SID_KEYSETINVALID, cryIfKeyId);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00056] */
@@ -454,8 +505,16 @@ Std_ReturnType CryIf_KeySetInValid(uint32 cryIfKeyId)
         ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_KeySetInValid_Name(CryIf_GetDriverKeyId(cryIfKeyId));
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYSETINVALID, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
+
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the get key element function to the configured crypto driver object.
@@ -465,6 +524,8 @@ Std_ReturnType CryIf_KeySetInValid(uint32 cryIfKeyId)
 Std_ReturnType CryIf_KeyElementGet(uint32 cryIfKeyId, uint32 keyElementId, uint8* resultPtr, uint32* resultLengthPtr)
 /* PRQA S 6030,6060 -- */
 {
+    CryIf_ArtiApiStart(5, CRYIF_SID_KEYELEMENT_GET, cryIfKeyId, keyElementId, resultPtr, resultLengthPtr);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00059] */
@@ -492,10 +553,6 @@ Std_ReturnType CryIf_KeyElementGet(uint32 cryIfKeyId, uint32 keyElementId, uint8
     {
         CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_GET, CRYIF_E_PARAM_VALUE);
     }
-    else if (keyElementId >= CRYIF_KEYELEMENT_MAX_CONFIGURED)
-    {
-        CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_SET, CRYIF_E_PARAM_HANDLE);
-    }
     else
 #endif
     {
@@ -519,20 +576,28 @@ Std_ReturnType CryIf_KeyElementGet(uint32 cryIfKeyId, uint32 keyElementId, uint8
             resultLengthPtr);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYELEMENT_GET, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall copy a key elements from one key to a target key.
  */
 /*******************************************************************************/
-
 /* PRQA S 6030,6060, 2889 ++ */ /* VL_MTR_CryIf_STMIF, VL_MTR_CryIf_STM19, VL_QAC_MultiReturn */
 Std_ReturnType
     CryIf_KeyElementCopy(uint32 cryIfKeyId, uint32 keyElementId, uint32 targetCryIfKeyId, uint32 targetKeyElementId)
 /* PRQA S 6030,6060, 2889 -- */
 {
+    CryIf_ArtiApiStart(5, CRYIF_SID_KEYELEMENT_COPY, cryIfKeyId, keyElementId, targetCryIfKeyId, targetKeyElementId);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00110] */
@@ -549,10 +614,6 @@ Std_ReturnType
     else if (targetCryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED)
     {
         CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_COPY, CRYIF_E_PARAM_HANDLE);
-    }
-    else if (keyElementId >= CRYIF_KEYELEMENT_MAX_CONFIGURED)
-    {
-        return ret;
     }
     else
 #endif
@@ -626,16 +687,22 @@ Std_ReturnType
             targetKeyElementId);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYELEMENT_COPY, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief Copies a key element to another key element. The keyElementOffsets and
  * keyElementCopyLength allows to copy just parts of the source key element into the destination key element.
  */
 /*******************************************************************************/
-
 /* PRQA S 6060, 6040, 2889 ++ */ /* VL_MTR_CryIf_STM19, VL_MTR_CryIf_STPAR, VL_QAC_MultiReturn */
 Std_ReturnType CryIf_KeyElementCopyPartial(
     uint32 cryIfKeyId,
@@ -647,12 +714,31 @@ Std_ReturnType CryIf_KeyElementCopyPartial(
     uint32 targetKeyElementId)
 /* PRQA S 6060, 6040, 2889 -- */
 {
+    CryIf_ArtiApiStart(
+        8,
+        CRYIF_SID_KEYELEMENT_COPYPARTIAL,
+        cryIfKeyId,
+        keyElementId,
+        keyElementSourceOffset,
+        keyElementTargetOffset,
+        keyElementCopyLength,
+        targetCryIfKeyId,
+        targetKeyElementId);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
-    uint8 cryDriverId;
-    uint8 cryTargetDriverId;
+    uint8 sourceDriverId;
+    uint8 targetDriverId;
 #else /*STD_OFF == CRYIF_MUL_DRIVER_SUPPORT*/
 #endif
+
+    /* SWS_CryIf_91018 : Reentrant but not for the same cryIfKeyId*/
+    if (CryIf_CurrentLockedKeyId == cryIfKeyId)
+    {
+        return ret;
+    }
+    CryIf_CurrentLockedKeyId = cryIfKeyId;
+
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00137] */
     if (CryIf_InitStatus != (boolean)TRUE)
@@ -660,40 +746,64 @@ Std_ReturnType CryIf_KeyElementCopyPartial(
         CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_COPYPARTIAL, CRYIF_E_UNINIT);
     }
     /* @req [SWS_CryIf_00138] */
-    else if (
-        (cryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED) || (targetCryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED)
-        || (keyElementId >= CRYIF_KEYELEMENT_MAX_CONFIGURED) || (CRYIF_KEYELEMENT_MAX_CONFIGURED == targetKeyElementId))
+    else if ((cryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED) || (targetCryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED))
     {
         CRYIF_DET_REPORT(CRYIF_SID_KEYELEMENT_COPYPARTIAL, CRYIF_E_PARAM_HANDLE);
     }
     else
 #endif
     {
-        /* PRQA S 1258,1252 ++ */ /* VL_CryIf_1258,VL_CryIf_1252 */
-        if (cryIfKeyId == targetCryIfKeyId)
-        /* PRQA S 1258,1252 -- */
+#if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
+        sourceDriverId = CryIf_GetDriverId(cryIfKeyId);
+        targetDriverId = CryIf_GetDriverId(targetCryIfKeyId);
+
+        /* @req [SWS_CryIf_00139] */
+        if (sourceDriverId == targetDriverId)
         {
-            return ret;
+#endif
+            /* PRQA S 1258,1252 ++ */ /* VL_CryIf_1258,VL_CryIf_1252 */
+            if (cryIfKeyId != targetCryIfKeyId)
+            /* PRQA S 1258,1252 -- */
+            {
+                ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_KeyElementCopyPartial_Name(
+                    CryIf_GetDriverKeyId(cryIfKeyId),
+                    keyElementId,
+                    keyElementSourceOffset,
+                    keyElementTargetOffset,
+                    keyElementCopyLength,
+                    CryIf_GetDriverKeyId(targetCryIfKeyId),
+                    targetKeyElementId);
+            }
+#if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
         }
+        else
+        {
+            /* @req [SWS_CryIf_00140] sourceDriverId != targetDriverId */
+        }
+#endif
     }
-    (void)keyElementId;
-    (void)keyElementSourceOffset;
-    (void)keyElementTargetOffset;
-    (void)keyElementCopyLength;
-    (void)targetKeyElementId;
+    CryIf_CurrentLockedKeyId = CRYIF_KEY_INVALID_ID;
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYELEMENT_COPYPARTIAL, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall copy all key elements from the source key to a target key.
  */
 /*******************************************************************************/
-
 /* PRQA S 6060, 2889 ++ */ /* VL_MTR_CryIf_STM19, VL_QAC_MultiReturn */
 Std_ReturnType CryIf_KeyCopy(uint32 cryIfKeyId, uint32 targetCryIfKeyId)
 /* PRQA S 6060, 2889 -- */
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_KEYCOPY, cryIfKeyId, targetCryIfKeyId);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00016] */
@@ -736,18 +846,32 @@ Std_ReturnType CryIf_KeyCopy(uint32 cryIfKeyId, uint32 targetCryIfKeyId)
             CryIf_GetDriverKeyId(cryIfKeyId),
             CryIf_GetDriverKeyId(targetCryIfKeyId));
 #endif
+#if (STD_ON == CRYIF_DEV_ERROR_DETECT)
+        if (ret == CRYPTO_E_KEY_SIZE_MISMATCH)
+        {
+            CRYIF_DET_REPORT(CRYIF_SID_KEYCOPY, CRYIF_E_KEY_SIZE_MISMATCH);
+        }
+#endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYCOPY, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the random seed function to the configured cryptodriver object.
  */
 /*******************************************************************************/
-
 Std_ReturnType CryIf_RandomSeed(uint32 cryIfKeyId, const uint8* seedPtr, uint32 seedLength)
 {
+    CryIf_ArtiApiStart(4, CRYIF_SID_RANDOM_SEED, cryIfKeyId, seedPtr, seedLength);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00068] */
@@ -791,17 +915,25 @@ Std_ReturnType CryIf_RandomSeed(uint32 cryIfKeyId, const uint8* seedPtr, uint32 
             seedLength);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_RANDOM_SEED, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the key generate function to the configured crypto driver object.
  */
 /*******************************************************************************/
-
 Std_ReturnType CryIf_KeyGenerate(uint32 cryIfKeyId)
 {
+    CryIf_ArtiApiStart(2, CRYIF_SID_KEYGENERATE, cryIfKeyId);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00073] */
@@ -829,19 +961,27 @@ Std_ReturnType CryIf_KeyGenerate(uint32 cryIfKeyId)
         ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_KeyGenerate_Name(CryIf_GetDriverKeyId(cryIfKeyId));
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYGENERATE, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the key derive function to the configured crypto driver object.
  */
 /*******************************************************************************/
-
 /* PRQA S 6060, 2889 ++ */ /* VL_MTR_CryIf_STM19, VL_QAC_MultiReturn */
 Std_ReturnType CryIf_KeyDerive(uint32 cryIfKeyId, uint32 targetCryIfKeyId)
 /* PRQA S 6060, 2889 -- */
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_KEYDERIVE, cryIfKeyId, targetCryIfKeyId);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00076] */
@@ -880,18 +1020,26 @@ Std_ReturnType CryIf_KeyDerive(uint32 cryIfKeyId, uint32 targetCryIfKeyId)
             CryIf_GetDriverKeyId(targetCryIfKeyId));
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYDERIVE, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the key exchange public value calculation
  * function to the configured crypto driver object.
  */
 /*******************************************************************************/
-
 Std_ReturnType CryIf_KeyExchangeCalcPubVal(uint32 cryIfKeyId, uint8* publicValuePtr, uint32* publicValueLengthPtr)
 {
+    CryIf_ArtiApiStart(4, CRYIF_SID_KEYEXCHANGECALCPUBVAL, cryIfKeyId, publicValuePtr, publicValueLengthPtr);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00082] */
@@ -936,19 +1084,27 @@ Std_ReturnType CryIf_KeyExchangeCalcPubVal(uint32 cryIfKeyId, uint8* publicValue
             publicValueLengthPtr);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYEXCHANGECALCPUBVAL, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief This function shall dispatch the key exchange common shared secret
  * calculation function to the configured crypto driver object.
  */
 /*******************************************************************************/
-
 Std_ReturnType
     CryIf_KeyExchangeCalcSecret(uint32 cryIfKeyId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength)
 {
+    CryIf_ArtiApiStart(4, CRYIF_SID_KEYEXCHANGECALCSECRET, cryIfKeyId, partnerPublicValuePtr, partnerPublicValueLength);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_CryIf_2981 */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00090] */
@@ -992,6 +1148,9 @@ Std_ReturnType
             partnerPublicValueLength);
 #endif
     }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYEXCHANGECALCSECRET, ret);
+
     return ret;
 }
 #define CRYIF_STOP_SEC_CODE
@@ -1004,9 +1163,10 @@ Std_ReturnType
  * @brief the CRYIF about the completion of the request with the result of the cryptographic operation.
  */
 /*******************************************************************************/
-
 void CryIf_CallbackNotification(Crypto_JobType* job, Crypto_ResultType result)
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_CBNOTIFICATION, job, result);
+
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
     /* @req [SWS_CryIf_00107] */
     if (CryIf_InitStatus != (boolean)TRUE)
@@ -1024,7 +1184,14 @@ void CryIf_CallbackNotification(Crypto_JobType* job, Crypto_ResultType result)
         /* @req [SWS_CryIf_00109] */
         Csm_CallbackNotification(job, result);
     }
+
+    CryIf_ArtiApiStop(1, CRYIF_SID_CBNOTIFICATION);
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
+
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief get the status of a key .
@@ -1032,13 +1199,45 @@ void CryIf_CallbackNotification(Crypto_JobType* job, Crypto_ResultType result)
 /*******************************************************************************/
 Std_ReturnType CryIf_KeyGetStatus(uint32 cryIfKeyId, Crypto_KeyStatusType* keyStatusPtr)
 {
+    CryIf_ArtiApiStart(3, CRYIF_SID_KEYGETSTATUS, cryIfKeyId, keyStatusPtr);
+
     Std_ReturnType ret = E_NOT_OK;
-#if (CRYPTO_MAXKEY_CONFIGURED > 0)
-    ret = Crypto_62_KeyGetStatus(cryIfKeyId, keyStatusPtr);
+#if (STD_ON == CRYIF_DEV_ERROR_DETECT)
+    /* @req [SWS_CryIf_00146] */
+    if (CryIf_InitStatus != (boolean)TRUE)
+    {
+        CRYIF_DET_REPORT(CRYIF_SID_KEYGETSTATUS, CRYIF_E_UNINIT);
+    }
+    /* @req [SWS_CryIf_00147] */
+    else if (cryIfKeyId >= CRYIF_KEY_MAX_CONFIGURED)
+    {
+        CRYIF_DET_REPORT(CRYIF_SID_KEYGETSTATUS, CRYIF_E_PARAM_HANDLE);
+    }
+    /* @req [SWS_CryIf_00148] */
+    else if (NULL_PTR == keyStatusPtr)
+    {
+        CRYIF_DET_REPORT(CRYIF_SID_KEYGETSTATUS, CRYIF_E_PARAM_POINTER);
+    }
+    else
 #endif
+    {
+#if (CRYPTO_MAXKEY_CONFIGURED > 0)
+        /* @req [SWS_CryIf_00149] */
+        ret = CryIf_DriverApi[CRYIF_SINGLE_DRIVER].Crypto_KeyGetStatus_Name(
+            CryIf_GetDriverKeyId(cryIfKeyId),
+            keyStatusPtr);
+#endif
+    }
+
+    CryIf_ArtiApiStop(2, CRYIF_SID_KEYGETSTATUS, ret);
+
     return ret;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief Custom synchronous operation for the CryIf module.
@@ -1080,32 +1279,35 @@ Std_ReturnType CryIf_CustomSync(
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
-#define CRYIF_START_SEC_CODE
-#include "CryIf_MemMap.h"
 #if (STD_ON == CRYIF_MUL_DRIVER_SUPPORT)
 /*******************************************************************************/
 /**
- * @brief Function to get driverId from keyId.
+ * @brief          Maps a CryIf key ID to a CryIf_DriverApi[] index.
+ * @details        Temporary stub until multi-core/multi-driver key routing is restored.
+ *                 Currently always returns 0u so key APIs remain callable when
+ *                 CRYIF_MUL_DRIVER_SUPPORT is enabled before the mapping lands.
+ * @param[in]      keyid : CryIf key ID to resolve.
+ * @return         uint8
+ * @retval         0u: temporary stub index into CryIf_DriverApi[].
+ * @trace       CPD-71590
  */
 /*******************************************************************************/
-
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 CRYIF_LOCAL uint8 CryIf_GetDriverId(uint32 keyid)
 {
-    uint8 driverid = 0u;
-    uint8 i;
-    /*  search driverId form CryIf_KeyCfg   */
-    for (i = 0; i < CRYIF_KEY_MAX_CONFIGURED; i++)
-    {
-        if (CryIf_KeyCfg[i].KeyId == keyid)
-        {
-            driverid = CryIf_KeyCfg[i].CryptoChannelId;
-            break;
-        }
-    }
-    driverid--;
-    return driverid;
+    /* TODO(multi-core): Implement keyid -> CryIf_DriverApi index mapping
+     * (e.g. CryIf_KeyChannelId[] or equivalent). Do not extend CryIf_KeyCfgType. */
+    (void)keyid;
+
+    return 0u;
 }
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 #endif
+
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 /*******************************************************************************/
 /**
  * @brief Function to get keyid in driver from Cryif keyId.
@@ -1128,7 +1330,6 @@ CRYIF_LOCAL uint32 CryIf_GetDriverKeyId(uint32 keyid)
     }
     return driverkeyid;
 }
-
 #define CRYIF_STOP_SEC_CODE
 #include "CryIf_MemMap.h"
 /* PRQA S 1532 -- */

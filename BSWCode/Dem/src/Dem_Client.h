@@ -265,6 +265,8 @@ typedef Dem_ComProcessorWordType Dem_ReportedEventsType[DEM_CLIENT_REPORT_EVENT_
 
 /* ========================================== internal function declarations ======================================== */
 #if (DEM_USER_DEFINED_MEMORY_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Checking User Defined Memory Origin Validity
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -279,7 +281,11 @@ typedef Dem_ComProcessorWordType Dem_ReportedEventsType[DEM_CLIENT_REPORT_EVENT_
  */
 DEM_LOCAL boolean
     Dem_DTCOriginUserDefinedCheckValid(uint8 ClientId, Dem_DTCOriginType DTCOrigin, Dem_MemoryNumType* MemIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Checking DTC Origin Validity in Client
@@ -295,6 +301,10 @@ DEM_LOCAL boolean
  */
 DEM_LOCAL boolean
     Dem_DTCOriginCheckValidOnClient(uint8 ClientId, Dem_DTCOriginType DTCOrigin, Dem_MemoryNumType* MemIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Checking if a DTC number encodes a specific DTC.
@@ -310,6 +320,10 @@ DEM_LOCAL boolean
  */
 DEM_LOCAL Dem_EventIdType
     Dem_ClientCheckSingleDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Selects a DTC or DTC group as target for further operations.
@@ -324,8 +338,12 @@ DEM_LOCAL Dem_EventIdType
  */
 DEM_LOCAL void
     Dem_ClientSelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Initialize memory entry.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -334,6 +352,10 @@ DEM_LOCAL void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ClientReadoutBufferInit(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check state of a ReadoutBuffer entry, save current request if it is new.
@@ -349,9 +371,13 @@ DEM_LOCAL void Dem_ClientReadoutBufferInit(uint8 ClientId);
  */
 DEM_LOCAL Std_ReturnType
     Dem_DTCReadoutBufferCheckAndSetState(uint8 ClientId, Dem_EventIdType EventId, Dem_MemoryNumType MemIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X14)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -370,6 +396,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCSelectionResult(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Provides information if the clear result of a selected valid DTC or group of DTCs.
@@ -389,9 +419,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientResultForClearDTCGetDTCSelection(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -410,9 +444,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Release a previously prepared memory entry.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -424,6 +462,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientEnableDTCRecordUpdate(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Populate readout buffer with data.
@@ -433,6 +475,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientEnableDTCRecordUpdate(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ReadoutBufferFillData(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Copy the memory entry contents into the ReadoutBuffer.
@@ -441,6 +487,10 @@ DEM_LOCAL void Dem_ReadoutBufferFillData(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_FilterEventDataTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check the DTC Setting state of Event
@@ -453,8 +503,12 @@ DEM_LOCAL void Dem_FilterEventDataTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_CheckEventDTCSettingState(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #if (STD_ON == DCM_UDS_0X85)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Enable the DTC setting State
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -463,6 +517,10 @@ DEM_LOCAL boolean Dem_CheckEventDTCSettingState(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCSettingEnable(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Disable the DTC setting
@@ -472,7 +530,11 @@ DEM_LOCAL void Dem_DTCSettingEnable(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCSettingDisable(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes changes of DTC setting
@@ -483,6 +545,10 @@ DEM_LOCAL void Dem_DTCSettingDisable(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessQueueEventDTCSetting(Dem_EventIdType EventId, uint8 DcmClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         DTC setting Process.
@@ -492,6 +558,10 @@ DEM_LOCAL void Dem_ProcessQueueEventDTCSetting(Dem_EventIdType EventId, uint8 Dc
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCSettingProcess(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         DTC setting Task.
@@ -500,9 +570,13 @@ DEM_LOCAL void Dem_DTCSettingProcess(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCSettingTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Suppress event or release event suppression as requested by the client
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -516,10 +590,14 @@ DEM_LOCAL void Dem_DTCSettingTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientSetDTCSuppression(uint8 ClientId, boolean SuppressionStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if ((DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON) || (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -541,10 +619,14 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCStatusAvailabilityMask(
     uint8                  ClientId,
     Dem_UdsStatusByteType* DTCStatusMask,
     Dem_DTCOriginType      DTCOrigin);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the current Uds status of a selected DTC
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -567,9 +649,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetStatusOfDTC(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the severity of a selected DTC
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -590,6 +676,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetSeverityOfDTC(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the functional unit of a selected DTC
@@ -611,7 +701,11 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetFunctionalUnitOfDTC(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initialize a filter for a 'filter DTC' request.
@@ -630,8 +724,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetFunctionalUnitOfDTC(
  */
 DEM_LOCAL void
     Dem_FilterDataInit(uint8 ClientId, Dem_DTCOriginType DTCOrigin, Dem_MemoryNumType MemIndex, uint8 StatusMask);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Initialize a filter for a 'filter DTC' request.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -670,10 +768,14 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
     boolean             FilterWithSeverity,
     Dem_DTCSeverityType DTCSeverityMask,
     boolean             FilterForFaultDetectionCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_PERMANENT_MEMORY_NUMBER > 0u))
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the number of filtered DTCs for permanent memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -683,8 +785,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Test whether a given EventId matches the filter.
@@ -698,8 +804,12 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, Dem_EventIdType EventId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Calculates the number of filtered events in a standard event memory.
  * @param[in]     DcmClientId: Identification of a client.
@@ -709,9 +819,13 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, De
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Fetch number of DTCs matching the client specific filter settings.
  * @param[in]     ClientId: Identification of a client.
@@ -721,9 +835,13 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_ClientFilterNumberMemory(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Tests whether an event is already reported.
  * @param[in]     ClientId: Identification of a client.
@@ -736,7 +854,11 @@ DEM_LOCAL uint16 Dem_ClientFilterNumberMemory(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_FilterDataCheckEventReported(uint8 ClientId, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Iterates events in the event memory matching the Dcm DTC filter.
@@ -748,8 +870,12 @@ DEM_LOCAL boolean Dem_FilterDataCheckEventReported(uint8 ClientId, Dem_EventIdTy
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryByEvent(uint8 ClientId, const Dem_MemStateInfoType* MemoryInfo);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         If chronological reporting is required this function iterates  all events in order of occurrence.
  * @param[in]     ClientId: Identification of a client.
@@ -760,10 +886,14 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryByEvent(uint8 ClientId, cons
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const Dem_MemStateInfoType* MemoryInfo);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
 #if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Iterates events in permanent memory matching the Dcm DTC filter.
  * @param[in]     ClientId: Identification of a client.
@@ -774,8 +904,12 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterPermanentByEvent(uint8 ClientId, const Dem_MemStateInfoType* MemoryInfo);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
 /**
@@ -789,10 +923,14 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterPermanentByEvent(uint8 ClientId, c
 DEM_LOCAL Dem_FilterDataFuncPtrType
     Dem_FilterDataGetDTCFilterFunction(Dem_FilterDataDTCFilteringStrategyType DTCFilteringStrategy);
 /* PRQA S 5016 -- */
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (                                                                                                        \
     (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON) || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON) \
     || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Get the next matching event the filter criteria set with Dem_ClientSetDTCFilter
  * @param[in]     ClientId: Identification of a client.
@@ -805,10 +943,14 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_FilterDataResultType* FilterResult);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a freeze frame record filter with the given criteria.
  * @param[in]     ClientId: Identification of a client.
@@ -821,10 +963,14 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_Fi
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_DTCFormatType DTCFormat);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get a DTC based on occurrence time.
  * @param[in]     ClientId: Identification of a client.
@@ -838,7 +984,11 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTCRequest, uint32* DTC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Select the the given extended data record
@@ -862,6 +1012,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectExtendedDataRecord(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculates the size of an extended data record
@@ -879,8 +1033,12 @@ DEM_LOCAL uint32 Dem_GetSizeOfEDCalculateSize(
     uint8                  DcmClientId,
     Dem_NvBlockNumType     MemoryIndex,
     uint8                  ExtendedEntryIndex);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Copies an extended data record into the given buffer
  * @param[in]     DcmClientId: Identification of a client.
@@ -894,6 +1052,10 @@ DEM_LOCAL uint32 Dem_GetSizeOfEDCalculateSize(
  */
 DEM_LOCAL Std_ReturnType
     Dem_ClientGetNextEDCopyNextRecord(uint8 DcmClientId, Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Test whether filter for extended data record(s) matches
@@ -908,6 +1070,10 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_ClientGetNextEDChecktRecordMatch(uint8 ClientId, uint8 RecordNumberFilter, uint8 RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the size of one or all extended data record(s)
@@ -924,6 +1090,10 @@ DEM_LOCAL boolean Dem_ClientGetNextEDChecktRecordMatch(uint8 ClientId, uint8 Rec
  */
 DEM_LOCAL Std_ReturnType
     Dem_ClientGetSizeOfExtendedDataRecordSelection(uint8 ClientId, uint32* SizeOfExtendedDataRecord);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Validates the request to get an extended data record in UDS format and copies the data.
@@ -942,7 +1112,11 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the iterator for the selected event.
@@ -955,6 +1129,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetNextExtendedDataRecord(uint8 ClientId, uin
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ReadoutBufferSelectFF(uint8 DcmClientId, uint8 RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrameSelection.
@@ -964,6 +1142,10 @@ DEM_LOCAL void Dem_ReadoutBufferSelectFF(uint8 DcmClientId, uint8 RecordNumber);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetFFInitFFIterator(uint8 DcmClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Select the first snapshot record source
@@ -987,6 +1169,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectFirstSource(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the size of one or all formatted snapshot record() stored for a DTC (19 04).
@@ -1003,8 +1189,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectFirstSource(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetSizeOfFFSelection(uint8 ClientId, uint32* SizeOfFreezeFrame);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Reads the OBD freeze frame
  * @param[in]     ClientId: Identification of a client.
@@ -1017,9 +1207,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetSizeOfFFSelection(uint8 ClientId, uint32* 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataObd(uint8 ClientId, Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Reads the freeze frame
  * @param[in]     ClientId: Identification of a client.
@@ -1032,7 +1226,11 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataObd(uint8 ClientId, Dem_DestinationBuf
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataStd(uint8 ClientId, Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Select the next snapshot record source
@@ -1045,6 +1243,10 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataStd(uint8 ClientId, Dem_DestinationBuf
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientSelectNextSource(uint8 DcmClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Copies data into the given buffer.
@@ -1059,9 +1261,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectNextSource(uint8 DcmClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Suppress event or release event suppression as requested by the client
  * @param[in]     ClientId: Identification of a client.
@@ -1082,6 +1288,8 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetDTCSuppression(
     uint8* ErrorId
 #endif
 );
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
@@ -1097,30 +1305,28 @@ DEM_LOCAL Dem_ReportedEventsType Dem_ReportedEventsOfFilter[DEM_DCM_CLIENT_NUMBE
 #include "Dem_MemMap.h"
 #endif
 
-#define DEM_START_SEC_VAR_INIT_UNSPECIFIED
+#define DEM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dem_MemMap.h"
 /**
  * @brief Filter data infomation array
  * @range NA
  */
 DEM_LOCAL Dem_FilterDataInfoType Dem_FilterDataInfo[DEM_DCM_CLIENT_NUMBER + DEM_J1939DCM_CLIENT_NUMBER];
-#define DEM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#define DEM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dem_MemMap.h"
 #endif
 
-#define DEM_START_SEC_VAR_INIT_UNSPECIFIED
+#define DEM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dem_MemMap.h"
 /**
  * @brief Client infomation array
  * @range NA
  */
 DEM_LOCAL Dem_ClientInfoType Dem_ClientInfo[DEM_CLIENT_NUMBER];
-#define DEM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#define DEM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Checking Client ID Validity
  * @param[in]     ClientId: Identification of a client.
@@ -1135,7 +1341,6 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckValid(uint8 ClientId)
 {
     return (ClientId < DEM_CLIENT_NUMBER); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
 /**
  * @brief         Checking Dcm Client ID Validity
  * @param[in]     ClientId: Identification of a client.
@@ -1158,7 +1363,6 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckDcmClientIdValid(uint8 ClientId)
     }
     return ret;
 }
-
 /**
  * @brief         Checking J1939Dcm Client ID Validity
  * @param[in]     ClientId: Identification of a client.
@@ -1182,6 +1386,7 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckJ1939DcmClientIdValid(uint8 ClientId)
     }
     return ret;
 }
+
 /* PRQA S 2742 -- */
 
 /**
@@ -1206,8 +1411,9 @@ DEM_LOCAL_INLINE boolean Dem_DTCOriginCheckValid(Dem_DTCOriginType DTCOrigin)
     }
     return ret;
 }
-
 #if (DEM_USER_DEFINED_MEMORY_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Checking User Defined Memory Origin Validity
  */
@@ -1231,8 +1437,11 @@ DEM_LOCAL boolean
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Checking DTC Origin Validity in Client
  */
@@ -1273,7 +1482,8 @@ DEM_LOCAL boolean
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the Client Request Info
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1388,7 +1598,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckClientLocked(uint8 ClientId)
 {
     return (Dem_ClientInfo[ClientId].ActiveAsyncOps > 0u); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
 #if ((DEM_DCM_CLIENT_NUMBER + DEM_J1939DCM_CLIENT_NUMBER) > 0u)
 /**
  * @brief         Set the data of a DTC filter.
@@ -1564,7 +1773,6 @@ DEM_LOCAL_INLINE boolean Dem_FilterDataCheckUseFdc(uint8 DcmClientId)
     /* PRQA S 4404 -- */
     return ret;
 }
-
 #if (DEM_OBDII_SUPPORT == STD_ON)
 /**
  * @brief 		  Get the UseFormatOBD flag of the given filter flags.
@@ -1582,7 +1790,6 @@ DEM_LOCAL_INLINE boolean Dem_FilterDataCheckUseFormatOBD(uint8 DcmClientId)
     return ret;
 }
 #endif
-
 /**
  * @brief 		  Get the severity mask stored in the filter object.
  * @param[in]     DcmClientId: Unique client id, assigned to the instance of the calling module.
@@ -1595,7 +1802,6 @@ DEM_LOCAL_INLINE uint8 Dem_FilterDataGetSeverityMask(uint8 DcmClientId)
 {
     return Dem_FilterDataInfo[DcmClientId].SeverityMask;
 }
-
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
 /**
  * @brief 		  Get the fault detection counter in the given filter object.
@@ -1611,7 +1817,6 @@ DEM_LOCAL_INLINE sint8 Dem_FilterDataGetFDC(uint8 DcmClientId)
 }
 #endif
 #endif
-
 /**
  * @brief 		  Set the Client Request Info
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1756,7 +1961,6 @@ DEM_LOCAL_INLINE Dem_GroupOfDTCNumType Dem_ClientCheckGroupDTC(uint8 ClientId, u
     return groupId;
 }
 #endif
-
 /**
  * @brief 		  Find the event configured to use the DTC number
  * @param[in]     DTC: Defines the DTC in respective format that is selected. If the DTC fits to a DTC group
@@ -1783,7 +1987,6 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_ClientFindEventFromUdsDtc(uint32 DTC, Dem_M
     }
     return eventId;
 }
-
 #if (DEM_J1939_SUPPORT == STD_ON)
 /**
  * @brief 		  Find the event configured to use the J1939 DTC number
@@ -1812,7 +2015,8 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_ClientFindEventFromJ1939Dtc(uint32 DTC, Dem
     return eventId;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Checking if a DTC number encodes a specific DTC.
  */
@@ -1850,7 +2054,10 @@ DEM_LOCAL Dem_EventIdType
     }
     return eventId;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Selects a DTC or DTC group as target for further operations.
  */
@@ -1898,7 +2105,8 @@ DEM_LOCAL void Dem_ClientSelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 /**
  * @brief 		  Returns the readout buffer entry
@@ -1912,7 +2120,6 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferEntryType* Dem_ClientGetReadoutBuffer(uint8 Dc
 {
     return &Dem_GetReadoutBuffer()[DcmClientId];
 }
-
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
 /**
  * @brief 		  Init the readout buffer entry  Extend Data Iterator
@@ -1972,7 +2179,6 @@ DEM_LOCAL_INLINE void
     readoutBuffer->ExtendedIterator           = ExtendedIterator;
 }
 #endif
-
 /**
  * @brief         Returns the snapshot iterator of the given readout buffer
  * @param[in]     DcmClientId: Identification of a client.
@@ -2051,9 +2257,7 @@ DEM_LOCAL_INLINE boolean Dem_ReadoutBufferCheckStoredDataAvailable(uint8 DcmClie
     return (Dem_GetReadoutBuffer()[DcmClientId].State == DEM_READOUTBUFFER_STATUS_IN_USE);
     /* PRQA S 4404 -- */
 }
-
 #if ((DEM_MAX_SIZE_OBDFREEZEFRAME > 0u) || (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u))
-
 /**
  * @brief         Initializes the snapshot entry iterator
  * @param[in]     OldFFIterator: Internal state for reporting SnapshotData record(s)
@@ -2080,7 +2284,8 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferFFIteratorType Dem_ReadoutBufferFFInit(Dem_Rea
     return lFFIterator;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initialize memory entry.
  */
@@ -2102,7 +2307,8 @@ DEM_LOCAL void Dem_ClientReadoutBufferInit(uint8 ClientId)
 #endif
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initialize a filter.
  * @param[in]     ClientId: Identification of a client.
@@ -2131,7 +2337,8 @@ DEM_LOCAL_INLINE void Dem_FilterDataInitDefault(uint8 ClientId)
         Dem_SetFilterData(dcmClientId, filterData);
     }
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check state of a ReadoutBuffer entry, save current request if it is new.
  */
@@ -2183,7 +2390,8 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Test if the DTC record update is disabled
  * @param[in]     ClientId: Identification of a client.
@@ -2204,8 +2412,9 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckDTCRecordUpdateDisabled(uint8 ClientId)
     /* PRQA S 4404 -- */
 }
 #endif
-
 #if (STD_ON == DCM_UDS_0X14)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  */
@@ -2250,7 +2459,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCSelectionResult(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  */
@@ -2299,9 +2511,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientResultForClearDTCGetDTCSelection(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Disables the event memory update of a specific DTC (only one at one time).
  */
@@ -2353,9 +2568,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Release a previously prepared memory entry.
  */
@@ -2379,7 +2597,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientEnableDTCRecordUpdate(uint8 ClientId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Populate readout buffer with data.
  */
@@ -2421,6 +2642,10 @@ DEM_LOCAL void Dem_ReadoutBufferFillData(uint8 ClientId)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2436,7 +2661,8 @@ DEM_LOCAL void Dem_FilterEventDataTask(void)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3473, 4399, 4461 ++ */ /* VL_Dem_3473, VL_Dem_4399, VL_Dem_4461 */
 /**
  * @brief         Set the active state of DTC setting
@@ -2651,6 +2877,7 @@ DEM_LOCAL_INLINE uint8 Dem_ResetDTCSettingStateProcessEnable(uint8 DTCSettingSta
     DEM_FLAG_RESET(state, DEM_DTCSETTING_PROCESS_ENABLE);
     return state;
 }
+
 /* PRQA S 3473, 4399, 4461 -- */
 
 /**
@@ -2693,7 +2920,8 @@ DEM_LOCAL_INLINE uint8 Dem_GetDTCSettingState(uint8 DcmClientId)
 {
     return Dem_GetClientSetting()[DcmClientId];
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check the DTC Setting state of Event
  */
@@ -2717,8 +2945,11 @@ DEM_LOCAL boolean Dem_CheckEventDTCSettingState(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (STD_ON == DCM_UDS_0X85)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Enable the DTC setting State
  */
@@ -2746,7 +2977,10 @@ DEM_LOCAL void Dem_DTCSettingEnable(uint8 ClientId)
         Dem_EnableTaskOnce(Dem_Task_DTCSetting);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Disable the DTC setting
  */
@@ -2773,7 +3007,11 @@ DEM_LOCAL void Dem_DTCSettingDisable(uint8 ClientId)
         Dem_EnableTaskOnce(Dem_Task_DTCSetting);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2804,7 +3042,10 @@ DEM_LOCAL void Dem_ProcessQueueEventDTCSetting(Dem_EventIdType EventId, uint8 Dc
         Dem_NotiInitMonitorForEvent(EventId, DEM_INIT_MONITOR_REENABLED);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief DTC setting Process.
  */
@@ -2854,6 +3095,10 @@ DEM_LOCAL void Dem_DTCSettingProcess(uint8 ClientId)
     Dem_LeaveCritical_StateManager();
     /** Leave Critical Section: StateManager */
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2869,8 +3114,9 @@ DEM_LOCAL void Dem_DTCSettingTask(void)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Initializes the Client Info for all clients.
  * @reentrant     FALSE
@@ -2894,8 +3140,9 @@ DEM_LOCAL_INLINE void Dem_InitClientInfo(void)
     Dem_InitClientDTCSetting();
 #endif
 }
-
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Suppress event or release event suppression as requested by the client
  */
@@ -2941,8 +3188,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCSuppression(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Gets the event memory overflow indication status.
@@ -2970,7 +3218,6 @@ DEM_LOCAL_INLINE Std_ReturnType
     return ret;
 }
 #endif
-
 #if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Returns the number of entries currently stored in the requested event memory.
@@ -3000,8 +3247,9 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetNumberOfEventMemoryEntries(
     return ret;
 }
 #endif
-
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Suppress event or release event suppression as requested by the client
  */
@@ -3016,10 +3264,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCSuppression(uint8 ClientId, boolean Sup
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if ((DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON) || (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the DTC Status availability mask of the selected fault memory.
  */
@@ -3044,9 +3295,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCStatusAvailabilityMask(
 #endif
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the current Uds status of a selected DTC
  */
@@ -3103,9 +3357,12 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetStatusOfDTC(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the severity of a selected DTC
  */
@@ -3162,7 +3419,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetSeverityOfDTC(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the functional unit of a selected DTC
  */
@@ -3220,8 +3480,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetFunctionalUnitOfDTC(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_CLIENT_REPORT_EVENT_SIZE > 0u)
 /**
  * @brief         Clear the bitfield of reported events for the given filter.
@@ -3235,7 +3496,8 @@ DEM_LOCAL_INLINE void Dem_FilterDataResetReportedEvents(uint8 DcmClientId)
     Dem_MemSet((uint8*)&Dem_ReportedEventsOfFilter[DcmClientId], 0u, sizeof(Dem_ReportedEventsType));
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initialize a filter for a 'filter DTC' request.
  */
@@ -3273,8 +3535,11 @@ DEM_LOCAL void
     }
     Dem_SetFilterData(ClientId, filterData);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3473, 4399, 4461,6040 ++ */ /* VL_Dem_3473, VL_Dem_4399, VL_Dem_4461,VL_MTR_Dem_STPAR */
 /**
  * @brief Initializes a DTC filter with the given criteria.
@@ -3361,11 +3626,14 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
         }
 
         /** Check if output format of DTCs shall be OBD */
-        if ((DTCFormat == DEM_DTC_FORMAT_OBD)
+        if
 #if (DEM_SUPPORTED_OBD_UDS_DTC_SEPARATION == STD_ON)
-            || (DTCFormat == DEM_DTC_FORMAT_OBD_3BYTE)
+            (
 #endif
-        )
+                (DTCFormat == DEM_DTC_FORMAT_OBD)
+#if (DEM_SUPPORTED_OBD_UDS_DTC_SEPARATION == STD_ON)
+                || (DTCFormat == DEM_DTC_FORMAT_OBD_3BYTE))
+#endif
         {
 #if (DEM_OBDII_SUPPORT == STD_ON)
             DEM_FLAG_SET(filterData.FilterFlags, DEM_FILTERDATA_FILTERFLAGS_USEFORMATOBD);
@@ -3386,11 +3654,15 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3473, 4399, 4461,6040 -- */
 #endif
 
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_PERMANENT_MEMORY_NUMBER > 0u))
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the number of filtered DTCs for permanent memory.
  */
@@ -3419,9 +3691,12 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId)
     }
     return numberOfEvents;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1258,6030,6070 ++ */ /* VL_Dem_1258,VL_MTR_Dem_STMIF,VL_MTR_Dem_STCAL */
 /**
  * @brief Test whether a given EventId matches the filter.
@@ -3477,9 +3752,13 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, De
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1258,6030,6070 -- */
 
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the number of filtered events in a standard event memory.
  */
@@ -3502,9 +3781,12 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId)
     }
     return numberOfEvents;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Fetch number of DTCs matching the client specific filter settings.
  */
@@ -3526,9 +3808,12 @@ DEM_LOCAL uint16 Dem_ClientFilterNumberMemory(uint8 ClientId)
     }
     return numberOfEvents;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1252 ++ */ /* VL_Dem_1252 */
 /**
  * @brief Tests whether an event is already reported.
@@ -3546,9 +3831,13 @@ DEM_LOCAL boolean Dem_FilterDataCheckEventReported(uint8 ClientId, Dem_EventIdTy
     /* PRQA S 4404, 4397, 1891 -- */
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1252 -- */
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Iterates events in the event memory matching the Dcm DTC filter.
  */
@@ -3597,7 +3886,8 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryByEvent(uint8 ClientId, cons
     /** else FindEventId = DEM_EVENT_INVALID initially set */
     return findEventId;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 /**
  * @brief         Marks an event as reported in the corresponding filter's bitfield.
@@ -3621,7 +3911,8 @@ DEM_LOCAL_INLINE void Dem_FilterDataSetEventReported(uint8 ClientId, Dem_EventId
     DEM_FLAG_SET(wordPtr[wordPosition], DEM_BIT(bitPosition));
     /* PRQA S 3473, 1891, 4397 -- */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief If chronological reporting is required this function iterates  all events in order of occurrence.
  */
@@ -3684,11 +3975,15 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const
     }
     return eventId;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
 #if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Iterates events in permanent memory matching the Dcm DTC filter.
  */
@@ -3723,9 +4018,12 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterPermanentByEvent(uint8 ClientId, c
     Dem_SetFilterData(dcmClientId, filterData);
     return eventId;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the DTC filter function corresponding to the DTC filtering strategy.
  */
@@ -3756,10 +4054,13 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
     }
     return lDTCFilterFunction;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (                                                                                                        \
     (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON) || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON) \
     || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching event the filter criteria set with Dem_ClientSetDTCFilter
  */
@@ -3810,6 +4111,8 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_Fi
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
 
@@ -3851,9 +4154,10 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckFreezeFrameFilterSet(uint8 ClientId)
     return (Dem_FFIteratorGetDTCFormat(Dem_GetDcmClientIdOfClient(ClientId)) != DEM_FREEZEFRAMEITERATOR_DTCFORMAT_INIT);
     /* PRQA S 4404 -- */
 }
-
 #if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets a freeze frame record filter with the given criteria.
  */
@@ -3894,6 +4198,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_
     Dem_FFIteratorStartIterator(dcmClientId, lDtcFormat, memoryIndex);
     return E_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
@@ -3933,6 +4239,8 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetNextFreezeFrameRecord(uint8 ClientI
 #endif
 
 #if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get a DTC based on occurrence time.
  */
@@ -3970,6 +4278,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCByOccurrenceTime(uint8 ClientId, Dem_DT
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /**
@@ -3987,7 +4297,8 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckDTCRecordUpdateRequested(uint8 ClientId)
     const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
     return (readoutBuffer->State != DEM_READOUTBUFFER_STATUS_UNUSED); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Select the the given extended data record
  */
@@ -4059,7 +4370,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectExtendedDataRecord(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Test if an extended data record is selected for the given ClientId.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module
@@ -4091,8 +4403,9 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckFFRecordSelected(uint8 ClientId)
     const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
     return readoutBuffer->FFIterator.SnapshotSelected;
 }
-
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1252 ++ */ /* VL_Dem_1252 */
 /**
  * @brief Calculates the size of an extended data record
@@ -4123,7 +4436,10 @@ DEM_LOCAL uint32 Dem_GetSizeOfEDCalculateSize(
     return sizeOfExtRec;
 }
 /* PRQA S 1252 -- */
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copies an extended data record into the given buffer
  */
@@ -4166,7 +4482,10 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Test whether filter for extended data record(s) matches
  */
@@ -4213,7 +4532,10 @@ DEM_LOCAL boolean Dem_ClientGetNextEDChecktRecordMatch(uint8 ClientId, uint8 Rec
     }
     return match;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the size of one or all extended data record(s)
  */
@@ -4253,11 +4575,14 @@ DEM_LOCAL Std_ReturnType
     else
     {
         /** Look for all supported records */
-        if ((recordNumber == DEM_RECORD_NUMBER_ALL)
+        if
 #if (DEM_OBDII_SUPPORT == STD_ON)
-            || (recordNumber == DEM_RECORD_NUMBER_OBDALL)
+            (
 #endif
-        )
+                (recordNumber == DEM_RECORD_NUMBER_ALL)
+#if (DEM_OBDII_SUPPORT == STD_ON)
+                || (recordNumber == DEM_RECORD_NUMBER_OBDALL))
+#endif
         {
             uint8                  extendedEntryIndex = 0u;
             Dem_EDRecordRefNumType lEDRNStart         = lEDIterator.EDRNStart;
@@ -4288,7 +4613,10 @@ DEM_LOCAL Std_ReturnType
     return ret;
 }
 /* PRQA S 6030 -- */
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Validates the request to get an extended data record in UDS format and copies the data.
  */
@@ -4335,7 +4663,11 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetNextExtendedDataRecord(uint8 ClientId, uin
 #endif
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the iterator for the selected event.
  */
@@ -4355,7 +4687,10 @@ DEM_LOCAL void Dem_ReadoutBufferSelectFF(uint8 DcmClientId, uint8 RecordNumber)
     Dem_InitFFIterator(&(lFFIterator.FFEntryIter), 0u, 0u);
     Dem_ReadoutBufferSetFFIterator(DcmClientId, lFFIterator);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrameSelection.
  */
@@ -4386,7 +4721,10 @@ DEM_LOCAL void Dem_GetFFInitFFIterator(uint8 DcmClientId)
     }
     Dem_ReadoutBufferSetFFIterator(DcmClientId, lFFIterator);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Select the first snapshot record source
  */
@@ -4459,7 +4797,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectFirstSource(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the size of one or all formatted snapshot record() stored for a DTC (19 04).
  */
@@ -4496,8 +4837,11 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetSizeOfFFSelection(uint8 ClientId, uint32* 
 #endif
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reads the OBD freeze frame
  */
@@ -4523,9 +4867,12 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataObd(uint8 ClientId, Dem_DestinationBuf
     Dem_ReadoutBufferSetFFIterator(dcmClientId, lFFIterator);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reads the freeze frame
  */
@@ -4606,9 +4953,13 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataStd(uint8 ClientId, Dem_DestinationBuf
     Dem_ReadoutBufferSetFFIterator(dcmClientId, lFFIterator);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Select the next snapshot record source
  */
@@ -4648,7 +4999,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectNextSource(uint8 DcmClientId)
 
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copies data into the given buffer.
  */
@@ -4702,9 +5056,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetNextFreezeFrameData(uint8 ClientId, uint8*
     }
     return ret;
 }
-#endif
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+#endif
 #endif
 #endif

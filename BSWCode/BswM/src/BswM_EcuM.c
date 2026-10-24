@@ -49,6 +49,8 @@
 void BswM_InitEcuMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITECUMREQUESTPORTS);
+#if ((BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON) || (BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON))
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -57,11 +59,6 @@ void BswM_InitEcuMRequestPorts(void)
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
     boolean                             result;
-    EcuM_WakeupSourceType               numOfEcuMWakeupSrc;
-    EcuM_WakeupSourceType               wkSrcIdx;
-
-    uint8 numOfEcuMRunRqstSource;
-    uint8 runRqstIdx;
 
     result = BswM_GetPartitionLcPCCfgPtr(
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -74,8 +71,8 @@ void BswM_InitEcuMRequestPorts(void)
         modeRqstPCfgPtr = bswmPartPCCfgPtr->modeRqstPCCfg;
         modeRqstPtr     = bswmPartPCCfgPtr->modeRqstPortRunPtr;
 #if (BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON)
-        numOfEcuMWakeupSrc = modeRqstPCfgPtr->numOfEcuMWakeupSource;
-        for (wkSrcIdx = 0u; wkSrcIdx < numOfEcuMWakeupSrc; wkSrcIdx++)
+        EcuM_WakeupSourceType numOfEcuMWakeupSrc = modeRqstPCfgPtr->numOfEcuMWakeupSource;
+        for (EcuM_WakeupSourceType wkSrcIdx = 0u; wkSrcIdx < numOfEcuMWakeupSrc; wkSrcIdx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->ecumWkInitstate)
             {
@@ -89,8 +86,8 @@ void BswM_InitEcuMRequestPorts(void)
 #endif /*BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON*/
 
 #if (BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON)
-        numOfEcuMRunRqstSource = modeRqstPCfgPtr->numOfEcuMRunRqstSource;
-        for (runRqstIdx = 0u; runRqstIdx < numOfEcuMRunRqstSource; runRqstIdx++)
+        uint8 numOfEcuMRunRqstSource = modeRqstPCfgPtr->numOfEcuMRunRqstSource;
+        for (uint8 runRqstIdx = 0u; runRqstIdx < numOfEcuMRunRqstSource; runRqstIdx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->ecumRunRqstInitstate)
             {
@@ -106,11 +103,18 @@ void BswM_InitEcuMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITECUMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
+#endif
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITECUMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current wakeup status for a specified wakeup source.
  * The function checks if the given wakeup source is valid and updates its status accordingly.
@@ -121,6 +125,8 @@ void BswM_InitEcuMRequestPorts(void)
 void BswM_EcuM_CurrentWakeup(EcuM_WakeupSourceType source, EcuM_WakeupStatusType state)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_ECUM_CURRENT_WAKEUP, source, state);
+
 #if (BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -186,9 +192,15 @@ void BswM_EcuM_CurrentWakeup(EcuM_WakeupSourceType source, EcuM_WakeupStatusType
     (void)source;
     (void)state;
 #endif /*BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_ECUM_CURRENT_WAKEUP);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current wakeup status for a specified wakeup source.
  * The function checks if the partition configuration pointer is valid and returns the wakeup status.
@@ -209,8 +221,12 @@ EcuM_WakeupStatusType BswM_GetEcuMWakeSrcStatus(EcuM_WakeupSourceType wkSrcIdx)
     }
     return wkStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ECUMWAKEUPSOURCE_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the requested state transition for the EcuM module.
  * This function updates the runtime request status for the specified state and evaluates rules if the process type is
@@ -220,6 +236,8 @@ EcuM_WakeupStatusType BswM_GetEcuMWakeSrcStatus(EcuM_WakeupSourceType wkSrcIdx)
 void BswM_EcuM_RequestedState(EcuM_StateType State, EcuM_RunStatusType CurrentState)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_ECUM_REQUESTED_STATE, State, CurrentState);
+
 #if (BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -284,9 +302,15 @@ void BswM_EcuM_RequestedState(EcuM_StateType State, EcuM_RunStatusType CurrentSt
     (void)State;
     (void)CurrentState;
 #endif /*BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_ECUM_REQUESTED_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the runtime request status for a specified EcuM state.
  * The function checks if the partition configuration pointer is valid and returns the request status.
@@ -307,8 +331,12 @@ EcuM_RunStatusType BswM_GetEcuMRunRqstStatus(EcuM_StateType rqstIdx)
     }
     return rqstStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ECUMRUNREQUESTINDICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current state of EcuM and processes any immediate rules associated with the new state.
  * This function performs error checking to ensure the system is initialized and the state is valid.
@@ -319,6 +347,8 @@ EcuM_RunStatusType BswM_GetEcuMRunRqstStatus(EcuM_StateType rqstIdx)
 void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_ECUM_CURRENT_STATE, CurrentState);
+
 #if (BSWM_ECUMINDICATION_ENABLED == STD_ON)
     const BswM_ModeRqstPortLCfgType* modeRqstLCfgPtr;
     BswM_RuleIndexType               numOfRules;
@@ -329,13 +359,21 @@ void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
 #endif /* BSWM_PB_CONFIG_ENABLED */
     const BswM_PartitionLCfgType* bswmPartLCfgPtr;
-    const BswM_PCCfgType*         runPCCfgPtr;
-    boolean                       result;
-
+    boolean                       result = FALSE;
+    EcuM_StateType*               statePtr;
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+    statePtr = &BswM_RuntimeStatus.ecumState;
+#else
+    const BswM_PCCfgType* runPCCfgPtr;
     result = BswM_GetCorePCCfgPtr(&runPCCfgPtr);
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = BSWM_E_OK;
-    if ((BSWM_UNINITED == runPCCfgPtr->runtimeStatusPtr->bswmInitState) || (FALSE == result))
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+    if (BSWM_UNINITED == BswM_RuntimeStatus.bswmInitState)
+#else
+    if ((FALSE == result) || (BSWM_UNINITED == runPCCfgPtr->runtimeStatusPtr->bswmInitState))
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
     {
         errorId = BSWM_E_UNINIT;
     }
@@ -347,9 +385,13 @@ void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
         errorId = BSWM_E_REQ_MODE_OUT_OF_RANGE;
     }
     else
+#else
+    (void)result;
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
-        (void)result;
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF)
+        statePtr = &(runPCCfgPtr->runtimeStatusPtr->ecumState);
+#endif
         result = BswM_GetPartitionLcPCCfgPtr(
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
             &bswmPartPbConfigPtr,
@@ -358,8 +400,8 @@ void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
             &bswmPartLCfgPtr);
         if (result)
         {
-            runPCCfgPtr->runtimeStatusPtr->ecumState = CurrentState;
-            modeRqstLCfgPtr                          = bswmPartLCfgPtr->modeRqstLCfg;
+            *statePtr       = CurrentState;
+            modeRqstLCfgPtr = bswmPartLCfgPtr->modeRqstLCfg;
             if (BSWM_IMMEDIATE == modeRqstLCfgPtr->ecuMState->process)
             {
                 numOfRules = modeRqstLCfgPtr->ecuMState->belongToRlueNum;
@@ -390,9 +432,15 @@ void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
 #else
     (void)CurrentState;
 #endif /*BSWM_ECUMINDICATION_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_ECUM_CURRENT_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_ECUMINDICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current state of EcuM from the runtime configuration.
  * The function fetches the configuration pointer and returns the current EcuM state.
@@ -401,14 +449,18 @@ void BswM_EcuM_CurrentState(EcuM_StateType CurrentState)
 EcuM_StateType BswM_GetEcuMState(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+    return BswM_RuntimeStatus.ecumState;
+#else
     const BswM_PCCfgType* runPCCfgPtr;
     (void)BswM_GetCorePCCfgPtr(&runPCCfgPtr);
     return runPCCfgPtr->runtimeStatusPtr->ecumState;
+#endif /*SWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
 }
-#endif /*BSWM_ECUMINDICATION_ENABLED == STD_ON*/
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /*BSWM_ECUMINDICATION_ENABLED == STD_ON*/
+
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_ECUM_ENABLED == STD_ON*/

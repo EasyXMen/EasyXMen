@@ -58,11 +58,15 @@
  *  V2.3.3    20250620  tong.zhao     Remove the restriction that the sending condition for the periodic Pdu in the If
  *                                    cycle is based on receiving the previous transmission's Confirmation.
  *  V2.3.4    20251225  jianyu.yang   Add procedure to clear TxIpduStatePtr->RptNum in Com_MainFunction_SendPdu to meet
- SWS_Com_00467.
+ *                                    SWS_Com_00467.
  *  V2.3.5    20260119  jianyu.yang   Modify transmiting condition in Com_TriggerIPDUSend only valid in TP type and fix
- build bug in Com_ResetTxIpduMDT.
+ *                                    build bug in Com_ResetTxIpduMDT.
  *  V2.3.6    20260228  jianyu.yang   Modify buiding conditions of functions related to Gateway.
  *  V2.3.7    20260322  jianyu.yang   Put TMC of TxSignal,TxGroupSignal and DescriptionSignal in to a same buffer.
+ *  V2.3.8    20260415  jianyu.yang   In RxIndication allow the reception of Pdu with length longer than expected.
+ *  V2.3.9    20260701  Tianyu.wang   When a pduGroup stop, pdus in this group should continue run if it is inside any
+ *                                    other runing pduGroups at the same time
+ *  V2.3.10   20260714  Tianyu.wang   Fix signal pack and unpack logic
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -279,11 +283,11 @@ extern "C" {
 #define COM_AR_RELEASE_REVISION_VERSION (0u)
 #define COM_SW_MAJOR_VERSION            (2u)
 #define COM_SW_MINOR_VERSION            (3u)
-#define COM_SW_PATCH_VERSION            (6u)
+#define COM_SW_PATCH_VERSION            (10u)
 /* ===================================================== macros ===================================================== */
-#define COM_SERVICE_NOT_AVAILABLE ((uint8)0x80u)
-#define COM_BUSY                  ((uint8)0x81u)
-#define COM_INSTANCE_ID           (0x00u)
+#define COM_SERVICE_NOT_AVAILABLE       ((uint8)0x80u)
+#define COM_BUSY                        ((uint8)0x81u)
+#define COM_INSTANCE_ID                 (0x00u)
 
 /*Service ID*/
 #define COM_INIT_ID                        ((uint8)0x01u)
@@ -350,7 +354,11 @@ extern const uint16 Com_PartitionList[COM_MAX_PARTITION_NUMBER];
  * @synchronous   TRUE
  * @trace         CPD-61720
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_Init(const Com_ConfigType* config);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         This service stops the inter-ECU communication. All started
  *                I-PDU groups are stopped and have to be started again, if
@@ -360,7 +368,11 @@ extern void Com_Init(const Com_ConfigType* config);
  * @synchronous   TRUE
  * @trace         CPD-61721
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_DeInit(void);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
 /**
@@ -371,7 +383,11 @@ extern void Com_DeInit(void);
  * @synchronous   TRUE
  * @trace         CPD-61722
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_IpduGroupStart(Com_IpduGroupIdType IpduGroupId, boolean initialize);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
@@ -382,7 +398,11 @@ extern void Com_IpduGroupStart(Com_IpduGroupIdType IpduGroupId, boolean initiali
  * @synchronous   TRUE
  * @trace         CPD-61723
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_IpduGroupStop(Com_IpduGroupIdType IpduGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Enables the reception deadline monitoring for the I-PDUs within the given IPDU group.
@@ -391,7 +411,11 @@ extern void Com_IpduGroupStop(Com_IpduGroupIdType IpduGroupId);
  * @synchronous   TRUE
  * @trace         CPD-66058
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Disables the reception deadline monitoring for the I-PDUs within the given IPDU group.
  * @param[in]     IpduGroupId: Id of I-PDU group where reception DM shall be disabled.
@@ -399,7 +423,11 @@ extern void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId);
  * @synchronous   TRUE
  * @trace         CPD-61725
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_DisableReceptionDM(Com_IpduGroupIdType IpduGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Returns the status of the AUTOSAR COM module.
  * @retval        COM_UNINIT: the AUTOSAR COM module is not initialized and not usable
@@ -408,7 +436,11 @@ extern void Com_DisableReceptionDM(Com_IpduGroupIdType IpduGroupId);
  * @synchronous   TRUE
  * @trace         CPD-61726
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Com_StatusType Com_GetStatus(void);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 #if (STD_ON == COM_VERSION_INFO_API)
 /**
@@ -417,7 +449,11 @@ extern Com_StatusType Com_GetStatus(void);
  * @synchronous   TRUE
  * @trace         CPD-61727
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         The service Com_SendSignal updates the signal(include group signal) object
@@ -432,7 +468,11 @@ extern void Com_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous   FALSE
  * @trace         CPD-61728
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendSignal(Com_SignalIdType SignalId, const void* SignalDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         The service Com_SendDynSignal updates the signal object identified by SignalId
  *                with the signal referenced by the SignalDataPtr parameter.
@@ -447,7 +487,11 @@ extern uint8 Com_SendSignal(Com_SignalIdType SignalId, const void* SignalDataPtr
  * @synchronous   FALSE
  * @trace         CPD-61729
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendDynSignal(Com_SignalIdType SignalId, const void* SignalDataPtr, uint16 Length);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Com_ReceiveSignal copies the data of the signal identified by SignalId to the location specified
  *                by SignalDataPtr.
@@ -461,7 +505,11 @@ extern uint8 Com_SendDynSignal(Com_SignalIdType SignalId, const void* SignalData
  * @synchronous   TRUE
  * @trace         CPD-61750
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveSignal(Com_SignalIdType SignalId, void* SignalDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Com_ReceiveDynSignal copies the data of the signal identified by SignalId to the
  *                location specified by SignalDataPtr and stores the length of the dynamical length
@@ -478,7 +526,11 @@ extern uint8 Com_ReceiveSignal(Com_SignalIdType SignalId, void* SignalDataPtr);
  * @synchronous   TRUE
  * @trace         CPD-61751
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveDynSignal(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         The service Com_SendSignalGroup copies the content of the associated shadow buffer to the
  *                associated I-PDU.
@@ -491,7 +543,11 @@ extern uint8 Com_ReceiveDynSignal(Com_SignalIdType SignalId, void* SignalDataPtr
  * @synchronous   FALSE
  * @trace         CPD-61730
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendSignalGroup(Com_SignalGroupIdType SignalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         The service Com_ReceiveSignalGroup copies the received signal group from the I-PDU to the shadow
  * buffer.
@@ -503,7 +559,11 @@ extern uint8 Com_SendSignalGroup(Com_SignalGroupIdType SignalGroupId);
  * @synchronous   TRUE
  * @trace         CPD-61731
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
 /**
@@ -519,7 +579,11 @@ extern uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId);
  * @synchronous   FALSE
  * @trace         CPD-61732
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_SendSignalGroupArray(Com_SignalGroupIdType SignalGroupId, const uint8* SignalGroupArrayPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
 /**
@@ -534,7 +598,11 @@ extern uint8 Com_SendSignalGroupArray(Com_SignalGroupIdType SignalGroupId, const
  * @synchronous   TRUE
  * @trace         CPD-61733
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_ReceiveSignalGroupArray(Com_SignalGroupIdType SignalGroupId, uint8* SignalGroupArrayPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         The service Com_InvalidateSignal invalidates the signal with the given SignalId
@@ -548,7 +616,11 @@ extern uint8 Com_ReceiveSignalGroupArray(Com_SignalGroupIdType SignalGroupId, ui
  * @synchronous   FALSE
  * @trace         CPD-61734
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_InvalidateSignal(Com_SignalIdType SignalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         The service Com_InvalidateSignalGroup invalidates all group signals of the signal
  *                group with the given SignalGroupId by setting their values to their configured
@@ -562,7 +634,11 @@ extern uint8 Com_InvalidateSignal(Com_SignalIdType SignalId);
  * @synchronous   FALSE
  * @trace         CPD-61735
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern uint8 Com_InvalidateSignalGroup(Com_SignalGroupIdType SignalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         By a call to Com_TriggerIPDUSend the I-PDU with the given ID is triggered for transmission.
  * @param[in]     PduId: The I-PDU-ID of the I-PDU that shall be triggered for sending
@@ -572,7 +648,11 @@ extern uint8 Com_InvalidateSignalGroup(Com_SignalGroupIdType SignalGroupId);
  * @synchronous   TRUE
  * @trace         CPD-61736
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #if (STD_ON == COM_METADATA_SUPPORT)
 /**
  * @brief         By a call to Com_TriggerIPDUSendWithMetaData the AUTOSAR COM module
@@ -588,7 +668,11 @@ extern Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId);
  * @trace         CPD-61737
  */
 /* PRQA S 1712 ++ */ /* VL_Com_1712 */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uint8* MetaData);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1712 -- */
 #endif
 /**
@@ -601,7 +685,11 @@ extern Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uin
  * @synchronous   TRUE
  * @trace         CPD-61738
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_SwitchIpduTxMode(PduIdType PduId, boolean Mode);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         This function performs the processing of the AUTOSAR COM module's receive processing that
  *                are not directly handled within the COM's functions invoked by the PDU-R, for example
@@ -611,7 +699,11 @@ extern void Com_SwitchIpduTxMode(PduIdType PduId, boolean Mode);
  * @synchronous   TRUE
  * @trace         CPD-61747
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionRx(Com_MainFunctionIdType RxMainFunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         This function performs the processing of the AUTOSAR COM module's transmission activities that
  *                are not directly handled within the COM's function invoked by the RTE, for example Com_SendSignal.
@@ -620,7 +712,11 @@ extern void Com_MainFunctionRx(Com_MainFunctionIdType RxMainFunctionId);
  * @synchronous   TRUE
  * @trace         CPD-61748
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionTx(Com_MainFunctionIdType TxMainFunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Calls the signal gateway part of the AUTOSAR COM module to forward received signals to be routed.
  * @param[in]     RouteSignalsMainFunctionId: MainfunctionId for RouteSignals.
@@ -628,7 +724,11 @@ extern void Com_MainFunctionTx(Com_MainFunctionIdType TxMainFunctionId);
  * @synchronous   TRUE
  * @trace         CPD-66392
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 extern void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /* PRQA S 5015 -- */
 #ifdef __cplusplus

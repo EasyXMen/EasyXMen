@@ -118,38 +118,60 @@ typedef enum
 
 /* =========================================== external data declarations =========================================== */
 
+#define DOIP_START_SEC_VAR_INIT_32
+#include "DoIP_MemMap.h"
 /**
  * @brief Status of DoIP
  *        @range 0..1
  */
 extern DOIP_InitStatusType DoIP_InitStatus;
+#define DOIP_STOP_SEC_VAR_INIT_32
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_INIT_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief PC configuration
  *        @range NA
  */
 extern const DoIP_PCConfigType* DoIP_PCCfgPtr;
+#define DOIP_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_CLEARED_PTR
+#include "DoIP_MemMap.h"
 /**
  * @brief PB configuration
  *        @range NA
  */
 extern const DoIP_PBConfigType* DoIP_PBCfgPtr;
+#define DOIP_STOP_SEC_VAR_CLEARED_PTR
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "DoIP_MemMap.h"
 /**
  * @brief Callbacks in DoIPGeneral configuration
  *        @range NA
  */
 extern const DoIP_GeneralCfgType DoIP_General;
+#define DOIP_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "DoIP_MemMap.h"
 
+#define DOIP_START_SEC_VAR_CLEARED_BOOLEAN
+#include "DoIP_MemMap.h"
 /**
  * @brief GID synchronization Status
  *        @range 0..1
  */
 extern boolean DoIP_GidSynStatus;
+#define DOIP_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "DoIP_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Returns the smaller value in the parameter.
  * @param[in]   x: Participate in comparison.
@@ -160,6 +182,10 @@ extern boolean DoIP_GidSynStatus;
  * @trace       CPD-PLACEHOLDER
  */
 PduLengthType DOIP_MIN(PduLengthType x, PduLengthType y);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Check version field.
@@ -173,6 +199,10 @@ PduLengthType DOIP_MIN(PduLengthType x, PduLengthType y);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DOIP_GENERICHEADER_CHECK(const uint8* header, PduLengthType sduLen);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       transfer byte to short.
@@ -183,6 +213,10 @@ boolean DOIP_GENERICHEADER_CHECK(const uint8* header, PduLengthType sduLen);
  * @trace       CPD-PLACEHOLDER
  */
 uint16 DOIP_U8_2_U16(const uint8* array);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       transfer byte to int.
@@ -193,6 +227,10 @@ uint16 DOIP_U8_2_U16(const uint8* array);
  * @trace       CPD-PLACEHOLDER
  */
 uint32 DOIP_U8_2_U32(const uint8* array);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       transfer short to byte.
@@ -204,6 +242,10 @@ uint32 DOIP_U8_2_U32(const uint8* array);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_u16_2_u8(uint8* array, uint16 data);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       transfer int to byte.
@@ -215,6 +257,10 @@ void DoIP_u16_2_u8(uint8* array, uint16 data);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_u32_2_u8(uint8* array, uint32 data);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Copy data.
@@ -227,6 +273,10 @@ void DoIP_u32_2_u8(uint8* array, uint32 data);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_MemCpy(uint8* dest, const uint8* src, PduLengthType len);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Open Or close connection.
@@ -239,6 +289,10 @@ void DoIP_MemCpy(uint8* dest, const uint8* src, PduLengthType len);
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_SwitchConnection(uint16 soadTxPduRef, boolean assignment, boolean isOpen);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Close connection.
@@ -250,6 +304,8 @@ boolean DoIP_SwitchConnection(uint16 soadTxPduRef, boolean assignment, boolean i
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_CloseSoCon(SoAd_SoConIdType soConId, boolean isAbort);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 #ifdef __cplusplus
 }

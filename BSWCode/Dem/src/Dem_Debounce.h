@@ -333,6 +333,8 @@ typedef void (*Dem_DebounceCounterCalculFunctionPtr)(Dem_CounterBasedInfoPtrType
 
 /* ========================================== internal function declarations ======================================== */
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Call function to Update Debounce Value Max
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -341,6 +343,10 @@ typedef void (*Dem_DebounceCounterCalculFunctionPtr)(Dem_CounterBasedInfoPtrType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Call function to resets the maximum debouncing value
@@ -350,7 +356,11 @@ DEM_LOCAL void Dem_DebounceUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceResetDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Call function to Returns the fault detection counter.
@@ -361,8 +371,12 @@ DEM_LOCAL void Dem_DebounceResetDebounceValueMax(Dem_BaseInfoConstPtrConstType B
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_DebounceGetFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Call function to Update Debounce Value Max
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -375,9 +389,13 @@ DEM_LOCAL Std_ReturnType Dem_DebounceGetFaultDetectionCounter(Dem_BaseInfoConstP
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_DebounceGetMaxFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_COUNTER_DEBOUNCCE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Debounce counter initialization
  * @param[in]     EventId: The event ID
@@ -388,6 +406,10 @@ DEM_LOCAL Std_ReturnType Dem_DebounceGetMaxFaultDetectionCounter(Dem_BaseInfoCon
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL sint8 Dem_CalculateCounterFDC(Dem_EventIdType EventId, sint16 DebounceValue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Calculate of Prepassed function
@@ -397,6 +419,10 @@ DEM_LOCAL sint8 Dem_CalculateCounterFDC(Dem_EventIdType EventId, sint16 Debounce
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebCounterCalculatePrepassed(Dem_CounterBasedInfoPtrType DebounceCounterPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Calculate of passed function
@@ -406,6 +432,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePrepassed(Dem_CounterBasedInfoPtrType Debo
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebCounterCalculatePassed(Dem_CounterBasedInfoPtrType DebounceCounterPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Calculate of Prefailed function
@@ -415,6 +445,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePassed(Dem_CounterBasedInfoPtrType Debounc
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebCounterCalculatePrefailed(Dem_CounterBasedInfoPtrType DebounceCounterPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Calculate of failed function
@@ -424,6 +458,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePrefailed(Dem_CounterBasedInfoPtrType Debo
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebCounterCalculateFailed(Dem_CounterBasedInfoPtrType DebounceCounterPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
 /**
@@ -440,6 +478,10 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceCounterInit(
     Dem_CounterBasedInfoType* const DebounceCounterPtr,
     Dem_EventIdType                 EventId,
     Dem_SatelliteDataType           SatelliteData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Calculate function
@@ -452,6 +494,10 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceCounterInit(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DebounceCounterCalculate(Dem_BaseInfoPtrType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Freeze function
@@ -461,6 +507,10 @@ DEM_LOCAL boolean Dem_DebounceCounterCalculate(Dem_BaseInfoPtrType BaseInfoPtr);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceCounterFreeze(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Reset function
@@ -470,6 +520,10 @@ DEM_LOCAL void Dem_DebounceCounterFreeze(Dem_BaseInfoConstPtrConstType BaseInfoP
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceCounterReset(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Get Debouncing State function
@@ -480,8 +534,12 @@ DEM_LOCAL void Dem_DebounceCounterReset(Dem_BaseInfoConstPtrConstType BaseInfoPt
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_DebouncingStateType Dem_DebounceCounterGetDebouncingState(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce counter Update Debounce Value Max function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -490,6 +548,10 @@ DEM_LOCAL Dem_DebouncingStateType Dem_DebounceCounterGetDebouncingState(Dem_Base
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceCounterUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief       Debounce counter Reset Debounce Value Max function
@@ -499,7 +561,11 @@ DEM_LOCAL void Dem_DebounceCounterUpdateDebounceValueMax(Dem_BaseInfoConstPtrCon
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceCounterResetDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Get Fault Detection Counter function
@@ -514,8 +580,12 @@ DEM_LOCAL void Dem_DebounceCounterResetDebounceValueMax(Dem_BaseInfoConstPtrCons
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceCounterGetFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce counter Get Max Fault Detection Counter function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -529,7 +599,11 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceCounterGetMaxFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Get Debouncing Result function
@@ -545,6 +619,10 @@ DEM_LOCAL Std_ReturnType
 DEM_LOCAL Dem_SatelliteDataType Dem_DebounceCounterGetDebouncingResult(
     Dem_BaseInfoConstPtrConstType BaseInfoPtr,
     Dem_SatelliteDataType         SatelliteData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce counter Restore Debounce Value function
@@ -564,9 +642,13 @@ DEM_LOCAL Dem_SatelliteDataType Dem_DebounceCounterRestoreDebounceValue(
     Dem_SatelliteDataType         SatelliteData,
     sint16                        Value,
     boolean                       ExpectedThreshold);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Debounce time Calculate Fault Detection Counter
  * @param[in]     EventId: The event ID
@@ -578,6 +660,10 @@ DEM_LOCAL Dem_SatelliteDataType Dem_DebounceCounterRestoreDebounceValue(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL sint8 Dem_CalculateTimeFDC(Dem_EventIdType EventId, sint16 DebounceValue, uint8 DebounceStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce time Calculate of Prepassed function
@@ -587,6 +673,10 @@ DEM_LOCAL sint8 Dem_CalculateTimeFDC(Dem_EventIdType EventId, sint16 DebounceVal
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebTimeCalculatePrepassed(Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce time Calculate of passed function
@@ -596,6 +686,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePrepassed(Dem_TimeBasedInfoPtrType DebounceTi
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebTimeCalculatePrefailed(Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce time Calculate of Prefailed function
@@ -605,6 +699,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePrefailed(Dem_TimeBasedInfoPtrType DebounceTi
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebTimeCalculatePassed(Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce time Calculate of failed function
@@ -614,6 +712,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePassed(Dem_TimeBasedInfoPtrType DebounceTimeP
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebTimeCalculateFailed(Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce time initialization
@@ -628,6 +730,10 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceTimeInit(
     Dem_TimeBasedInfoType* const DebounceTimePtr,
     Dem_EventIdType              EventId,
     Dem_SatelliteDataType        SatelliteData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Calculate function
@@ -640,6 +746,10 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceTimeInit(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DebounceTimeCalculate(Dem_BaseInfoPtrType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Freeze function
@@ -649,6 +759,10 @@ DEM_LOCAL boolean Dem_DebounceTimeCalculate(Dem_BaseInfoPtrType BaseInfoPtr);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeFreeze(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Reset function
@@ -658,6 +772,10 @@ DEM_LOCAL void Dem_DebounceTimeFreeze(Dem_BaseInfoConstPtrConstType BaseInfoPtr)
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeReset(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Reset function
@@ -668,8 +786,12 @@ DEM_LOCAL void Dem_DebounceTimeReset(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_DebouncingStateType Dem_DebounceTimeGetDebouncingState(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce Time Update Debounce Value Max function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -678,6 +800,10 @@ DEM_LOCAL Dem_DebouncingStateType Dem_DebounceTimeGetDebouncingState(Dem_BaseInf
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Reset Debounce Value Max function
@@ -687,7 +813,11 @@ DEM_LOCAL void Dem_DebounceTimeUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstT
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeResetDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Debounce Time Get Fault Detection Counter function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -701,8 +831,12 @@ DEM_LOCAL void Dem_DebounceTimeResetDebounceValueMax(Dem_BaseInfoConstPtrConstTy
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceTimeGetFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce Time Get Max Fault Detection Counter function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -716,7 +850,11 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceTimeGetMaxFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Get Debouncing Result function
@@ -731,6 +869,10 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL Dem_SatelliteDataType
     Dem_DebounceTimeGetDebouncingResult(Dem_BaseInfoConstPtrConstType BaseInfoPtr, Dem_SatelliteDataType SatelliteData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Counting Towards Passed
@@ -740,6 +882,10 @@ DEM_LOCAL Dem_SatelliteDataType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeCountingTowardsPassed(const Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Counting Towards Failed
@@ -749,6 +895,10 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsPassed(const Dem_TimeBasedInfoPtrT
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailed(const Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Counting Towards Failed With FDC Reached
@@ -758,6 +908,10 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailed(const Dem_TimeBasedInfoPtrT
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailedWithFDCReached(const Dem_TimeBasedInfoPtrType DebounceTimePtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Time Process Debounce
@@ -767,6 +921,10 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailedWithFDCReached(const Dem_Tim
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceTimeProcessDebounce(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check Debounce Time is active
@@ -779,6 +937,8 @@ DEM_LOCAL void Dem_DebounceTimeProcessDebounce(Dem_BaseInfoConstPtrConstType Bas
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DebounceTimeIsTimerActive(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_MONOTOR_DEBOUNCCE))
@@ -798,6 +958,8 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceMonitorInternalInit(
     Dem_EventIdType                    EventId,
     Dem_SatelliteDataType              SatelliteData);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Debounce Monitor Internal Calculate function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -809,6 +971,10 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceMonitorInternalInit(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DebounceMonitorInternalCalculate(Dem_BaseInfoPtrType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Monitor Internal Freeze function
@@ -818,6 +984,10 @@ DEM_LOCAL boolean Dem_DebounceMonitorInternalCalculate(Dem_BaseInfoPtrType BaseI
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceMonitorInternalFreeze(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Debounce Monitor Internal Reset function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -826,6 +996,10 @@ DEM_LOCAL void Dem_DebounceMonitorInternalFreeze(Dem_BaseInfoConstPtrConstType B
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceMonitorInternalReset(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Monitor Internal Get Debouncing State function
@@ -837,8 +1011,12 @@ DEM_LOCAL void Dem_DebounceMonitorInternalReset(Dem_BaseInfoConstPtrConstType Ba
  */
 DEM_LOCAL Dem_DebouncingStateType
     Dem_DebounceMonitorInternalGetDebouncingState(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce Monitor Internal Update Debounce Value Max function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -847,6 +1025,10 @@ DEM_LOCAL Dem_DebouncingStateType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceMonitorInternalUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Monitor Internal Reset Debounce Value Max function
@@ -856,7 +1038,11 @@ DEM_LOCAL void Dem_DebounceMonitorInternalUpdateDebounceValueMax(Dem_BaseInfoCon
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DebounceMonitorInternalResetDebounceValueMax(Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Monitor Internal Get Fault Detection Counter function
@@ -871,8 +1057,12 @@ DEM_LOCAL void Dem_DebounceMonitorInternalResetDebounceValueMax(Dem_BaseInfoCons
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceMonitorInternalGetFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Debounce Monitor Internal Get Max Fault Detection Counter function
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -886,7 +1076,11 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL Std_ReturnType
     Dem_DebounceMonitorInternalGetMaxFaultDetectionCounter(Dem_BaseInfoConstPtrConstType BaseInfoPtr, sint8* FDC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Debounce Monitor Internal Get Debouncing Result function
@@ -902,13 +1096,15 @@ DEM_LOCAL Std_ReturnType
 DEM_LOCAL Dem_SatelliteDataType Dem_DebounceMonitorInternalGetDebouncingResult(
     Dem_BaseInfoConstPtrConstType BaseInfoPtr,
     Dem_SatelliteDataType         SatelliteData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
-#define DEM_START_SEC_CONST_UNSPECIFIED
-#include "Dem_MemMap.h"
 /* PRQA S 3218 ++ */ /* VL_Dem_3218 */
 #if (defined(DEM_EVENT_COUNTER_DEBOUNCCE))
+#define DEM_START_SEC_CONST_UNSPECIFIED
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Counter Function Table
  * @range NA
@@ -929,9 +1125,13 @@ DEM_LOCAL const Dem_DebounceFunctionTableType Dem_DebounceCounterFunctionTable =
     Dem_DebounceCounterGetDebouncingResult,
     Dem_DebounceCounterRestoreDebounceValue,
 };
+#define DEM_STOP_SEC_CONST_UNSPECIFIED
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
+#define DEM_START_SEC_CONST_UNSPECIFIED
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Function Table
  * @range NA
@@ -952,9 +1152,13 @@ DEM_LOCAL const Dem_DebounceFunctionTableType Dem_DebounceTimeFunctionTable = {
     Dem_DebounceTimeGetDebouncingResult,
     NULL_PTR,
 };
+#define DEM_STOP_SEC_CONST_UNSPECIFIED
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_MONOTOR_DEBOUNCCE))
+#define DEM_START_SEC_CONST_UNSPECIFIED
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Function Table
  * @range NA
@@ -975,15 +1179,12 @@ DEM_LOCAL const Dem_DebounceFunctionTableType Dem_DebounceMonitorInternalFunctio
     Dem_DebounceMonitorInternalGetDebouncingResult,
     NULL_PTR,
 };
-#endif
 #define DEM_STOP_SEC_CONST_UNSPECIFIED
 #include "Dem_MemMap.h"
+#endif
 /* PRQA S 3218 -- */
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
 /**
  * @brief         Set Satellite data
@@ -1026,7 +1227,6 @@ DEM_LOCAL_INLINE void Dem_SetDebounceValueMaxByEvent(Dem_EventIdType EventId, si
     Dem_GetMaxDebValOfSatellite(satelliteId)[Dem_GetMonitorIdByEventId(EventId)] = (uint16)DebounceValue;
 }
 #endif
-
 /* PRQA S 4404 ++ */ /* VL_Dem_4404 */
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
 /**
@@ -1044,7 +1244,6 @@ DEM_LOCAL_INLINE boolean Dem_GetDebounceStorageByEvent(Dem_EventIdType EventId)
     return (boolean)Dem_GetStorageOfDB(Dem_GetDebounceRefOfEvent(EventId));
 }
 #endif
-
 /**
  * @brief Get Debounce based type on event ID
  * @param[in]     EventId: Event ID
@@ -1225,6 +1424,7 @@ DEM_LOCAL_INLINE Dem_DebouncingStateType Dem_SetTestComplete(Dem_DebouncingState
     DEM_FLAG_SET(state, DEM_TEST_COMPLETE); /* PRQA S 3473 */ /* VL_Dem_3473 */
     return state;
 }
+
 /* PRQA S 4404 -- */
 
 /**
@@ -1279,6 +1479,7 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceInfoInit(
 #endif
     default:
         /** Invalid debounce configurations that don't appear in the tool generation case */
+        base = NULL_PTR;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
         Dem_DetReportError(DEM_SID_INTERNALAPIID, DEM_E_WRONG_CONFIGURATION);
 #endif
@@ -1308,6 +1509,7 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceBaseInfoInit(
     BaseInfoPtr->State          = DEM_DEBOUNCSTATE_INITIAL;
     return BaseInfoPtr;
 }
+
 /* PRQA S 5016 -- */
 
 /**
@@ -1374,8 +1576,9 @@ DEM_LOCAL_INLINE Dem_DebouncingStateType Dem_DebounceGetDebouncingState(Dem_Base
 {
     return BaseInfoPtr->FunctionTable->GetDebouncingState(BaseInfoPtr);
 }
-
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call function to Update Debounce Value Max
  */
@@ -1383,7 +1586,10 @@ DEM_LOCAL void Dem_DebounceUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstType 
 {
     BaseInfoPtr->FunctionTable->UpdateDebounceValueMax(BaseInfoPtr);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call function to resets the maximum debouncing value
  */
@@ -1391,8 +1597,11 @@ DEM_LOCAL void Dem_DebounceResetDebounceValueMax(Dem_BaseInfoConstPtrConstType B
 {
     BaseInfoPtr->FunctionTable->ResetDebounceValueMax(BaseInfoPtr);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call function to Returns the fault detection counter.
  */
@@ -1402,8 +1611,11 @@ DEM_LOCAL Std_ReturnType Dem_DebounceGetFaultDetectionCounter(Dem_BaseInfoConstP
     ret = BaseInfoPtr->FunctionTable->GetFaultDetectionCounter(BaseInfoPtr, FDC);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Call function to Update Debounce Value Max
  */
@@ -1413,8 +1625,9 @@ DEM_LOCAL Std_ReturnType Dem_DebounceGetMaxFaultDetectionCounter(Dem_BaseInfoCon
     ret = BaseInfoPtr->FunctionTable->GetMaxFaultDetectionCounter(BaseInfoPtr, FDC);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Call function to Get Debouncing Result
  * @param[in]     BaseInfoPtr: Pointer to the debounce information
@@ -1495,8 +1708,9 @@ DEM_LOCAL_INLINE Dem_SatelliteDataType
     Dem_DebounceFreeze(BaseInfoPtr);
     return Dem_DebounceGetDebouncingResult(BaseInfoPtr, SatelliteData);
 }
-
 #if (defined(DEM_EVENT_COUNTER_DEBOUNCCE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**************Debounce Counter************************/
 /**
  * @brief Debounce counter fault detection counter Calculate
@@ -1551,6 +1765,8 @@ DEM_LOCAL sint8 Dem_CalculateCounterFDC(Dem_EventIdType EventId, sint16 Debounce
     }
     return FDC;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030 -- */
 
 /**
@@ -1567,7 +1783,8 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceCounterInit(
     DebounceCounterPtr->NewDebounceValue = (sint16)Dem_GetSatelliteDebounceData(SatelliteData);
     return ret;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Calculate of Prepassed function
  */
@@ -1600,7 +1817,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePrepassed(Dem_CounterBasedInfoPtrType Debo
             (sint16)((sint32)DebounceCounterPtr->NewDebounceValue + (sint32)decreStep);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Calculate of passed function
  */
@@ -1615,7 +1835,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePassed(Dem_CounterBasedInfoPtrType Debounc
     DebounceCounterPtr->NewDebounceValue    = passedThr;
     DebounceCounterPtr->Base.MonitorTrigger = DEM_EVENT_STATUS_PASSED;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Calculate of Prefailed function
  */
@@ -1648,7 +1871,10 @@ DEM_LOCAL void Dem_DebCounterCalculatePrefailed(Dem_CounterBasedInfoPtrType Debo
             (sint16)((sint32)DebounceCounterPtr->NewDebounceValue + (sint32)IncreStep);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Calculate of failed function
  */
@@ -1663,7 +1889,10 @@ DEM_LOCAL void Dem_DebCounterCalculateFailed(Dem_CounterBasedInfoPtrType Debounc
     DebounceCounterPtr->NewDebounceValue    = failedThr;
     DebounceCounterPtr->Base.MonitorTrigger = DEM_EVENT_STATUS_FAILED;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0310 ++ */ /* VL_Dem_0310 */
 /**
  * @brief Debounce counter Calculate function
@@ -1726,7 +1955,10 @@ DEM_LOCAL boolean Dem_DebounceCounterCalculate(Dem_BaseInfoPtrType BaseInfoPtr)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Freeze function
  */
@@ -1735,7 +1967,10 @@ DEM_LOCAL void Dem_DebounceCounterFreeze(Dem_BaseInfoConstPtrConstType BaseInfoP
     /** No action necessary */
     DEM_PARAM_UNUSED(BaseInfoPtr);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 ++ */ /* VL_Dem_0311 */
 /**
  * @brief Debounce counter Reset function
@@ -1745,7 +1980,10 @@ DEM_LOCAL void Dem_DebounceCounterReset(Dem_BaseInfoConstPtrConstType BaseInfoPt
     Dem_CounterBasedInfoPtrType debounceCounterPtr = (Dem_CounterBasedInfoPtrType)BaseInfoPtr;
     debounceCounterPtr->NewDebounceValue           = DEM_DEBOUNCE_INIT_VALUE;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Get Debouncing State function
  */
@@ -1791,9 +2029,12 @@ DEM_LOCAL Dem_DebouncingStateType Dem_DebounceCounterGetDebouncingState(Dem_Base
     }
     return debouncingState;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
-
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Update Debounce Value Max function
  */
@@ -1802,7 +2043,10 @@ DEM_LOCAL void Dem_DebounceCounterUpdateDebounceValueMax(Dem_BaseInfoConstPtrCon
     Dem_CounterBasedInfoConstPtrType debounceCounterPtr = (Dem_CounterBasedInfoPtrType)BaseInfoPtr;
     Dem_SetDebounceValueMaxByEvent(BaseInfoPtr->EventId, debounceCounterPtr->NewDebounceValue);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Reset Debounce Value Max function
  */
@@ -1810,8 +2054,11 @@ DEM_LOCAL void Dem_DebounceCounterResetDebounceValueMax(Dem_BaseInfoConstPtrCons
 {
     Dem_SetDebounceValueMaxByEvent(BaseInfoPtr->EventId, DEM_DEBOUNCE_INIT_VALUE);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Get Fault Detection Counter function
  */
@@ -1824,8 +2071,11 @@ DEM_LOCAL Std_ReturnType
     *FDC = Dem_CalculateCounterFDC(eventId, debounceCounterPtr->NewDebounceValue);
     return E_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Get Max Fault Detection Counter function
  */
@@ -1836,8 +2086,11 @@ DEM_LOCAL Std_ReturnType
     *FDC                    = Dem_CalculateCounterFDC(eventId, Dem_GetDebounceValueMaxByEvent(eventId));
     return E_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Get Debouncing Result function
  */
@@ -1850,8 +2103,12 @@ DEM_LOCAL Dem_SatelliteDataType Dem_DebounceCounterGetDebouncingResult(
     ret = Dem_SetSatelliteDebounceData(SatelliteData, (Dem_DebounceDataType)debounceCounterPtr->NewDebounceValue);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce counter Restore Debounce Value function
  */
@@ -1882,9 +2139,10 @@ DEM_LOCAL Dem_SatelliteDataType Dem_DebounceCounterRestoreDebounceValue(
 
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0310 -- */
 #endif
-
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
 /* PRQA S 0310 ++ */ /* VL_Dem_0310 */
 /**************Debounce Time***************************/
@@ -1904,7 +2162,8 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceTimeInit(
     DebounceTimePtr->NewTimerValue = DebounceTimePtr->OldTimerValue;
     return ret;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce time Calculate Fault Detection Counter
  */
@@ -1969,7 +2228,10 @@ DEM_LOCAL sint8 Dem_CalculateTimeFDC(Dem_EventIdType EventId, sint16 DebounceVal
     }
     return lFDC;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce time Calculate of Prepassed function
  */
@@ -2004,7 +2266,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePrepassed(Dem_TimeBasedInfoPtrType DebounceTi
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce time Calculate of passed function
  */
@@ -2041,7 +2306,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePrefailed(Dem_TimeBasedInfoPtrType DebounceTi
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce time Calculate of Prefailed function
  */
@@ -2050,7 +2318,10 @@ DEM_LOCAL void Dem_DebTimeCalculatePassed(Dem_TimeBasedInfoPtrType DebounceTimeP
     DebounceTimePtr->NewTimerState = DEM_DEBOUNCETIME_DONEPASSED;
     DebounceTimePtr->NewTimerValue = DEM_DEBOUNCE_INIT_VALUE;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce time Calculate of failed function
  */
@@ -2072,7 +2343,10 @@ DEM_LOCAL void Dem_DebTimeCalculateFailed(Dem_TimeBasedInfoPtrType DebounceTimeP
         Dem_SetRequestFdcProcessing(baseInfoPtr);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Calculate function
  */
@@ -2115,7 +2389,10 @@ DEM_LOCAL boolean Dem_DebounceTimeCalculate(Dem_BaseInfoPtrType BaseInfoPtr)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 ++ */ /* VL_Dem_0311 */
 /**
  * @brief Debounce Time Freeze function
@@ -2150,7 +2427,10 @@ DEM_LOCAL void Dem_DebounceTimeFreeze(Dem_BaseInfoConstPtrConstType BaseInfoPtr)
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Reset function
  */
@@ -2160,7 +2440,10 @@ DEM_LOCAL void Dem_DebounceTimeReset(Dem_BaseInfoConstPtrConstType BaseInfoPtr)
     debounceTimePtr->NewTimerState           = DEM_DEBOUNCETIME_NONE;
     debounceTimePtr->NewTimerValue           = DEM_DEBOUNCE_INIT_VALUE;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Get Debouncing State function
  */
@@ -2208,8 +2491,11 @@ DEM_LOCAL Dem_DebouncingStateType Dem_DebounceTimeGetDebouncingState(Dem_BaseInf
     }
     return debouncingState;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Update Debounce Value Max function
  */
@@ -2223,7 +2509,10 @@ DEM_LOCAL void Dem_DebounceTimeUpdateDebounceValueMax(Dem_BaseInfoConstPtrConstT
         Dem_SetDebounceValueMaxByEvent(eventId, debounceTimePtr->NewTimerValue);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Reset Debounce Value Max function
  */
@@ -2233,8 +2522,11 @@ DEM_LOCAL void Dem_DebounceTimeResetDebounceValueMax(Dem_BaseInfoConstPtrConstTy
     Dem_DebounceAlgorithmNumType debounceRef = Dem_GetDebounceRefOfEvent(eventId);
     Dem_SetDebounceValueMaxByEvent(eventId, Dem_GetFailedThrOfDB(debounceRef));
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Get Fault Detection Counter function
  */
@@ -2245,9 +2537,11 @@ DEM_LOCAL Std_ReturnType Dem_DebounceTimeGetFaultDetectionCounter(Dem_BaseInfoCo
     *FDC = Dem_CalculateTimeFDC(BaseInfoPtr->EventId, debounceTimePtr->OldTimerValue, debounceTimePtr->OldTimerState);
     return E_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Get Max Fault Detection Counter function
  */
@@ -2267,8 +2561,11 @@ DEM_LOCAL Std_ReturnType
     }
     return E_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Get Debouncing Result function
  */
@@ -2282,7 +2579,10 @@ DEM_LOCAL Dem_SatelliteDataType
     ret = Dem_SetSatelliteDebounceData(ret, (Dem_DebounceDataType)debounceTimePtr->NewTimerValue);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1259 ++ */ /* VL_Dem_1259 */
 /**
  * @brief Debounce Time Counting Towards Passed
@@ -2301,7 +2601,10 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsPassed(const Dem_TimeBasedInfoPtrT
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Counting Towards Failed
  */
@@ -2348,7 +2651,10 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailed(const Dem_TimeBasedInfoPtrT
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Counting Towards Failed With FDC Reached
  */
@@ -2382,8 +2688,12 @@ DEM_LOCAL void Dem_DebounceTimeCountingTowardsFailedWithFDCReached(const Dem_Tim
     }
 #endif
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1259 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Time Process Debounce
  */
@@ -2421,7 +2731,10 @@ DEM_LOCAL void Dem_DebounceTimeProcessDebounce(Dem_BaseInfoConstPtrConstType Bas
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check Debounce Time is active
  */
@@ -2452,10 +2765,11 @@ DEM_LOCAL boolean Dem_DebounceTimeIsTimerActive(Dem_BaseInfoConstPtrConstType Ba
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 -- */
 /* PRQA S 0310 -- */
 #endif
-
 #if (defined(DEM_EVENT_MONOTOR_DEBOUNCCE))
 /* PRQA S 0310 ++ */ /* VL_Dem_0310 */
 /**************Debounce Monitor Internal***************/
@@ -2480,7 +2794,8 @@ DEM_LOCAL_INLINE Dem_BaseInfoPtrType Dem_DebounceMonitorInternalInit(
     MonitorInternalPtr->NewMonitorStatus = MonitorInternalPtr->OldMonitorStatus;
     return ret;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Calculate function
  */
@@ -2552,8 +2867,12 @@ DEM_LOCAL boolean Dem_DebounceMonitorInternalCalculate(Dem_BaseInfoPtrType BaseI
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070,6030 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Freeze function
  */
@@ -2562,7 +2881,10 @@ DEM_LOCAL void Dem_DebounceMonitorInternalFreeze(Dem_BaseInfoConstPtrConstType B
     /** No action necessary */
     DEM_PARAM_UNUSED(BaseInfoPtr);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 ++ */ /* VL_Dem_0311 */
 /**
  * @brief Debounce Monitor Internal Reset function
@@ -2572,7 +2894,10 @@ DEM_LOCAL void Dem_DebounceMonitorInternalReset(Dem_BaseInfoConstPtrConstType Ba
     Dem_MonitorInternalInfoPtrType monitorInternalPtr = (Dem_MonitorInternalInfoPtrType)BaseInfoPtr;
     monitorInternalPtr->NewMonitorStatus              = DEM_DEBOUNCEMONITORINTERNAL_NONE;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Get Debouncing State function
  */
@@ -2625,9 +2950,13 @@ DEM_LOCAL Dem_DebouncingStateType
     }
     return debouncingState;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030,6070 -- */
 
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Update Debounce Value Max function
  */
@@ -2642,7 +2971,10 @@ DEM_LOCAL void Dem_DebounceMonitorInternalUpdateDebounceValueMax(Dem_BaseInfoCon
         /* PRQA S 2152 -- */
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Reset Debounce Value Max function
  */
@@ -2650,8 +2982,11 @@ DEM_LOCAL void Dem_DebounceMonitorInternalResetDebounceValueMax(Dem_BaseInfoCons
 {
     Dem_SetDebounceValueMaxByEvent(BaseInfoPtr->EventId, DEM_DEBOUNCE_INIT_VALUE);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Get Fault Detection Counter function
  */
@@ -2676,8 +3011,11 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Get Max Fault Detection Counter function
  */
@@ -2687,8 +3025,11 @@ DEM_LOCAL Std_ReturnType
     *FDC = (sint8)Dem_GetDebounceValueMaxByEvent(BaseInfoPtr->EventId);
     return E_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Debounce Monitor Internal Get Debouncing Result function
  */
@@ -2701,12 +3042,11 @@ DEM_LOCAL Dem_SatelliteDataType Dem_DebounceMonitorInternalGetDebouncingResult(
         Dem_SetSatelliteDebounceData(SatelliteData, (Dem_DebounceDataType)monitorInternalPtr->NewMonitorStatus);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0311 -- */
 /* PRQA S 0310 -- */
 #endif
 /* PRQA S 0759 -- */
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 #endif

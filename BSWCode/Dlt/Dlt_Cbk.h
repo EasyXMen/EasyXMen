@@ -1,4 +1,3 @@
-/* PRQA S 3108++ */
 /**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
@@ -34,6 +33,8 @@
 #include "Dlt_Types.h"
 #include "Dlt_Cfg.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               Indication of a received PDU from a lower layer communication interface module.
  * ServiceId           0x42
@@ -48,7 +49,11 @@
  */
 extern FUNC(void, DLT_APPL_CODE)
     Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CONST) PduInfoPtr);
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               Within this API, the upper layer module (called module) shall check whether the available data
  *                     fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data
@@ -68,8 +73,12 @@ extern FUNC(void, DLT_APPL_CODE)
  *                     NULL pointer or point to invalid data.
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CONST) PduInfoPtr);
+    Dlt_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, DLT_APPL_DATA) PduInfoPtr);
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               The lower layer communication interface module confirms the transmission of a PDU, or the failure
  * to transmit a PDU. ServiceId           0x40 Sync/Async          Synchronous Reentrancy          Reentrant for
@@ -79,7 +88,11 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Return              N/A
  */
 extern FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               This extern FUNCtion is called after the I-PDU has been transmitted on its network,
  *                     the result indicates whether the transmission was successful or not.
@@ -94,7 +107,11 @@ extern FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_Retur
  * Return              N/A
  */
 extern FUNC(void, DLT_APPL_CODE) Dlt_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               This extern FUNCtion is called to acquire the transmit data of an I-PDU segment (N-PDU).
  *                     Each call to this extern FUNCtion provides the next part of the I-PDU data unless
@@ -131,7 +148,11 @@ extern FUNC(BufReq_ReturnType, DLT_APPL_CODE) Dlt_CopyTxData(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) availableDataPtr);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               This extern FUNCtion is called at the start of receiving an N-SDU. The N-SDU might be fragmented
  * into multiple N-PDUs (FF with one or more following CFs) or might consist of a single N-PDU (SF). The service shall
@@ -157,7 +178,11 @@ extern FUNC(BufReq_ReturnType, DLT_APPL_CODE) Dlt_StartOfReception(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) bufferSizePtr);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               Called after an I-PDU has been received via the TP API, the result indicates whether the
  * transmission was successful or not. ServiceId           0x45 Sync/Async          Synchronous Reentrancy Reentrant
@@ -168,7 +193,11 @@ extern FUNC(BufReq_ReturnType, DLT_APPL_CODE) Dlt_StartOfReception(
  * Return              N/A
  */
 extern FUNC(void, DLT_APPL_CODE) Dlt_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 /*
  * Brief               This extern FUNCtion is called to provide the received data of an I-PDU segment (N-PDU) to the
  * upper layer. Each call to this extern FUNCtion provides the next part of the I-PDU data. The size of the remaining
@@ -187,5 +216,7 @@ extern FUNC(BufReq_ReturnType, DLT_APPL_CODE) Dlt_CopyRxData(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) bufferSizePtr);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+#define DLT_STOP_SEC_CODE_FAST
+#include "Dlt_MemMap.h"
 
 #endif /* DLT_CBK_H_ */

@@ -105,6 +105,8 @@ DOIP_LOCAL_INLINE Std_ReturnType
 /* PRQA S 5016 -- */
 /* rcv */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Check whether TA is valid.
  * @param[in]   ta: Target address.
@@ -117,6 +119,10 @@ DOIP_LOCAL_INLINE Std_ReturnType
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsTaInRaCfg(uint16 ta, uint8 tcpConnStatusIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Check diagnostic message is valid.
@@ -132,6 +138,10 @@ DOIP_LOCAL boolean DoIP_IsTaInRaCfg(uint16 ta, uint8 tcpConnStatusIdx);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsValidDiagMsg(uint16 sa, uint16 ta, SoAd_SoConIdType soConId, uint8* nack);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Transfer diagnostic message to PduR.
@@ -153,6 +163,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_TransferDiagMsgToPduR(
     PduLengthType*                    bufferSizePtr,
     const DoIP_HandleDiagContextType* handleDiagCtx,
     uint8*                            nack);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Start transfer diagnostic message to PduR.
@@ -170,6 +184,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_StartTransDataToPduR(
     PduLengthType*                    bufferSizePtr,
     const DoIP_HandleDiagContextType* handleDiagCtx,
     uint8*                            nack);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle diagnostic message header.
@@ -187,6 +205,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_HandleReceivedDiagMsgHeader(
     const PduInfoType*                pduInfoPtr,
     PduLengthType*                    bufferSizePtr,
     const DoIP_HandleDiagContextType* handleDiagCtx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle diagnostic message.
@@ -204,6 +226,8 @@ DOIP_LOCAL BufReq_ReturnType DoIP_HandleDiagMsgCfReceiving(
     const PduInfoType*                pduInfoPtr,
     PduLengthType*                    bufferSizePtr,
     const DoIP_HandleDiagContextType* handleDiagCtx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* send */
 
@@ -220,6 +244,8 @@ DOIP_LOCAL BufReq_ReturnType DoIP_HandleDiagMsgCfReceiving(
  */
 DOIP_LOCAL_INLINE void DoIP_FillDiagnosticHeader(const PduInfoType* pduInfoPtr, uint8 txRxCtxIdx, uint16 sa, uint16 ta);
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief        Send diagnostic message header.
  * @param[inout] ctx: Send receive context.
@@ -241,6 +267,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_SoAdTpCopyTxTpHeader(
     const PduInfoType*       pduInfoPtr,
     PduLengthType*           availableDataPtr,
     const RetryInfoType*     retry);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send diagnostic ACK.
@@ -252,6 +282,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_SoAdTpCopyTxTpHeader(
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send diagnostic NACK.
@@ -264,15 +298,16 @@ DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendDiagnosticNack(uint16 soadTxPduRef, uint8 txRxCtxIdx, uint8 nack);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
-
-#define DOIP_START_SEC_CODE
-#include "DoIP_MemMap.h"
 
 /* ----------------------------------------- connect ----------------------------------------- */
 
 /* PRQA S 1512 EOF */ /* VL_DoIP_1512 */
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Notify PdurR when close tcp connection.
  */
@@ -283,6 +318,7 @@ void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx)
 {
     /* PRQA S 2844,2934 ++ */ /* VL_DoIP_DerefInvalidPtr,VL_DoIP_ComputeInvalidPtr */
     const DoIP_TcpTxCtrlType* txCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl; /* PRQA S 3408 */ /* VL_DoIP_3408 */
+    const DoIP_TcpRxCtrlType* rxCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].RxCtrl; /* PRQA S 3408 */ /* VL_DoIP_3408 */
 
     if ((txCtrl->PdurTxPduRef != (PduIdType)DOIP_INVALID_UINT16) && (txCtrl->TxState != DOIP_TX_STATE_IDLE))
     {
@@ -299,14 +335,22 @@ void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx)
             /* for qac */
         }
     }
+    if ((rxCtrl->RxState != DOIP_RX_STATE_IDLE) && (rxCtrl->PdurRxPduRef != (PduIdType)COMSTACK_PDUID_INVALID))
+    {
+        PduR_DoIPTpRxIndication(rxCtrl->PdurRxPduRef, E_NOT_OK);
+    }
 
     DOIP_ClearIfQueue(&DoIP_TcpTxRxContext[txRxCtxIdx], TRUE);
     DOIP_ClearTpQueue(&DoIP_TcpTxRxContext[txRxCtxIdx], TRUE);
     /* PRQA S 2844,2934 -- */
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 2905 -- */
 /* ----------------------------------------- send ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check whether the metadata is valid.
  */
@@ -345,11 +389,21 @@ boolean DoIP_IsValidMatadata(uint16 channelIdx, const PduInfoType* pduInfoPtr)
         {
             ret = FALSE;
         }
+        uint16         MDchannelIdx  = 0u;
+        Std_ReturnType retGetChannel = DoIP_GetChannelIdxBySaTa(metaDataSa, metaDataTa, &MDchannelIdx);
+        if ((retGetChannel == E_OK) && (DoIP_PBCfgPtr->ChannelCfgArray[MDchannelIdx].PduRTxPdu == NULL_PTR)
+            && (metaDataSa == channelSa))
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Trigger send TP message.
  */
@@ -379,7 +433,10 @@ Std_ReturnType DoIP_TriggerTpTransmit(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Trigger send TP message.
  */
@@ -433,7 +490,10 @@ Std_ReturnType DoIP_TpTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Trigger send IF message.
  */
@@ -500,8 +560,12 @@ Std_ReturnType DoIP_IfTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
 
     return ret;
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 6070 -- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Copy non TP data form send buffer.
  */
@@ -538,7 +602,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxNoTpData(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Copy TP data form send buffer.
  */
@@ -586,9 +653,12 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxTpData(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- pending ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle Tp message in queued.
  */
@@ -620,7 +690,10 @@ boolean DoIP_HandlePendingTpMsg(DoIP_TcpTxRxContextType* ctx)
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle IF message in queued.
  */
@@ -652,7 +725,10 @@ boolean DoIP_HandlePendingIfMsg(DoIP_TcpTxRxContextType* ctx)
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Enqueue TP message.
  */
@@ -705,9 +781,10 @@ Std_ReturnType DoIP_EnqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId,
     /* PRQA S 2814,2934,2844 -- */
     return ret;
 }
-
-DOIP_LOCAL_INLINE Std_ReturnType
-    DoIP_UnreadqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+DOIP_LOCAL_INLINE
+Std_ReturnType DoIP_UnreadqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
     uint8          pendingQueueNum;
@@ -757,6 +834,9 @@ DOIP_LOCAL_INLINE Std_ReturnType
 
     return ret;
 }
+
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Enqueue IF message.
  */
@@ -817,9 +897,10 @@ Std_ReturnType DoIP_EnqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId,
 
     return ret;
 }
-
-DOIP_LOCAL_INLINE Std_ReturnType
-    DoIP_UnreadqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+DOIP_LOCAL_INLINE
+Std_ReturnType DoIP_UnreadqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
     uint8          pendingQueueNum;
@@ -879,6 +960,8 @@ DOIP_LOCAL_INLINE Std_ReturnType
 
     return ret;
 }
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Clear IF queue.
  */
@@ -904,7 +987,10 @@ void DOIP_ClearIfQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur)
 
     } while (NULL_PTR != item);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Clear TP queue.
  */
@@ -930,9 +1016,12 @@ void DOIP_ClearTpQueue(DoIP_TcpTxRxContextType* ctx, boolean isNotifyPdur)
 
     } while (NULL_PTR != item);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- rcv ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle diagnostic message.
  */
@@ -964,7 +1053,8 @@ BufReq_ReturnType DoIP_HandleDiagMsg(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 
 /* ----------------------------------------- cfg ----------------------------------------- */
@@ -991,9 +1081,7 @@ DOIP_LOCAL_INLINE PduIdType DoIP_GetPduRTxPduRef(uint16 channelIdx) /* PRQA S 15
     return DoIP_PBCfgPtr->ChannelCfgArray[channelIdx].PduRTxPdu->PdurTxPduRef;
     /* PRQA S 2814,2824 -- */
 }
-
 /* ----------------------------------------- pending ----------------------------------------- */
-
 /**
  * @brief Get message from queue.
  */
@@ -1051,9 +1139,10 @@ DOIP_LOCAL_INLINE DoIP_IfItemType* DoIP_DequeueIfMsg(DoIP_IfQueueType* queue)
     SchM_Exit_DoIP_ExclusiveArea();
     return item;
 }
-
 /* ----------------------------------------- rcv ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check whether TA is valid.
  */
@@ -1083,7 +1172,10 @@ DOIP_LOCAL boolean DoIP_IsTaInRaCfg(uint16 ta, uint8 tcpConnStatusIdx)
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check diagnostic message is valid.
  */
@@ -1131,7 +1223,10 @@ DOIP_LOCAL boolean DoIP_IsValidDiagMsg(uint16 sa, uint16 ta, SoAd_SoConIdType so
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Transfer diagnostic message to PduR.
  */
@@ -1182,7 +1277,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_TransferDiagMsgToPduR(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Start transfer diagnostic message to PduR.
  */
@@ -1275,7 +1373,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_StartTransDataToPduR(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle diagnostic message header.
  */
@@ -1340,7 +1441,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_HandleReceivedDiagMsgHeader(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle diagnostic message.
  */
@@ -1378,9 +1482,9 @@ DOIP_LOCAL BufReq_ReturnType DoIP_HandleDiagMsgCfReceiving(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- send ----------------------------------------- */
-
 /**
  * @brief Fill diagnostic message header.
  */
@@ -1399,7 +1503,8 @@ DOIP_LOCAL_INLINE void DoIP_FillDiagnosticHeader(const PduInfoType* pduInfoPtr, 
     DoIP_u16_2_u8(&DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf[DOIP_DIAG_MSG_FIELD_POSITION_TA], ta);
     /* PRQA S 2844,2814 -- */
 }
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send diagnostic message header.
  */
@@ -1468,7 +1573,10 @@ DOIP_LOCAL BufReq_ReturnType DoIP_SoAdTpCopyTxTpHeader(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send diagnostic ACK.
  */
@@ -1567,7 +1675,10 @@ DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx)
     }
     SchM_Exit_DoIP_ExclusiveArea();
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send diagnostic NACK.
  */

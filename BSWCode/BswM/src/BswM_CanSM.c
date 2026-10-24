@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_CANSMINDICATION_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_CANSMINDICATION_ENABLED == STD_ON)
 /**
  * This function initializes the CAN State Manager request ports. It retrieves the partition configuration pointer,
  * checks the validity of the configuration, and sets the initial status of the CAN SM indication ports based on the
@@ -50,6 +50,8 @@
 void BswM_InitCanSMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITCANSMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -78,11 +80,17 @@ void BswM_InitCanSMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITCANSMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITCANSMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function retrieves the current status of the CAN State Manager indication port for a given channel index.
  * It retrieves the partition configuration pointer and returns the status of the specified CAN SM indication port.
@@ -102,8 +110,12 @@ CanSM_BswMCurrentStateType BswM_GetCanSmIndStatus(NetworkHandleType cansmChIdx)
     }
     return retStatu;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_CANSMINDICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function updates the current state of the CAN State Manager for a specific network.
  * It retrieves the necessary configuration pointers and updates the CAN SM indication status.
@@ -113,6 +125,8 @@ CanSM_BswMCurrentStateType BswM_GetCanSmIndStatus(NetworkHandleType cansmChIdx)
 void BswM_CanSM_CurrentState(NetworkHandleType Network, CanSM_BswMCurrentStateType CurrentState)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_CANSM_CURRENT_STATE, Network, CurrentState);
+
 #if (BSWM_CANSMINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -178,6 +192,8 @@ void BswM_CanSM_CurrentState(NetworkHandleType Network, CanSM_BswMCurrentStateTy
     (void)Network;
     (void)CurrentState;
 #endif /* BSWM_CANSMINDICATION_ENABLED == STD_ON */
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_CANSM_CURRENT_STATE);
 }
 
 #define BSWM_STOP_SEC_CODE

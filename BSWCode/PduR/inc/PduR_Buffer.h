@@ -26,10 +26,11 @@
 #define PDUR_BUFFER_H_
 
 /* =================================================== inclusions =================================================== */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if (STD_OFF == PDUR_ZERO_COST_OPERATION)
 /* =============================================== version information ============================================== */
 
 /* ===================================================== macros ===================================================== */
@@ -42,13 +43,40 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 #if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_BufferInit(void);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 5016 ++ */ /* VL_PduR_5016 */
-PduR_BufferType* PduR_QueueGetTail(const PduR_QueueRuntimeType* queuePtr);
+PduR_BufferType* PduR_QueueGetTail(PduIdType srcPduId, const PduR_QueueRuntimeType* queuePtr);
 /* PRQA S 5016 -- */ /* VL_PduR_5016 */
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+boolean PduR_QueueIsEmpty(const PduR_QueueRuntimeType* queuePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_QueuePopFront(PduR_QueueRuntimeType* queuePtr);
-void PduR_QueuePopBack(const PduR_QueueRuntimeType* queuePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+void PduR_QueuePopBack(PduIdType srcPduId, const PduR_QueueRuntimeType* queuePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 5016 ++ */ /* VL_PduR_5016 */
 PduR_BufferType* PduR_QueueProvideBuffer(
     PduR_QueueRuntimeType* queuePtr,
@@ -56,13 +84,25 @@ PduR_BufferType* PduR_QueueProvideBuffer(
     uint8                  apiId,
     boolean*               flushFlag);
 /* PRQA S 5016 -- */ /* VL_PduR_5016 */
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 PduR_QueueStoreType PduR_QueueStorePduInfo(
     PduR_QueueRuntimeType* queuePtr,
     uint8                  metaDataLength,
     const PduInfoType*     pduInfoPtr,
     uint8                  apiId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_QueueDataConf(PduR_QueueRuntimeType* queuePtr, uint8 metaDataLength);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif

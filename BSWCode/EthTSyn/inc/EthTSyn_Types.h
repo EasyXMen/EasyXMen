@@ -31,380 +31,539 @@
 #if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
 #include "Os.h"
 #endif
-/* ===================================================== macros ===================================================== */
-#define SYNC                     (EthTSynMessageType)0x00u
-#define PDELAY_REQ               (EthTSynMessageType)0x02u
-#define PDELAY_RESP              (EthTSynMessageType)0x03u
-#define FOLLOW_UP                (EthTSynMessageType)0x08u
-#define PDELAY_RESP_FOLLOW_UP    (EthTSynMessageType)0x0Au
-#define MSG_NONE                 (EthTSynMessageType)0xFFu
-#define ETHTSYN_DATA_LIST_LENGTH ((uint8)16u)
 
-#define ETHTSYN_PORT_IDENTITY_LENGTH ((uint8)10u)
-#define ETHTSYN_NANOSECOND_TO_SECOND ((uint32)1000000000UL)
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+#include "Csm.h"
+#endif
+/* ===================================================== macros ===================================================== */
+/**
+ * @name ETHTSYN_MessageTypes
+ * @{
+ * @brief message type definitions for Ethernet Time Synchronization.
+ */
+#define SYNC                             (uint8)0x00u /**< Sync message type. */
+#define PDELAY_REQ                       (uint8)0x02u /**< Pdelay_Req message type. */
+#define PDELAY_RESP                      (uint8)0x03u /**< Pdelay_Resp message type. */
+#define FOLLOW_UP                        (uint8)0x08u /**< Follow_Up message type. */
+#define PDELAY_RESP_FOLLOW_UP            (uint8)0x0Au /**< Pdelay_Resp_Follow_Up message type. */
+#define MSG_NONE                         (uint8)0xFFu /**< invalid/placeholder. */
+#define ETHTSYN_DATA_LIST_LENGTH         ((uint8)16u) /**< Length of data list for message processing. */
+#define ETHTSYN_ICV_CIRCULAR_BUFFER_SIZE ((uint16)ETHTSYN_MAX_ICV_SIZE + 439u) /**< maximum ICV size plus overhead. */
+#define ETHTSYN_ICV_DATA_BLOCK_NUMBER    ((uint8)2u) /**< Number of data blocks for ICV processing. */
+#define ETHTSYN_MAX_FRESHNESS_VALUE_SIZE ((uint8)8u) /**< Maximum size of freshness value in bytes. */
+/** @} */
+
+/**
+ * @name ETHTSYN_StandardConstants
+ * @{
+ * @brief Standard constants for time synchronization.
+ */
+#define ETHTSYN_PORT_IDENTITY_LENGTH ((uint8)10u)   /**< Length of port identity field in bytes */
+#define ETHTSYN_NANOSECOND_TO_SECOND (1000000000UL) /**< nanoseconds per second */
+/** @} */
 /* ================================================ type definitions ================================================ */
-/** This type shall Determine whether the CRC verification is enabled for each specific field under the sub-TLV.
- *
+/**
+ * @brief     This type shall Determine whether the CRC verification is enabled for each specific field under the
+ * sub-TLV.
  */
 typedef struct
 {
-    /** messageLength from the Follow_Up Message Header shall be included in CRC calculation. */
-    boolean CrcMessageLength;
-    /** domainNumber from the Follow_Up Message Header shall be included in CRC calculation. */
-    boolean CrcDomainNumber;
-    /** correctionField from the Follow_Up Message Header shall be included in CRC calculation. */
-    boolean CrcCorrectionField;
-    /** sourcePortIdentity from the Follow_Up Message Header shall be included in CRC calculation. */
-    boolean CrcSourcePortIdentity;
-    /** sequenceId from the Follow_Up Message Header shall be included in CRC calculation. */
-    boolean CrcSequenceId;
-    /** preciseOriginTimestamp from the Follow_Up Message Field shall be included in CRC calculation. */
-    boolean CrcPreciseOriginTimestamp;
+    boolean CrcMessageLength; /**< messageLength from the Follow_Up Message Header shall be included in CRC calculation.
+                                 @range TRUE, FALSE */
+    boolean CrcDomainNumber;  /**<  domainNumber from the Follow_Up Message Header shall be included in CRC calculation.
+                                 @range TRUE, FALSE */
+    boolean CrcCorrectionField;    /**< correctionField from the Follow_Up Message Header shall be included in CRC
+                                      calculation. @range TRUE, FALSE */
+    boolean CrcSourcePortIdentity; /**< sourcePortIdentity from the Follow_Up Message Header shall be included in CRC
+                                      calculation. @range TRUE, FALSE */
+    boolean CrcSequenceId; /**< sequenceId from the Follow_Up Message Header shall be included in CRC calculation.
+                              @range TRUE, FALSE */
+    boolean CrcPreciseOriginTimestamp; /**< preciseOriginTimestamp from the Follow_Up Message Field shall be included in
+                                          CRC calculation. @range TRUE, FALSE */
 } EthTSyn_CrcTimeFlagsTxSecuredCfgType;
 
 typedef EthTSyn_CrcTimeFlagsTxSecuredCfgType EthTSyn_CrcFlagsRxValidatedCfgType;
-/** This represents the configuration of whether or not CRC is supported.
- *
+/**
+ * @brief This represents the configuration of whether or not CRC is supported.
  */
 typedef enum
 {
-    ETHTSYN_CRC_NOT_SUPPORTED,
-    ETHTSYN_CRC_SUPPORTED
+    ETHTSYN_CRC_NOT_SUPPORTED, /**< CRC not supported for this configuration @range NA*/
+    ETHTSYN_CRC_SUPPORTED      /**< CRC supported for this configuration @range NA*/
 } EthTSyn_CrcSecuredType;
-/** Definition of whether or not validation of the CRC takes place.
- *
+/**
+ * @brief     Definition of whether or not validation of the CRC takes place.
  */
 typedef enum
 {
-    ETHTSYN_CRC_IGNORED,
-    ETHTSYN_CRC_NOT_VALIDATED,
-    ETHTSYN_CRC_OPTIONAL,
-    ETHTSYN_CRC_VALIDATED
+    ETHTSYN_CRC_IGNORED,       /**< CRC validation is ignored @range 0u */
+    ETHTSYN_CRC_NOT_VALIDATED, /**< CRC is not validated @range 1u */
+    ETHTSYN_CRC_OPTIONAL,      /**< CRC validation is optional @range 2u */
+    ETHTSYN_CRC_VALIDATED      /**< CRC is validated @range 3u */
 } EthTSyn_CrcValidatedType;
-/** This type shall define the configuration of the time slave.
- *
- */
-typedef struct
-{
-    /** Timeout value of the Follow_Up message (of the subsequent Sync message). */
-    uint64 GlobalTimeFollowUpTimeout;
-    /** Definition of whether or not validation of the CRC takes place. */
-    EthTSyn_CrcValidatedType RxCrcValidated;
-    /** This container collects definitions which parts of the Follow_Up message elements shall be included in CRC
-     * validation. */
-    const EthTSyn_CrcFlagsRxValidatedCfgType* CrcFlagsRxValidated;
-    /** specifies the maximum allowed jump of the Sequence Counter between two consecutive Sync messages */
-    uint16 GlobalTimeSequenceCounterJumpWidth;
-    /** specifies the number of consecutive valid message paris that are required by the Time Slave while being in
-     * Timeout state until a Time Tuple is forwarded to the StbM. */
-    uint8 GlobalTimeSequenceCounterHysteresis;
-    /** Definition of whether or not a Sub-TLV:Status Secured or Sub-TLV:Status Not Secured
-     * shall be present and shall be evaluated when processing a received Follow_Up message. */
-    boolean RxSubTLVStatus;
-    /** Definition of whether or not a Sub-TLV:Time Secured  shall be present and shall be evaluated when processing a
-     * received Follow_Up message. */
-    boolean RxSubTLVTime;
-    /** Definition of whether or not a Sub-TLV:UserData Secured or Sub-TLV:UserData Not Secured shall be present and
-     * shall be evaluated when processing a received Follow_Up message. */
-    boolean RxSubTLVUserData;
-} EthTSyn_GlobalTimeSlaveCfgType;
-/** This type shall define the configuration of the propagation delay.
- *
- */
-typedef struct
-{
-    /** This parameter allows disabling Pdelay_Resp / Pdelay_Resp_Follow_Up transmission, if no Pdelay_Req messages are
-     * expected. */
-    boolean GlobalTimePdelayRespEnable;
-    /** This defines the time interval at which log messages are generated. */
-    sint8 LogMessageInterval;
-    /** If cyclic propagation delay measurement is enabled, this parameter represents the default value of the
-    propagation delay until the first actually measured propagation delay is available. */
-    uint64 GlobalTimePropagationDelay;
-    /** This represents configuration of the TX period for Pdelay_Req messages.A value of 0 disables the cyclic Pdelay
-     * measurement */
-    uint64 GlobalTimeTxPdelayReqPeriod;
-    /** Threshold for calculated Pdelay.  */
-    uint64 PdelayLatencyThreshold;
-    /** Timeout value for Pdelay_Resp and Pdelay_Resp_Follow_Up after a Pdelay_Req has been transmitted resp. a
-     * Pdelay_Resp has been received */
-    uint64 PdelayRespAndRespFollowUpTimeout;
-} EthTSyn_PdelayConfigCfgType;
-/** This type shall define the configuration of the time master.
- *
- */
-typedef struct
-{
-    /** Defines the time where the 1st regular cycle time based message transmission takes place, after an immediate
-     * transmission before.  */
-    uint64 CyclicMsgResumeTime;
-    /** This represents the configuration of whether or not CRC is supported. */
-    EthTSyn_CrcSecuredType GlobalTimeTxCrcSecured;
-    /** This represents configuration of the TX period. */
-    uint64 GlobalTimeTxPeriod;
-    /** This defines the time interval at which log messages are generated. */
-    sint8 LogMessageInterval;
-    /** Enables/Disables the cyclic polling of StbM_GetTimeBaseUpdateCounter() within EthTSyn_MainFunction(). */
-    boolean ImmediateTimeSync;
-    /** This represents the configuration of whether an AUTOSAR Follow_Up TLV Status Sub-TLV is used or not. */
-    boolean TLVFollowUpStatusSubTLV;
-    /** This represents the configuration of whether an AUTOSAR Follow_Up TLV Time Sub-TLV is used or not. */
-    boolean TLVFollowUpTimeSubTLV;
-    /** This represents the configuration of whether an AUTOSAR Follow_Up TLV UserData Sub-TLV is used or not. */
-    boolean TLVFollowUpUserDataSubTLV;
-    /** This container collects definitions which parts of the Follow_Up message elements shall be used for CRC
-     * calculation */
-    const EthTSyn_CrcTimeFlagsTxSecuredCfgType* CrcTimeFlagsTxSecured;
-    /** This represents the correctionField that is used when transmitting  Sync/Follow_Up Message by Master */
-    uint64 CorrectionField;
-    /** This represents the CumulativeScaledRateOffset that is used when transmitting Messages by Master */
-    uint32 CumulativeScaledRateOffset;
-#if ETHTSYN_CRC_SUPPORT == STD_ON
-    /** This indicates the CRC Time Flags that are included in the Follow - Up (FU) Messages sent by the Master. */
-    uint8 CRCTimeFlags;
-#endif
-} EthTSyn_GlobalTimeMasterCfgType;
-/** This type shall define the configuration of role of a port during the synchronization process.
- *
- */
-typedef struct
-{
-    /** Configuration of the global time master. Each global time domain is required to have exactly one global time
-     * master. */
-    const EthTSyn_GlobalTimeMasterCfgType* GlobalTimeMaster;
-    /** Configuration of a time slave. Each global time domain is required to have at least one time slave. */
-    const EthTSyn_GlobalTimeSlaveCfgType* GlobalTimeSlave;
-} EthTSyn_PortRoleCfgType;
-/** This type shall define the role of a port during time synchronization process.
- *
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+/**
+ * @brief     Definition of whether or not ICV verification shall be supported.
  */
 typedef enum
 {
-    ETHTSYN_MASTER,
-    ETHTSYN_SLAVE,
-} EthTSyn_PortRoleType;
-/** This type shall define the configuration of the port under a time doamin.
- *
+    ETHTSYN_ICV_IGNORED,      /**< ICV verification is ignored @range 0u */
+    ETHTSYN_ICV_NOT_VERIFIED, /**< ICV is not verified @range 1u */
+    ETHTSYN_ICV_OPTIONAL,     /**< ICV verification is optional @range 2u */
+    ETHTSYN_ICV_VERIFIED      /**< ICV is verified @range 3u */
+} EthTSyn_RxIcvVerificationType;
+#endif
+/**
+ * @brief     This type shall define the configuration of the time slave.
  */
 typedef struct
 {
-    /** This optional parameter, if present, indicates the priority of outgoing EthTSyn messages */
-    uint8 FramePrio;
-    /** This represents the configuration of a TX debounce time for Sync and Follow_Up messages compared to a message
-     * before with the same PDU. */
-    uint64 GlobalTimeDebounceTime;
-    /** This represents the reference to the Ethernet interface taken to fetch the global time information. */
-    uint8 GlobalTimeEthIfRef;
-    /** Stbm if use EthFreerunning */
-    boolean SynchronizedTimeBaseUseEthFreerunning;
-    /** specifying the port role */
-    EthTSyn_PortRoleType GlobalTimePortRole;
-    /** Configuration of cyclic propagation delay measurement. */
-    const EthTSyn_PdelayConfigCfgType* PdelayConfig;
-    /** Specifying the Role of the EthTSyn-Port (Master or Slave). */
-    EthTSyn_PortRoleCfgType PortRole;
-#if ETHTSYN_MULTIPLE_PARTITION_USED
-    /** Specifying the partition id of port */
-    ApplicationType PortReferrencedPartitionId;
+    uint16 FollowUpTimeoutTicks; /**< Timeout value of the Follow_Up message (of the subsequent Sync message). @range
+                                    0..4000 (0..4s) */
+    uint16 RxDebounceTimeTicks;  /**< RX debounce time for global time messages @range 0..4000 (0..4s) */
+    EthTSyn_CrcValidatedType
+        RxCrcValidated; /**< Definition of whether or not validation of the CRC takes place. @range NA */
+    const EthTSyn_CrcFlagsRxValidatedCfgType*
+        CrcFlagsRxValidated; /**< This container collects definitions which parts of the Follow_Up message elements
+                                shall be included in CRC validation. @range NA */
+    uint16 GlobalTimeSequenceCounterJumpWidth; /**< specifies the maximum allowed jump of the Sequence Counter between
+                                                  two consecutive Sync messages @range 0x0000u..0xFFFFu */
+    uint8 GlobalTimeSequenceCounterHysteresis; /**< Number of consecutive valid message pairs required by Time Slave in
+                                                  Timeout state @range 0x00u..0xFFu */
+    boolean RxSubTLVStatus; /**< Indicates if Sub-TLV:Status (Secured/Not Secured) is present and evaluated @range TRUE,
+                               FALSE */
+    boolean RxSubTLVTime;   /**< Indicates if Sub-TLV:Time Secured is present and evaluated @range TRUE, FALSE */
+    boolean RxSubTLVUserData; /**< Indicates if Sub-TLV:UserData (Secured/Not Secured) is present and evaluated @range
+                                 TRUE, FALSE */
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+    EthTSyn_RxIcvVerificationType
+        RxIcvVerification; /**< Definition of whether ICV verification is supported @range NA */
+#endif
+} EthTSyn_GlobalTimeSlaveCfgType;
+/**
+ * @brief     Configuration structure for propagation delay measurement in Ethernet Time Synchronization.
+ */
+typedef struct
+{
+    boolean GlobalTimePdelayRespEnable; /**< Enables/disables Pdelay_Resp/Pdelay_Resp_Follow_Up transmission @range
+                                           TRUE, FALSE */
+    sint8  LogMessageInterval;          /**< Time interval for generating log messages @range -128..127 */
+    uint64 GlobalTimePropagationDelay;  /**< Default propagation delay value before first measurement @range
+                                           0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint64 GlobalTimeTxPdelayReqPeriod; /**< TX period for Pdelay_Req messages (0 disables cyclic measurement) @range
+                                           0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint64 PdelayLatencyThreshold;      /**< Threshold for calculated propagation delay @range
+                                           0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint64 PdelayRespAndRespFollowUpTimeout; /**< Timeout for Pdelay_Resp and Pdelay_Resp_Follow_Up messages @range
+                                                0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+#if (ETHTSYN_RATE_RATIO_ENABLE == STD_ON)
+    boolean RateRatioEnable;           /**< Enables/disables neighbor rate ratio calculation @range TRUE, FALSE */
+    uint8   RateRatioMeasurementCount; /**< Number of successful pDelay measurements for rate ratio calculation @range
+                                          0x00u..0xFFu */
+#endif
+} EthTSyn_PdelayConfigCfgType;
+/**
+ * @brief     This type shall define the configuration of the time master.
+ */
+typedef struct
+{
+    uint64 GlobalTimeTxPeriod;  /**< Configuration of TX period @range 0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    sint8  LogMessageInterval;  /**< Time interval for log message generation @range -128..127 */
+    uint64 CyclicMsgResumeTime; /**< Time for 1st regular cycle time based message transmission after immediate
+                                   transmission @range 0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    EthTSyn_CrcSecuredType GlobalTimeTxCrcSecured; /**< Configuration indicating whether CRC is supported @range NA */
+    boolean
+        ImmediateTimeSync; /**< Enables/Disables cyclic polling of StbM_GetTimeBaseUpdateCounter() @range TRUE, FALSE */
+    boolean TLVFollowUpStatusSubTLV; /**< Configuration indicating whether AUTOSAR Follow_Up TLV Status Sub-TLV is used
+                                        @range TRUE, FALSE */
+    boolean TLVFollowUpTimeSubTLV;   /**< Configuration indicating whether AUTOSAR Follow_Up TLV Time Sub-TLV is used
+                                        @range TRUE, FALSE */
+    boolean TLVFollowUpUserDataSubTLV; /**< Configuration indicating whether AUTOSAR Follow_Up TLV UserData Sub-TLV is
+                                          used @range TRUE, FALSE */
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+    boolean TLVFollowUpICVSubTLV; /**< Configuration indicating whether AUTOSAR Follow_Up TLV Time Authenticated Sub-TLV
+                                     is used @range TRUE, FALSE */
+#endif
+    const EthTSyn_CrcTimeFlagsTxSecuredCfgType*
+        CrcTimeFlagsTxSecured; /**< Configuration for which parts of Follow_Up message elements are used for CRC
+                                  calculation @range NA */
+    uint64 CorrectionField;    /**< CorrectionField used when transmitting Sync/Follow_Up Message by Master @range
+                                  0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+#if ETHTSYN_CRC_SUPPORT == STD_ON
+    uint8 CRCTimeFlags; /**< CRC Time Flags included in Follow_Up Messages sent by Master @range 0x00u..0xFFu */
+#endif
+    uint64 HoldOverTime; /**< Timeout for transmission of Sync and Follow_Up messages on Master ports @range
+                            0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+} EthTSyn_GlobalTimeMasterCfgType;
+/**
+ * @brief     This type shall define the configuration of role of a port during the synchronization process.
+ */
+typedef struct
+{
+    const EthTSyn_GlobalTimeMasterCfgType*
+        GlobalTimeMaster; /**< Configuration of the global time master (exactly one per domain) @range NA */
+    const EthTSyn_GlobalTimeSlaveCfgType*
+        GlobalTimeSlave; /**< Configuration of a time slave (at least one per domain) @range NA */
+} EthTSyn_PortRoleCfgType;
+/**
+ * @brief     This type shall define the role of a port during time synchronization process.
+ */
+typedef enum
+{
+    ETHTSYN_DYNAMIC, /**< Port role is dynamically determined @range 0u */
+    ETHTSYN_MASTER,  /**< Port acts as time master @range 1u */
+    ETHTSYN_SLAVE    /**< Port acts as time slave @range 2u */
+} EthTSyn_PortRoleType;
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+/**
+ * @brief     Structure for ICV-related RX PDU data handling.
+ */
+typedef struct
+{
+    uint8* pduDataPtr; /**< Pointer to PDU data @range 0x00..0xFFu */
+    uint16 pduLength;  /**< Length of PDU data @range 0x0000u..0xFFFFu */
+} EthTSyn_ICVRxPduType;
+/**
+ * @brief     This type shall define Symmetric or asymmetric cryptography selection for the ICV generation.
+ */
+typedef enum
+{
+    ETHTSYN_ICV_MAC,      /**< CSM primitive is MAC (Message Authentication Code) @range 0u */
+    ETHTSYN_ICV_SIGNATURE /**< CSM primitive is SIGNATURE @range 1u */
+} EthTSyn_CriptographySelection;
+/**
+ * @brief    Define the encryption and decryption process, synchronous or asynchronous.
+ */
+typedef enum
+{
+    ETHTSYN_CRYPTO_PROCESSING_ASYNC, /**< Indicate the encryption and decryption process is asynchronous. @range 0u*/
+    ETHTSYN_CRYPTO_PROCESSING_SYNC   /**< Indicate the encryption and decryption process is synchronous. @range 1u*/
+} EthTSyn_CryptoProcessingType;
+/**
+ * @brief    Define information about the Csm job of generation.
+ */
+typedef struct
+{
+    uint32 IcvGenerationJobRef; /**< Reference to CSM job to fetch CSM job ID @range 0x00000000u..0xFFFFFFFFu */
+    EthTSyn_CryptoProcessingType
+        IcvProcessingType; /**< Encryption/decryption process type (synchronous/asynchronous) @range NA */
+    EthTSyn_CriptographySelection
+        IcvGenerationBase; /**< Symmetric or asymmetric cryptography selection for ICV generation @range NA */
+} EthTSyn_TxCsmJobType;
+
+/**
+ * @brief    Define information about the Csm job of verification.
+ */
+typedef struct
+{
+    uint32 IcvVerificationJobRef; /**< specifying the reference to the CSM job to fetch the CSM job ID. @range
+                                     0x00000000u..oxFFFFFFFFu */
+    EthTSyn_CryptoProcessingType
+        IcvProcessingType; /**< Indicate the encryption and decryption process,synchronous or asynchronous. @range NA */
+    EthTSyn_CriptographySelection IcvVerificationBase; /**<  specifying Symmetric or asymmetric cryptography selection
+                                                          for the ICV verificaiton. @range NA */
+} EthTSyn_RxCsmJobType;
+/**
+ *  @brief  This type shall define the configuration of ICV generation.
+ */
+typedef struct
+{
+    uint64 IcvGenerationTimeout; /**< Timeout value for ICV generation process @range
+                                    0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint16
+        IcvTxLength; /**< Length of ICV to be transmitted within Follow_Up Message (in bytes) @range 0x0000u..0xFFFFu */
+    uint16 TxAuthenticationBuildAttempts; /**< Number of authentication build attempts @range 0x0000u..0xFFFFu */
+    uint16
+        IcvGenerationFvIdRef; /**< Reference to Freshness Value (FV) used for ICV generation @range 0x0000u..0xFFFFu */
+    EthTSyn_TxCsmJobType TxICVGenerationConfig; /**< Configuration for ICV generation job @range NA */
+    uint32 IcvTxFreshnessValueTruncLength; /**< Length in bits of Freshness Value to be included in secured messages
+                                              @range 0x00000000u..0xFFFFFFFFu */
+    uint32 IcvTxFreshnessValueLength;      /**< Length in bits of the provided freshness value @range
+                                              0x00000000u..0xFFFFFFFFu */
+} EthTSyn_GlobalTimeTxIcvGenerationType;
+
+/**
+ * @brief     Configuration structure for ICV (Integrity Check Value) verification in Ethernet Time Synchronization.
+ */
+typedef struct
+{
+    uint64 IcvVerificationTimeout; /**< Timeout value for ICV verification process @range
+                                      0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint16 IcvRxLength; /**< Length of ICV to be received within Follow_Up Message (in bytes) @range 0x0000u..0xFFFFu */
+    uint16 IcvVerificationAttempts; /**< Number of ICV verification attempts after failure @range 0x0000u..0xFFFFu */
+    uint16 RxAuthenticationBuildAttempts; /**< Number of authentication build attempts after ICV verification failure
+                                             @range 0x0000u..0xFFFFu */
+    uint32 IcvVerificationFvIdRef;        /**< Reference to Freshness Value (FV) used for ICV verification @range
+                                             0x00000000u..0xFFFFFFFFu */
+    EthTSyn_RxCsmJobType RxICVVerificationConfig; /**< Configuration for ICV verification job @range NA */
+    uint32 IcvRxFreshnessValueTruncLength; /**< Length in bits of Freshness Value to be included in secured messages
+                                              @range 0x00000000u..0xFFFFFFFFu */
+    uint32 IcvRxFreshnessValueLength;      /**< Length in bits of the provided freshness value @range
+                                              0x00000000u..0xFFFFFFFFu */
+    uint8* RxIcvCircularBuffer;            /**< Circular buffer pointer for ICV verification @range NA */
+} EthTSyn_GlobalTimeRxIcvVerificationType;
+/**
+ * @brief     Structure describing the Time Authenticated Field for ICV processing.
+ */
+typedef struct
+{
+    uint16 TimeAuthenticatedLength; /**< Length of Sub-Tlv Time Authenticated @range 0x0000u..0xFFFFu */
+    uint8  ICVFlags;                /**< ICV Flags indicating processing options @range 0x00u..0xFFu */
+    uint8  TruncatedFreshnessValue[ETHTSYN_MAX_FRESHNESS_VALUE_SIZE]; /**< Freshness Value array @range NA */
+    uint8  ICVBuffer[ETHTSYN_MAX_ICV_SIZE];                           /**< Generated ICV buffer @range NA */
+} EthTSyn_AuthenticatedFieldInfoType;
+/**
+ * @brief     Structure defining parameters of a circular buffer used for ICV data storage.
+ */
+typedef struct
+{
+    uint8* Buffer;   /**< Pointer to the buffer @range NA */
+    uint16 Capacity; /**< Capacity of the buffer @range 0x0000u..0xFFFFu */
+    uint16 Head;     /**< Index of the write position @range 0x0000u..0xFFFFu */
+    uint16 Tail;     /**< Index of the read position @range 0x0000u..0xFFFFu */
+    uint16 Count;    /**< Current number of data stored in the buffer @range 0x0000u..0xFFFFu */
+} EthTSyn_CircularBufferType;
+/**
+ * @brief     Structure defining runtime variables related to ICV (Integrity Check Value).
+ */
+typedef struct
+{
+    uint64 IcvIndicationStartTime;             /**< Local time when ICV generation/verification timer starts @range
+                                                  0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint16 AuthenticationBuildAttemptsCounter; /**< ICV generation/verification build counter @range 0x0000u..0xFFFFu */
+    uint16 IcvVerificationAttemptsCounter;     /**< ICV verification counter @range 0x0000u..0xFFFFu */
+    uint8  TimeAuthencatedSequenceCounter;  /**< Sequence counter of Sub-Tlv Time Authenticated @range 0x00u..0xFFu */
+    uint8  IcvProgressStatus;               /**< ICV generation or verification status @range 0x00u..0xFFu */
+    uint8  TimeAuthenticatedFieldOffset;    /**< Data offset of Sub-Tlv Time Authenticated @range 0x00u..0xFFu */
+    Crypto_VerifyResultType RxVerifyResult; /**< Result of ICV verification @range NA */
+    EthTSyn_AuthenticatedFieldInfoType
+                               AuthenticatedFieldInfo; /**< Data field of Sub-Tlv Time Authenticated @range NA */
+    EthTSyn_CircularBufferType RxICVBufferToken;       /**< ICV circular buffer token @range NA */
+} EthTSyn_ICVGenerationAndVerificationType;
+
+#endif
+/**
+ * @brief     Configuration structure for a port under a time domain.
+ */
+typedef struct
+{
+    boolean SynchronizedTimeBaseUseEthFreerunning; /**< Indicates if StbM uses EthFreerunning @range TRUE, FALSE */
+    EthTSyn_PortRoleType GlobalTimePortRole;       /**< Specifies the port role @range NA */
+    const EthTSyn_PdelayConfigCfgType*
+        PdelayConfig; /**< Configuration of cyclic propagation delay measurement @range NA */
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+    const EthTSyn_GlobalTimeTxIcvGenerationType*
+        GlobalTimeTxIcvGeneration; /**< Configuration of ICV generation @range NA */
+    const EthTSyn_GlobalTimeRxIcvVerificationType*
+        GlobalTimeRxIcvVerification; /**< Configuration of ICV verification @range NA */
+#endif
+#if (ETHTSYN_MASTER_TIME_VALIDATION_SUPPORT == STD_ON) || (ETHTSYN_SLAVE_TIME_VALIDATION_SUPPORT == STD_ON)
+    boolean EnableTimeValidation; /**< Indicates if Time Validation is enabled @range TRUE, FALSE */
 #endif
 } EthTSyn_PortConfigCfgType;
-/** This type shall define the data ID,which is used for CRC caculation or message authentication.
- *
+/**
+ * @brief     Structure defining a single data ID used for CRC calculation or message authentication.
  */
 typedef struct
 {
-    /** Index of the DataIDList for Follow_Up message ensures the identification of data elements due to CRC calculation
-     * and message authentication process. */
-    uint8 GlobalTimeFollowUpDataIDListIndex;
-    /** Value of the DataIDList for Follow_Up message ensures the identification of data elements due to CRC calculation
-     * and message authentication process. */
-    uint8 GlobalTimeFollowUpDataIDListValue;
+    uint8 GlobalTimeFollowUpDataIDListIndex; /**< Index of DataIDList element @range 0x00u..0xFFu */
+    uint8 GlobalTimeFollowUpDataIDListValue; /**< Value of DataIDList element @range 0x00u..0xFFu */
 } EthTSyn_GlobalTimeFollowUpDataIDListElementCfgType;
-/** This type shall define the list of  data ID,which is used for CRC caculation or message authentication.
- *
+/**
+ * @brief     Structure defining the list of data IDs used for CRC calculation or message authentication.
  */
 typedef struct
 {
-    /** Element of the DataIDList for Follow_Up message ensures the identification of data elements due to CRC
-     * calculation and message authentication process. */
-    EthTSyn_GlobalTimeFollowUpDataIDListElementCfgType GlobalTimeFollowUpDataIDListElement[ETHTSYN_DATA_LIST_LENGTH];
+    EthTSyn_GlobalTimeFollowUpDataIDListElementCfgType
+        GlobalTimeFollowUpDataIDListElement[ETHTSYN_DATA_LIST_LENGTH]; /**< Element of DataIDList for Follow_Up message
+                                                                          identification @range NA */
 } EthTSyn_GlobalTimeFollowUpDataIDListCfgType;
-/** This type shall define the configuration of a time domain.
- *
+/**
+ * @brief     This type shall define the configuration of a time domain.
  */
 typedef struct
 {
-    /** The global time domain ID. */
-    uint8 GlobalTimeDomainId;
-    /** Mandatory reference to the required synchronized time-base. */
-    uint8 SynchronizedTimeBaseRef;
-    /** The DataIDList for Follow_Up message ensures the identification of data elements due to CRC calculation and
-     * message authentication process. */
-    const EthTSyn_GlobalTimeFollowUpDataIDListCfgType* GlobalTimeFollowUpDataIDList;
-    /** The number of PortConfig */
-    uint8 PortConfigNum;
-    /** Configuration of the EthTSyn-Ports within the TimeDomain. */
-    const EthTSyn_PortConfigCfgType* PortConfig;
+    uint8 GlobalTimeDomainId;         /**< The global time domain ID @range 0x00u..0xFFu */
+    uint8 FramePrio;                  /**< Priority of outgoing EthTSyn messages @range 0x00u..0xFFu */
+    uint8 SynchronizedTimeBaseRef;    /**< Mandatory reference to required synchronized time-base @range 0x00u..0xFFu */
+    uint8 GlobalTimeEthIfRef;         /**< Reference to Ethernet interface for fetching global time information @range
+                                         0x00u..0xFFu */
+    EthTSyn_PortRoleCfgType PortRole; /**< Role of EthTSyn-Port (Master or Slave) @range NA */
+    uint64                  GlobalTimeDebounceTime; /**< TX debounce time for Sync and Follow_Up messages @range
+                                                       0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    const EthTSyn_GlobalTimeFollowUpDataIDListCfgType*
+        GlobalTimeFollowUpDataIDList;            /**< DataIDList for Follow_Up message identification @range NA */
+    const EthTSyn_PortConfigCfgType* PortConfig; /**< Configuration of EthTSyn-Ports within TimeDomain @range NA */
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+    ApplicationType PortReferrencedPartitionId; /**< Partition ID of port @range NA */
+#endif
+    uint8                   ClkUnitRef;    /**< Clock unit reference @range 0x00u..0xFFu */
+    StbM_ProtocolParamType* ProtocolParam; /**< Specific parameters for individual TimeSync modules @range NA */
 } EthTSyn_GlobalTimeDomainCfgType;
 
-typedef uint8 EthTSynMessageType;
-/** This type shall define the status of Pdelay Delay Measurement Requester during pdelay measurement.
- *
+/**
+ * @brief     Enumeration defining the status of Pdelay Delay Measurement Requester during pdelay measurement.
  */
 typedef enum
 {
-    ETHTSYN_SEND_PDELAY_REQ,
-    ETHTSYN_WAITFOR_PDELAY_RESP,
-    ETHTSYN_WAITFOR_PDELAY_RESP_FOLLOWUP,
+    ETHTSYN_SEND_PDELAY_REQ,              /**< Send Pdelay_Req message @range 0u */
+    ETHTSYN_WAITFOR_PDELAY_RESP,          /**< Wait for Pdelay_Resp message @range 1u */
+    ETHTSYN_WAITFOR_PDELAY_RESP_FOLLOWUP, /**< Wait for Pdelay_Resp_Follow_Up message @range 2u */
 } EthTSyn_PdelayTXStatusType;
-/** This type shall define the  status of Pdelay Delay Measurement Receiver during pdelay measurement.
- *
+
+/**
+ * @brief     Enumeration defining the status of Pdelay Delay Measurement Receiver during pdelay measurement.
  */
 typedef enum
 {
-    ETHTSYN_WAITFOR_PDELAY_REQ,
-    ETHTSYN_SEND_PDELAY_RESP,
-    ETHTSYN_SEND_PDELAY_RESP_FOLLOWUP,
+    ETHTSYN_WAITFOR_PDELAY_REQ,        /**< Wait for Pdelay_Req message @range 0u */
+    ETHTSYN_SEND_PDELAY_RESP,          /**< Send Pdelay_Resp message @range 1u */
+    ETHTSYN_SEND_PDELAY_RESP_FOLLOWUP, /**< Send Pdelay_Resp_Follow_Up message @range 2u */
 } EthTSyn_PdelayRXStatusType;
-/** This type shall define the status of a port during synchronization process.
- *
+
+/**
+ * @brief     Enumeration defining the status of a port during synchronization process.
  */
 typedef enum
 {
-    ETHTSYN_SEND_SYNC,
-    ETHTSYN_SEND_FOLLOWUP,
-    ETHTSYN_WAITFOR_SYNC,
-    ETHTSYN_WAITFOR_FOLLOWUP,
+    ETHTSYN_SEND_SYNC,     /**< Send Sync message @range 0u */
+    ETHTSYN_SEND_FOLLOWUP, /**< Send Follow_Up message @range 1u */
 } EthTSyn_SyncStatusType;
-/** This type shall define the mode of transmission.
- *
+/**
+ * @brief     Enumeration defining the mode of transmission for Ethernet Time Synchronization.
  */
 typedef enum
 {
-    ETHTSYN_TX_OFF,
-    ETHTSYN_TX_ON
+    ETHTSYN_TX_OFF, /**< Transmission mode OFF @range 0*/
+    ETHTSYN_TX_ON   /**< Transmission mode ON @range 1*/
 } EthTSyn_TransmissionModeType;
-/** This type shall define the format of global timestamp.
- *
+/**
+ * @brief     Structure defining the format of a global timestamp.
  */
 typedef struct
 {
-    /** nanoseconds */
-    uint32 Nanoseconds;
-    /** seconds */
-    uint32 Seconds;
-    /** secondsHi */
-    uint16 SecondsHi;
+    uint32 Nanoseconds; /**< Nanoseconds component of timestamp @range 0x00000000u..0xFFFFFFFFu */
+    uint32 Seconds;     /**< Lower 32-bit seconds component of timestamp @range 0x00000000u..0xFFFFFFFFu */
+    uint16 SecondsHi;   /**< Higher 16-bit seconds component of timestamp @range 0x0000u..0xFFFFu */
 } EthTSyn_TimeStampType;
-/** This type shall define the type of ingress timestamp and egress timestamp during pdelay measurement.
- *
+/**
+ * @brief     Structure defining ingress and egress timestamps during Pdelay measurement.
  */
 typedef struct
 {
-    /** ingress timestamp for pdelay_req message */
-    EthTSyn_TimeStampType PdelayReqEventIngressTimestamp;
-    /** egress timestamp for pdelay_resonse message */
-    EthTSyn_TimeStampType PdelayRespEventEgressTimestamp;
+    EthTSyn_TimeStampType PdelayReqEventIngressTimestamp; /**< Ingress timestamp for pdelay_req message @range NA */
+    EthTSyn_TimeStampType PdelayRespEventEgressTimestamp; /**< Egress timestamp for pdelay_response message @range NA */
 } EthTSyn_PdelayResponderTimestampType;
-/** This type shall define the type of egress time tuple,which includes the global and local time.
- *
+/**
+ * @brief     Structure defining the egress time tuple type, including global and local time.
  */
 typedef struct
 {
-    /** The T0 for tx preciseOriginTimestamp */
-    EthTSyn_TimeStampType T0;
-    /** The T0vlt for tx preciseOriginTimestamp */
-    EthTSyn_TimeStampType T0vlt;
+    EthTSyn_TimeStampType T0;    /**< T0 for tx preciseOriginTimestamp @range NA */
+    EthTSyn_TimeStampType T0vlt; /**< T0vlt for tx preciseOriginTimestamp @range NA */
 } EthTSyn_SyncEgressTupleType;
-/** This type shall define the runtime variable of a port.
- *
+
+/**
+ * @brief     Structure for parameters related to rate ratio calculation in Ethernet Time Synchronization.
  */
 typedef struct
 {
-    /** The id of timedomain */
-    uint8 Timedomainid;
-    /** The id of ETH control */
-    uint8 CtrlId;
-    /** Port ID in time domain */
-    uint8 PortIdinTimedomain;
-    /** Port index in configured port list */
-    uint16 PortIndexInPortList;
-    /** the index of domain in configured domain list,which the Port belongs to */
-    uint16 DomainIndex;
-    /** Port identity*/
-    uint8 ThisPortIdentity[ETHTSYN_PORT_IDENTITY_LENGTH];
-    /** The sender port identity of the received sync message */
-    uint8 PortIdentity[ETHTSYN_PORT_IDENTITY_LENGTH];
-    /** userData of stbm */
-    StbM_UserDataType UserData;
-    /** Handles the enabling and disabling of the transmission mode */
-    EthTSyn_TransmissionModeType TransmissionMode;
-    /** Link State */
-    EthTrcv_LinkStateType EthtrcvLinkState;
-    /** Role of port */
-    EthTSyn_PortRoleType PortRoleType;
-    /** The type of message to be transmitted */
-    EthTSynMessageType TranssmitMessageType;
-    /** Status of  Pdelay Delay Measurement Requester */
-    EthTSyn_PdelayTXStatusType PdelayTXStatusType;
-    /** Status of  Pdelay Delay Measurement Receiver */
-    EthTSyn_PdelayRXStatusType PdelayRXStatusType;
-    /** Status of SYNC message sending and receiving */
-    EthTSyn_SyncStatusType SyncStatusType;
-    /** TimeBaseUpdateCounter */
-    uint8 TimeBaseUpdateCounter;
-    /** Time of next sync message sent */
-    uint64 SyncReqPeriod;
-    /** Time of next Pdelay message sent */
-    uint64 PdelayReqPeriod;
-    /** DebounceCounter between SYNC and FOLLOW_UP */
-    uint64 SyncdebounceCounter;
-    /** DebounceCounter between PDELAY_RESP and PDELAY_RESP_FOLLOWUP */
-    uint64 PdelaydebounceCounter;
-    /** SequenceId of SYNC message */
-    uint16 SyncSequenceId;
-    /** SequenceId of received SYNC message */
-    uint16 ReceivedSyncSequenceId;
-    /** SequenceId of Pdelay message */
-    uint16 PdelayReqSequenceId;
-    /** SequenceId of received Pdelay message */
-    uint16 ReceivedPdelayReqSequenceId;
-    /** Indicate Whether firstly received sync req or not */
-    boolean FirstlyReceivedSyncReq;
-    /** The time for slave to sync the time */
-    EthTSyn_TimeStampType PreciseOriginTimestamp;
-    /** The time for caculating precise timestamp */
-    EthTSyn_SyncEgressTupleType SyncEgressTuple;
-    /** The T1vlt for rx preciseOriginTimestamp */
-    EthTSyn_TimeStampType T1vlt;
-    /** The t1 for pdelay */
-    EthTSyn_TimeStampType T1;
-    /** The t2 for pdelay */
-    EthTSyn_TimeStampType T2;
-    /** The t3 for pdelay */
-    EthTSyn_TimeStampType T3;
-    /** The t4 for pdelay */
-    EthTSyn_TimeStampType T4;
-    /** The requestReceiptTimestamp */
-    EthTSyn_PdelayResponderTimestampType PdelayResponderTimestamp;
-    /** Delay of sending between nodes */
-    EthTSyn_TimeStampType Pdelay;
-    /** Priority */
-    uint8 FramePrio;
-    /** The counter for debounce. */
-    uint8 SCHysteresisCount;
+    float64 NeighborRateRatio; /**< Neighbor Rate Ratio between local clocks of Peer Delay Responder and Initiator
+                                  @range 0.0..DBL_MAX */
+    float64
+        RateRatioPdelayResponder; /**< Rate ratio of Peer Delay Responder to Global Time Master @range 0.0..DBL_MAX */
+#if (ETHTSYN_RATE_RATIO_ENABLE == STD_ON)
+    uint8 RateRatioMesuredCounter; /**< Number of successful pDelay measurements for neighbor rate ratio calculation
+                                      @range 0x00u..0xFFu */
+    EthTSyn_TimeStampType T30;     /**< First egress timestamps of Pdelay_Resp messages on Responder side @range NA */
+    EthTSyn_TimeStampType T40;     /**< First ingress timestamps of Pdelay_Resp messages on Initiator side @range NA */
+    boolean HasCaculatedNeighborRateRatio; /**< Indicates if valid neighborRateRatio has been calculated @range TRUE,
+                                              FALSE */
+#endif
+} EthTSyn_RateRatioType;
+
+/**
+ * @brief Structure which contains port identity data
+ */
+typedef struct
+{
+    uint64 ClockIdentity; /**< Clock identity @range 0...0xFFFFFFFFFFFFFFFF */
+    uint16 PortNumber;    /**< Number of Ethernet port @range 0...0xFFFF */
+} EthTSyn_PortIdType;
+
+/**
+ * @brief     Runtime variable structure for an Ethernet Time Synchronization port.
+ */
+typedef struct
+{
+    uint8                        TimeDomainId; /**< The ID of the time domain @range 0x00u..0xFFu */
+    uint8                        CtrlId;       /**< The ID of ETH control @range 0x00u..0xFFu */
+    uint16                       DomainIndex;  /**< Index of domain in configured domain list @range 0x0000u..0xFFFFu */
+    EthTSyn_PortIdType           ThisPortIdentity;     /**< Port identity of this port @range NA */
+    EthTSyn_PortIdType           PortIdentity;         /**< Sender port identity of received sync message @range NA */
+    StbM_UserDataType            UserData;             /**< User data from StbM @range NA */
+    EthTSyn_TransmissionModeType TransmissionMode;     /**< Handles enabling/disabling of transmission mode @range NA */
+    EthTrcv_LinkStateType        EthtrcvLinkState;     /**< Link state of Ethernet transceiver @range NA */
+    EthTSyn_PortRoleType         PortRoleType;         /**< Role of the port @range NA */
+    uint8                        TranssmitMessageType; /**< Type of message to be transmitted @range 0x00u..0xFFu */
+    EthTSyn_PdelayTXStatusType
+        PdelayTXStatusType; /**< Status of Pdelay Delay Measurement Requester @range 0xFFu..0xFFu */
+    EthTSyn_PdelayRXStatusType PdelayRXStatusType; /**< Status of Pdelay Delay Measurement Receiver @range NA */
+    EthTSyn_SyncStatusType     SyncStatusType; /**< Status of SYNC message sending (only used by master) @range NA */
+    uint8                      TimeBaseUpdateCounter; /**< TimeBaseUpdateCounter value @range 0x00u..0xFFu */
+    uint64 SyncReqPeriod;       /**< Time of next sync message sent @range 0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint64 PdelayReqPeriod;     /**< Time of next Pdelay message sent @range 0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint64 SyncdebounceCounter; /**< DebounceCounter between SYNC and FOLLOW_UP @range
+                                   0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
+    uint16  SyncSequenceId;     /**< SequenceId of SYNC message @range 0x0000u..0xFFFFu */
+    uint16  ReceivedSyncSequenceId;      /**< SequenceId of received SYNC message @range 0x0000u..0xFFFFu */
+    uint16  PdelayReqSequenceId;         /**< SequenceId of Pdelay message @range 0x0000u..0xFFFFu */
+    uint16  ReceivedPdelayReqSequenceId; /**< SequenceId of received Pdelay message @range 0x0000u..0xFFFFu */
+    uint16  RxDebounceTimeTicks;
+    uint16  FollowUpTimeoutTicks;
+    boolean FirstlyReceivedSyncReq; /**< Indicates whether sync request is first received @range TRUE, FALSE */
+    EthTSyn_TimeStampType                PreciseOriginTimestamp; /**< Time for slave to sync the time @range NA */
+    EthTSyn_SyncEgressTupleType          SyncEgressTuple; /**< Time for calculating precise timestamp @range NA */
+    EthTSyn_TimeStampType                T1vlt;           /**< T1vlt for rx preciseOriginTimestamp @range NA */
+    EthTSyn_TimeStampType                T1;              /**< T1 for pdelay @range NA */
+    EthTSyn_TimeStampType                T2;              /**< T2 for pdelay @range NA */
+    EthTSyn_TimeStampType                T3;              /**< T3 for pdelay @range NA */
+    EthTSyn_TimeStampType                T4;              /**< T4 for pdelay @range NA */
+    EthTSyn_PdelayResponderTimestampType PdelayResponderTimestamp; /**< Request receipt timestamp @range NA */
+    EthTSyn_TimeStampType                Pdelay;                   /**< Delay of sending between nodes @range NA */
+    uint8                                FramePrio;                /**< Frame priority @range 0x00u..0xFFu */
+    uint8                                SCHysteresisCount;        /**< Counter for debounce @range 0x00u..0xFFu */
+#if (ETHTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+#if (ETHTSYN_MESSAGE_COMPLIANCE == STD_OFF)
+    boolean IsSyncToGatewayBitSet; /**< Indicates if sync message is received from gateway @range TRUE, FALSE */
+#endif
+    uint8 RecRawDataPtr[ETHTSYN_ICV_CIRCULAR_BUFFER_SIZE]; /**< Raw data copied from Rxindication when ICV enabled
+                                                              @range NA */
+    uint8 TimeAuthenticatedFieldOffset; /**< Offset of timeAuthenticatedField in RecRawDataPtr @range 0x00u..0xFFu */
+    EthTSyn_ICVGenerationAndVerificationType
+        ICVGenarationAndVerification; /**< Specific data for ICV generation or verification @range NA */
+#endif
+#if (ETHTSYN_MASTER_TIME_VALIDATION_SUPPORT == STD_ON)
+    StbM_TimeTupleType TrefPDResponder; /**< Used for coherent conversion of t2/t3 into Global Time values @range NA */
+#endif
+#if (ETHTSYN_SLAVE_TIME_VALIDATION_SUPPORT == STD_ON)
+    StbM_TimeTupleType TrefPDInitiator; /**< Used for coherent conversion of t1/t4 from Virtual Local Time into Global
+                                           Time @range NA */
+#endif
+    EthTSyn_RateRatioType RateRatio; /**< Parameters related to rate ratio calculation @range NA */
+    uint64 HoldOverTimer;            /**< Timer for transmission of Sync and Follow_Up messages on Master ports @range
+                                        0x0000000000000000u..0xFFFFFFFFFFFFFFFFu */
 } EthTSyn_PortType;
-/** This type shall define the configuration of EthTSyn.
- *
+/**
+ * @brief     Main configuration structure for the Ethernet Time Synchronization module.
  */
 typedef struct
 {
-    /** specifying the number of TimeDomain in this configuration */
+    /** number of port/domain */
+    uint8 DomainNum;
+    /** specifying the configuration of TimeDomain */
     const EthTSyn_GlobalTimeDomainCfgType* GlobalTimeDomain;
     /** specifying the Runtime Variables of Port */
     EthTSyn_PortType* const* RuntimeVariables;
-    /** specifying the number of Ports in this configuration */
-    const uint8 PortNum;
 } EthTSyn_ConfigType;
-
 #endif

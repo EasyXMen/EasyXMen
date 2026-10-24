@@ -28,6 +28,7 @@
 #if (STD_ON == DCM_MULTICORE_ENABLED)
 #include "Os.h"
 #endif
+#include "Dcm_Arti.h"
 /* ============================================ internal data definitions =========================================== */
 #ifdef DCM_VIN_REF
 /**
@@ -60,6 +61,7 @@ DCM_LOCAL boolean Dcm_VinObtained; /* PRQA S 3218 */ /* VL_Dcm_3218 */
 void Dcm_Init(const Dcm_ConfigType* ConfigPtr)
 /* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x01, ConfigPtr);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == ConfigPtr)
     {
@@ -95,8 +97,12 @@ void Dcm_Init(const Dcm_ConfigType* ConfigPtr)
         (void)Dcm_GetVin(Dcm_Vin);
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x01);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * periodically deal with asynchronous functionalities
  */
@@ -104,6 +110,7 @@ void Dcm_Init(const Dcm_ConfigType* ConfigPtr)
 void Dcm_MainFunction(void) /* PRQA S 6070 */ /* VL_MTR_Dcm_STCAL */
 /* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 1, 0x25);
     if (NULL_PTR != Dcm_CfgPtr)
     {
 #if ((STD_ON == DCM_UDS_0X27) && (STD_ON == DCM_SECURITY_READOUT))
@@ -151,14 +158,19 @@ void Dcm_MainFunction(void) /* PRQA S 6070 */ /* VL_MTR_Dcm_STCAL */
         Dcm_UDS0x85_MainFunction();
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x25);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_MULTICORE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * process transmission on targeted application
  */
 void Dcm_SatelliteMainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 1, 0x26);
     ApplicationType CurrentApplication = GetApplicationID();
     /* iterate over protocolrows to find message pending to be sent due to different application */
     for (uint8 index = 0u; index < DCM_PROTOCOLROW_NUM; index++)
@@ -170,14 +182,19 @@ void Dcm_SatelliteMainFunction(void)
             DslInternal_ProcessTransmit(index);
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x26);
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * retrive version info from macros
  */
 void Dcm_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x24, versionInfo);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == versionInfo)
     {
@@ -192,8 +209,12 @@ void Dcm_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* V
         versionInfo->sw_minor_version = DCM_SW_MINOR_VERSION;
         versionInfo->sw_patch_version = DCM_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x24);
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * called by dem to notify DTC status change (potentially triggering roe)
  */
@@ -202,6 +223,7 @@ Std_ReturnType
     Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew)
 /* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 4, 0x2B, DTC, DTCStatusOld, DTCStatusNew);
     DCM_UNUSED(DTC);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
@@ -224,15 +246,20 @@ Std_ReturnType
         DCM_UNUSED(DTCStatusOld);
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x2B, E_OK);
     return E_OK;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * get vehicle info data (called by DoIP)
  */
 /* PRQA S 3673++ */ /* VL_QAC_3673 */
 Std_ReturnType Dcm_GetVin(uint8* Data)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x07, Data);
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
@@ -275,8 +302,13 @@ Std_ReturnType Dcm_GetVin(uint8* Data)
         DCM_UNUSED(Data);
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x07, result);
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 3673-- */ /* VL_QAC_3673 */
 
 /**
@@ -285,6 +317,7 @@ Std_ReturnType Dcm_GetVin(uint8* Data)
 /* PRQA S 1503++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType Dcm_GetSecurityLevel(Dcm_SecLevelType* SecLevel)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x0D, SecLevel);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -295,8 +328,13 @@ Std_ReturnType Dcm_GetSecurityLevel(Dcm_SecLevelType* SecLevel)
     {
         *SecLevel = Dcm_CurrentSecurity;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x0D, E_OK);
     return E_OK;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 1503-- */ /* VL_QAC_NoUsedApi */
 
 /**
@@ -305,6 +343,7 @@ Std_ReturnType Dcm_GetSecurityLevel(Dcm_SecLevelType* SecLevel)
 /* PRQA S 1503++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType Dcm_GetSesCtrlType(Dcm_SesCtrlType* SesCtrlType)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 2, 0x06, SesCtrlType);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -315,8 +354,13 @@ Std_ReturnType Dcm_GetSesCtrlType(Dcm_SesCtrlType* SesCtrlType)
     {
         *SesCtrlType = Dcm_SessionCtrl.CurrentSession;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x06, E_OK);
     return E_OK;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 1503-- */ /* VL_QAC_NoUsedApi */
 
 /**
@@ -325,6 +369,7 @@ Std_ReturnType Dcm_GetSesCtrlType(Dcm_SesCtrlType* SesCtrlType)
 /* PRQA S 1503++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType Dcm_ResetToDefaultSession(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 1, 0x2A);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -335,16 +380,22 @@ Std_ReturnType Dcm_ResetToDefaultSession(void)
     {
         DslInternal_ResetToDefaultSession(TRUE);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x2A, E_OK);
     return E_OK;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 1503-- */ /* VL_QAC_NoUsedApi */
 
 #if (STD_ON == DCM_USE_BNDM)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * callbacks for BndM asynchronous jobs finish notification
  */
 void Dcm_BndMWriteBlockFinish(BndM_BlockIdType BlockId, BndM_ResultType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Notify, 3, 0x7A, BlockId, result);
     for (uint16 index = 0u; index < DCM_DID_NUM; index++)
     {
         if (BlockId == Dcm_DspDid[index].DidBndMBlockIdRef)
@@ -352,7 +403,8 @@ void Dcm_BndMWriteBlockFinish(BndM_BlockIdType BlockId, BndM_ResultType result)
             Dcm_BndMResult[Dcm_DspDid[index].DidBndMIndex] = (Std_ReturnType)result;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 1, 0x7A);
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif

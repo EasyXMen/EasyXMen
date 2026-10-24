@@ -52,7 +52,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66230
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_CanSM_CurrentState(NetworkHandleType Network, CanSM_BswMCurrentStateType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_CANSM_ENABLED == STD_ON*/
 

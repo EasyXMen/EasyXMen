@@ -48,6 +48,8 @@
 typedef void (*Dem_TaskFunctionPtr)(void); /* PRQA S 5004 */ /* VL_Dem_5004 */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Scheduler Task process
  * @reentrant     FALSE
@@ -55,6 +57,10 @@ typedef void (*Dem_TaskFunctionPtr)(void); /* PRQA S 5004 */ /* VL_Dem_5004 */
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_TaskScheduler(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Master partition pre-initialization
@@ -64,6 +70,10 @@ DEM_LOCAL void Dem_TaskScheduler(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MasterPreInit(const Dem_ConfigType* ConfigPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Master partition initialization
@@ -73,6 +83,8 @@ DEM_LOCAL void Dem_MasterPreInit(const Dem_ConfigType* ConfigPtr);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MasterInit(const Dem_ConfigType* ConfigPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 #define DEM_START_SEC_VAR_CLEARED_32
@@ -82,7 +94,10 @@ DEM_LOCAL void Dem_MasterInit(const Dem_ConfigType* ConfigPtr);
  * @range 0..4294967295
  */
 DEM_LOCAL uint32 Dem_MultipleSchedulerTask;
-
+#define DEM_STOP_SEC_VAR_CLEARED_32
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_VAR_CLEARED_32
+#include "Dem_MemMap.h"
 /**
  * @brief     Type definition for single scheduler task
  * @range 0..4294967295
@@ -92,8 +107,6 @@ DEM_LOCAL uint32 Dem_SingleSchedulerTask;
 #include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Scheduler Task initialization
  * @reentrant     FALSE
@@ -200,7 +213,8 @@ DEM_LOCAL_INLINE uint32 Dem_GetAndClearSingleScheduledTask(void)
     }
     return singleScheduledTask;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Scheduler Task process
  */
@@ -244,7 +258,10 @@ DEM_LOCAL void Dem_TaskScheduler(void)
         ++currentTask;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Master partition pre-initialization
  */
@@ -289,7 +306,10 @@ DEM_LOCAL void Dem_MasterPreInit(const Dem_ConfigType* ConfigPtr)
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Master partition initialization
  */
@@ -347,7 +367,8 @@ DEM_LOCAL void Dem_MasterInit(const Dem_ConfigType* ConfigPtr)
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Master partition Main Function
  * @reentrant     FALSE
@@ -356,21 +377,9 @@ DEM_LOCAL void Dem_MasterInit(const Dem_ConfigType* ConfigPtr)
  */
 DEM_LOCAL_INLINE void Dem_MasterMainFunction(void)
 {
-#if (DEM_DEV_ERROR_DETECT == STD_ON)
-    if (Dem_CheckLeastMasterInitStatus(DEM_PREINITIALIZED) == FALSE)
+    if (Dem_CheckMasterInitStatus(DEM_INITIALIZED) == TRUE)
     {
-        Dem_DetReportError(DEM_SID_MAINFUNCTION, DEM_E_UNINIT);
-    }
-    else
-#endif
-    {
-        if (Dem_CheckMasterInitStatus(DEM_INITIALIZED) == TRUE)
-        {
-            Dem_TaskScheduler();
-        }
+        Dem_TaskScheduler();
     }
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

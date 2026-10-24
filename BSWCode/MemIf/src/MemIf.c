@@ -28,6 +28,7 @@
 #if (STD_ON == MEMIF_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif
+#include "MemIf_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 /** Development Errors */
@@ -47,7 +48,7 @@
 
 /** This macro definition represents an internal function of the MemIf module */
 #ifndef MEMIF_LOCAL
-#define MEMIF_LOCAL static /* PRQA S 3414 */ /* VL_MemIf_3414 */
+#define MEMIF_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
 #endif
 
 /** This macro definition represents the MemIf module inline function */
@@ -72,7 +73,7 @@ MEMIF_LOCAL_INLINE void MemIf_DetReportError(uint8 ApiId, uint8 ErrorId)
 
 /* PRQA S 0553 EOF */ /* VL_MemIf_0553 */
 /* ========================================== external function definitions ========================================= */
-/* PRQA S 1503,1532 ++ */ /* VL_MemIf_1503,VL_QAC_OneFunRef */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 #if (MEMIF_DEV_ERROR_DETECT == STD_ON)
 #define MEMIF_START_SEC_CODE
 #include "MemIf_MemMap.h"
@@ -82,6 +83,19 @@ MEMIF_LOCAL_INLINE void MemIf_DetReportError(uint8 ApiId, uint8 ErrorId)
 Std_ReturnType
     MemIf_Read(uint16 DeviceIndex, uint16 BlockNumber, uint16 BlockOffset, uint8* DataBufferPtr, uint16 Length)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        MemIf,
+        0,
+        Bsw_Start,
+        6,
+        0x02,
+        DeviceIndex,
+        BlockNumber,
+        BlockOffset,
+        DataBufferPtr,
+        Length);
     Std_ReturnType ret     = E_NOT_OK;
     uint8          errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -103,15 +117,20 @@ Std_ReturnType
     {
         MemIf_DetReportError(MEMIF_SID_READ, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x02, ret);
     return ret;
 }
-
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief Invokes the "Write" function of the underlying memory abstraction module selected by the parameter
  * DeviceIndex.
  */
 Std_ReturnType MemIf_Write(uint16 DeviceIndex, uint16 BlockNumber, const uint8* DataBufferPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 4, 0x03, DeviceIndex, BlockNumber, DataBufferPtr);
     Std_ReturnType ret     = E_NOT_OK;
     uint8          errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -133,15 +152,20 @@ Std_ReturnType MemIf_Write(uint16 DeviceIndex, uint16 BlockNumber, const uint8* 
     {
         MemIf_DetReportError(MEMIF_SID_WRITE, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x03, ret);
     return ret;
 }
-
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief Invokes the "InvalidateBlock" function of the underlying memory abstraction module selected by the parameter
  * DeviceIndex.
  */
 Std_ReturnType MemIf_InvalidateBlock(uint16 DeviceIndex, uint16 BlockNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 3, 0x07, DeviceIndex, BlockNumber);
     Std_ReturnType ret     = E_NOT_OK;
     uint8          errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -159,15 +183,20 @@ Std_ReturnType MemIf_InvalidateBlock(uint16 DeviceIndex, uint16 BlockNumber)
     {
         MemIf_DetReportError(MEMIF_SID_INVALIDATE, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x07, ret);
     return ret;
 }
-
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief Invokes the "EraseImmediateBlock" function of the underlying memory abstraction module selected by the
  * parameter DeviceIndex.
  */
 Std_ReturnType MemIf_EraseImmediateBlock(uint16 DeviceIndex, uint16 BlockNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 3, 0x09, DeviceIndex, BlockNumber);
     Std_ReturnType ret     = E_NOT_OK;
     uint8          errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -185,15 +214,20 @@ Std_ReturnType MemIf_EraseImmediateBlock(uint16 DeviceIndex, uint16 BlockNumber)
     {
         MemIf_DetReportError(MEMIF_SID_ERASE, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x09, ret);
     return ret;
 }
-
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief Invokes the "Cancel" function of the underlying memory abstraction module selected by the parameter
  * DeviceIndex.
  */
 void MemIf_Cancel(uint16 DeviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 2, 0x04, DeviceIndex);
     uint8 errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
     if (MEMIF_NUMBER_OF_DEVICES <= DeviceIndex)
@@ -210,14 +244,19 @@ void MemIf_Cancel(uint16 DeviceIndex)
     {
         MemIf_DetReportError(MEMIF_SID_CANCEL, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 1, 0x04);
 }
-
+#define MEMIF_STOP_SEC_CODE
+#include "MemIf_MemMap.h"
+#define MEMIF_START_SEC_CODE
+#include "MemIf_MemMap.h"
 /**
  * @brief Invokes the "GetJobResult" function of the underlying memory abstraction module selected by the parameter
  * DeviceIndex.
  */
 MemIf_JobResultType MemIf_GetJobResult(uint16 DeviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 2, 0x06, DeviceIndex);
     MemIf_JobResultType ret;
     uint8               errorId = MEMIF_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -236,6 +275,7 @@ MemIf_JobResultType MemIf_GetJobResult(uint16 DeviceIndex)
     {
         MemIf_DetReportError(MEMIF_SID_GET_JOB_RESULT, errorId);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x06, ret);
     return ret;
 }
 #define MEMIF_STOP_SEC_CODE
@@ -252,6 +292,7 @@ MemIf_JobResultType MemIf_GetJobResult(uint16 DeviceIndex)
 /* PRQA S 6030 ++ */ /* VL_MTR_MemIf_STMIF */
 MemIf_StatusType MemIf_GetStatus(uint16 DeviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 2, 0x05, DeviceIndex);
     MemIf_StatusType ret = MEMIF_UNINIT;
     uint8            iloop;
     /* ----- Development Error Detection --------*/
@@ -303,6 +344,7 @@ MemIf_StatusType MemIf_GetStatus(uint16 DeviceIndex)
         MemIf_DetReportError(MEMIF_SID_GET_STATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 2, 0x05, ret);
     return ret;
 }
 /* PRQA S 6030 -- */
@@ -318,6 +360,7 @@ MemIf_StatusType MemIf_GetStatus(uint16 DeviceIndex)
  */
 void MemIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Start, 2, 0x08, VersionInfoPtr);
     /** ***** Development Error Checks ***** */
 #if (STD_ON == MEMIF_DEV_ERROR_DETECT)
     uint8 errorId = MEMIF_E_NO_ERROR;
@@ -342,6 +385,7 @@ void MemIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
         MemIf_DetReportError(MEMIF_SID_VERSION_INFO, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, MemIf, 0, Bsw_Return, 1, 0x08);
 }
 #define MEMIF_STOP_SEC_CODE
 #include "MemIf_MemMap.h"

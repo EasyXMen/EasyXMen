@@ -28,6 +28,13 @@
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_RSA == STD_ON)
+#include <stdint.h>
+
+#include "Crypto_62_Bignum.h"
+#include "Crypto_62_Asn1.h"
+
+#include "Crypto_62_CtrDrbg.h"
+#include "Crypto_62_Random.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,208 +45,15 @@ extern "C" {
 #define CRYPTO_RSA_CRYPT 2 /**< Identifier for RSA encryption and decryption operations. */
 
 #define CRYPTO_RSA_SALT_LEN_ANY (-1)
-#define CRYPTO_MPI_MAX_SIZE     (1024)
-#define CRYPTO_RSA_NO_CRT       (1)
-#if !defined(CRYPTO_MPI_WINDOW_SIZE)
-/*
- * Maximum window size used for modular exponentiation. Default: 3
- * Minimum value: 1. Maximum value: 6.
- *
- * Result is an array of ( 2 ** CRYPTO_MPI_WINDOW_SIZE ) MPIs used
- * for the sliding window calculation. (So 8 by default)
- *
- * Reduction in size, reduces speed.
- */
-#define CRYPTO_MPI_WINDOW_SIZE 3 /**< Maximum window size used. */
-#endif                           /* !CRYPTO_MPI_WINDOW_SIZE */
-/** \} name ASN1 Error codes */
+#define CRYPTO_RSA_NO_CRT       1
 
-/**
- * \name DER constants
- * These constants comply with the DER encoded ASN.1 type tags.
- * DER encoding uses hexadecimal representation.
- * An example DER sequence is:\n
- * - 0x02 -- tag indicating INTEGER
- * - 0x01 -- length in octets
- * - 0x05 -- value
- * Such sequences are typically read into \c ::CRYPTO_x509_buf.
- * \{
- */
-#define CRYPTO_ASN1_BOOLEAN          0x01U
-#define CRYPTO_ASN1_INTEGER          0x02U
-#define CRYPTO_ASN1_BIT_STRING       0x03U
-#define CRYPTO_ASN1_OCTET_STRING     0x04U
-#define CRYPTO_ASN1_NULL             0x05U
-#define CRYPTO_ASN1_OID              0x06U
-#define CRYPTO_ASN1_ENUMERATED       0x0AU
-#define CRYPTO_ASN1_UTF8_STRING      0x0CU
-#define CRYPTO_ASN1_SEQUENCE         0x10U
-#define CRYPTO_ASN1_SET              0x11U
-#define CRYPTO_ASN1_PRINTABLE_STRING 0x13U
-#define CRYPTO_ASN1_T61_STRING       0x14U
-#define CRYPTO_ASN1_IA5_STRING       0x16U
-#define CRYPTO_ASN1_UTC_TIME         0x17U
-#define CRYPTO_ASN1_GENERALIZED_TIME 0x18U
-#define CRYPTO_ASN1_UNIVERSAL_STRING 0x1CU
-#define CRYPTO_ASN1_BMP_STRING       0x1EU
-#define CRYPTO_ASN1_PRIMITIVE        0x00U
-#define CRYPTO_ASN1_CONSTRUCTED      0x20U
-#define CRYPTO_ASN1_CONTEXT_SPECIFIC 0x80U
-
-/** An error occurred while reading from or writing to a file. */
-#define CRYPTO_ERR_MPI_FILE_IO_ERROR 0x02U
-/** Bad input parameters to function. */
-#define CRYPTO_ERR_MPI_BAD_INPUT_DATA 0x04U
-/** There is an invalid character in the digit string. */
-#define CRYPTO_ERR_MPI_INVALID_CHARACTER 0x06U
-/** The buffer is too small to write to. */
-#define CRYPTO_ERR_MPI_BUFFER_TOO_SMALL 0x08U
-/** The input arguments are negative or result in illegal output. */
-#define CRYPTO_ERR_MPI_NEGATIVE_VALUE 0x0AU
-/** The input argument for division is zero, which is not allowed. */
-#define CRYPTO_ERR_MPI_DIVISION_BY_ZERO 0x0CU
-/** The input arguments are not acceptable. */
-#define CRYPTO_ERR_MPI_NOT_ACCEPTABLE 0x0EU
-/** Memory allocation failed. */
-#define CRYPTO_ERR_MPI_ALLOC_FAILED 0x10U
-
-/** Generic error */
-#define CRYPTO_ERR_ERROR_GENERIC_ERROR 0X01U
-/** This is a bug in the library */
-#define CRYPTO_ERR_ERROR_CORRUPTION_DETECTED 0x6EU
-
-/** Hardware accelerator failed */
-#define CRYPTO_ERR_PLATFORM_HW_ACCEL_FAILED 0x70U
-/** The requested feature is not supported by the platform */
-#define CRYPTO_ERR_PLATFORM_FEATURE_UNSUPPORTED 0x72U
-
-#define CRYPTO_MPI_CHK(f)     \
-    do                        \
-    {                         \
-        if ((ret = (f)) != 0) \
-            goto cleanup;     \
-    } while (0)
-
-/* PRQA S 3412,3411 ++ */ /* VL_Crypto_62_3412 */
-#define MULADDC_INIT \
-    {                \
-        uint64 r;    \
-        uint32 r0, r1;
-
-#define MULADDC_CORE         \
-    r  = *(s++) * (uint64)b; \
-    r0 = (uint32)r;          \
-    r1 = (uint32)(r >> biL); \
-    r0 += c;                 \
-    r1 += (r0 < c);          \
-    r0 += *d;                \
-    r1 += (r0 < *d);         \
-    c      = r1;             \
-    *(d++) = r0;
-
-/* PRQA S 3412,3411 -- */ /* VL_Crypto_62_3412 */
-
-/* PRQA S 3431 ++ */ /* VL_Crypto_62_General */
-#define MULADDC_STOP }
-/* PRQA S 3431 -- */         /* VL_Crypto_62_General */
-#define ciL (sizeof(uint32)) /** chars in limb  */
-#define biL (ciL << 3)       /** bits  in limb  */
-#define biH (ciL << 2)       /** half limb size */
-
-#define CRYPTO_ASN1_CHK_ADD(g, f) \
-    do                            \
-    {                             \
-        if ((ret = (f)) < 0)      \
-            return ret;           \
-        else                      \
-            (g) += ret;           \
-    } while (0)
 /*
  * Convert between bits/chars and number of limbs
  * Divide first in order to avoid potential overflows
  */
 #define BITS_TO_LIMBS(i)  ((i) / biL + ((i) % biL != 0))
 #define CHARS_TO_LIMBS(i) ((i) / ciL + ((i) % ciL != 0))
-/* Get a specific byte, without range checks. */
-#define GET_BYTE(X, i) (((X)[(i) / ciL] >> (((i) % ciL) * 8)) & 0xffU)
 
-/*
- * Maximum size MPIs are allowed to grow to in number of limbs.
- */
-#define CRYPTO_MPI_MAX_LIMBS 10000
-#define CRYPTO_MPI_MAX_BITS  (8 * CRYPTO_MPI_MAX_SIZE) /**< Maximum number of bits for usable MPIs. */
-
-#define CRYPTO_BYTE_0(x) ((uint8)((x) & 0xffU))
-#define CRYPTO_BYTE_1(x) ((uint8)(((x) >> 8) & 0xffU))
-#define CRYPTO_BYTE_2(x) ((uint8)(((x) >> 16) & 0xffU))
-#define CRYPTO_BYTE_3(x) ((uint8)(((x) >> 24) & 0xffU))
-#define CRYPTO_BYTE_4(x) ((uint8)(((x) >> 32) & 0xffU))
-#define CRYPTO_BYTE_5(x) ((uint8)(((x) >> 40) & 0xffU))
-#define CRYPTO_BYTE_6(x) ((uint8)(((x) >> 48) & 0xffU))
-#define CRYPTO_BYTE_7(x) ((uint8)(((x) >> 56) & 0xffU))
-
-#if defined(CRYPTO_HAVE_UDBL)
-
-#define MULADDC_X1_INIT  \
-    {                    \
-        CRYPTO_t_udbl r; \
-        uint32        r0, r1;
-
-#define MULADDC_X1_CORE             \
-    r  = *(s++) * (CRYPTO_t_udbl)b; \
-    r0 = (uint32)r;                 \
-    r1 = (uint32)(r >> biL);        \
-    r0 += c;                        \
-    r1 += (r0 < c);                 \
-    r0 += *d;                       \
-    r1 += (r0 < *d);                \
-    c      = r1;                    \
-    *(d++) = r0;
-
-#define MULADDC_X1_STOP }
-
-#else /* CRYPTO_HAVE_UDBL */
-/* PRQA S 3412,3411 ++ */ /* VL_Crypto_62_3412 */
-#define MULADDC_X1_INIT         \
-    {                           \
-        uint32 s0, s1, b0, b1;  \
-        uint32 r0, r1, rx, ry;  \
-        b0 = (b << biH) >> biH; \
-        b1 = (b >> biH);
-
-#define MULADDC_X1_CORE      \
-    s0 = (*s << biH) >> biH; \
-    s1 = (*s >> biH);        \
-    s++;                     \
-    rx = s0 * b1;            \
-    r0 = s0 * b0;            \
-    ry = s1 * b0;            \
-    r1 = s1 * b1;            \
-    r1 += (rx >> biH);       \
-    r1 += (ry >> biH);       \
-    rx <<= biH;              \
-    ry <<= biH;              \
-    r0 += rx;                \
-    r1 += (r0 < rx);         \
-    r0 += ry;                \
-    r1 += (r0 < ry);         \
-    r0 += c;                 \
-    r1 += (r0 < c);          \
-    r0 += *d;                \
-    r1 += (r0 < *d);         \
-    c      = r1;             \
-    *(d++) = r0;
-/* PRQA S 3412,3411 -- */ /* VL_Crypto_62_3412 */
-
-/* PRQA S 3431 ++ */ /* VL_Crypto_62_General */
-#define MULADDC_X1_STOP }
-/* PRQA S 3431 -- */ /* VL_Crypto_62_General */
-#endif
-#define MULADDC_X8_INIT MULADDC_X1_INIT
-#define MULADDC_X8_STOP MULADDC_X1_STOP
-#define MULADDC_X2_CORE MULADDC_X1_CORE MULADDC_X1_CORE
-#define MULADDC_X4_CORE MULADDC_X2_CORE MULADDC_X2_CORE
-#define MULADDC_X8_CORE MULADDC_X4_CORE MULADDC_X4_CORE
 /*
  * Digest algorithms
  */
@@ -328,21 +142,9 @@ extern "C" {
 #define CRYPTO_RSA_GEN_KEY_MIN_BITS 1024
 
 /* ================================================ type definitions ================================================ */
-/**
- * \brief Flags for Crypto_mpi_gen_prime()
- *
- * Each of these flags is a constraint on the result X returned by
- * Crypto_mpi_gen_prime().
- */
-/* PRQA S 1271 ++ */ /* VL_Crypto_62_1271 */
-typedef enum
-{
-    CRYPTO_MPI_GEN_PRIME_FLAG_DH      = 1U, /**< (X-1)/2 is prime too */
-    CRYPTO_MPI_GEN_PRIME_FLAG_LOW_ERR = 2U, /**< lower error rate from 2<sup>-80</sup> to 2<sup>-128</sup> */
-} Crypto_mpi_gen_prime_flag_t;
-/* PRQA S 1271 -- */ /* VL_Crypto_62_1271 */
+
 /** @brief ASN.1 buffer structure. */
-typedef struct
+typedef struct Crypto_asn1_buf_tag
 {
     int    tag; /**< ASN1 type, e.g. TLS_ASN1_UTF8_STRING. */
     uint32 len; /**< ASN1 length, in octets. */
@@ -350,38 +152,11 @@ typedef struct
 } Crypto_asn1_buf;
 
 /** @brief ASN.1 Sequence Item Structure*/
-typedef struct
+typedef struct Crypto_asn1_sequence_tag
 {
     Crypto_asn1_buf                  buf;  /**< Buffer containing the given ASN.1 item. */
     struct Crypto_asn1_sequence_tag* next; /**< The next entry in the sequence. */
 } Crypto_asn1_sequence;
-
-/** @brief MPI structure  */
-typedef struct
-{
-    /** Pointer to limbs.
-     *
-     * This may be \c NULL if \c n is 0.
-     */
-    uint32* p;
-
-    /** Sign: -1 if the mpi is negative, 1 otherwise.
-     *
-     * The number 0 must be represented with `s = +1`. Although many library
-     * functions treat all-limbs-zero as equivalent to a valid representation
-     * of 0 regardless of the sign bit, there are exceptions, so bignum
-     * functions and external callers must always set \c s to +1 for the
-     * number zero.
-     *
-     * Note that this implies that calloc() or `... = {0}` does not create
-     * a valid MPI representation. You must call Crypto_mpi_init().
-     */
-    sint16 s;
-
-    /** Total number of limbs in \c p.  */
-    uint16 n;
-
-} Crypto_mpi;
 
 /** @brief RSA Context Structure*/
 typedef struct
@@ -395,19 +170,18 @@ typedef struct
     Crypto_mpi N; /*!<  The public modulus. */
     Crypto_mpi E; /*!<  The public exponent. */
 
-    Crypto_mpi D; /*!<  The private exponent. */
-    Crypto_mpi P; /*!<  The first prime factor. */
-    Crypto_mpi Q; /*!<  The second prime factor. */
+    Crypto_mpi D;  /*!<  The private exponent. */
+    Crypto_mpi P;  /*!<  The first prime factor. */
+    Crypto_mpi Q;  /*!<  The second prime factor. */
+    Crypto_mpi RN; /*!<  cached <code>R^2 mod N</code>. */
 
+#if !defined(CRYPTO_RSA_NO_CRT)
     Crypto_mpi DP; /*!<  <code>D % (P - 1)</code>. */
     Crypto_mpi DQ; /*!<  <code>D % (Q - 1)</code>. */
     Crypto_mpi QP; /*!<  <code>1 / (Q % P)</code>. */
-
-    Crypto_mpi RN; /*!<  cached <code>R^2 mod N</code>. */
-
     Crypto_mpi RP; /*!<  cached <code>R^2 mod P</code>. */
     Crypto_mpi RQ; /*!<  cached <code>R^2 mod Q</code>. */
-
+#endif
     Crypto_mpi Vi; /*!<  The cached blinding value. */
     Crypto_mpi Vf; /*!<  The cached un-blinding value. */
 
@@ -462,86 +236,6 @@ CRYPTO_62_LOCAL inline uint32 Crypto_mpi_core_montmul_working_limbs(uint32 AN_li
 }
 
 /**
- * @brief   Copies the value of one MPI (Multiple Precision Integer) to another.
- *
- * @param[out] X  Destination MPI.
- * @param[in]  Y  Source MPI.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_copy(Crypto_mpi* X, const Crypto_mpi* Y);
-
-/**
- * @brief   Returns the size of an MPI in bytes.
- *
- * @param[in] X  Pointer to the MPI.
- *
- * @return  Size of the MPI in bytes.
- */
-uint32 Crypto_mpi_size(const Crypto_mpi* X);
-
-/**
- * @brief   Compares two MPIs.
- *
- * @param[in] X  First MPI.
- * @param[in] Y  Second MPI.
- *
- * @return  Comparison result.
- *          - 0: X == Y
- *          - < 0: X < Y
- *          - > 0: X > Y
- */
-int Crypto_mpi_cmp_mpi(const Crypto_mpi* X, const Crypto_mpi* Y);
-
-/**
- * @brief   Performs modular exponentiation: X = A^E mod N.
- *
- * @param[out] X            Result of the exponentiation.
- * @param[in]  A            Base MPI.
- * @param[in]  E            Exponent MPI.
- * @param[in]  N            Modulus MPI.
- * @param[in]  prec_RR      Precomputed R^2 mod N.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_exp_mod(
-    Crypto_mpi*       X,
-    const Crypto_mpi* A,
-    const Crypto_mpi* E,
-    const Crypto_mpi* N,
-    Crypto_mpi*       prec_RR);
-
-/**
- * @brief   Frees and clears an MPI structure.
- *
- * @details This function securely frees the memory allocated for the MPI structure
- *          and clears any sensitive data to prevent information leakage. It should
- *          be called whenever the MPI is no longer needed.
- *
- * @param[in,out] X  Pointer to the MPI structure to be freed.
- *                   If a null pointer is passed, no operation is performed.
- *
- * @return  void
- */
-void Crypto_mpi_free(Crypto_mpi* X);
-/**
- * @brief   Parses an MPI from an ASN.1 encoded buffer.
- *
- * @param[in,out] p  Pointer to the current position in the buffer.
- * @param[in]     end  End of the buffer.
- * @param[out]    X  MPI to store the parsed value.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_asn1_get_mpi(unsigned char** p, const unsigned char* end, Crypto_mpi* X);
-
-/**
  * @brief   Processes RSA encryption for a given object ID, mode, and secondary family.
  *
  * @param[in] objectId         The object ID for the RSA encryption process.
@@ -552,8 +246,12 @@ int Crypto_asn1_get_mpi(unsigned char** p, const unsigned char* end, Crypto_mpi*
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_Rsa_EncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes RSA decryption for a given object ID, mode, and secondary family.
@@ -566,8 +264,12 @@ Std_ReturnType
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_Rsa_DecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Generates an RSA signature for a given object ID, mode, and secondary family.
@@ -580,10 +282,14 @@ Std_ReturnType
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmModeType   mode,
     Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Verifies an RSA signature for a given object ID, mode, and secondary family.
@@ -596,10 +302,14 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
     uint32                     objectId,
     Crypto_AlgorithmModeType   mode,
     Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Initializes an RSA context.
@@ -610,7 +320,11 @@ Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_rsa_init(Crypto_rsa_context* ctx, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the padding mode and hash algorithm for an RSA context.
@@ -623,7 +337,11 @@ void Crypto_rsa_init(Crypto_rsa_context* ctx, Crypto_AlgorithmModeType mode, Cry
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_set_padding(Crypto_rsa_context* ctx, int padding, Crypto_AlgorithmFamilyType hash_id);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Retrieves the current padding mode from an RSA context.
@@ -632,7 +350,11 @@ int Crypto_rsa_set_padding(Crypto_rsa_context* ctx, int padding, Crypto_Algorith
  *
  * @return  The current padding mode.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_get_padding_mode(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Retrieves the current hash algorithm from an RSA context.
@@ -641,7 +363,11 @@ int Crypto_rsa_get_padding_mode(const Crypto_rsa_context* ctx);
  *
  * @return  The current hash algorithm family type.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_get_md_alg(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Imports RSA parameters into an RSA context.
@@ -657,6 +383,8 @@ int Crypto_rsa_get_md_alg(const Crypto_rsa_context* ctx);
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_import(
     Crypto_rsa_context* ctx,
     const Crypto_mpi*   N,
@@ -664,6 +392,8 @@ int Crypto_rsa_import(
     const Crypto_mpi*   Q,
     const Crypto_mpi*   D,
     const Crypto_mpi*   E);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Imports raw RSA parameters into an RSA context.
@@ -684,6 +414,8 @@ int Crypto_rsa_import(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_import_raw(
     Crypto_rsa_context*  ctx,
     const unsigned char* N,
@@ -696,6 +428,8 @@ int Crypto_rsa_import_raw(
     uint32               D_len,
     const unsigned char* E,
     uint32               E_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Completes the initialization of an RSA context.
@@ -709,7 +443,11 @@ int Crypto_rsa_import_raw(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_complete(Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Exports RSA parameters from an RSA context.
@@ -728,6 +466,8 @@ int Crypto_rsa_complete(Crypto_rsa_context* ctx);
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export(
     const Crypto_rsa_context* ctx,
     Crypto_mpi*               N,
@@ -735,6 +475,8 @@ int Crypto_rsa_export(
     Crypto_mpi*               Q,
     Crypto_mpi*               D,
     Crypto_mpi*               E);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Exports raw RSA parameters from an RSA context.
@@ -758,6 +500,8 @@ int Crypto_rsa_export(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export_raw(
     const Crypto_rsa_context* ctx,
     unsigned char*            N,
@@ -770,6 +514,8 @@ int Crypto_rsa_export_raw(
     uint32                    D_len,
     unsigned char*            E,
     uint32                    E_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Exports the CRT parameters from an RSA context.
@@ -786,7 +532,11 @@ int Crypto_rsa_export_raw(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export_crt(const Crypto_rsa_context* ctx, Crypto_mpi* DP, Crypto_mpi* DQ, Crypto_mpi* QP);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Retrieves the bit length of the RSA modulus.
@@ -797,7 +547,11 @@ int Crypto_rsa_export_crt(const Crypto_rsa_context* ctx, Crypto_mpi* DP, Crypto_
  *
  * @return  The bit length of the RSA modulus.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 uint32 Crypto_rsa_get_bitlen(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Retrieves the length of the RSA modulus in bytes.
  *
@@ -807,7 +561,11 @@ uint32 Crypto_rsa_get_bitlen(const Crypto_rsa_context* ctx);
  *
  * @return  The length of the RSA modulus in bytes.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 uint32 Crypto_rsa_get_len(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Generates an RSA key pair.
  *
@@ -845,7 +603,11 @@ int Crypto_rsa_gen_key(
  *          - 0: Public key is valid.
  *          - Non-zero: Public key is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_check_pubkey(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Checks the validity of an RSA private key.
  *
@@ -857,7 +619,11 @@ int Crypto_rsa_check_pubkey(const Crypto_rsa_context* ctx);
  *          - 0: Private key is valid.
  *          - Non-zero: Private key is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_check_privkey(const Crypto_rsa_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Checks the consistency between an RSA public and private key pair.
  *
@@ -870,7 +636,11 @@ int Crypto_rsa_check_privkey(const Crypto_rsa_context* ctx);
  *          - 0: Key pair is consistent.
  *          - Non-zero: Key pair is inconsistent.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_check_pub_priv(const Crypto_rsa_context* pub, const Crypto_rsa_context* prv);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Performs RSA public key encryption or signature verification.
  *
@@ -885,7 +655,11 @@ int Crypto_rsa_check_pub_priv(const Crypto_rsa_context* pub, const Crypto_rsa_co
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_public(Crypto_rsa_context* ctx, const unsigned char* input, unsigned char* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Performs RSA private key decryption or signature generation.
  *
@@ -1257,12 +1031,16 @@ int Crypto_rsa_rsassa_pss_sign(
  *          - 0: Signature is valid.
  *          - Non-zero: Signature is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_pkcs1_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
     unsigned int               hashlen,
     const unsigned char*       hash,
     const unsigned char*       sig);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Verifies an RSA signature using the RSASSA-PKCS1-v1_5 scheme.
@@ -1280,12 +1058,16 @@ int Crypto_rsa_pkcs1_verify(
  *          - 0: Signature is valid.
  *          - Non-zero: Signature is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pkcs1_v15_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
     unsigned int               hashlen,
     const unsigned char*       hash,
     const unsigned char*       sig);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Verifies an RSA signature using the RSASSA-PSS scheme.
@@ -1303,12 +1085,16 @@ int Crypto_rsa_rsassa_pkcs1_v15_verify(
  *          - 0: Signature is valid.
  *          - Non-zero: Signature is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
     unsigned int               hashlen,
     const unsigned char*       hash,
     const unsigned char*       sig);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Verifies an RSA signature using the RSASSA-PSS scheme with extended parameters.
@@ -1328,6 +1114,8 @@ int Crypto_rsa_rsassa_pss_verify(
  *          - 0: Signature is valid.
  *          - Non-zero: Signature is invalid.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_verify_ext(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
@@ -1336,268 +1124,9 @@ int Crypto_rsa_rsassa_pss_verify_ext(
     Crypto_AlgorithmFamilyType mgf1_hash_id,
     int                        expected_salt_len,
     const unsigned char*       sig);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
-/**
- * @brief   Reduces an MPI modulo another MPI using Montgomery reduction.
- *
- * This function reduces an MPI A modulo another MPI N using Montgomery reduction.
- * The result is stored in the provided MPI structure X.
- *
- * @param[out] X  Pointer to the MPI structure to store the result.
- * @param[in]  A  Pointer to the MPI to reduce.
- * @param[in]  N  Pointer to the modulus MPI.
- * @param[in]  mm Montgomery multiplier.
- * @param[in]  T  Pointer to a temporary MPI for calculations.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int mpi_montred(Crypto_mpi* A, const Crypto_mpi* N, uint32 mm, const Crypto_mpi* T);
-
-/**
- * @brief   Initializes the Montgomery multiplier.
- *
- * This function initializes the Montgomery multiplier for a given modulus N.
- * The result is stored in the provided variable mm.
- *
- * @param[out] mm Pointer to the variable to store the Montgomery multiplier.
- * @param[in]  N  Pointer to the modulus MPI.
- */
-void mpi_montg_init(uint32* mm, const Crypto_mpi* N);
-
-/**
- * @brief   Selects an MPI from an array of MPIs based on an index.
- *
- * This function selects an MPI from an array of MPIs based on the provided index.
- * The result is stored in the provided MPI structure R.
- *
- * @param[out] R      Pointer to the MPI structure to store the result.
- * @param[in]  T      Pointer to the array of MPIs.
- * @param[in]  T_size Number of MPIs in the array.
- * @param[in]  idx    Index of the MPI to select.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int mpi_select(Crypto_mpi* R, const Crypto_mpi* T, uint32 T_size, uint32 idx);
-
-/**
- * @brief   Converts a 32-bit unsigned integer from big-endian to host byte order.
- *
- * This function converts a 32-bit unsigned integer from big-endian byte order to the host byte order.
- *
- * @param[in] x 32-bit unsigned integer in big-endian byte order.
- *
- * @return  32-bit unsigned integer in host byte order.
- */
-uint32 mpi_uint_bigendian_to_host_c(uint32 x);
-
-/**
- * @brief   Frees an RSA context.
- *
- * This function frees the resources associated with an RSA context.
- *
- * @param[in,out] ctx Pointer to the RSA context to free.
- */
-void Crypto_rsa_free(Crypto_rsa_context* ctx);
-
-/**
- * @brief   Adds an integer to an MPI.
- *
- * This function adds an integer b to an MPI A and stores the result in X.
- *
- * @param[out] X Pointer to the MPI structure to store the result.
- * @param[in]  A Pointer to the MPI to add.
- * @param[in]  b Integer to add to the MPI.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_add_int(Crypto_mpi* X, const Crypto_mpi* A, sint32 b);
-
-/**
- * @brief   Conditionally assigns an MPI based on a flag.
- *
- * This function conditionally assigns an MPI A to another MPI X based on the provided flag.
- *
- * @param[out] X     Pointer to the MPI structure to store the result.
- * @param[in]  A     Pointer to the MPI to conditionally assign.
- * @param[in]  limbs Number of limbs in the MPI.
- * @param[in]  assign Flag indicating whether to perform the assignment (non-zero) or not (zero).
- */
-void Crypto_mpi_core_cond_assign(uint32* X, const uint32* A, uint32 limbs, uint32 assign);
-
-/**
- * @brief   Performs modular exponentiation using the Montgomery method.
- *
- * This function performs modular exponentiation of A^E mod N using the Montgomery method.
- * The result is stored in the provided array X.
- *
- * @param[out] X        Pointer to the array to store the result of the exponentiation.
- * @param[in]  A        Pointer to the base array.
- * @param[in]  N        Pointer to the modulus array.
- * @param[in]  AN_limbs Number of limbs in the modulus array.
- * @param[in]  E        Pointer to the exponent array.
- * @param[in]  E_limbs  Number of limbs in the exponent array.
- * @param[in]  RR       Pointer to the precomputed R^2 mod N.
- * @param[in]  T        Pointer to a temporary array for calculations.
- */
-void Crypto_mpi_core_exp_mod(
-    uint32*       X,
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    const uint32* E,
-    uint32        E_limbs,
-    const uint32* RR,
-    uint32*       T);
-/**
- * @brief   Computes the Montgomery R^2 value for a given modulus.
- *
- * This function calculates the Montgomery R^2 value, which is used in Montgomery multiplication.
- * The result is stored in the provided MPI structure.
- *
- * @param[out] X  Pointer to the MPI structure to store the result R^2.
- * @param[in]  N  Pointer to the modulus MPI.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_core_get_mont_r2_unsafe(Crypto_mpi* X, const Crypto_mpi* N);
-
-/**
- * @brief   Performs Montgomery multiplication.
- *
- * This function performs the Montgomery multiplication of two numbers A and B modulo N.
- * The result is stored in the provided array X.
- *
- * @param[out] X        Pointer to the array to store the result of the multiplication.
- * @param[in]  A        Pointer to the first operand array.
- * @param[in]  B        Pointer to the second operand array.
- * @param[in]  B_limbs  Number of limbs in the second operand array.
- * @param[in]  N        Pointer to the modulus array.
- * @param[in]  AN_limbs Number of limbs in the modulus array.
- * @param[in]  mm       Montgomery multiplier.
- * @param[in]  T        Pointer to a temporary array for calculations.
- */
-void Crypto_mpi_core_montmul(
-    uint32*       X,
-    const uint32* A,
-    const uint32* B,
-    uint32        B_limbs,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    uint32*       T);
-
-/**
- * @brief   Multiplies two MPIs.
- *
- * This function multiplies two MPIs A and B and stores the result in X.
- *
- * @param[out] X        Pointer to the MPI structure to store the result.
- * @param[in]  A        Pointer to the first operand MPI.
- * @param[in]  A_limbs  Number of limbs in the first operand MPI.
- * @param[in]  B        Pointer to the second operand MPI.
- * @param[in]  B_limbs  Number of limbs in the second operand MPI.
- */
-void Crypto_mpi_core_mul(uint32* X, const uint32* A, uint32 A_limbs, const uint32* B, uint32 B_limbs);
-
-/**
- * @brief   Converts an MPI to its Montgomery representation.
- *
- * This function converts an MPI A to its Montgomery representation modulo N.
- * The result is stored in the provided array X.
- *
- * @param[out] X        Pointer to the array to store the Montgomery representation.
- * @param[in]  A        Pointer to the MPI to convert.
- * @param[in]  N        Pointer to the modulus array.
- * @param[in]  AN_limbs Number of limbs in the modulus array.
- * @param[in]  mm       Montgomery multiplier.
- * @param[in]  rr       Pointer to the Montgomery R^2 value.
- * @param[in]  T        Pointer to a temporary array for calculations.
- */
-void Crypto_mpi_core_to_mont_rep(
-    uint32*       X,
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    const uint32* rr,
-    uint32*       T);
-
-/**
- * @brief   Multiplies an MPI by an integer.
- *
- * This function multiplies an MPI A by an integer b and stores the result in X.
- *
- * @param[out] X  Pointer to the MPI structure to store the result.
- * @param[in]  A  Pointer to the MPI to multiply.
- * @param[in]  b  Integer to multiply with the MPI.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_mul_int(Crypto_mpi* X, const Crypto_mpi* A, uint32 b);
-
-/**
- * @brief   Initializes an MPI.
- *
- * This function initializes an MPI structure, setting its value to zero.
- *
- * @param[out] X  Pointer to the MPI structure to initialize.
- */
-void Crypto_mpi_init(Crypto_mpi* X);
-
-/**
- * @brief   Reads an MPI from a binary buffer.
- *
- * This function reads an MPI from a binary buffer and stores it in the provided MPI structure.
- *
- * @param[out] X       Pointer to the MPI structure to store the result.
- * @param[in]  buf     Pointer to the binary buffer.
- * @param[in]  buflen  Length of the binary buffer.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_read_binary(Crypto_mpi* X, const unsigned char* buf, uint32 buflen);
-
-/**
- * @brief   Writes an MPI to a binary buffer.
- *
- * This function writes an MPI to a binary buffer.
- *
- * @param[in]  X       Pointer to the MPI structure to write.
- * @param[out] buf     Pointer to the binary buffer.
- * @param[in]  buflen  Length of the binary buffer.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_write_binary(const Crypto_mpi* X, unsigned char* buf, uint32 buflen);
-
-/**
- * @brief   Reads an MPI from a string.
- *
- * This function reads an MPI from a string representation and stores it in the provided MPI structure.
- *
- * @param[out] X      Pointer to the MPI structure to store the result.
- * @param[in]  radix  Radix of the string representation (e.g., 10 for decimal, 16 for hexadecimal).
- * @param[in]  s      Pointer to the string representation.
- *
- * @return  Status of the operation.
- *          - 0: Operation successful.
- *          - Non-zero: Operation failed.
- */
-int Crypto_mpi_read_string(Crypto_mpi* X, int radix, const char* s);
 /**
  * @brief   Deduces the CRT (Chinese Remainder Theorem) parameters from given RSA primes and private exponent.
  *
@@ -1615,6 +1144,8 @@ int Crypto_mpi_read_string(Crypto_mpi* X, int radix, const char* s);
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_crt(
     const Crypto_mpi* P,
     const Crypto_mpi* Q,
@@ -1622,6 +1153,8 @@ int Crypto_rsa_deduce_crt(
     Crypto_mpi*       DP,
     Crypto_mpi*       DQ,
     Crypto_mpi*       QP);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Deduces the RSA prime factors from the modulus and private exponent.
  *
@@ -1637,12 +1170,16 @@ int Crypto_rsa_deduce_crt(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_primes(
     const Crypto_mpi* N,
     const Crypto_mpi* E,
     const Crypto_mpi* D,
     Crypto_mpi*       P,
     Crypto_mpi*       Q);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Deduces the RSA private exponent from the prime factors and public exponent.
  *
@@ -1658,7 +1195,11 @@ int Crypto_rsa_deduce_primes(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_private_exponent(const Crypto_mpi* P, const Crypto_mpi* Q, const Crypto_mpi* E, Crypto_mpi* D);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Validates the RSA key parameters.
  *
@@ -1702,7 +1243,11 @@ int Crypto_rsa_validate_params(
  *          - 0: Operation successful.
  *          - Non-zero: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_write_key(const Crypto_rsa_context* rsa, unsigned char* start, unsigned char** p);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

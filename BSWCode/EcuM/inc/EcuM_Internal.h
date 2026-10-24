@@ -24,9 +24,6 @@
 
 #ifndef ECUM_INTERNAL_H
 #define ECUM_INTERNAL_H
-
-/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
-
 /* =================================================== inclusions =================================================== */
 #include "EcuM.h"
 #include "EcuM_Cfg.h"
@@ -40,6 +37,7 @@
 #include "SchM_EcuM.h"
 #include "Rte_Main.h"
 #include "EcuM_Externals.h"
+#include "EcuM_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -157,14 +155,13 @@ typedef struct
 typedef struct
 {
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
-    CoreIdType coreId; /**< The core id the user of ECUM is in. @raneg 0x00 ~ 0xFF */
+    CoreIdType coreId[ECUM_MAX_WAKE_UP_SOURCE_NUM]; /**< The core id the user of ECUM is in. @raneg 0x00 ~ 0xFF */
 #endif
     EcuM_WakeupSourceType* Pending;   /**< wake up source which is pending to be validated. @range 0x00 ~ 0xFFFFFFFF */
     EcuM_WakeupSourceType* Validated; /**< wake up source which is validated. @range 0x00 ~ 0xFFFFFFFF */
     EcuM_WakeupSourceType* Expired;   /**< wake up source which is expired. @range 0x00 ~ 0xFFFFFFFF */
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
-    Tm_PredefTimer100us32bitType
-        wkTime[ECUM_MAX_WAKE_UP_SOURCE_NUM]; /**< wake up source time. @range 0x00 ~ 0xFFFFFFFF */
+    uint32 wkTime[ECUM_MAX_WAKE_UP_SOURCE_NUM]; /**< wake up source time. @range 0x00 ~ 0xFFFFFFFF */
 #else
     TickType wkTime[ECUM_MAX_WAKE_UP_SOURCE_NUM]; /**< wake up source time. @range 0x00 ~ 0xFFFFFFFF */
 #endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
@@ -202,8 +199,8 @@ typedef struct
     EcuM_WksStateType Wks; /* wake up source state. @range 0x00 ~ 0xFF */
 #endif                     /*ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u*/
 
-    EcuM_TargetType SdtgNext; /* Next shutdown target. @range 0x00 ~ 0xFF */
-    EcuM_TargetType SdtgLast; /* Last shutdown target. @range 0x00 ~ 0xFF */
+    EcuM_TargetType* SdtgNext; /* Next shutdown target. @range 0x00 ~ 0xFF */
+    EcuM_TargetType* SdtgLast; /* Last shutdown target. @range 0x00 ~ 0xFF */
 } EcuM_RunTimeLcType;
 
 /* ========================================== internal function definitions ========================================= */
@@ -214,54 +211,116 @@ typedef struct
 /*EcuMOSResource, reference to a OS resource which is used to bring the ECU into
  * sleep mode. In case of multi core each core shall have an own OsResource.*/
 #if (1u >= ECUM_MAX_MCU_CORE_NUM)
+#define ECUM_START_SEC_CONFIG_DATA_16
+#include "EcuM_MemMap.h"
 extern const ResourceType EcuM_OSResource;
+#define ECUM_STOP_SEC_CONFIG_DATA_16
+#include "EcuM_MemMap.h"
 #else
+#define ECUM_START_SEC_CONFIG_DATA_16
+#include "EcuM_MemMap.h"
 extern const ResourceType EcuM_OSResource[ECUM_MAX_MCU_CORE_NUM];
+#define ECUM_STOP_SEC_CONFIG_DATA_16
+#include "EcuM_MemMap.h"
 #endif
 
 #if (ECUM_SLEEP_MODE_ENABLED == STD_ON)
 /*EcuM Sleep modes configured by pre-compile configure*/
+#define ECUM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 extern const EcuM_SleepModeCfgType EcuM_SleepModeCfgs[ECUM_MAX_SLEEP_MODE_NUM];
+#define ECUM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 #endif
 
 /*The normal MCU mode to be restored after a sleep.*/
+#define ECUM_START_SEC_CONFIG_DATA_8
+#include "EcuM_MemMap.h"
 extern const Mcu_ModeType EcuM_NormalMcuModeCfg;
+#define ECUM_STOP_SEC_CONFIG_DATA_8
+#include "EcuM_MemMap.h"
 
 /*ECUM user configuration*/
+#define ECUM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 extern const EcuM_UserCfgType EcuM_UserCfgs[ECUM_MAX_USER_NUM];
+#define ECUM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
-
 /*ECUM user alarm configuration*/
+#define ECUM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 extern const EcuM_AlarmClockCfgType EcuM_AlarmClkCfgs[ECUM_MAX_ALARM_CLOCK_NUM];
+#define ECUM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 
 #endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /* Slave cores IDs */
+#define ECUM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 extern const CoreIdType EcuM_SlaveCoreIds[ECUM_MAX_MCU_CORE_NUM - 1u];
-/* Reference spinlock configuration */
-extern const SpinlockIdType EcuM_RefSpinLockCfg;
+#define ECUM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 
+/* Reference spinlock configuration */
+#define ECUM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
+extern const SpinlockIdType EcuM_RefSpinLockCfg;
+#define ECUM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "EcuM_MemMap.h"
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
+
 /* Wake up source Pending, Validated and Expired */
-extern EcuM_WakeupSourceType EcuMWksPending;
-extern EcuM_WakeupSourceType EcuMWksValidated;
-extern EcuM_WakeupSourceType EcuMWksExpired;
+#define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+extern EcuM_WakeupSourceType EcuM_WksPending;
+#define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+extern EcuM_WakeupSourceType EcuM_WksValidated;
+#define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
+extern EcuM_WakeupSourceType EcuM_WksExpired;
+#define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
 
 /*Pointer variable to store the determined PB configuration data*/
+#define ECUM_START_SEC_VAR_FAST_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
 extern const EcuM_ConfigType* EcuM_ConfigPtr;
+#define ECUM_STOP_SEC_VAR_FAST_CLEARED_UNSPECIFIED
+#include "EcuM_MemMap.h"
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /*Shutdown request flag, set by master core, check by slave main function*/
+#define ECUM_START_SEC_VAR_FAST_CLEARED_BOOLEAN
+#include "EcuM_MemMap.h"
 extern volatile boolean EcuM_ShutdownFlag;
+#define ECUM_STOP_SEC_VAR_FAST_CLEARED_BOOLEAN
+#include "EcuM_MemMap.h"
 
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 #if (ECUM_MODE_HANDING == STD_ON)
 /* Current Rte State to notify during MainFunction */
 extern Rte_ModeType_EcuM_Mode EcuM_RteState;
-#endif
+#endif /* ECUM_MODE_HANDING == STD_ON */
+
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON)
+#define ECUM_START_SEC_VAR_CLONE_UNSPECIFIED
+#include "EcuM_MemMap.h"
+extern EcuM_RunTimeLcType EcuMRunData;
+#define ECUM_STOP_SEC_VAR_CLONE_UNSPECIFIED
+#include "EcuM_MemMap.h"
+#endif /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON */
 
 /* ========================================= external function declarations ========================================= */
 /**
@@ -272,7 +331,11 @@ extern Rte_ModeType_EcuM_Mode EcuM_RteState;
  * @synchronous TRUE
  * @trace       CPD-69010
  */
+#define ECUM_START_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 uint8 EcuM_WkSrcMap2CfgWkIdx(EcuM_WakeupSourceType wkSrc);
+#define ECUM_STOP_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Executes the shutdown phase for the specified user.
@@ -284,7 +347,11 @@ uint8 EcuM_WkSrcMap2CfgWkIdx(EcuM_WakeupSourceType wkSrc);
  * @synchronous TRUE
  * @trace       CPD-64772
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_DoShutDownPhase(EcuM_UserType caller);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Performs the necessary actions to turn off the ECU before the OS starts.
@@ -293,8 +360,13 @@ Std_ReturnType EcuM_DoShutDownPhase(EcuM_UserType caller);
  * @synchronous TRUE
  * @trace       CPD-64803
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_OffPreOS(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
 /**
  * @brief       Updates the ECU Manager's clock with the current runtime information.
  * @param[in]   pRt : Pointer to the runtime information structure.
@@ -303,9 +375,11 @@ void EcuM_OffPreOS(void);
  * @synchronous TRUE
  * @trace       CPD-64875
  */
-/* PRQA S 1753,1501 ++ */ /* VL_EcuM_1753,VL_EcuM_1501 */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_UpdateEcuMClock(EcuM_RunTimeLcType* pRt);
-/* PRQA S 1753,1501 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Cancels all active alarms managed by the ECU Manager.
@@ -314,9 +388,13 @@ void EcuM_UpdateEcuMClock(EcuM_RunTimeLcType* pRt);
  * @synchronous TRUE
  * @trace       CPD-69011
  */
-/* PRQA S 1501 ++ */ /* VL_EcuM_1501 */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_CancellAlarms(void);
-/* PRQA S 1501 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /**
@@ -327,7 +405,11 @@ void EcuM_CancellAlarms(void);
  * @synchronous TRUE
  * @trace       CPD-64783
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 uint8 EcuM_GetSlaveCoreIndex(CoreIdType coreId);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /**
@@ -341,7 +423,11 @@ uint8 EcuM_GetSlaveCoreIndex(CoreIdType coreId);
  * @synchronous TRUE
  * @trace       CPD-64870
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_SearchUserByCaller(EcuM_UserType caller, uint8* userIndex);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Checks if the ECU Manager is in the initialization state.
@@ -351,8 +437,13 @@ Std_ReturnType EcuM_SearchUserByCaller(EcuM_UserType caller, uint8* userIndex);
  * @synchronous TRUE
  * @trace       CPD-69012
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 boolean EcuM_isInitState(EcuM_RunTimeLcType** EcuMRunDataPtr);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF)
 /**
  * @brief       Retrieves the pointer to the ECU Manager's runtime data.
  * @return      EcuM_RunTimeLcType : Pointer to the ECU Manager's runtime data.
@@ -361,8 +452,13 @@ boolean EcuM_isInitState(EcuM_RunTimeLcType** EcuMRunDataPtr);
  * @trace       CPD-69013
  */
 /* PRQA S 5016 ++ */ /* VL_EcuM_5016 */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 EcuM_RunTimeLcType* EcuM_GetLcRunDataPtr(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 5016 -- */
+#endif /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF */
 
 /**
  * @brief       Retrieves the configuration pointer for a specific wakeup source.

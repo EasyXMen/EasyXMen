@@ -53,7 +53,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-69362
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_BswModeNotification(BswM_ModeGroupType modeGroup);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_BSWMODENOTIFICATION_ENABLED == STD_ON*/
 

@@ -53,9 +53,13 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66336
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Sd_ClientServiceCurrentState(
     uint16                           SdClientServiceHandleId,
     Sd_ClientServiceCurrentStateType CurrentClientState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by Service Discovery to indicate the current status of the Consumed Eventgroup
@@ -67,9 +71,13 @@ void BswM_Sd_ClientServiceCurrentState(
  * @synchronous TRUE
  * @trace       CPD-66338
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Sd_ConsumedEventGroupCurrentState(
     uint16                                SdConsumedEventGroupHandleId,
     Sd_ConsumedEventGroupCurrentStateType ConsumedEventGroupState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by Service Discovery to indicate the current status of the EventHandler
@@ -81,9 +89,13 @@ void BswM_Sd_ConsumedEventGroupCurrentState(
  * @synchronous TRUE
  * @trace       CPD-66340
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Sd_EventHandlerCurrentState(
     uint16                          SdEventHandlerHandleId,
     Sd_EventHandlerCurrentStateType EventHandlerStatus);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_SD_ENABLED == STD_ON*/
 

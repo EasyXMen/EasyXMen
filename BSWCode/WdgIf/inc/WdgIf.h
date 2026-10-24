@@ -40,27 +40,27 @@
   \li VL_WdgIf_0380
     Reason: Macro definitions are necessary
     Risk: No risk.
-    Prevention: None.
+    Prevention: Functional reliability guaranteed by design.
 
   \li VL_WdgIf_0553
     Reason: The usage of this file depends on the config
     Risk: No risk.
-    Prevention: None.
+    Prevention: Functional reliability guaranteed by design.
 
   \li VL_WdgIf_3432
     Reason: Function-like macros are used to allow more efficient code.
     Risk: No risk.
-    Prevention: None.
+    Prevention: Functional reliability guaranteed by design.
 
   \li VL_MTR_WdgIf_CONF
     Reason: Some special files have less or no code, allowing for the reduction of useless comments.
     Risk: No risk.
-    Prevention: None.
+    Prevention: Functional reliability guaranteed by design.
 
   \li VL_WdgIf_3472
     Reason: Macro definitions for easy reuse.
     Risk: No risk.
-    Prevention: None.
+    Prevention: Functional reliability guaranteed by design.
 
 */
 
@@ -69,7 +69,6 @@
 
 /* =================================================== inclusions =================================================== */
 #include "Std_Types.h"
-#include "WdgIf_Types.h"
 #include "WdgIf_Cfg.h"
 
 #ifdef __cplusplus
@@ -77,21 +76,21 @@ extern "C" {
 #endif
 
 /* =============================================== version information ============================================== */
-#define WDGIF_H_AR_MAJOR_VERSION 4u /*Autosar Major Version*/
-#define WDGIF_H_AR_MINOR_VERSION 9u /*Autosar Minor Version*/
-#define WDGIF_H_AR_PATCH_VERSION 0u /*Autosar Patch Version*/
-#define WDGIF_H_SW_MAJOR_VERSION 2u /*Major Version*/
-#define WDGIF_H_SW_MINOR_VERSION 2u /*Minor Version*/
-#define WDGIF_H_SW_PATCH_VERSION 1u /*Patch Version*/
+#define WDGIF_VENDOR_ID                62U /*Vendor ID*/
+#define WDGIF_MODULE_ID                43U /*Module ID*/
+#define WDGIF_AR_RELEASE_MAJOR_VERSION 4u  /*Autosar Major Version*/
+#define WDGIF_AR_RELEASE_MINOR_VERSION 9u  /*Autosar Minor Version*/
+#define WDGIF_AR_RELEASE_PATCH_VERSION 0u  /*Autosar Patch Version*/
+#define WDGIF_SW_MAJOR_VERSION         3u  /*Major Version*/
+#define WDGIF_SW_MINOR_VERSION         0u  /*Minor Version*/
+#define WDGIF_SW_PATCH_VERSION         0u  /*Patch Version*/
 
-#define WDGIF_VENDOR_ID 62U /*Vendor ID*/
-#define WDGIF_MODULE_ID 43U /*Module ID*/
-#define WDGIF_INSTANCE  0U  /*Instance ID*/
+#define WDGIF_INSTANCE 0U /*Instance ID*/
 
 /* ===================================================== macros ===================================================== */
-#define WDGIF_SETMODE_ID        (0x01u) /* API SetMode ID*/
-#define WDGIF_TRIGGER_ID        (0x02u) /* API Trigger ID*/
-#define WDGIF_GETVERSIONINFO_ID (0x03u) /* API Getversioninfo ID*/
+#define WDGIF_SETMODE_ID        0x01u /* API SetMode ID*/
+#define WDGIF_TRIGGER_ID        0x02u /* API Trigger ID*/
+#define WDGIF_GETVERSIONINFO_ID 0x03u /* API Getversioninfo ID*/
 
 #define WDGIF_E_PARAM_DEVICE  (0x01u) /* Invalid device ID   */
 #define WDGIF_E_PARAM_POINTER (0x03u) /* Invalid pointer   */
@@ -116,7 +115,11 @@ typedef struct
 
 /* =========================================== external data declarations =========================================== */
 #if (WDGIF_NUMBER_OF_DEVICES > 1)
+#define WDGIF_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "WdgIf_MemMap.h"
 extern const WdgIf_DeviceType WdgIf_DeviceData[WDGIF_NUMBER_OF_DEVICES];
+#define WDGIF_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "WdgIf_MemMap.h"
 #endif /*WDGIF_NUMBER_OF_DEVICES > 1*/
 
 /* ========================================= external function declarations ========================================= */
@@ -131,7 +134,11 @@ extern const WdgIf_DeviceType WdgIf_DeviceData[WDGIF_NUMBER_OF_DEVICES];
  * @synchronous TRUE
  * @trace       CPD-68258
  */
+#define WDGIF_START_SEC_CODE
+#include "WdgIf_MemMap.h"
 extern Std_ReturnType WdgIf_SetMode(uint8 DeviceIndex, WdgIf_ModeType WdgMode);
+#define WDGIF_STOP_SEC_CODE
+#include "WdgIf_MemMap.h"
 
 /**
  * @brief Set the trigger condition value to watchdog driver.
@@ -143,7 +150,11 @@ extern Std_ReturnType WdgIf_SetMode(uint8 DeviceIndex, WdgIf_ModeType WdgMode);
  * @synchronous TRUE
  * @trace       CPD-68259
  */
+#define WDGIF_START_SEC_CODE
+#include "WdgIf_MemMap.h"
 extern void WdgIf_SetTriggerCondition(uint8 DeviceIndex, uint16 Timeout);
+#define WDGIF_STOP_SEC_CODE
+#include "WdgIf_MemMap.h"
 
 #if (STD_ON == WDGIF_VERSION_INFO_API)
 /**
@@ -153,7 +164,11 @@ extern void WdgIf_SetTriggerCondition(uint8 DeviceIndex, uint16 Timeout);
  * @synchronous TRUE
  * @trace       CPD-68260
  */
+#define WDGIF_START_SEC_CODE
+#include "WdgIf_MemMap.h"
 extern void WdgIf_GetVersionInfo(Std_VersionInfoType* versionInfoPtr);
+#define WDGIF_STOP_SEC_CODE
+#include "WdgIf_MemMap.h"
 #endif /*STD_ON == WDGIF_VERSION_INFO_API*/
 
 #ifdef __cplusplus

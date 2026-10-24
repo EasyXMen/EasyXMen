@@ -22,16 +22,9 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+/* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040   ++ */         /* VL_QAC_Crypto */
 
-/* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 ++ */ /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #include "Crypto_62_Hash.h"
@@ -48,8 +41,6 @@
 
 /* ============================================ internal data definitions =========================================== */
 
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /**
  * @brief          Updates the cryptographic operation for a given object.
  * @param[in]      objectId : The ID of the cryptographic object to be updated.
@@ -60,28 +51,34 @@
  * @synchronous    TRUE
  * @trace       CPD-71687
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Update(uint32 objectId);
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
+
 /* ========================================== external data definition ============================================= */
-
-#define CRYPTO_62_START_SEC_VAR_CLEARED_UNSPECIFIED
-#include "Crypto_62_MemMap.h"
-
 /**
  * @brief Array to store the cryptographic jobs
  * @details This array is used to store cryptographic jobs that are being processed or waiting to be processed.
  * @range CRYPTO_MAX_DRIVER_OBJECT
  */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 Crypto_JobType Crypto_62_StoredJob[CRYPTO_MAX_DRIVER_OBJECT];
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief Memory pool for cryptographic operations
  * @details This memory pool is used to allocate memory for cryptographic operations dynamically.
- * @range CRYPTO_MEMPOOL_SIZE
+ * @range CRYPTO_MEMPOOL_SIZE/4 elements (CRYPTO_MEMPOOL_SIZE bytes total)
  */
-uint8 Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE];
+#define CRYPTO_62_START_SEC_VAR_CLEARED_32
+#include "Crypto_62_MemMap.h"
+uint32 Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE / CRYPTO_CONST_4];
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_32
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
 /**
@@ -90,28 +87,49 @@ uint8 Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE];
  *          Each row corresponds to a specific cryptographic object, and each column represents a job in the queue.
  * @range CRYPTO_MAX_DRIVER_OBJECT x CRYPTO_MAX_QUEUE_SIZE
  */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 Crypto_JobType Crypto_62_JobInQueue[CRYPTO_MAX_DRIVER_OBJECT][CRYPTO_MAX_QUEUE_SIZE];
-
-#endif
-
 #define CRYPTO_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Crypto_62_MemMap.h"
+#endif
 
-#define CRYPTO_62_START_SEC_VAR_CLEARED_8
-#include "Crypto_62_MemMap.h"
+#if (CRYPTO_MEMPOOL_SIZE % 4 != 0)
+#error "ERROR: CRYPTO_MEMPOOL_SIZE must be divisible by 4 for 32-bit alignment."
+#endif
 
 /**
  * @brief Status of the cryptographic driver
  * @range 0-1
  */
-Crypto_62_DriverStatusType Crypto_62_DriverStatus;
+#define CRYPTO_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+Crypto_62_DriverStatusType Crypto_62_DriverStatus; /* PRQA S 1531  */ /* VL_QAC_NoReferenced */
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief Array to store the status of cryptographic objects
  * @details This array is used to store the status of each cryptographic object.
  * @range CRYPTO_MAX_DRIVER_OBJECT
  */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 Crypto_62_ObjectStatusType Crypto_ObjectStatus[CRYPTO_MAX_DRIVER_OBJECT];
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
+/**
+ * @brief Array to store the status of stored jobs
+ * @details This array is used to store the status of cryptographic jobs that are being processed or waiting to be
+ * processed.
+ * @range CRYPTO_MAX_DRIVER_OBJECT
+ */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_8
+#include "Crypto_62_MemMap.h"
+uint8 Crypto_62_StoredJobBusy[CRYPTO_MAX_DRIVER_OBJECT];
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_8
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
 /**
@@ -119,14 +137,24 @@ Crypto_62_ObjectStatusType Crypto_ObjectStatus[CRYPTO_MAX_DRIVER_OBJECT];
  * @details This array keeps track of the number of jobs currently in each queue.
  * @range CRYPTO_MAX_DRIVER_OBJECT
  */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_32
+#include "Crypto_62_MemMap.h"
 uint32 Crypto_62_QueueFilledSize[CRYPTO_MAX_DRIVER_OBJECT];
-#endif
-#define CRYPTO_62_STOP_SEC_VAR_CLEARED_8
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_32
 #include "Crypto_62_MemMap.h"
 
-/* ========================================== external function definitions ========================================= */
-#define CRYPTO_62_START_SEC_CODE
+/**
+ * @brief Skip dequeue once in MainFunction after high-priority sync (SWS_Crypto_00199)
+ * @range CRYPTO_MAX_DRIVER_OBJECT
+ */
+#define CRYPTO_62_START_SEC_VAR_CLEARED_8
 #include "Crypto_62_MemMap.h"
+boolean Crypto_62_QueueSkipDequeue[CRYPTO_MAX_DRIVER_OBJECT]; /* PRQA S 1531 */ /* VL_QAC_NoReferenced */
+#define CRYPTO_62_STOP_SEC_VAR_CLEARED_8
+#include "Crypto_62_MemMap.h"
+#endif
+
+/* ========================================== external function definitions ========================================= */
 /******************************************************************************/
 /*
  * @Brief               This function clears the stored job in the crypto.
@@ -135,13 +163,18 @@ uint32 Crypto_62_QueueFilledSize[CRYPTO_MAX_DRIVER_OBJECT];
  * @param[in]      objectId : The object ID of the crypto driver.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_ClearStoredJob(uint32 objectId)
 {
+    Crypto_62_StoredJob[objectId].jobState              = CRYPTO_JOBSTATE_IDLE;
     Crypto_62_StoredJob[objectId].jobId                 = CRYPTO_JOB_NOT_VALID;
     Crypto_62_StoredJob[objectId].jobPrimitiveInfo      = NULL_PTR;
     Crypto_62_StoredJob[objectId].jobRedirectionInfoRef = NULL_PTR;
-    Crypto_62_StoredJob[objectId].jobState              = CRYPTO_JOBSTATE_IDLE;
+    Crypto_62_StoredJobBusy[objectId]                   = CRYPTO_STOREDJOB_IDLE;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
 /******************************************************************************/
@@ -149,6 +182,8 @@ void Crypto_62_ClearStoredJob(uint32 objectId)
  * @Brief               This function copy the job to the crypto queue.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJob)
 {
     destJob->jobId                   = srcJob->jobId;
@@ -160,11 +195,15 @@ void Crypto_62_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJob)
     destJob->jobRedirectionInfoRef   = srcJob->jobRedirectionInfoRef;
     destJob->targetCryptoKeyId       = srcJob->targetCryptoKeyId;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function pops a job from the crypto queue.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_QueueOutJob(uint32 objectId, Crypto_JobType* job)
 {
     uint32         offset;
@@ -183,15 +222,43 @@ Std_ReturnType Crypto_62_QueueOutJob(uint32 objectId, Crypto_JobType* job)
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/******************************************************************************/
+/*
+ * @Brief               Return the highest priority among queued jobs by reading
+ *                      queue head (index 0). Head is highest because
+ *                      Crypto_62_QueueInJob inserts in descending priority order;
+ *                      this function does not scan the queue.
+ * @req                 SWS_Crypto_00030
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+uint32 Crypto_62_GetQueueHighestPriority(uint32 objectId)
+{
+    uint32 highestPriority = 0u;
+
+    /* SWS_Crypto_00058, SWS_Crypto_00030 */
+    if ((objectId < CRYPTO_MAX_DRIVER_OBJECT) && (Crypto_62_QueueFilledSize[objectId] > 0u))
+    {
+        highestPriority = Crypto_62_JobInQueue[objectId][0u].jobPriority;
+    }
+    return highestPriority;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function push a job to the crypto queue.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_QueueInJob(uint32 objectId, Crypto_JobType* job)
 {
     uint32         offset;
-    Std_ReturnType status = E_OK;
+    Std_ReturnType status = E_NOT_OK;
     Crypto_JobType Crypto_JobTempBuf;
     uint32         queueSize = Crypto_DriverObjects[objectId].CryptoQueueSize;
     Crypto_62_SetQueueBuf(&Crypto_JobTempBuf, job);
@@ -201,6 +268,7 @@ Std_ReturnType Crypto_62_QueueInJob(uint32 objectId, Crypto_JobType* job)
         /* @req [SWS_Crypto_00033] */
         Crypto_62_JobInQueue[objectId][0]   = Crypto_JobTempBuf;
         Crypto_62_QueueFilledSize[objectId] = 1u;
+        status                              = E_OK;
     }
     else if (queueSize == Crypto_62_QueueFilledSize[objectId])
     {
@@ -231,15 +299,20 @@ Std_ReturnType Crypto_62_QueueInJob(uint32 objectId, Crypto_JobType* job)
                 break;
             }
         }
+        status = E_OK;
     }
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function cancels a job from the queue.
  *                     state.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_CancelQueuedJob(uint32 objectId, Crypto_JobType* job)
 {
     uint32         offset;
@@ -269,61 +342,80 @@ Std_ReturnType Crypto_62_CancelQueuedJob(uint32 objectId, Crypto_JobType* job)
     }
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
  * @Brief               This function implements the Crypto driver.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_62_ProcessJob_Internal(uint32 objectId, Crypto_JobType* job, Crypto_OperationModeType operationMode)
 {
     Std_ReturnType status = E_NOT_OK;
-    switch (operationMode)
+    if (job->jobPrimitiveInfo != NULL_PTR)
     {
-    case CRYPTO_OPERATIONMODE_START:
-        status = Crypto_Start(objectId, job);
-        break;
-    case CRYPTO_OPERATIONMODE_UPDATE:
-        if ((CRYPTO_OPERATIONMODE_FINISH != Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode)
-            && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
+        switch (operationMode)
         {
-            Crypto_62_StoredJob[objectId] = *job;
-            status                        = Crypto_Update(objectId);
-        }
-        break;
-    case CRYPTO_OPERATIONMODE_FINISH:
-        if ((CRYPTO_OPERATIONMODE_FINISH != Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode)
-            && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
-        {
-            Crypto_62_StoredJob[objectId] = *job;
-            status                        = Crypto_Finish(objectId);
-        }
-        break;
-    case CRYPTO_OPERATIONMODE_STREAMSTART:
-    case CRYPTO_OPERATIONMODE_SINGLECALL:
-        status = Crypto_Start(objectId, job);
-        if (status == E_OK)
-        {
-            status = Crypto_Update(objectId);
-        }
-        if (status == E_OK)
-        {
-            status = Crypto_Finish(objectId);
-        }
-        break;
+        case CRYPTO_OPERATIONMODE_START:
+            status = Crypto_Start(objectId, job);
+            break;
+        case CRYPTO_OPERATIONMODE_UPDATE:
+            if ((CRYPTO_OPERATIONMODE_FINISH != Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode)
+                && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
+            {
+                if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                    && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+                {
+                    Crypto_62_StoredJob[objectId] = *job;
+                    status                        = Crypto_Update(objectId);
+                }
+            }
+            break;
+        case CRYPTO_OPERATIONMODE_FINISH:
+            if ((CRYPTO_OPERATIONMODE_FINISH != Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode)
+                && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
+            {
+                if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                    && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+                {
+                    Crypto_62_StoredJob[objectId] = *job;
+                    status                        = Crypto_Finish(objectId);
+                }
+            }
+            break;
+        case CRYPTO_OPERATIONMODE_STREAMSTART:
+        case CRYPTO_OPERATIONMODE_SINGLECALL:
+            status = Crypto_Start(objectId, job);
+            if (status == E_OK)
+            {
+                status = Crypto_Update(objectId);
+            }
+            if (status == E_OK)
+            {
+                status = Crypto_Finish(objectId);
+            }
+            break;
 
-    default:
-        /*do nothing*/
-        break;
+        default:
+            /*do nothing*/
+            break;
+        }
     }
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function process the asynchronous job.without queue.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobType* job)
 {
     Std_ReturnType status = E_OK;
@@ -333,7 +425,15 @@ Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobTyp
         if ((CRYPTO_OPERATIONMODE_START == Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode)
             && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
         {
-            Crypto_62_StoredJob[objectId] = *job;
+            if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+            {
+                Crypto_62_StoredJob[objectId] = *job;
+            }
+            else
+            {
+                status = E_NOT_OK;
+            }
         }
         break;
     case CRYPTO_OPERATIONMODE_FINISH:
@@ -341,7 +441,15 @@ Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobTyp
              || (CRYPTO_OPERATIONMODE_STREAMSTART == Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.mode))
             && (CRYPTO_JOBSTATE_ACTIVE == Crypto_62_StoredJob[objectId].jobState))
         {
-            Crypto_62_StoredJob[objectId] = *job;
+            if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_INUSE)
+                && (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+            {
+                Crypto_62_StoredJob[objectId] = *job;
+            }
+            else
+            {
+                status = E_NOT_OK;
+            }
         }
         else
         {
@@ -354,39 +462,63 @@ Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobTyp
     }
     return status;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * @Brief               This function starts the Crypto driver job.
  *
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Start(uint32 objectId, Crypto_JobType* job)
 {
     Std_ReturnType ret;
-    Crypto_62_StoredJob[objectId]          = *job;
-    Crypto_62_StoredJob[objectId].jobState = CRYPTO_JOBSTATE_ACTIVE;
-    Crypto_ObjectStatus[objectId]          = CRYPTO_OBJECT_BUSY;
-    ret                                    = Crypto_ProcessAlgorithm(objectId, CRYPTO_OPERATIONMODE_START);
+    if ((Crypto_62_StoredJobBusy[objectId] == CRYPTO_STOREDJOB_IDLE)
+        || (Crypto_62_StoredJob[objectId].jobId == job->jobId))
+    {
+        Crypto_62_StoredJobBusy[objectId]      = CRYPTO_STOREDJOB_INUSE;
+        Crypto_62_StoredJob[objectId]          = *job;
+        Crypto_62_StoredJob[objectId].jobState = CRYPTO_JOBSTATE_ACTIVE;
+        Crypto_ObjectStatus[objectId]          = CRYPTO_OBJECT_BUSY;
+        ret                                    = Crypto_ProcessAlgorithm(objectId, CRYPTO_OPERATIONMODE_START);
+    }
+    else
+    {
+        ret = CRYPTO_E_BUSY;
+    }
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function update the Crypto driver job.
  *
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Update(uint32 objectId)
 {
     Std_ReturnType ret;
     ret = Crypto_ProcessAlgorithm(objectId, CRYPTO_OPERATIONMODE_UPDATE);
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * @Brief               This function finish the Crypto driver job.
  *
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Finish(uint32 objectId)
 {
     Std_ReturnType ret;
@@ -401,12 +533,16 @@ Std_ReturnType Crypto_Finish(uint32 objectId)
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * @Brief               This function process the Crypto driver services.
  *
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType operateMode)
 {
     Std_ReturnType result = E_NOT_OK;
@@ -416,6 +552,7 @@ Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType
         Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.family;
     const Crypto_ServiceInfoType service = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->service;
     Crypto_AlgorithmModeType     mode = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.mode;
+
     switch (service)
     {
     case CRYPTO_HASH:
@@ -479,19 +616,13 @@ Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType
     case CRYPTO_KEYDERIVE:
         result = Crypto_62_KeyDerive_Process(objectId, algorithmfamily, mode);
         break;
-    case CRYPTO_KEYEXCHANGECALCPUBVAL:
-        result = Crypto_62_KeyExchangeCalcPubval_Process(objectId, algorithmfamily, mode);
-        break;
-    case CRYPTO_KEYEXCHANGECALCSECRET:
-        result = Crypto_62_KeyExchangeCalcSecret_Process(objectId, algorithmfamily, mode);
-        break;
     case CRYPTO_KEYSETVALID:
         result = Crypto_62_KeySetValid(Crypto_62_StoredJob[objectId].cryptoKeyId);
         break;
     case CRYPTO_KEYSETINVALID:
         result = Crypto_62_KeySetInValid(Crypto_62_StoredJob[objectId].cryptoKeyId);
         break;
-    case CUSTOM_SERVICE:
+    case CRYPTO_CUSTOM_SERVICE:
 #if (CRYPTO_SERVICE_CUSTOM == STD_ON)
         result = Custom_Service_Process(objectId, algorithmfamily, mode);
 #endif
@@ -500,8 +631,12 @@ Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType
         result = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
         break;
     }
+
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * @Brief               This function process the custom service.
@@ -509,6 +644,8 @@ Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType
  */
 /******************************************************************************/
 #if (CRYPTO_SERVICE_CUSTOM == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Custom_Service_Process(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily, Crypto_AlgorithmModeType mode)
 {
@@ -528,6 +665,8 @@ Std_ReturnType
     }
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
@@ -535,6 +674,8 @@ Std_ReturnType
  *
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_CustomSync(
     uint32       dispatchId,
     uint32       keyId,
@@ -548,9 +689,24 @@ Std_ReturnType Crypto_62_CustomSync(
     uint8*       secondaryOutputPtr,
     uint32*      secondaryOutputLengthPtr)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
+    Crypto_62_ArtiApiStart(
+        12,
+        CRYPTO_SID_CustomSync,
+        dispatchId,
+        keyId,
+        keyElementId,
+        targetKeyId,
+        targetKeyElementId,
+        inputPtr,
+        inputLength,
+        outputPtr,
+        outputLengthPtr,
+        secondaryOutputPtr,
+        secondaryOutputLengthPtr);
+
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
-    /*@req SWS_Crypto_00075*/
+    /*PRQA S 3138 ++*/ /* VL_Crypto_62_DETReport */
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_CustomSync, CRYPTO_E_UNINIT);
@@ -560,6 +716,11 @@ Std_ReturnType Crypto_62_CustomSync(
     {
         Crypto_62_ReportDetErr(CRYPTO_SID_CustomSync, CRYPTO_E_PARAM_HANDLE);
     }
+    /*SWS_Crypto_00257*/
+    else if (keyId >= CRYPTO_MAXKEY_CONFIGURED)
+    {
+        Crypto_62_ReportDetErr(CRYPTO_SID_CustomSync, CRYPTO_E_PARAM_HANDLE);
+    } /*PRQA S 3138 --*/
     else
 #endif
     {
@@ -575,9 +736,47 @@ Std_ReturnType Crypto_62_CustomSync(
         (void)secondaryOutputPtr;
         (void)secondaryOutputLengthPtr;
     }
+
+    Crypto_62_ArtiApiStop(2, CRYPTO_SID_CustomSync, status);
+
     return status;
 }
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 
+#if ((CRYPTO_ALGORITHMFAM_AES == STD_ON) || (CRYPTO_ALGORITHMFAM_SM4 == STD_ON))
+/******************************************************************************/
+/*
+ * Brief               Function of CTR mode counter raise.
+ *                     default counter len : 8
+ * Param-Name[in]      None.
+ * Param-Name[in/out]  arr [in]counter to raise [out] raised counter
+ * Param-Name[out]     None.
+ * Return              void
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void CTR_Counter_Raise(uint8 arr[CRYPTO_CONST_8])
+{
+    /* PRQA S 2990,5209,1291,2144,1822 ++ */ /* VL_Crypto_62_2990 */ /* VL_Crypto_62_5209 */
+    for (uint32 i = CRYPTO_CONST_0; i <= CRYPTO_CONST_7; i++)
+    {
+        if (arr[CRYPTO_CONST_7 - i] < CRYPTO_CONST_0xFF)
+        {
+            arr[CRYPTO_CONST_7 - i]++;
+            break;
+        }
+        else
+        {
+            arr[CRYPTO_CONST_7 - i] = CRYPTO_CONST_0;
+        }
+    }
+    /* PRQA S 2990,5209,1291,2144,1822 -- */
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
+
 /* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 -- */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040   -- */

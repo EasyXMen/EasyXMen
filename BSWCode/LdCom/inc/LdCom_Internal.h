@@ -39,7 +39,7 @@ extern "C" {
 /* ===================================================== macros ===================================================== */
 /** LdCom local var or function */
 #if !defined(LDCOM_LOCAL)
-#define LDCOM_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
+#define LDCOM_LOCAL static /* PRQA S 3414 */ /* VL_LdCom_3414 */
 #endif
 
 /** LdCom inline function */

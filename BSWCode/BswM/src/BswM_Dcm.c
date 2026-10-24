@@ -38,10 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-
-#if (BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON)
 /**
  * Initializes the DCM request ports by setting the initial communication mode request status.
  * If the initialization mode is not NULL, it sets the status for each DCM channel.
@@ -51,6 +50,8 @@
 void BswM_InitDcmRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITDCMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -79,12 +80,18 @@ void BswM_InitDcmRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITDCMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITDCMREQUESTPORTS);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /* BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON */
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the DCM application update indication by setting the event request port status and evaluating rules.
  * If the event request is immediate, it evaluates the associated rules for the updated DCM application.
@@ -94,6 +101,8 @@ void BswM_InitDcmRequestPorts(void)
 void BswM_Dcm_ApplicationUpdated(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_DCM_APPLICATION_UPDATED);
+
 #if (BSWM_EVENT_DCM_APPLICATION_UPDATED_INDICATION_ENABLE == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -145,8 +154,14 @@ void BswM_Dcm_ApplicationUpdated(void)
         }
     }
 #endif /*BSWM_EVENT_DCM_APPLICATION_UPDATED_INDICATION_ENABLE == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_DCM_APPLICATION_UPDATED);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the current communication mode request for a specific network by updating the mode request status and
  * evaluating rules. If the mode request is immediate, it evaluates the associated rules for the requested communication
@@ -156,6 +171,8 @@ void BswM_Dcm_ApplicationUpdated(void)
 void BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_CommunicationModeType RequestedMode)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_DCM_COM_MODE_CURRENT_STATE, Network, RequestedMode);
+
 #if (BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*  bswmPartLCfgPtr;
@@ -221,9 +238,15 @@ void BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_Comm
     (void)Network;
     (void)RequestedMode;
 #endif /*BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_DCM_COM_MODE_CURRENT_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current communication mode status for a given DCM channel index.
  * It checks the partition configuration to get the current mode status of the specified DCM channel.
@@ -245,8 +268,12 @@ Dcm_CommunicationModeType BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx)
     }
     return dcmComMode;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_DCMCOMMODEREQUEST_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the updated status of the DCM application.
  * It checks the partition configuration to get the event request port runtime status for the DCM application update
@@ -254,7 +281,7 @@ Dcm_CommunicationModeType BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx)
  */
 /* PRQA S 1503 ++*/ /* VL_QAC_NoUsedApi */
 BswM_EventRquestPortRuntimeType BswM_GetDcmAppUpdatedStatus(void)
-/* PRQA S 1503 --*/ /* VL_QAC_NoUsedApi */
+/* PRQA S 1503 --*/
 {
     BswM_EventRquestPortRuntimeType dcmAppStatus = BSWM_INVALID_U8;
 #if (BSWM_EVENT_DCM_APPLICATION_UPDATED_INDICATION_ENABLE == STD_ON)
@@ -271,9 +298,9 @@ BswM_EventRquestPortRuntimeType BswM_GetDcmAppUpdatedStatus(void)
 #endif /*BSWM_EVENT_DCM_APPLICATION_UPDATED_INDICATION_ENABLE == STD_ON*/
     return dcmAppStatus;
 }
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_DCM_ENABLED == STD_ON*/

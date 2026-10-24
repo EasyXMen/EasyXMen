@@ -12,15 +12,28 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ************************************************************************************************************************
- **
- **  @file               : Crypto_62_Rsa.c
- **  @author             : Jie.gU
- **  @date               : 2024/01/01
- **  @vendor             : isoft
- **  @description        : Rebuid for Crypto
- **
- ***********************************************************************************************************************/
+************************************************************************************************************************
+**
+**  @file               : Crypto_62_Rsa.c
+**  @author             : Jie.gU
+**  @date               : 2024/01/01
+**  @vendor             : isoft
+**  @description        : Rebuid for Crypto
+**
+***********************************************************************************************************************/
+
+/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1253,0288,0317,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277,4825 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3717,3762,3769,3772,3779,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,2996,2992,2911,1503,2822,2896,2986,2990 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 2834,2982,2983,2955,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 2995,2997,2871 ++ */                                                             /* VL_QAC_Crypto */
 
 /* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
 /* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
@@ -32,19 +45,6 @@
 /* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 /* PRQA S 6520 EOF */ /* VL_MTR_Crypto_62_STVAR */
 /* PRQA S 6540 EOF */ /* VL_MTR_Crypto_62_STTPP */
-
-/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 ++ */      /* VL_Crypto_62_General */
-/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 2996,2992,2911,1503,2822,2896,2986 ++ */                                         /* VL_Crypto_62_General */
-/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 ++ */      /* VL_Crypto_62_General */
-/* PRQA S 2995,2997,2871,2990 ++ */                                                        /* VL_Crypto_62_General */
 
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
@@ -61,18 +61,8 @@
 /* ================================================ type definitions ================================================ */
 
 /* ============================================ internal data definitions =========================================== */
-/* Gaps between primes, starting at 3. https://oeis.org/A001223 */
-CRYPTO_62_LOCAL const unsigned char small_prime_gaps[] = {
-    2U,  2U,  4U, 2U,  4U,  2U,  4U,  6U, 2U,  6U, 4U, 2U,  4U,  6U, 6U, 2U,  6U,  4U,  2U,  6U,  4U,  6U,  8U, 4U,
-    2U,  4U,  2U, 4U,  14U, 4U,  6U,  2U, 10U, 2U, 6U, 6U,  4U,  6U, 6U, 2U,  10U, 2U,  4U,  2U,  12U, 12U, 4U, 2U,
-    4U,  6U,  2U, 10U, 6U,  6U,  6U,  2U, 6U,  4U, 2U, 10U, 14U, 4U, 2U, 4U,  14U, 6U,  10U, 2U,  4U,  6U,  8U, 6U,
-    6U,  4U,  6U, 8U,  4U,  8U,  10U, 2U, 10U, 2U, 6U, 4U,  6U,  8U, 4U, 2U,  4U,  12U, 8U,  4U,  8U,  4U,  6U, 12U,
-    2U,  18U, 6U, 10U, 6U,  6U,  2U,  6U, 10U, 6U, 6U, 2U,  6U,  6U, 4U, 2U,  12U, 10U, 2U,  4U,  6U,  6U,  2U, 12U,
-    4U,  6U,  8U, 10U, 8U,  10U, 8U,  6U, 6U,  4U, 8U, 6U,  4U,  8U, 4U, 14U, 10U, 12U, 2U,  10U, 2U,  4U,  2U, 10U,
-    14U, 4U,  2U, 4U,  14U, 4U,  2U,  4U, 20U, 4U, 8U, 10U, 8U,  4U, 6U, 6U,  14U, 4U,  6U,  6U,  8U,  6U, /*reaches
-                                                                                                              997*/
-    0U /* the last entry is effectively unused */
-};
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const Crypto_oid_md_alg_t oid_md_alg[] = {
 
     {
@@ -130,105 +120,44 @@ CRYPTO_62_LOCAL const Crypto_oid_md_alg_t oid_md_alg[] = {
         CRYPTO_ALGOFAM_NOT_SET,
     },
 };
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
 /* ========================================== internal function declarations ======================================== */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType myrand(void* rng_state, unsigned char* output, uint32 len);
-CRYPTO_62_LOCAL int
-    mpi_montmul(Crypto_mpi* A, const Crypto_mpi* B, const Crypto_mpi* N, uint32 mm, const Crypto_mpi* T);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
-CRYPTO_62_LOCAL void mpi_sub_hlp(uint32 n, uint32* s, uint32* d);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL int rsa_check_context(const Crypto_rsa_context* ctx, int is_priv, int blinding_needed);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
-CRYPTO_62_LOCAL int  Crypto_mpi_safe_cond_assign(Crypto_mpi* X, const Crypto_mpi* Y, uint8 assign);
-CRYPTO_62_LOCAL int  Crypto_ct_cond_select_sign(uint8 condition, int if1, int if0);
-CRYPTO_62_LOCAL void mpi_bigendian_to_host(uint32* const p, uint32 limbs);
-CRYPTO_62_LOCAL int  rsa_check_context(const Crypto_rsa_context* ctx, int is_priv, int blinding_needed);
-CRYPTO_62_LOCAL int  asn1_write_tagged_int(unsigned char** p, const unsigned char* start, int val, int tag);
-CRYPTO_62_LOCAL int
-    Crypto_asn1_write_len_and_tag(unsigned char** p, const unsigned char* start, uint32 len, unsigned char tag);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_oid_get_oid_by_md(Crypto_AlgorithmFamilyType md_alg, const char** oid, uint32* olen);
-uint32              Crypto_mpi_core_sub_int(
-                 uint32*       X,
-                 const uint32* A,
-                 uint32        c, /* doubles as carry */
-                 uint32        limbs);
-uint32 Crypto_mpi_core_sub(uint32* X, const uint32* A, const uint32* B, uint32 limbs);
-uint32 Crypto_mpi_core_add(uint32* X, const uint32* A, const uint32* B, uint32 limbs);
-uint32 Crypto_mpi_core_mla(uint32* d, uint32 d_len, const uint32* s, uint32 s_len, uint32 b);
-uint32 Crypto_mpi_core_check_zero_ct(const uint32* A, uint32 limbs);
-uint32 Crypto_mpi_core_montmul_init(const uint32* N);
-void Crypto_mpi_core_from_mont_rep(uint32* X, const uint32* A, const uint32* N, uint32 AN_limbs, uint32 mm, uint32* T);
-CRYPTO_62_LOCAL void exp_mod_precompute_window(
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    const uint32* RR,
-    uint32        welem,
-    uint32*       Wtable,
-    uint32*       temp);
-CRYPTO_62_LOCAL void
-    Crypto_mpi_core_ct_uint_table_lookup(uint32* dest, const uint32* table, uint32 limbs, uint32 count, uint32 index);
-uint32 Crypto_mpi_core_exp_mod_working_limbs(uint32 AN_limbs, uint32 E_limbs);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#if !defined(CRYPTO_RSA_NO_CRT)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+int Crypto_rsa_validate_crt(
+    const Crypto_mpi* P,
+    const Crypto_mpi* Q,
+    const Crypto_mpi* D,
+    const Crypto_mpi* DP,
+    const Crypto_mpi* DQ,
+    const Crypto_mpi* QP);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-
-/******************************************************************************/
-/*
- * Brief               Write an arbitrary-precision number in ASN.1 format.
- *
- * Param-Name[in]      start: The start of the buffer, for bounds-checking.
- *                     X: The MPI to write. It must be non-negative.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_write_mpi(unsigned char** p, const unsigned char* start, const Crypto_mpi* X)
-{
-    int    ret = E_NOT_OK;
-    uint32 len = 0;
-
-    // Write the MPI
-    //
-    len = Crypto_mpi_size(X);
-
-    /* DER represents 0 with a sign bit (0=nonnegative) and 7 value bits, not
-     * as 0 digits. We need to end up with 020100, not with 0200. */
-    if (len == 0)
-    {
-        len = 1;
-    }
-
-    if (*p < start || (uint32)(*p - start) < len)
-    {
-        return E_NOT_OK;
-    }
-
-    (*p) -= len;
-    CRYPTO_MPI_CHK(Crypto_mpi_write_binary(X, *p, len));
-
-    // DER format assumes 2s complement for numbers, so the leftmost bit
-    // should be 0 for positive numbers and 1 for negative numbers.
-    //
-    if (X->s == 1 && **p & 0x80U)
-    {
-        if (*p - start < 1)
-        {
-            return E_NOT_OK;
-        }
-
-        *--(*p) = 0x00U;
-        len += 1;
-    }
-
-    ret = Crypto_asn1_write_len_and_tag(p, start, len, CRYPTO_ASN1_INTEGER);
-
-cleanup:
-    return ret;
-}
 
 /******************************************************************************/
 /*
@@ -242,6 +171,8 @@ cleanup:
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_ct_zeroize_if(uint64 condition, void* buf, uint32 len)
 {
     uint32 mask = (uint32)~condition;
@@ -258,574 +189,8 @@ void Crypto_ct_zeroize_if(uint64 condition, void* buf, uint32 len)
         p[i] = p[i] & mask;
     }
 }
-
-/******************************************************************************/
-/*
- * Brief               Write a length field in ASN.1 format.
- *
- * Param-Name[in]      start: The start of the buffer, for bounds-checking.
- *                     tag: The length value to write.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_write_len(unsigned char** p, const unsigned char* start, uint32 len)
-{
-#if SIZE_MAX > 0xFFFFFFFF
-    if (len > 0xFFFFFFFF)
-    {
-        return E_NOT_OK;
-    }
-#endif
-
-    int required = 1;
-
-    if (len >= 0x80)
-    {
-        for (uint32 l = len; l != 0; l >>= 8)
-        {
-            required++;
-        }
-    }
-
-    if (required > (*p - start))
-    {
-        return E_NOT_OK;
-    }
-
-    do
-    {
-        *--(*p) = CRYPTO_BYTE_0(len);
-        len >>= 8;
-    } while (len);
-
-    if (required > 1)
-    {
-        *--(*p) = (unsigned char)(0x80 + required - 1);
-    }
-
-    return required;
-}
-
-/******************************************************************************/
-/*
- * Brief               Write an ASN.1 tag in ASN.1 format.
- *
- * Param-Name[in]      start: The start of the buffer, for bounds-checking.
- *                     tag: The tag to write.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_write_tag(unsigned char** p, const unsigned char* start, unsigned char tag)
-{
-    if (*p - start < 1)
-    {
-        return E_NOT_OK;
-    }
-
-    *--(*p) = tag;
-
-    return 1;
-}
-
-/******************************************************************************/
-/*
- * Brief               Write length and tag in ASN.1 format.
- *
- * Param-Name[in]      start: The beginning to write integer.
- *                     len: The length to be written.
- *                     tag: The tag to be written.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int
-    Crypto_asn1_write_len_and_tag(unsigned char** p, const unsigned char* start, uint32 len, unsigned char tag)
-{
-    int ret = E_NOT_OK;
-
-    CRYPTO_ASN1_CHK_ADD(len, Crypto_asn1_write_len(p, start, len));
-    CRYPTO_ASN1_CHK_ADD(len, Crypto_asn1_write_tag(p, start, tag));
-
-    return (int)len;
-}
-
-/******************************************************************************/
-/*
- * Brief               Write an int tag (#Crypto_ASN1_INTEGER) and value
- *                     in ASN.1 format.
- *
- * Param-Name[in]      start: The start of the buffer, for bounds-checking.
- *                     val: The integer value to write.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_write_int(unsigned char** p, const unsigned char* start, int val)
-{
-    return asn1_write_tagged_int(p, start, val, CRYPTO_ASN1_INTEGER);
-}
-
-/******************************************************************************/
-/*
- * Brief               Write integer with tag.
- *
- * Param-Name[in]      start: The start of the buffer, for bounds-checking.
- *                     val: The integer value to write.
- *                     tag: The tag to be written.
- * Param-Name[in/out]  p: The reference to the current position pointer.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int asn1_write_tagged_int(unsigned char** p, const unsigned char* start, int val, int tag)
-{
-    uint32 len = 0;
-
-    do
-    {
-        if (*p - start < 1)
-        {
-            return E_NOT_OK;
-        }
-        len += 1;
-        *--(*p) = val & 0xff;
-        val >>= 8;
-    } while (val > 0);
-
-    if (**p & 0x80)
-    {
-        if (*p - start < 1)
-        {
-            return E_NOT_OK;
-        }
-        *--(*p) = 0x00;
-        len += 1;
-    }
-
-    return Crypto_asn1_write_len_and_tag(p, start, len, tag);
-}
-
-/******************************************************************************/
-/*
- * Brief               Get the length of an ASN.1 element. Updates the pointer
- *                     to immediately behind the length.
- *
- * Param-Name[in]      end: End of data.
- * Param-Name[in/out]  p: On entry, *p points to the first byte of the length,
- *                        i.e. immediately after the tag. On successful completion,
- *                        *p points to the first byte after the length, i.e. the
- *                        first byte of the content. On error, the value of *p is
- *                        undefined.
- * Param-Name[out]     len: On successful completion, *len contains the length
- *                          read from the ASN.1 input.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_get_len(unsigned char** p, const unsigned char* end, uint32* len)
-{
-    if ((end - *p) < 1)
-    {
-        return E_NOT_OK;
-    }
-
-    if ((**p & 0x80) == 0)
-    {
-        *len = *(*p)++;
-    }
-    else
-    {
-        int n = (**p) & 0x7F;
-        if (n == 0 || n > 4)
-        {
-            return E_NOT_OK;
-        }
-        if ((end - *p) <= n)
-        {
-            return E_NOT_OK;
-        }
-        *len = 0;
-        (*p)++;
-        while (n--)
-        {
-            *len = (*len << 8) | **p;
-            (*p)++;
-        }
-    }
-
-    if (*len > (uint32)(end - *p))
-    {
-        return E_NOT_OK;
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Get the tag and length of the element. Check for the
- *                     requested tag. Updates the pointer to immediately behind
- *                     the tag and length.
- *
- * Param-Name[in]      end: End of data.
- *                     tag: The expected tag.
- * Param-Name[in/out]  p: On entry, *p points to the start of the ASN.1 element.
- *                        On successful completion, *p points to the first byte
- *                        after the length, i.e. the first byte of the content.
- *                        On error, the value of *p is undefined.
- * Param-Name[out]     len: On successful completion, *len contains the length
- *                          read from the ASN.1 input.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_get_tag(unsigned char** p, const unsigned char* end, uint32* len, int tag)
-{
-    if ((end - *p) < 1)
-    {
-        return E_NOT_OK;
-    }
-
-    if (**p != tag)
-    {
-        return E_NOT_OK;
-    }
-
-    (*p)++;
-
-    return Crypto_asn1_get_len(p, end, len);
-}
-
-/******************************************************************************/
-/*
- * Brief               Retrieve an integer ASN.1 tag and its value. Updates the
- *                     pointer to immediately behind the full tag. And check the
- *                     tag.
- *
- * Param-Name[in]      end: End of data.
- *                     tag: The tag expected.
- * Param-Name[in/out]  p: On entry, *p points to the start of the ASN.1 element.
- *                        On successful completion, *p points to the first byte
- *                        beyond the ASN.1 element. On error, the value of *p is
- *                        undefined.
- * Param-Name[out]     val: On success, the parsed value.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int asn1_get_tagged_int(unsigned char** p, const unsigned char* end, int tag, int* val)
-{
-    int    ret = E_NOT_OK;
-    uint32 len;
-
-    if ((ret = Crypto_asn1_get_tag(p, end, &len, tag)) != 0)
-    {
-        return ret;
-    }
-
-    /*
-     * len==0 is malformed (0 must be represented as 020100 for INTEGER,
-     * or 0A0100 for ENUMERATED tags
-     */
-    if (len == 0)
-    {
-        return E_NOT_OK;
-    }
-    /* This is a cryptography library. Reject negative integers. */
-    if ((**p & 0x80) != 0)
-    {
-        return E_NOT_OK;
-    }
-
-    /* Skip leading zeros. */
-    while (len > 0 && **p == 0)
-    {
-        ++(*p);
-        --len;
-    }
-
-    /* Reject integers that don't fit in an int. This code assumes that
-     * the int type has no padding bit. */
-    if (len > sizeof(int))
-    {
-        return E_NOT_OK;
-    }
-    if (len == sizeof(int) && (**p & 0x80) != 0)
-    {
-        return E_NOT_OK;
-    }
-
-    *val = 0;
-    while (len-- > 0)
-    {
-        *val = (*val << 8) | **p;
-        (*p)++;
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Retrieve an integer ASN.1 tag and its value. Updates the
- *                     pointer to immediately behind the full tag.
- *
- * Param-Name[in]      end: End of data.
- * Param-Name[in/out]  p: On entry, *p points to the start of the ASN.1 element.
- *                        On successful completion, *p points to the first byte
- *                        beyond the ASN.1 element. On error, the value of *p is
- *                        undefined.
- * Param-Name[out]     val: On success, the parsed value.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_get_int(unsigned char** p, const unsigned char* end, int* val)
-{
-    return asn1_get_tagged_int(p, end, CRYPTO_ASN1_INTEGER, val);
-}
-
-/******************************************************************************/
-/*
- * Brief               Retrieve an enumerated ASN.1 tag and its value. Updates the
- *                     pointer to immediately behind the full tag.
- * Param-Name[in]      end: End of data.
- * Param-Name[in/out]  p: On entry, *p points to the start of the ASN.1 element.
- *                        On successful completion, *p points to the first byte
- *                        beyond the ASN.1 element. On error, the value of *p is
- *                        undefined.
- * Param-Name[out]     val: On success, the parsed value.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_get_enum(unsigned char** p, const unsigned char* end, int* val)
-{
-    return asn1_get_tagged_int(p, end, CRYPTO_ASN1_ENUMERATED, val);
-}
-
-/******************************************************************************/
-/*
- * Brief               Retrieve an integer ASN.1 tag and its value. Updates the
- *                     pointer to immediately behind the full tag.
- *
- * Param-Name[in]      end: End of data.
- * Param-Name[in/out]  p: On entry, *p points to the start of the ASN.1 element.
- *                        On successful completion, *p points to the first byte
- *                        beyond the ASN.1 element. On error, the value of *p is
- *                        undefined.
- * Param-Name[out]     X: On success, the parsed value.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_asn1_get_mpi(unsigned char** p, const unsigned char* end, Crypto_mpi* X)
-{
-    int    ret = E_NOT_OK;
-    uint32 len;
-
-    if ((ret = Crypto_asn1_get_tag(p, end, &len, CRYPTO_ASN1_INTEGER)) != 0)
-    {
-        return ret;
-    }
-
-    ret = Crypto_mpi_read_binary(X, *p, len);
-
-    *p += len;
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Initialize an MPI context.
- *
- * Param-Name[in]      X: The MPI context to initialize.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_init(Crypto_mpi* X)
-{
-    X->s = 1;
-    X->n = 0;
-    X->p = NULL_PTR;
-}
-
-/******************************************************************************/
-/*
- * Brief               This function frees the components of an MPI context.
- *
- * Param-Name[in]      X: he MPI context to be cleared.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_free(Crypto_mpi* X)
-{
-    if (X == NULL_PTR)
-    {
-        return;
-    }
-
-    if (X->p != NULL_PTR)
-    {
-        (void)IStdLib_MemSet(X->p, 0, X->n * ciL);
-        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, X->p);
-    }
-
-    X->s = 1;
-    X->n = 0;
-    X->p = NULL_PTR;
-}
-
-/******************************************************************************/
-/*
- * Brief               Enlarge an MPI to the specified number of limbs.
- *
- * Param-Name[in]      nblimbs: The target number of limbs.
- * Param-Name[in/out]  X: The MPI to grow. It must be initialized.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_grow(Crypto_mpi* X, uint32 nblimbs)
-{
-    uint32* p;
-
-    if (nblimbs > CRYPTO_MPI_MAX_LIMBS)
-    {
-        return CRYPTO_ERR_MPI_ALLOC_FAILED;
-    }
-
-    if (X->n < nblimbs)
-    {
-        if ((p = (uint32*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, nblimbs, ciL)) == NULL_PTR)
-        {
-            return CRYPTO_ERR_MPI_ALLOC_FAILED;
-        }
-
-        if (X->p != NULL_PTR)
-        {
-            (void)IStdLib_MemCpy(p, X->p, (X->n) * ciL);
-            Crypto_mpi_free(X);
-        }
-
-        /* nblimbs fits in n because we ensure that CRYPTO_MPI_MAX_LIMBS
-         * fits, and we've checked that nblimbs <= CRYPTO_MPI_MAX_LIMBS. */
-        X->n = (unsigned short)nblimbs;
-        X->p = p;
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               This function resizes an MPI downwards, keeping at least
- *                     the specified number of limbs. If X is smaller than nblimbs,
- *                     it is resized up instead.
- * Param-Name[in]      nblimbs: The minimum number of limbs to keep.
- * Param-Name[in/out]  X: The MPI to shrink. This must point to an initialized MPI.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_shrink(Crypto_mpi* X, uint32 nblimbs)
-{
-    uint32* p;
-    uint32  i;
-
-    if (nblimbs > CRYPTO_MPI_MAX_LIMBS)
-    {
-        return CRYPTO_ERR_MPI_ALLOC_FAILED;
-    }
-
-    /* Actually resize up if there are currently fewer than nblimbs limbs. */
-    if (X->n <= nblimbs)
-    {
-        return Crypto_mpi_grow(X, nblimbs);
-    }
-    /* After this point, then X->n > nblimbs and in particular X->n > 0. */
-
-    for (i = X->n - 1; i > 0; i--)
-    {
-        if (X->p[i] != 0)
-        {
-            break;
-        }
-    }
-    i++;
-
-    if (i < nblimbs)
-    {
-        i = nblimbs;
-    }
-    p = (uint32*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, i, ciL);
-    if (p == NULL_PTR)
-    {
-        return CRYPTO_ERR_MPI_ALLOC_FAILED;
-    }
-
-    if (X->p != NULL_PTR)
-    {
-        (void)IStdLib_MemCpy(p, X->p, i * ciL);
-        Crypto_mpi_free(X);
-    }
-
-    /* i fits in n because we ensure that CRYPTO_MPI_MAX_LIMBS
-     * fits, and we've checked that i <= nblimbs <= CRYPTO_MPI_MAX_LIMBS. */
-    X->n = (unsigned short)i;
-    X->p = p;
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Resize X to have exactly n limbs and set it to 0.
- *
- * Param-Name[in]      limbs: The expected limbs X should be.
- * Param-Name[in/out]  X: The MPI to modify.
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int Crypto_mpi_resize_clear(Crypto_mpi* X, uint32 limbs)
-{
-    if (limbs == 0)
-    {
-        Crypto_mpi_free(X);
-        return 0;
-    }
-    else if (X->n == limbs)
-    {
-        (void)IStdLib_MemSet(X->p, 0, limbs * ciL);
-        X->s = 1;
-        return 0;
-    }
-    else
-    {
-        Crypto_mpi_free(X);
-        return Crypto_mpi_grow(X, limbs);
-    }
-}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -839,6 +204,8 @@ CRYPTO_62_LOCAL int Crypto_mpi_resize_clear(Crypto_mpi* X, uint32 limbs)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_ct_memmove_left(void* start, uint32 total, uint32 offset)
 {
     volatile unsigned char* buf = start;
@@ -857,690 +224,9 @@ void Crypto_ct_memmove_left(void* start, uint32 total, uint32 offset)
         buf[total - 1] = Crypto_ct_uint_if_else_0(no_op, buf[total - 1]);
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
-/******************************************************************************/
-/*
- * Brief               Fast Montgomery initialization.
- *
- * Param-Name[in]      N: The input mpi.
- * Param-Name[in/out]  None
- * Param-Name[out]     mm: The resultant mpi.
- * Return              None
- */
-/******************************************************************************/
-void mpi_montg_init(uint32* mm, const Crypto_mpi* N)
-{
-    uint32 x, m0 = N->p[0];
-    uint32 i;
-
-    x = m0;
-    x += ((m0 + 2) & 4) << 1;
-
-    for (i = biL; i >= 8; i /= 2)
-    {
-        x *= (2 - (m0 * x));
-    }
-
-    *mm = ~x + 1;
-}
-
-/******************************************************************************/
-/*
- * Brief               Montgomery reduction: A = A * R^-1 mod N.
- *
- * Param-Name[in]      N: The modulus mpi.
- *                    mm: The auxiliary mpi.
- *                     T: The auxiliary mpi.
- * Param-Name[in/out]  A: The resultant mpi.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int mpi_montred(Crypto_mpi* A, const Crypto_mpi* N, uint32 mm, const Crypto_mpi* T)
-{
-    uint32     z = 1;
-    Crypto_mpi U;
-
-    U.n = U.s = (int)z;
-    U.p       = &z;
-
-    return (mpi_montmul(A, &U, N, mm, T));
-}
-
-/******************************************************************************/
-/*
- * Brief               Helper for Crypto_mpi subtraction.
- *
- * Param-Name[in]
- * Param-Name[in/out]
- * Param-Name[out]
- * Return              None
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL void mpi_sub_hlp(uint32 n, uint32* s, uint32* d)
-{
-    uint32 i;
-    uint32 c, z;
-
-    for (i = c = 0; i < n; i++, s++, d++)
-    {
-        z = (*d < c);
-        *d -= c;
-        c = (*d < *s) + z;
-        *d -= *s;
-    }
-
-    while (c != 0)
-    {
-        z = (*d < c);
-        *d -= c;
-        c = z;
-        d++;
-    }
-}
-
-/******************************************************************************/
-/*
- * Brief               Make a copy of an MPI.
- *
- * Param-Name[in]      Y: The source MPI. This must point to an initialized MPI.
- * Param-Name[in/out]  X: The destination MPI. This must point to an initialized MPI.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_copy(Crypto_mpi* X, const Crypto_mpi* Y)
-{
-    int    ret = 0;
-    uint32 i;
-
-    if (X == Y)
-    {
-        return 0;
-    }
-
-    if (Y->n == 0)
-    {
-        if (X->n != 0)
-        {
-            X->s = 1;
-            (void)IStdLib_MemSet(X->p, 0, X->n * ciL);
-        }
-        return 0;
-    }
-
-    for (i = Y->n - 1; i > 0; i--)
-    {
-        if (Y->p[i] != 0)
-        {
-            break;
-        }
-    }
-    i++;
-
-    X->s = Y->s;
-
-    if (X->n < i)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_grow(X, i));
-    }
-    else
-    {
-        (void)IStdLib_MemSet(X->p + i, 0, (X->n - i) * ciL);
-    }
-
-    (void)IStdLib_MemCpy(X->p, Y->p, i * ciL);
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Swap the contents of two MPIs.
- *
- * Param-Name[in]      None
- * Param-Name[in/out]  X: The first MPI. It must be initialized.
- *                     Y: The second MPI. It must be initialized.
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_swap(Crypto_mpi* X, Crypto_mpi* Y)
-{
-    Crypto_mpi T;
-
-    (void)IStdLib_MemCpy(&T, X, sizeof(Crypto_mpi));
-    (void)IStdLib_MemCpy(X, Y, sizeof(Crypto_mpi));
-    (void)IStdLib_MemCpy(Y, &T, sizeof(Crypto_mpi));
-}
-
-/******************************************************************************/
-/*
- * Brief               Get the absolute value of z.
- *
- * Param-Name[in]      z: The input mpi.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32: The absolute value of z.
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL inline uint32 mpi_sint_abs(sint32 z)
-{
-    if (z >= 0)
-    {
-        return z;
-    }
-    /* Take care to handle the most negative value (-2^(biL-1)) correctly.
-     * A naive -z would have undefined behavior.
-     * Write this in a way that makes popular compilers happy (GCC, Clang,
-     * MSVC). */
-    return (uint32)0 - (uint32)z;
-}
-
-/* Convert x to a sign, i.e. to 1, if x is positive, or -1, if x is negative.
- * This looks awkward but generates smaller code than (x < 0 ? -1 : 1) */
-#define TO_SIGN(x) ((sint32)(((uint32)x) >> (biL - 1)) * -2 + 1)
-
-/******************************************************************************/
-/*
- * Brief               Store integer value in MPI.
- *
- * Param-Name[in]      z: The value to use.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The MPI to set. This must be initialized.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_lset(Crypto_mpi* X, sint32 z)
-{
-    int ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, 1));
-    (void)IStdLib_MemSet(X->p, 0, (X->n) * ciL);
-
-    X->p[0] = mpi_sint_abs(z);
-    X->s    = TO_SIGN(z);
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Get a specific bit from an MPI.
- *
- * Param-Name[in]      X: The MPI to query. This must be initialized.
- *                     pos: Zero-based index of the bit to query.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_get_bit(const Crypto_mpi* X, uint32 pos)
-{
-    if (X->n * biL <= pos)
-    {
-        return 0;
-    }
-
-    return (X->p[pos / biL] >> (pos % biL)) & 0x01;
-}
-
-/******************************************************************************/
-/*
- * Brief               Modify a specific bit in an MPI.
- *
- * Param-Name[in]      pos: Zero-based index of the bit to query.
- *                     val: The desired value of bit pos: 0 or 1.
- * Param-Name[in/out]  X: The MPI to modify. This must be initialized.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_set_bit(Crypto_mpi* X, uint32 pos, unsigned char val)
-{
-    int    ret = 0;
-    uint32 off = pos / biL;
-    uint32 idx = pos % biL;
-
-    if (val != 0 && val != 1)
-    {
-        return CRYPTO_ERR_MPI_BAD_INPUT_DATA;
-    }
-
-    if (X->n * biL <= pos)
-    {
-        if (val == 0)
-        {
-            return 0;
-        }
-
-        CRYPTO_MPI_CHK(Crypto_mpi_grow(X, off + 1));
-    }
-
-    X->p[off] &= ~((uint32)0x01 << idx);
-    X->p[off] |= (uint32)val << idx;
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/**
- * Brief               Return the number of bits of value 0 before the least
- *                     significant bit of value 1.
- * Param-Name[in]      X: The MPI to query.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_lsb(const Crypto_mpi* X)
-{
-    uint32 i;
-
-    uint32 count = 0;
-    for (i = 0; i < X->n; i++)
-    {
-        for (uint32 j = 0; j < biL; j++, count++)
-        {
-            if (((X->p[i] >> j) & 1) != 0)
-            {
-                return count;
-            }
-        }
-    }
-    return 1;
-}
-
-/******************************************************************************/
-/*
- * Brief               Count leading zero bits in a given integer.
- *
- * Param-Name[in]      a: Integer to count leading zero bits.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_clz(uint32 a)
-{
-    uint32 j;
-    uint32 mask = (uint32)1 << (biL - 1);
-
-    for (j = 0; j < biL; j++)
-    {
-        if (a & mask)
-        {
-            break;
-        }
-
-        mask >>= 1;
-    }
-
-    return j;
-}
-
-/******************************************************************************/
-/*
- * Brief               Export X into unsigned binary data, big-endian.
- *
- * Param-Name[in]      X: The address of the MPI.
- *                     X_limbs: The number of limbs of X.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: The output buffer to export to.
- *                     output_length: The length in bytes of output.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_core_write_be(const uint32* X, uint32 X_limbs, unsigned char* output, uint32 output_length)
-{
-    uint32         stored_bytes;
-    uint32         bytes_to_copy;
-    unsigned char* p;
-
-    stored_bytes = X_limbs * ciL;
-
-    if (stored_bytes < output_length)
-    {
-        /* There is enough space in the output buffer. Write initial
-         * null bytes and record the position at which to start
-         * writing the significant bytes. In this case, the execution
-         * trace of this function does not depend on the value of the
-         * number. */
-        bytes_to_copy = stored_bytes;
-        p             = output + output_length - stored_bytes;
-        (void)IStdLib_MemSet(output, 0, output_length - stored_bytes);
-    }
-    else
-    {
-        /* The output buffer is smaller than the allocated size of X.
-         * However X may fit if its leading bytes are zero. */
-        bytes_to_copy = output_length;
-        p             = output;
-        for (uint32 i = bytes_to_copy; i < stored_bytes; i++)
-        {
-            if (GET_BYTE(X, i) != 0)
-            {
-                return E_NOT_OK;
-            }
-        }
-    }
-
-    for (uint32 i = 0; i < bytes_to_copy; i++)
-    {
-        p[bytes_to_copy - i - 1] = GET_BYTE(X, i);
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Shift an MPI in-place right by a number of bits. Shifting
- *                     by more bits than there are bit positions in X is valid
- *                     and results in setting X to 0. This function's execution
- *                     time depends on the value of count (and of course limbs).
- *
- * Param-Name[in]      limbs: The number of limbs of X. This must be at least 1.
- *                     count: The number of bits to shift by.
- * Param-Name[in/out]  X: The number to shift.
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_core_shift_r(uint32* X, uint32 limbs, uint32 count)
-{
-    uint32 i, v0, v1;
-    uint32 r0 = 0u, r1;
-
-    v0 = count / biL;
-    v1 = count & (biL - 1);
-
-    if (v0 > limbs || (v0 == limbs && v1 > 0))
-    {
-        (void)IStdLib_MemSet(X, 0, limbs * ciL);
-        return;
-    }
-
-    /*
-     * shift by count / limb_size
-     */
-    if (v0 > 0)
-    {
-        for (i = 0; i < limbs - v0; i++)
-        {
-            X[i] = X[i + v0];
-        }
-
-        for (; i < limbs; i++)
-        {
-            X[i] = 0;
-        }
-    }
-
-    /*
-     * shift by count % limb_size
-     */
-    if (v1 > 0)
-    {
-        for (i = limbs; i > 0; i--)
-        {
-            r1 = X[i - 1] << (biL - v1);
-            X[i - 1] >>= v1;
-            X[i - 1] |= r0;
-            r0 = r1;
-        }
-    }
-}
-
-/******************************************************************************/
-/*
- * Brief               Shift an MPI in-place left by a number of bits. Shifting
- *                     by more bits than there are bit positions in X will produce
- *                     an unspecified result. This function's execution time
- *                     depends on the value of count (and of course limbs).
- *
- * Param-Name[in]      limbs: The number of limbs of X. This must be at least 1.
- *                     count: The number of bits to shift by.
- * Param-Name[in/out]  X: The number to shift.
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_core_shift_l(uint32* X, uint32 limbs, uint32 count)
-{
-    uint32 i, v0, v1;
-    uint32 r0 = 0u, r1;
-
-    v0 = count / (biL);
-    v1 = count & (biL - 1);
-
-    /*
-     * shift by count / limb_size
-     */
-    if (v0 > 0)
-    {
-        for (i = limbs; i > v0; i--)
-        {
-            X[i - 1] = X[i - v0 - 1];
-        }
-
-        for (; i > 0; i--)
-        {
-            X[i - 1] = 0;
-        }
-    }
-
-    /*
-     * shift by count % limb_size
-     */
-    if (v1 > 0)
-    {
-        for (i = v0; i < limbs; i++)
-        {
-            r1 = X[i] >> (biL - v1);
-            X[i] <<= v1;
-            X[i] |= r0;
-            r0 = r1;
-        }
-    }
-}
-/******************************************************************************/
-/*
- * Brief    Multiprecision integer addition
- *
- * Param-Name[in]      A:Addition 1 (multi-precision integer)
- *                     B:Addition 2 (multi-precision integer)
- *                     limbs:Length of the A, B, and X arrays
- * Param-Name[in/out]  None
- * Param-Name[out]     X:Target array for storing the result of the operation
- * Return
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_add(uint32* X, const uint32* A, const uint32* B, uint32 limbs)
-{
-    uint32 c = 0;
-
-    for (uint32 i = 0; i < limbs; i++)
-    {
-        uint32 t = c + A[i];
-        c        = (t < A[i]);
-        t += B[i];
-        c += (t < B[i]);
-        X[i] = t;
-    }
-
-    return c;
-}
-/******************************************************************************/
-/*
- * Brief               Return the number of bits up to and including the most
- *                     significant bit of value 1.
- *
- * Param-Name[in]      X: The MPI to query. This must point to an initialized MPI.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_bitlen(const Crypto_mpi* X)
-{
-    uint32 i, j;
-
-    if (X->n == 0)
-    {
-        return (0);
-    }
-
-    for (i = X->n - 1; i > 0; i--)
-    {
-        if (X->p[i] != 0)
-        {
-            break;
-        }
-    }
-
-    j = biL - Crypto_mpi_core_clz(X->p[i]);
-
-    return ((i * biL) + j);
-}
-
-/******************************************************************************/
-/*
- * Brief               This function returns the total size in bytes.
- *
- * Param-Name[in]      X: The mpi.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32: The bit len of X.
- */
-/******************************************************************************/
-uint32 Crypto_mpi_size(const Crypto_mpi* X)
-{
-    return (Crypto_mpi_bitlen(X) + 7) >> 3;
-}
-/*
- * Convert an ASCII character to digit value
- */
-CRYPTO_62_LOCAL int mpi_get_digit(uint32* d, int radix, char c)
-{
-    *d = 255;
-
-    if (c >= 0x30 && c <= 0x39)
-    {
-        *d = c - 0x30;
-    }
-    if (c >= 0x41 && c <= 0x46)
-    {
-        *d = c - 0x37;
-    }
-    if (c >= 0x61 && c <= 0x66)
-    {
-        *d = c - 0x57;
-    }
-
-    if (*d >= (uint32)radix)
-    {
-        return CRYPTO_ERR_MPI_INVALID_CHARACTER;
-    }
-
-    return 0;
-}
-/******************************************************************************/
-/*
- * Brief               Convert ASCII string to MPI
- *
- * Param-Name[in]      s:Null-terminated string buffer.
- *                     radix: The numeric base of the input string
- * Param-Name[in/out]  None
- * Param-Name[out]     X:The destination MPI. This must point to an initialized MPI.
- * Return              E_NOT_OK or E_OK.
- */
-/******************************************************************************/
-int Crypto_mpi_read_string(Crypto_mpi* X, int radix, const char* s)
-{
-    int        ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    uint32     i, j, slen, n;
-    int        sign = 1;
-    uint32     d;
-    Crypto_mpi T;
-
-    /*Check whether the value of radix is valid*/
-    if (radix < 2 || radix > 16)
-    {
-        return CRYPTO_ERR_MPI_BAD_INPUT_DATA;
-    }
-
-    /*Initialize the temporary variable T*/
-    Crypto_mpi_init(&T);
-
-    /*If the input string is empty, release X and return 0.*/
-    if (s[0] == 0)
-    {
-        Crypto_mpi_free(X);
-        return 0;
-    }
-
-    /*Checks if the first character is a negative sign*/
-    if (s[0] == '-')
-    {
-        ++s;
-        sign = -1;
-    }
-
-    /*Calculate the length of the input string*/
-    slen = strlen(s);
-
-    /*If radix is 16 (hexadecimal), then read the value directly from the string by bit, and store it in X.*/
-    if (radix == 16)
-    {
-        if (slen > (0xffffffffU) >> 2)
-        {
-            return CRYPTO_ERR_MPI_BAD_INPUT_DATA;
-        }
-
-        n = BITS_TO_LIMBS(slen << 2);
-
-        CRYPTO_MPI_CHK(Crypto_mpi_grow(X, n));
-        CRYPTO_MPI_CHK(Crypto_mpi_lset(X, 0));
-
-        for (i = slen, j = 0; i > 0; i--, j++)
-        {
-            CRYPTO_MPI_CHK(mpi_get_digit(&d, radix, s[i - 1]));
-            X->p[j / (2 * ciL)] |= d << ((j % (2 * ciL)) << 2);
-        }
-    }
-    /*If radix is not 16, the string is converted to Crypto_mpi by multiplying radix bit by bit and adding the value.*/
-    else
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_lset(X, 0));
-
-        for (i = 0; i < slen; i++)
-        {
-            CRYPTO_MPI_CHK(mpi_get_digit(&d, radix, s[i]));
-            CRYPTO_MPI_CHK(Crypto_mpi_mul_int(&T, X, radix));
-            CRYPTO_MPI_CHK(Crypto_mpi_add_int(X, &T, d));
-        }
-    }
-
-    /*If the final Crypto_mpi is negative, update X->s to -1.*/
-    if (sign < 0 && Crypto_mpi_bitlen(X) != 0)
-    {
-        X->s = -1;
-    }
-
-cleanup:
-
-    Crypto_mpi_free(&T);
-
-    return ret;
-}
 /******************************************************************************/
 /*
  * Brief               Constant-time buffer comparison without branches.
@@ -1553,7 +239,9 @@ cleanup:
  * Return              int
  */
 /******************************************************************************/
-int Crypto_ct_memcmp(const void* a, const void* b, uint32 n)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_ct_memcmp(const void* a, const void* b, uint32 n)
 {
     uint32 i = 0;
     /*
@@ -1585,2187 +273,8 @@ int Crypto_ct_memcmp(const void* a, const void* b, uint32 n)
 
     return (int)((diff & 0xffff) | (diff >> 16));
 }
-
-/******************************************************************************/
-/*
- * Brief               Import an MPI from unsigned big endian binary data.
- *
- * Param-Name[in]      buf: The input buffer.
- *                     buflen: The length of the input buffer buf in Bytes.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_read_binary(Crypto_mpi* X, const unsigned char* buf, uint32 buflen)
-{
-    int    ret = E_NOT_OK;
-    uint32 i, j, n;
-
-    for (n = 0; n < buflen; n++)
-    {
-        if (buf[n] != 0)
-        {
-            break;
-        }
-    }
-
-    ret = Crypto_mpi_grow(X, CHARS_TO_LIMBS(buflen - n));
-    if (E_OK == ret)
-    {
-        ret = Crypto_mpi_lset(X, 0);
-    }
-
-    if (E_OK == ret)
-    {
-        for (i = buflen, j = 0; i > n; i--, j++)
-        {
-            X->p[j / ciL] |= ((uint32)buf[i - 1]) << ((j % ciL) << 3);
-        }
-    }
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Export X into unsigned binary data, big endian.
- *                     Always fills the whole buffer, which will start with zeros
- *                     if the number is smaller.
- *
- * Param-Name[in]      X: The source MPI.
- * Param-Name[in/out]  None
- * Param-Name[out]     buf: The output buffer.
- *                     buflen: The size of the output buffer buf in Bytes.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_write_binary(const Crypto_mpi* X, unsigned char* buf, uint32 buflen)
-{
-    return Crypto_mpi_core_write_be(X->p, X->n, buf, buflen);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a left-shift on an MPI: X <<= count.
- *
- * Param-Name[in]      count: The number of bits to shift by.
- * Param-Name[in/out]  X: The MPI to shift.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_shift_l(Crypto_mpi* X, uint32 count)
-{
-    int    ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    uint32 i;
-
-    i = Crypto_mpi_bitlen(X) + count;
-
-    if (X->n * biL < i)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_grow(X, BITS_TO_LIMBS(i)));
-    }
-
-    ret = 0;
-
-    Crypto_mpi_core_shift_l(X->p, X->n, count);
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a right-shift on an MPI: X >>= count.
- *
- * Param-Name[in]      count: The number of bits to shift by.
- * Param-Name[in/out]  X: The MPI to shift.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_shift_r(Crypto_mpi* X, uint32 count)
-{
-    if (X->n != 0)
-    {
-        Crypto_mpi_core_shift_r(X->p, X->n, count);
-    }
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Compare the absolute values of two MPIs.
- *
- * Param-Name[in]      X: The left-hand MPI.
- *                     Y: The right-hand MPI.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_cmp_abs(const Crypto_mpi* X, const Crypto_mpi* Y)
-{
-    uint32 i, j;
-
-    for (i = X->n; i > 0; i--)
-    {
-        if (X->p[i - 1] != 0)
-        {
-            break;
-        }
-    }
-
-    for (j = Y->n; j > 0; j--)
-    {
-        if (Y->p[j - 1] != 0)
-        {
-            break;
-        }
-    }
-
-    /* If i == j == 0, i.e. abs(X) == abs(Y),
-     * we end up returning 0 at the end of the function. */
-
-    if (i > j)
-    {
-        return 1;
-    }
-    if (j > i)
-    {
-        return -1;
-    }
-
-    for (; i > 0; i--)
-    {
-        if (X->p[i - 1] > Y->p[i - 1])
-        {
-            return 1;
-        }
-        if (X->p[i - 1] < Y->p[i - 1])
-        {
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Compare two MPIs.
- *
- * Param-Name[in]      X: The left-hand MPI.
- *                     Y: The right-hand MPI.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_cmp_mpi(const Crypto_mpi* X, const Crypto_mpi* Y)
-{
-    uint32 i, j;
-
-    for (i = X->n; i > 0; i--)
-    {
-        if (X->p[i - 1] != 0)
-        {
-            break;
-        }
-    }
-
-    for (j = Y->n; j > 0; j--)
-    {
-        if (Y->p[j - 1] != 0)
-        {
-            break;
-        }
-    }
-
-    if (i == 0 && j == 0)
-    {
-        return 0;
-    }
-
-    if (i > j)
-    {
-        return X->s;
-    }
-    if (j > i)
-    {
-        return -Y->s;
-    }
-
-    if (X->s > 0 && Y->s < 0)
-    {
-        return 1;
-    }
-    if (Y->s > 0 && X->s < 0)
-    {
-        return -1;
-    }
-
-    for (; i > 0; i--)
-    {
-        if (X->p[i - 1] > Y->p[i - 1])
-        {
-            return X->s;
-        }
-        if (X->p[i - 1] < Y->p[i - 1])
-        {
-            return -X->s;
-        }
-    }
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Helper for Crypto_mpi multiplication.
- *
- * Param-Name[in]
- *
- * Param-Name[in/out]
- * Param-Name[out]
- * Return              None
- */
-/******************************************************************************/
-void mpi_mul_hlp(uint32 i, uint32* s, uint32* d, uint32 b)
-{
-    uint32 c = 0u, t = 0;
-
-    for (; i >= 16; i -= 16)
-    {
-        MULADDC_INIT
-        MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE
-
-            MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE
-                MULADDC_CORE MULADDC_STOP
-    }
-
-    for (; i >= 8; i -= 8)
-    {
-        MULADDC_INIT
-        MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE
-
-            MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_CORE MULADDC_STOP
-    }
-
-    for (; i > 0; i--)
-    {
-        MULADDC_INIT
-        MULADDC_CORE
-        MULADDC_STOP
-    }
-
-    t++;
-
-    do
-    {
-        *d += c;
-        c = (*d < c);
-        d++;
-    } while (c != 0);
-}
-
-/******************************************************************************/
-/*
- * Brief               Compare an MPI with an integer.
- *
- * Param-Name[in]      X: The left-hand MPI.
- *                     z: The integer value to compare to.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_cmp_int(const Crypto_mpi* X, sint32 z)
-{
-    Crypto_mpi Y;
-    uint32     p[1];
-
-    *p  = mpi_sint_abs(z);
-    Y.s = TO_SIGN(z);
-    Y.n = 1;
-    Y.p = p;
-
-    return Crypto_mpi_cmp_mpi(X, &Y);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform an unsigned addition of MPIs: X = |A| + |B|.
- *
- * Param-Name[in]      A: The first summand.
- *                     B: The second summand.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_add_abs(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-
-    uint32  j;
-    uint32 *p, c;
-
-    if (X == B)
-    {
-        const Crypto_mpi* T = A;
-        A                   = X;
-        B                   = T;
-    }
-
-    if (X != A)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_copy(X, A));
-    }
-
-    /*
-     * X should always be positive as a result of unsigned additions.
-     */
-    X->s = 1;
-
-    for (j = B->n; j > 0; j--)
-    {
-        if (B->p[j - 1] != 0)
-        {
-            break;
-        }
-    }
-
-    /* Exit early to avoid undefined behavior on NULL+0 when X->n == 0
-     * and B is 0 (of any size). */
-    if (j == 0)
-    {
-        return 0;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, j));
-
-    /* j is the number of non-zero limbs of B. Add those to X. */
-
-    p = X->p;
-
-    c = Crypto_mpi_core_add(p, p, B->p, j);
-
-    p += j;
-
-    /* Now propagate any carry */
-
-    while (c != 0)
-    {
-        if (j >= X->n)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_grow(X, j + 1));
-            p = X->p + j;
-        }
-
-        *p += c;
-        c = (*p < c);
-        j++;
-        p++;
-    }
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform an unsigned subtraction of MPIs: X = |A| - |B|.
- *
- * Param-Name[in]      A: The minuend.
- *                     B: The subtrahend.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_sub_abs(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int    ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    uint32 n;
-    uint32 carry;
-
-    for (n = B->n; n > 0; n--)
-    {
-        if (B->p[n - 1] != 0)
-        {
-            break;
-        }
-    }
-    if (n > A->n)
-    {
-        /* B >= (2^ciL)^n > A */
-        ret = CRYPTO_ERR_MPI_NEGATIVE_VALUE;
-        goto cleanup;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, A->n));
-
-    /* Set the high limbs of X to match A. Don't touch the lower limbs
-     * because X might be aliased to B, and we must not overwrite the
-     * significant digits of B. */
-    if (A->n > n && A != X)
-    {
-        (void)IStdLib_MemCpy(X->p + n, A->p + n, (A->n - n) * ciL);
-    }
-    if (X->n > A->n)
-    {
-        (void)IStdLib_MemSet(X->p + A->n, 0, (X->n - A->n) * ciL);
-    }
-
-    carry = Crypto_mpi_core_sub(X->p, A->p, B->p, n);
-    if (carry != 0)
-    {
-        /* Propagate the carry through the rest of X. */
-        carry = Crypto_mpi_core_sub_int(X->p + n, X->p + n, carry, X->n - n);
-
-        /* If we have further carry/borrow, the result is negative. */
-        if (carry != 0)
-        {
-            ret = CRYPTO_ERR_MPI_NEGATIVE_VALUE;
-            goto cleanup;
-        }
-    }
-
-    /* X should always be positive as a result of unsigned subtractions. */
-    X->s = 1;
-
-cleanup:
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Common function for signed addition and subtraction.
- *                     Calculate A + B * flip_B where flip_B is 1 or -1.
- *
- * Param-Name[in]      A: The first mpi.
- *                     B: The second mpi.
- *                     flip_B: Can be -1 or 1.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int add_sub_mpi(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B, int flip_B)
-{
-    int ret, s;
-
-    s = A->s;
-    if (A->s * B->s * flip_B < 0)
-    {
-        int cmp = Crypto_mpi_cmp_abs(A, B);
-        if (cmp >= 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_abs(X, A, B));
-            /* If |A| = |B|, the result is 0 and we must set the sign bit
-             * to +1 regardless of which of A or B was negative. Otherwise,
-             * since |A| > |B|, the sign is the sign of A. */
-            X->s = cmp == 0 ? 1 : s;
-        }
-        else
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_abs(X, B, A));
-            /* Since |A| < |B|, the sign is the opposite of A. */
-            X->s = -s;
-        }
-    }
-    else
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_add_abs(X, A, B));
-        X->s = s;
-    }
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a signed addition of MPIs: X = A + B.
- *
- * Param-Name[in]      A: The first summand.
- *                     B: The second summand.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_add_mpi(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    return add_sub_mpi(X, A, B, 1);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a signed subtraction of MPIs: X = A - B.
- *
- * Param-Name[in]      A: The minuend.
- *                     B: The subtrahend.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_sub_mpi(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    return add_sub_mpi(X, A, B, -1);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a signed addition of an MPI and an integer: X = A + b.
- *
- * Param-Name[in]      A: The first summand.
- *                     b: The second summand.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_add_int(Crypto_mpi* X, const Crypto_mpi* A, sint32 b)
-{
-    Crypto_mpi B;
-    uint32     p[1];
-
-    p[0] = mpi_sint_abs(b);
-    B.s  = TO_SIGN(b);
-    B.n  = 1;
-    B.p  = p;
-
-    return Crypto_mpi_add_mpi(X, A, &B);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a signed subtraction of an MPI and an integer:
- *                     X = A - b.
- *
- * Param-Name[in]      A: The minuend.
- *                     b: The subtrahend.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_sub_int(Crypto_mpi* X, const Crypto_mpi* A, sint32 b)
-{
-    Crypto_mpi B;
-    uint32     p[1];
-
-    p[0] = mpi_sint_abs(b);
-    B.s  = TO_SIGN(b);
-    B.n  = 1;
-    B.p  = p;
-
-    return Crypto_mpi_sub_mpi(X, A, &B);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a multiplication of two MPIs: X = A * B.
- *
- * Param-Name[in]      A: The first factor.
- *                     B: The second factor.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_mul_mpi(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int        ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    uint32     i, j;
-    Crypto_mpi TA, TB;
-    int        result_is_zero = 0;
-
-    Crypto_mpi_init(&TA);
-    Crypto_mpi_init(&TB);
-
-    if (X == A)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_copy(&TA, A));
-        A = &TA;
-    }
-    if (X == B)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_copy(&TB, B));
-        B = &TB;
-    }
-
-    for (i = A->n; i > 0; i--)
-    {
-        if (A->p[i - 1] != 0)
-        {
-            break;
-        }
-    }
-    if (i == 0)
-    {
-        result_is_zero = 1;
-    }
-
-    for (j = B->n; j > 0; j--)
-    {
-        if (B->p[j - 1] != 0)
-        {
-            break;
-        }
-    }
-    if (j == 0)
-    {
-        result_is_zero = 1;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, i + j));
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(X, 0));
-
-    Crypto_mpi_core_mul(X->p, A->p, i, B->p, j);
-
-    /* If the result is 0, we don't shortcut the operation, which reduces
-     * but does not eliminate side channels leaking the zero-ness. We do
-     * need to take care to set the sign bit properly since the library does
-     * not fully support an MPI object with a value of 0 and s == -1. */
-    if (result_is_zero)
-    {
-        X->s = 1;
-    }
-    else
-    {
-        X->s = A->s * B->s;
-    }
-
-cleanup:
-
-    Crypto_mpi_free(&TB);
-    Crypto_mpi_free(&TA);
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a multiplication of an MPI with an unsigned integer:
- *                     X = A * b.
- *
- * Param-Name[in]      A: The first factor.
- *                     b: The second factor.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_mul_int(Crypto_mpi* X, const Crypto_mpi* A, uint32 b)
-{
-    uint32 n = A->n;
-    while (n > 0 && A->p[n - 1] == 0)
-    {
-        --n;
-    }
-
-    /* The general method below doesn't work if b==0. */
-    if (b == 0 || n == 0)
-    {
-        return Crypto_mpi_lset(X, 0);
-    }
-
-    /* Calculate A*b as A + A*(b-1) to take advantage of Crypto_mpi_core_mla */
-    int ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    /* In general, A * b requires 1 limb more than b. If
-     * A->p[n - 1] * b / b == A->p[n - 1], then A * b fits in the same
-     * number of limbs as A and the call to grow() is not required since
-     * copy() will take care of the growth if needed. However, experimentally,
-     * making the call to grow() unconditional causes slightly fewer
-     * calls to calloc() in ECP code, presumably because it reuses the
-     * same mpi for a while and this way the mpi is more likely to directly
-     * grow to its final size.
-     *
-     * Note that calculating A*b as 0 + A*b doesn't work as-is because
-     * A,X can be the same. */
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, n + 1));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(X, A));
-    Crypto_mpi_core_mla(X->p, X->n, A->p, n, b - 1);
-
-cleanup:
-    return ret;
-}
-/******************************************************************************/
-/*
- * Brief     Multiple precision integer multiplication
- *
- * Param-Name[in]   A:Multiplier 1 (multi-precision integer)
- *                  A_limbs:A Length of the array
- *                  B:Multiplier 2 (multi-precision integer)
- *                  B_limbs:B Length of the array
- * Param-Name[in/out]  None
- * Param-Name[out]     X:Target array for storing the result of the operation
- * Return
- */
-/******************************************************************************/
-void Crypto_mpi_core_mul(uint32* X, const uint32* A, uint32 A_limbs, const uint32* B, uint32 B_limbs)
-{
-    (void)IStdLib_MemSet(X, 0, (A_limbs + B_limbs) * ciL);
-
-    for (uint32 i = 0; i < B_limbs; i++)
-    {
-        (void)Crypto_mpi_core_mla(X + i, A_limbs + 1, A, A_limbs, B[i]);
-    }
-}
-/******************************************************************************/
-/*
- * Brief               Unsigned integer divide - double  dividend, u1/u0, and
- *                     divisor, d.
- *
- * Param-Name[in]      u1: First dividend.
- *                     u0: Second dividend.
- *                     d: Divisor.
- * Param-Name[in/out]  None
- * Param-Name[out]     r: The destination.
- * Return              uint32
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL uint32 Crypto_int_div_int(uint32 u1, uint32 u0, uint32 d, uint32* r)
-{
-#if defined(CRYPTO_HAVE_UDBL)
-    Crypto_t_udbl dividend, quotient;
-#else
-    const uint32 radix              = (uint32)1 << biH;
-    const uint32 uint_halfword_mask = ((uint32)1 << biH) - 1;
-    uint32       d0, d1, q0, q1, rAX, r0, quotient;
-    uint32       u0_msw, u0_lsw;
-    uint32       s;
-#endif
-
-    /*
-     * Check for overflow
-     */
-    if (0 == d || u1 >= d)
-    {
-        if (r != NULL_PTR)
-        {
-            *r = ~(uint32)0u;
-        }
-
-        return ~(uint32)0u;
-    }
-
-#if defined(CRYPTO_HAVE_UDBL)
-    dividend = (Crypto_t_udbl)u1 << biL;
-    dividend |= (Crypto_t_udbl)u0;
-    quotient = dividend / d;
-    if (quotient > ((Crypto_t_udbl)1 << biL) - 1)
-    {
-        quotient = ((Crypto_t_udbl)1 << biL) - 1;
-    }
-
-    if (r != NULL_PTR)
-    {
-        *r = (uint32)(dividend - (quotient * d));
-    }
-
-    return (uint32)quotient;
-#else
-
-    /*
-     * Algorithm D, Section 4.3.1 - The Art of Computer Programming
-     *   Vol. 2 - Seminumerical Algorithms, Knuth
-     */
-
-    /*
-     * Normalize the divisor, d, and dividend, u0, u1
-     */
-    s = Crypto_mpi_core_clz(d);
-    d = d << s;
-
-    u1 = u1 << s;
-    u1 |= (u0 >> (biL - s)) & (-(sint32)s >> (biL - 1));
-    u0 = u0 << s;
-
-    d1 = d >> biH;
-    d0 = d & uint_halfword_mask;
-
-    u0_msw = u0 >> biH;
-    u0_lsw = u0 & uint_halfword_mask;
-
-    /*
-     * Find the first quotient and remainder
-     */
-    q1 = u1 / d1;
-    r0 = u1 - d1 * q1;
-
-    while (q1 >= radix || (q1 * d0 > radix * r0 + u0_msw))
-    {
-        q1 -= 1;
-        r0 += d1;
-
-        if (r0 >= radix)
-        {
-            break;
-        }
-    }
-
-    rAX = (u1 * radix) + (u0_msw - q1 * d);
-    q0  = rAX / d1;
-    r0  = rAX - q0 * d1;
-
-    while (q0 >= radix || (q0 * d0 > radix * r0 + u0_lsw))
-    {
-        q0 -= 1;
-        r0 += d1;
-
-        if (r0 >= radix)
-        {
-            break;
-        }
-    }
-
-    if (r != NULL_PTR)
-    {
-        *r = (rAX * radix + u0_lsw - q0 * d) >> s;
-    }
-
-    quotient = q1 * radix + q0;
-
-    return quotient;
-#endif
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a division with remainder of two MPIs: A = Q * B + R.
- * Param-Name[in]      Q: The destination MPI for the quotient.
- *                     R: The destination MPI for the remainder value.
- *                     B: The divisor.
- * Param-Name[in/out]  None
- * Param-Name[out]     A: The dividend.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_div_mpi(Crypto_mpi* Q, Crypto_mpi* R, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int        ret = E_NOT_OK;
-    uint32     i, n, t, k;
-    Crypto_mpi X, Y, Z, T1, T2;
-    uint32     TP2[CRYPTO_CONST_3];
-
-    if (Crypto_mpi_cmp_int(B, 0) == 0)
-    {
-        return E_NOT_OK;
-    }
-
-    Crypto_mpi_init(&X);
-    Crypto_mpi_init(&Y);
-    Crypto_mpi_init(&Z);
-    Crypto_mpi_init(&T1);
-
-    T2.s = 1;
-    T2.n = sizeof(TP2) / sizeof(*TP2);
-    T2.p = TP2;
-
-    if (Crypto_mpi_cmp_abs(A, B) < 0)
-    {
-        if (Q != NULL_PTR)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_lset(Q, 0));
-        }
-        if (R != NULL_PTR)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_copy(R, A));
-        }
-        return 0;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&X, A));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&Y, B));
-    X.s = Y.s = 1;
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(&Z, A->n + 2));
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(&Z, 0));
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(&T1, A->n + 2));
-
-    k = Crypto_mpi_bitlen(&Y) % biL;
-    if (k < biL - 1)
-    {
-        k = biL - 1 - k;
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&X, k));
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&Y, k));
-    }
-    else
-    {
-        k = 0;
-    }
-
-    n = X.n - 1;
-    t = Y.n - 1;
-    CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&Y, biL * (n - t)));
-
-    while (Crypto_mpi_cmp_mpi(&X, &Y) >= 0)
-    {
-        Z.p[n - t]++;
-        CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&X, &X, &Y));
-    }
-    CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&Y, biL * (n - t)));
-
-    for (i = n; i > t; i--)
-    {
-        if (X.p[i] >= Y.p[t])
-        {
-            Z.p[i - t - 1] = ~(uint32)0u;
-        }
-        else
-        {
-            Z.p[i - t - 1] = Crypto_int_div_int(X.p[i], X.p[i - 1], Y.p[t], NULL_PTR);
-        }
-        T2.p[0] = (i < 2) ? 0 : X.p[i - 2];
-        T2.p[1] = (i < 1) ? 0 : X.p[i - 1];
-        T2.p[2] = X.p[i];
-
-        Z.p[i - t - 1]++;
-        do
-        {
-            Z.p[i - t - 1]--;
-
-            CRYPTO_MPI_CHK(Crypto_mpi_lset(&T1, 0));
-            T1.p[0] = (t < 1) ? 0 : Y.p[t - 1];
-            T1.p[1] = Y.p[t];
-            CRYPTO_MPI_CHK(Crypto_mpi_mul_int(&T1, &T1, Z.p[i - t - 1]));
-
-        } while (Crypto_mpi_cmp_mpi(&T1, &T2) > 0);
-
-        CRYPTO_MPI_CHK(Crypto_mpi_mul_int(&T1, &Y, Z.p[i - t - 1]));
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&T1, biL * (i - t - 1)));
-        CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&X, &X, &T1));
-
-        if (Crypto_mpi_cmp_int(&X, 0) < 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_copy(&T1, &Y));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&T1, biL * (i - t - 1)));
-            CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(&X, &X, &T1));
-            Z.p[i - t - 1]--;
-        }
-    }
-
-    if (Q != NULL_PTR)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_copy(Q, &Z));
-        Q->s = A->s * B->s;
-    }
-
-    if (R != NULL_PTR)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&X, k));
-        X.s = A->s;
-        CRYPTO_MPI_CHK(Crypto_mpi_copy(R, &X));
-
-        if (Crypto_mpi_cmp_int(R, 0) == 0)
-        {
-            R->s = 1;
-        }
-    }
-
-cleanup:
-
-    Crypto_mpi_free(&X);
-    Crypto_mpi_free(&Y);
-    Crypto_mpi_free(&Z);
-    Crypto_mpi_free(&T1);
-    (void)IStdLib_MemSet(&TP2, 0, CRYPTO_CONST_3);
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a division with remainder of an MPI by an integer:
- *                     A = Q * b + R.
- * Param-Name[in]      Q: The destination MPI for the quotient.
- *                     R: The destination MPI for the remainder value.
- *                     b: The divisor.
- * Param-Name[in/out]  None
- * Param-Name[out]     A: The dividend.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_div_int(Crypto_mpi* Q, Crypto_mpi* R, const Crypto_mpi* A, sint32 b)
-{
-    Crypto_mpi B;
-    uint32     p[1];
-
-    p[0] = mpi_sint_abs(b);
-    B.s  = TO_SIGN(b);
-    B.n  = 1;
-    B.p  = p;
-
-    return Crypto_mpi_div_mpi(Q, R, A, &B);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a modular reduction. R = A mod B.
- * Param-Name[in]      A: The MPI to compute the residue of.
- *                     B: The base of the modular reduction.
- * Param-Name[in/out]  None
- * Param-Name[out]     R: The destination MPI for the residue value.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_mod_mpi(Crypto_mpi* R, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int ret = E_NOT_OK;
-
-    if (Crypto_mpi_cmp_int(B, 0) < 0)
-    {
-        return E_NOT_OK;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_div_mpi(NULL_PTR, R, A, B));
-
-    while (Crypto_mpi_cmp_int(R, 0) < 0)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(R, R, B));
-    }
-
-    while (Crypto_mpi_cmp_mpi(R, B) >= 0)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(R, R, B));
-    }
-
-cleanup:
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a modular reduction with respect to an integer.
- *                     r = A mod b.
- * Param-Name[in]      A: The MPI to compute the residue of.
- *                     b: The integer base of the modular reduction.
- * Param-Name[in/out]  None
- * Param-Name[out]     r: The address at which to store the residue.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_mod_int(uint32* r, const Crypto_mpi* A, sint32 b)
-{
-    uint32 i;
-    uint32 x, y, z;
-
-    if (b == 0)
-    {
-        return E_NOT_OK;
-    }
-
-    if (b < 0)
-    {
-        return E_NOT_OK;
-    }
-
-    /*
-     * handle trivial cases
-     */
-    if (b == 1 || A->n == 0)
-    {
-        *r = 0;
-        return 0;
-    }
-
-    if (b == 2)
-    {
-        *r = A->p[0] & 1;
-        return 0;
-    }
-
-    /*
-     * general case
-     */
-    for (i = A->n, y = 0; i > 0; i--)
-    {
-        x = A->p[i - 1];
-        y = (y << biH) | (x >> biH);
-        z = y / b;
-        y -= z * b;
-
-        x <<= biH;
-        y = (y << biH) | (x >> biH);
-        z = y / b;
-        y -= z * b;
-    }
-
-    /*
-     * If A is negative, then the current y represents a negative value.
-     * Flipping it to the positive side.
-     */
-    if (A->s < 0 && y != 0)
-    {
-        y = b - y;
-    }
-
-    *r = y;
-
-    return 0;
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a sliding-window exponentiation: X = A^E mod N.
- * Param-Name[in]      A: The base of the exponentiation.
- *                     E: The exponent MPI.
- *                     N: The base for the modular reduction.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI. This must point to an initialized MPI.
- *                        This must not alias E or N.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_exp_mod(
-    Crypto_mpi*       X,
-    const Crypto_mpi* A,
-    const Crypto_mpi* E,
-    const Crypto_mpi* N,
-    Crypto_mpi*       prec_RR)
-{
-    int ret = E_NOT_OK;
-
-    if (Crypto_mpi_cmp_int(N, 0) <= 0 || (N->p[0] & 1) == 0)
-    {
-        return E_NOT_OK;
-    }
-
-    if (Crypto_mpi_cmp_int(E, 0) < 0)
-    {
-        return E_NOT_OK;
-    }
-
-    if (Crypto_mpi_bitlen(E) > CRYPTO_MPI_MAX_BITS || Crypto_mpi_bitlen(N) > CRYPTO_MPI_MAX_BITS)
-    {
-        return E_NOT_OK;
-    }
-
-    /*
-     * Ensure that the exponent that we are passing to the core is not NULL.
-     */
-    if (E->n == 0)
-    {
-        ret = Crypto_mpi_lset(X, 1);
-        return ret;
-    }
-
-    /*
-     * Allocate working memory for Crypto_mpi_core_exp_mod()
-     */
-    uint32 T_limbs = Crypto_mpi_core_exp_mod_working_limbs(N->n, E->n);
-
-    uint32* T = (uint32*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, sizeof(uint32), T_limbs);
-    if (T == NULL_PTR)
-    {
-        return E_NOT_OK;
-    }
-
-    Crypto_mpi RR;
-    Crypto_mpi_init(&RR);
-
-    /*
-     * If 1st call, pre-compute R^2 mod N
-     */
-    if (prec_RR == NULL_PTR || prec_RR->p == NULL_PTR)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_core_get_mont_r2_unsafe(&RR, N));
-
-        if (prec_RR != NULL_PTR)
-        {
-            *prec_RR = RR;
-        }
-    }
-    else
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_grow(prec_RR, N->n));
-        RR = *prec_RR;
-    }
-
-    /*
-     * To preserve constness we need to make a copy of A. Using X for this to
-     * save memory.
-     */
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(X, A));
-
-    /*
-     * Compensate for negative A (and correct at the end).
-     */
-    X->s = 1;
-
-    /*
-     * Make sure that X is in a form that is safe for consumption by
-     * the core functions.
-     *
-     * - The core functions will not touch the limbs of X above N->n. The
-     *   result will be correct if those limbs are 0, which the mod call
-     *   ensures.
-     * - Also, X must have at least as many limbs as N for the calls to the
-     *   core functions.
-     */
-    if (Crypto_mpi_cmp_mpi(X, N) >= 0)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_mod_mpi(X, X, N));
-    }
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, N->n));
-
-    /*
-     * Convert to and from Montgomery around Crypto_mpi_core_exp_mod().
-     */
-    {
-        uint32 mm = Crypto_mpi_core_montmul_init(N->p);
-        Crypto_mpi_core_to_mont_rep(X->p, X->p, N->p, N->n, mm, RR.p, T);
-        Crypto_mpi_core_exp_mod(X->p, X->p, N->p, N->n, E->p, E->n, RR.p, T);
-        Crypto_mpi_core_from_mont_rep(X->p, X->p, N->p, N->n, mm, T);
-    }
-
-    /*
-     * Correct for negative A.
-     */
-    if (A->s == -1 && (E->p[0] & 1) != 0)
-    {
-        uint32 is_x_non_zero = Crypto_mpi_core_check_zero_ct(X->p, X->n);
-        X->s                 = Crypto_ct_uint_if(is_x_non_zero, 0, 2) - 1;
-
-        CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(X, N, X));
-    }
-
-cleanup:
-
-    (void)IStdLib_MemSet(T, 0, T_limbs * sizeof(*T));
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, T);
-
-    if (prec_RR == NULL_PTR || prec_RR->p == NULL_PTR)
-    {
-        Crypto_mpi_free(&RR);
-    }
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Montgomery multiplication: A = A * B * R^-1 mod N.
- * Param-Name[in]      B: The input mpi.
- *                     R: The second input mpi.
- *                     N: The input modulus.
- * Param-Name[in/out]  A: The destination MPI.
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int mpi_montmul(Crypto_mpi* A, const Crypto_mpi* B, const Crypto_mpi* N, uint32 mm, const Crypto_mpi* T)
-{
-    uint32 i, n, m;
-    uint32 u0, u1, *d;
-
-    (void)IStdLib_MemSet(T->p, 0, T->n * ciL);
-
-    d = T->p;
-    n = N->n;
-    m = (B->n < n) ? B->n : n;
-
-    for (i = 0; i < n; i++)
-    {
-        /*
-         * T = (T + u0*B + u1*N) / 2^biL3
-         */
-        u0 = A->p[i];
-        u1 = (d[0] + u0 * B->p[0]) * mm;
-
-        mpi_mul_hlp(m, B->p, d, u0);
-        mpi_mul_hlp(n, N->p, d, u1);
-
-        *d++     = u0;
-        d[n + 1] = 0;
-    }
-
-    (void)IStdLib_MemCpy(A->p, d, (n + 1) * ciL);
-
-    if (Crypto_mpi_cmp_abs(A, N) >= 0)
-    {
-        mpi_sub_hlp(n, N->p, A->p);
-    }
-    else
-    {
-        /* prevent timing attacks */
-        mpi_sub_hlp(n, A->p, T->p);
-    }
-
-    return (0);
-}
-
-/******************************************************************************/
-/*
- * Brief               Testify whether x is equal to y ot not.
- *
- * Param-Name[in]      x: The input mpi.
- *                     y: The second input mpi.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              unsigned
- */
-/******************************************************************************/
-unsigned Crypto_ct_size_bool_eq(uint32 x, uint32 y)
-{
-    /* diff = 0 if x == y, non-zero otherwise */
-    const uint32 diff = x ^ y;
-
-    /* diff_msb's most significant bit is equal to x != y */
-    const uint32 diff_msb = (diff | (uint32)-diff);
-
-    /* diff1 = (x != y) ? 1 : 0 */
-    const unsigned diff1 = diff_msb >> (sizeof(diff_msb) * 8 - 1);
-
-    return (1 ^ diff1);
-}
-
-/******************************************************************************/
-/*
- * Brief  Generate a mask for implementing constant time conditional judgments
- *
- * Param-Name[in]
- * Param-Name[in/out]
- * Param-Name[out]
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_ct_mpi_uint_mask(uint32 value)
-{
-    return (-((value | -value) >> (sizeof(value) * 8 - 1)));
-}
-
-/******************************************************************************/
-/*
- * Brief  Conditionally assigns an array from the source array src to the destination array dest
- *
- * Param-Name[in]
- * Param-Name[in/out]
- * Param-Name[out]
- * Return              None
- */
-/******************************************************************************/
-void Crypto_ct_mpi_uint_cond_assign(uint32 n, uint32* dest, const uint32* src, uint8 condition)
-{
-    uint32 i;
-
-    /* all-bits 1 if condition is 1, all-bits 0 if condition is 0 */
-    const uint32 mask = -condition;
-
-    for (i = 0; i < n; i++)
-    {
-        dest[i] = (src[i] & mask) | (dest[i] & ~mask);
-    }
-}
-
-/******************************************************************************/
-/*
- * Brief
- *
- * Param-Name[in]
- * Param-Name[in/out]
- * Param-Name[out]
- * Return              int
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int Crypto_ct_cond_select_sign(uint8 condition, int if1, int if0)
-{
-    /* In order to avoid questions about what we can reasonably assume about
-     * the representations of signed integers, move everything to unsigned
-     * by taking advantage of the fact that if1 and if0 are either +1 or -1. */
-    unsigned uif1 = if1 + 1;
-    unsigned uif0 = if0 + 1;
-
-    /* condition was 0 or 1, mask is 0 or 2 as are uif1 and uif0 */
-    const unsigned mask = condition << 1;
-
-    /* select uif1 or uif0 */
-    unsigned ur = (uif0 & ~mask) | (uif1 & mask);
-
-    /* ur is now 0 or 2, convert back to -1 or +1 */
-    return ((int)ur - 1);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a safe conditional copy of MPI which doesn't
- *                     reveal whether the condition was true or not.
- * Param-Name[in]      Y: The MPI to be assigned from.
- *                     assign: The condition deciding whether to perform the
- *                             assignment or not. Must be either 0 or 1:
- *                             1: Perform the assignment `X = Y`.
- *                             0: Keep the original value of X.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The MPI to conditionally assign to.
- * Return              int
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int Crypto_mpi_safe_cond_assign(Crypto_mpi* X, const Crypto_mpi* Y, uint8 assign)
-{
-    int    ret = 0;
-    uint32 i;
-    uint32 limb_mask;
-
-    /* all-bits 1 if assign is 1, all-bits 0 if assign is 0 */
-    limb_mask = Crypto_ct_mpi_uint_mask(assign);
-    ;
-
-    CRYPTO_MPI_CHK(Crypto_mpi_grow(X, Y->n));
-
-    X->s = Crypto_ct_cond_select_sign(assign, Y->s, X->s);
-
-    Crypto_ct_mpi_uint_cond_assign(Y->n, X->p, Y->p, assign);
-
-    for (i = Y->n; i < X->n; i++)
-    {
-        X->p[i] &= ~limb_mask;
-    }
-
-cleanup:
-    return (ret);
-}
-
-/******************************************************************************/
-/*
- * Brief               Perform a safe conditional copy of MPI which doesn't
- *                     reveal whether the condition was true or not
- *
- * Param-Name[in]      R: The MPI to conditionally assign to.
- *                     T: The MPI to be assigned from.
- *                     size,idx  The condition deciding whether to perform the
- *                             assignment or not. Must be either 0 or 1:
- *                             1: Perform the assignment `X = Y`.
- *                             0: Keep the original value of X.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int
- */
-/******************************************************************************/
-int mpi_select(Crypto_mpi* R, const Crypto_mpi* T, uint32 T_size, uint32 idx)
-{
-    int    ret = E_NOT_OK;
-    uint32 i;
-
-    for (i = 0; i < T_size; i++)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_safe_cond_assign(R, &T[i], (uint8)Crypto_ct_size_bool_eq(i, idx)));
-    }
-
-cleanup:
-    return (ret);
-}
-
-/******************************************************************************/
-/*
- * Brief               Compute the greatest common divisor: G = gcd(A, B).
- * Param-Name[in]      A: The first operand.
- *                     B: The second operand.
- * Param-Name[in/out]  None
- * Param-Name[out]     G: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_gcd(Crypto_mpi* G, const Crypto_mpi* A, const Crypto_mpi* B)
-{
-    int        ret = E_NOT_OK;
-    uint32     lz, lzt;
-    Crypto_mpi TA, TB;
-
-    Crypto_mpi_init(&TA);
-    Crypto_mpi_init(&TB);
-
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&TA, A));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&TB, B));
-
-    lz  = Crypto_mpi_lsb(&TA);
-    lzt = Crypto_mpi_lsb(&TB);
-
-    /* The loop below gives the correct result when A==0 but not when B==0.
-     * So have a special case for B==0. Leverage the fact that we just
-     * calculated the lsb and lsb(B)==0 iff B is odd or 0 to make the test
-     * slightly more efficient than cmp_int(). */
-    if (lzt == 0 && Crypto_mpi_get_bit(&TB, 0) == 0)
-    {
-        ret = Crypto_mpi_copy(G, A);
-        goto cleanup;
-    }
-
-    if (lzt < lz)
-    {
-        lz = lzt;
-    }
-
-    TA.s = TB.s = 1;
-
-    /* We mostly follow the procedure described in HAC 14.54, but with some
-     * minor differences:
-     * - Sequences of multiplications or divisions by 2 are grouped into a
-     *   single shift operation.
-     * - The procedure in HAC assumes that 0 < TB <= TA.
-     *     - The condition TB <= TA is not actually necessary for correctness.
-     *       TA and TB have symmetric roles except for the loop termination
-     *       condition, and the shifts at the beginning of the loop body
-     *       remove any significance from the ordering of TA vs TB before
-     *       the shifts.
-     *     - If TA = 0, the loop goes through 0 iterations and the result is
-     *       correctly TB.
-     *     - The case TB = 0 was short-circuited above.
-     *
-     * For the correctness proof below, decompose the original values of
-     * A and B as
-     *   A = sa * 2^a * A' with A'=0 or A' odd, and sa = +-1
-     *   B = sb * 2^b * B' with B'=0 or B' odd, and sb = +-1
-     * Then gcd(A, B) = 2^{min(a,b)} * gcd(A',B'),
-     * and gcd(A',B') is odd or 0.
-     *
-     * At the beginning, we have TA = |A| and TB = |B| so gcd(A,B) = gcd(TA,TB).
-     * The code maintains the following invariant:
-     *     gcd(A,B) = 2^k * gcd(TA,TB) for some k   (I)
-     */
-
-    /* Proof that the loop terminates:
-     * At each iteration, either the right-shift by 1 is made on a nonzero
-     * value and the nonnegative integer bitlen(TA) + bitlen(TB) decreases
-     * by at least 1, or the right-shift by 1 is made on zero and then
-     * TA becomes 0 which ends the loop (TB cannot be 0 if it is right-shifted
-     * since in that case TB is calculated from TB-TA with the condition TB>TA).
-     */
-    while (Crypto_mpi_cmp_int(&TA, 0) != 0)
-    {
-        /* Divisions by 2 preserve the invariant (I). */
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TA, Crypto_mpi_lsb(&TA)));
-        CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TB, Crypto_mpi_lsb(&TB)));
-
-        /* Set either TA or TB to |TA-TB|/2. Since TA and TB are both odd,
-         * TA-TB is even so the division by 2 has an integer result.
-         * Invariant (I) is preserved since any odd divisor of both TA and TB
-         * also divides |TA-TB|/2, and any odd divisor of both TA and |TA-TB|/2
-         * also divides TB, and any odd divisor of both TB and |TA-TB|/2 also
-         * divides TA.
-         */
-        if (Crypto_mpi_cmp_mpi(&TA, &TB) >= 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_abs(&TA, &TA, &TB));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TA, 1));
-        }
-        else
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_abs(&TB, &TB, &TA));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TB, 1));
-        }
-        /* Note that one of TA or TB is still odd. */
-    }
-
-    /* By invariant (I), gcd(A,B) = 2^k * gcd(TA,TB) for some k.
-     * At the loop exit, TA = 0, so gcd(TA,TB) = TB.
-     * - If there was at least one loop iteration, then one of TA or TB is odd,
-     *   and TA = 0, so TB is odd and gcd(TA,TB) = gcd(A',B'). In this case,
-     *   lz = min(a,b) so gcd(A,B) = 2^lz * TB.
-     * - If there was no loop iteration, then A was 0, and gcd(A,B) = B.
-     *   In this case, lz = 0 and B = TB so gcd(A,B) = B = 2^lz * TB as well.
-     */
-
-    CRYPTO_MPI_CHK(Crypto_mpi_shift_l(&TB, lz));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(G, &TB));
-
-cleanup:
-
-    Crypto_mpi_free(&TA);
-    Crypto_mpi_free(&TB);
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Fill an MPI with a number of random bytes.
- *                     The bytes returned from the RNG are used in a specific order which
- *                     is suitable for deterministic ECDSA (see the specification of
- *                     Crypto_mpi_random() and the implementation in Crypto_mpi_fill_random()).
- *
- * Param-Name[in]      size: The number of random bytes to generate.
- *                     f_rng: The RNG function to use. This must not be NULL.
- *                     p_rng: The RNG parameter to be passed to f_rng. This may
- *                            be NULL if f_rng doesn't need a context argument.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_fill_random(
-    Crypto_mpi* X,
-    uint32      size,
-    Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
-    void* p_rng)
-{
-    int          ret   = E_NOT_OK;
-    const uint32 limbs = CHARS_TO_LIMBS(size);
-
-    const uint32 overhead = (limbs * ciL) - size;
-
-    if ((X != NULL_PTR) && (f_rng != NULL_PTR))
-    {
-        /* Ensure that target MPI has exactly the necessary number of limbs */
-        CRYPTO_MPI_CHK(Crypto_mpi_resize_clear(X, limbs));
-        if (size == 0)
-        {
-            return 0;
-        }
-        if (X->n < limbs)
-        {
-            return 1;
-        }
-
-        (void)IStdLib_MemSet(X->p, 0, overhead);
-        (void)IStdLib_MemSet((uint8*)X->p + limbs * ciL, 0, (X->n - limbs) * ciL);
-        CRYPTO_MPI_CHK(f_rng(p_rng, (uint8*)X->p + overhead, size));
-
-        mpi_bigendian_to_host(X->p, limbs);
-    }
-cleanup:
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief                Convert a big-endian byte array aligned to the size of uint32
- *                      into the storage form used by Crypto_mpi
- *
- * Param-Name[in]      x: a big-endian byte array
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 mpi_uint_bigendian_to_host_c(uint32 x)
-{
-    uint8  i;
-    uint8* x_ptr;
-    uint32 tmp = 0;
-
-    for (i = 0u, x_ptr = (uint8*)&x; i < ciL; i++, x_ptr++)
-    {
-        tmp <<= 8;
-        tmp |= (uint32)*x_ptr;
-    }
-
-    return (tmp);
-}
-
-/******************************************************************************/
-/*
- * Brief               Exchange the order of p to fit bigendian system.
- * Param-Name[in]      limbs: The number of limbs of p.
- * Param-Name[in/out]  p: The number need to exchange order.
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL void mpi_bigendian_to_host(uint32* const p, uint32 limbs)
-{
-    uint32* cur_limb_left;
-    uint32* cur_limb_right;
-    if (limbs == 0)
-    {
-        return;
-    }
-
-    for (cur_limb_left = p, cur_limb_right = p + (limbs - 1); cur_limb_left <= cur_limb_right;
-         cur_limb_left++, cur_limb_right--)
-    {
-        uint32 tmp;
-
-        tmp             = CRYPTO_BSWAP32(*cur_limb_left);
-        *cur_limb_left  = CRYPTO_BSWAP32(*cur_limb_right);
-        *cur_limb_right = tmp;
-    }
-}
-
-/******************************************************************************/
-/*
- * Brief               Compute the modular inverse: X = A^-1 mod N.
- * Param-Name[in]      A: The MPI to calculate the modular inverse of.
- *                     N: The base of the modular inversion.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI.
- * Return              int
- */
-/******************************************************************************/
-int Crypto_mpi_inv_mod(Crypto_mpi* X, const Crypto_mpi* A, const Crypto_mpi* N)
-{
-    int        ret = E_NOT_OK;
-    Crypto_mpi G, TA, TU, U1, U2, TB, TV, V1, V2;
-
-    if (Crypto_mpi_cmp_int(N, 1) <= 0)
-    {
-        return E_NOT_OK;
-    }
-
-    Crypto_mpi_init(&TA);
-    Crypto_mpi_init(&TU);
-    Crypto_mpi_init(&U1);
-    Crypto_mpi_init(&U2);
-    Crypto_mpi_init(&G);
-    Crypto_mpi_init(&TB);
-    Crypto_mpi_init(&TV);
-    Crypto_mpi_init(&V1);
-    Crypto_mpi_init(&V2);
-
-    CRYPTO_MPI_CHK(Crypto_mpi_gcd(&G, A, N));
-
-    if (Crypto_mpi_cmp_int(&G, 1) != 0)
-    {
-        ret = E_NOT_OK;
-        goto cleanup;
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_mod_mpi(&TA, A, N));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&TU, &TA));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&TB, N));
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&TV, N));
-
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(&U1, 1));
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(&U2, 0));
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(&V1, 0));
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(&V2, 1));
-
-    do
-    {
-        while ((TU.p[0] & 1) == 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TU, 1));
-
-            if ((U1.p[0] & 1) != 0 || (U2.p[0] & 1) != 0)
-            {
-                CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(&U1, &U1, &TB));
-                CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&U2, &U2, &TA));
-            }
-
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&U1, 1));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&U2, 1));
-        }
-
-        while ((TV.p[0] & 1) == 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&TV, 1));
-
-            if ((V1.p[0] & 1) != 0 || (V2.p[0] & 1) != 0)
-            {
-                CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(&V1, &V1, &TB));
-                CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&V2, &V2, &TA));
-            }
-
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&V1, 1));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&V2, 1));
-        }
-
-        if (Crypto_mpi_cmp_mpi(&TU, &TV) >= 0)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&TU, &TU, &TV));
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&U1, &U1, &V1));
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&U2, &U2, &V2));
-        }
-        else
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&TV, &TV, &TU));
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&V1, &V1, &U1));
-            CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&V2, &V2, &U2));
-        }
-    } while (Crypto_mpi_cmp_int(&TU, 0) != 0);
-
-    while (Crypto_mpi_cmp_int(&V1, 0) < 0)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_add_mpi(&V1, &V1, N));
-    }
-
-    while (Crypto_mpi_cmp_mpi(&V1, N) >= 0)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_sub_mpi(&V1, &V1, N));
-    }
-
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(X, &V1));
-
-cleanup:
-
-    Crypto_mpi_free(&TA);
-    Crypto_mpi_free(&TU);
-    Crypto_mpi_free(&U1);
-    Crypto_mpi_free(&U2);
-    Crypto_mpi_free(&G);
-    Crypto_mpi_free(&TB);
-    Crypto_mpi_free(&TV);
-    Crypto_mpi_free(&V1);
-    Crypto_mpi_free(&V2);
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Small divisors test (X must be positive).
- * Param-Name[in]      X: The mpi for test.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int mpi_check_small_factors(const Crypto_mpi* X)
-{
-    int      ret = 0;
-    uint32   i;
-    uint32   r;
-    unsigned p = 3; /* The first odd prime */
-
-    if ((X->p[0] & 1) == 0)
-    {
-        return CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-    }
-
-    for (i = 0; i < sizeof(small_prime_gaps); p += small_prime_gaps[i], i++)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_mod_int(&r, X, p));
-        if (r == 0)
-        {
-            if (Crypto_mpi_cmp_int(X, p) == 0)
-            {
-                return 1;
-            }
-            else
-            {
-                return CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-            }
-        }
-    }
-
-cleanup:
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Miller-Rabin pseudo-primality test.
- * Param-Name[in]      X: The mpi for test.
- *                     rounds: The number of test rounds.
- *                     f_rng: The RNG function to use.
- *                     p_rng: The RNG context to be passed to f_rng.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL int mpi_miller_rabin(
-    const Crypto_mpi* X,
-    uint32            rounds,
-    Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
-    void* p_rng)
-{
-    int        ret, count;
-    uint32     i, j, k, s;
-    Crypto_mpi W, R, T, A, RR;
-
-    Crypto_mpi_init(&W);
-    Crypto_mpi_init(&R);
-    Crypto_mpi_init(&T);
-    Crypto_mpi_init(&A);
-    Crypto_mpi_init(&RR);
-
-    /*
-     * W = |X| - 1
-     * R = W >> lsb( W )
-     */
-    CRYPTO_MPI_CHK(Crypto_mpi_sub_int(&W, X, 1));
-    s = Crypto_mpi_lsb(&W);
-    CRYPTO_MPI_CHK(Crypto_mpi_copy(&R, &W));
-    CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&R, s));
-
-    for (i = 0; i < rounds; i++)
-    {
-        /*
-         * pick a random A, 1 < A < |X| - 1
-         */
-        count = 0;
-        do
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_fill_random(&A, X->n * ciL, f_rng, p_rng));
-
-            j = Crypto_mpi_bitlen(&A);
-            k = Crypto_mpi_bitlen(&W);
-            if (j > k)
-            {
-                A.p[A.n - 1] &= ((uint32)1 << (k - (A.n - 1) * biL - 1)) - 1;
-            }
-
-            if (count++ > 30)
-            {
-                ret = CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-                goto cleanup;
-            }
-
-        } while (Crypto_mpi_cmp_mpi(&A, &W) >= 0 || Crypto_mpi_cmp_int(&A, 1) <= 0);
-
-        /*
-         * A = A^R mod |X|
-         */
-        CRYPTO_MPI_CHK(Crypto_mpi_exp_mod(&A, &A, &R, X, &RR));
-
-        if (Crypto_mpi_cmp_mpi(&A, &W) == 0 || Crypto_mpi_cmp_int(&A, 1) == 0)
-        {
-            continue;
-        }
-
-        j = 1;
-        while (j < s && Crypto_mpi_cmp_mpi(&A, &W) != 0)
-        {
-            /*
-             * A = A * A mod |X|
-             */
-            CRYPTO_MPI_CHK(Crypto_mpi_mul_mpi(&T, &A, &A));
-            CRYPTO_MPI_CHK(Crypto_mpi_mod_mpi(&A, &T, X));
-
-            if (Crypto_mpi_cmp_int(&A, 1) == 0)
-            {
-                break;
-            }
-
-            j++;
-        }
-
-        /*
-         * not prime if A != |X| - 1 or A == 1
-         */
-        if (Crypto_mpi_cmp_mpi(&A, &W) != 0 || Crypto_mpi_cmp_int(&A, 1) == 0)
-        {
-            ret = CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-            break;
-        }
-    }
-
-cleanup:
-    Crypto_mpi_free(&W);
-    Crypto_mpi_free(&R);
-    Crypto_mpi_free(&T);
-    Crypto_mpi_free(&A);
-    Crypto_mpi_free(&RR);
-
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               small factors, then Miller-Rabin
- * Param-Name[in]      X: The MPI to check for primality.
- *                     rounds: The number of bases to perform the Miller-Rabin
- *                             primality test for.
- *                     f_rng: The RNG function to use.
- *                     p_rng: The RNG context to be passed to f_rng.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_is_prime_ext(
-    const Crypto_mpi* X,
-    int               rounds,
-    Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
-    void* p_rng)
-{
-    int        ret = CRYPTO_ERR_ERROR_CORRUPTION_DETECTED;
-    Crypto_mpi XX;
-
-    XX.s = 1;
-    XX.n = X->n;
-    XX.p = X->p;
-
-    if (Crypto_mpi_cmp_int(&XX, 0) == 0 || Crypto_mpi_cmp_int(&XX, 1) == 0)
-    {
-        return CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-    }
-
-    if (Crypto_mpi_cmp_int(&XX, 2) == 0)
-    {
-        return 0;
-    }
-
-    if ((ret = mpi_check_small_factors(&XX)) != 0)
-    {
-        if (ret == 1)
-        {
-            return 0;
-        }
-
-        return ret;
-    }
-
-    return mpi_miller_rabin(&XX, rounds, f_rng, p_rng);
-}
-
-/******************************************************************************/
-/*
- * Brief               Generate a prime number.
- * Param-Name[in]      nbits: The required size of the destination MPI in bits.
- *                     flags: A mask of flags.
- *                     f_rng: The RNG function to use.
- *                     p_rng: The RNG context to be passed to f_rng.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI to store the generated prime in.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_gen_prime(
-    Crypto_mpi* X,
-    uint32      nbits,
-    int         flags,
-    Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
-    void* p_rng)
-{
-#ifdef CRYPTO_HAVE_INT64
-// ceil(2^63.5)
-#define CEIL_MAXUINT_DIV_SQRT2 0xb504f333f9de6485ULL
-#else
-    // ceil(2^31.5)
-#define CEIL_MAXUINT_DIV_SQRT2 0xb504f334U
-#endif
-    int        ret = CRYPTO_ERR_MPI_NOT_ACCEPTABLE;
-    uint32     k, n;
-    int        rounds;
-    uint32     r;
-    Crypto_mpi Y;
-
-    if (nbits < 3 || nbits > CRYPTO_MPI_MAX_BITS)
-    {
-        return CRYPTO_ERR_MPI_BAD_INPUT_DATA;
-    }
-
-    Crypto_mpi_init(&Y);
-
-    n = BITS_TO_LIMBS(nbits);
-
-    if ((flags & CRYPTO_MPI_GEN_PRIME_FLAG_LOW_ERR) == 0)
-    {
-        /*
-         * 2^-80 error probability, number of rounds chosen per HAC, table 4.4
-         */
-        rounds =
-            ((nbits >= 1300)  ? 2
-             : (nbits >= 850) ? 3
-             : (nbits >= 650) ? 4
-             : (nbits >= 350) ? 8
-             : (nbits >= 250) ? 12
-             : (nbits >= 150) ? 18
-                              : 27);
-    }
-    else
-    {
-        /*
-         * 2^-100 error probability, number of rounds computed based on HAC,
-         * fact 4.48
-         */
-        rounds =
-            ((nbits >= 1450)   ? 4
-             : (nbits >= 1150) ? 5
-             : (nbits >= 1000) ? 6
-             : (nbits >= 850)  ? 7
-             : (nbits >= 750)  ? 8
-             : (nbits >= 500)  ? 13
-             : (nbits >= 250)  ? 28
-             : (nbits >= 150)  ? 40
-                               : 51);
-    }
-
-    while (1)
-    {
-        CRYPTO_MPI_CHK(Crypto_mpi_fill_random(X, n * ciL, f_rng, p_rng));
-
-        if (X->p[n - 1] < CEIL_MAXUINT_DIV_SQRT2)
-        {
-            continue;
-        }
-
-        k = n * biL;
-        if (k > nbits)
-        {
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(X, k - nbits));
-        }
-        X->p[0] |= 1;
-
-        if ((flags & CRYPTO_MPI_GEN_PRIME_FLAG_DH) == 0)
-        {
-            ret = Crypto_mpi_is_prime_ext(X, rounds, f_rng, p_rng);
-
-            if (ret != CRYPTO_ERR_MPI_NOT_ACCEPTABLE)
-            {
-                goto cleanup;
-            }
-        }
-        else
-        {
-            /*
-             * A necessary condition for Y and X = 2Y + 1 to be prime
-             * is X = 2 mod 3 (which is equivalent to Y = 2 mod 3).
-             * Make sure it is satisfied, while keeping X = 3 mod 4
-             */
-
-            X->p[0] |= 2;
-
-            CRYPTO_MPI_CHK(Crypto_mpi_mod_int(&r, X, 3));
-            if (r == 0)
-            {
-                CRYPTO_MPI_CHK(Crypto_mpi_add_int(X, X, 8));
-            }
-            else if (r == 1)
-            {
-                CRYPTO_MPI_CHK(Crypto_mpi_add_int(X, X, 4));
-            }
-
-            /* Set Y = (X-1) / 2, which is X / 2 because X is odd */
-            CRYPTO_MPI_CHK(Crypto_mpi_copy(&Y, X));
-            CRYPTO_MPI_CHK(Crypto_mpi_shift_r(&Y, 1));
-
-            while (1)
-            {
-                /*
-                 * First, check small factors for X and Y
-                 * before doing Miller-Rabin on any of them
-                 */
-                if ((ret = mpi_check_small_factors(X)) == 0 && (ret = mpi_check_small_factors(&Y)) == 0
-                    && (ret = mpi_miller_rabin(X, rounds, f_rng, p_rng)) == 0
-                    && (ret = mpi_miller_rabin(&Y, rounds, f_rng, p_rng)) == 0)
-                {
-                    goto cleanup;
-                }
-
-                if (ret != CRYPTO_ERR_MPI_NOT_ACCEPTABLE)
-                {
-                    goto cleanup;
-                }
-
-                /*
-                 * Next candidates. We want to preserve Y = (X-1) / 2 and
-                 * Y = 1 mod 2 and Y = 2 mod 3 (eq X = 3 mod 4 and X = 2 mod 3)
-                 * so up Y by 6 and X by 12.
-                 */
-                CRYPTO_MPI_CHK(Crypto_mpi_add_int(X, X, 12));
-                CRYPTO_MPI_CHK(Crypto_mpi_add_int(&Y, &Y, 6));
-            }
-        }
-    }
-
-cleanup:
-
-    Crypto_mpi_free(&Y);
-
-    return ret;
-}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -3781,6 +290,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int asn1_get_nonzero_mpi(unsigned char** p, const unsigned char* end, Crypto_mpi* X)
 {
     int ret;
@@ -3798,6 +309,55 @@ CRYPTO_62_LOCAL int asn1_get_nonzero_mpi(unsigned char** p, const unsigned char*
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               This function frees the components of an RSA key.
+ *
+ * Param-Name[in]      ctx: The RSA context to free.
+ * Param-Name[out]     None
+ * Return              int:  E_OK: State accepted
+ *                           E_NOT_OK: State not accepted
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+int Crypto_rsa_free(Crypto_rsa_context* ctx)
+{
+    if (ctx == NULL)
+    {
+        return E_OK;
+    }
+
+    Crypto_mpi_free(&ctx->Vi);
+
+    Crypto_mpi_free(&ctx->Vf);
+
+    Crypto_mpi_free(&ctx->RN);
+
+    Crypto_mpi_free(&ctx->D);
+
+    Crypto_mpi_free(&ctx->Q);
+
+    Crypto_mpi_free(&ctx->P);
+
+    Crypto_mpi_free(&ctx->E);
+
+    Crypto_mpi_free(&ctx->N);
+
+#if !defined(CRYPTO_RSA_NO_CRT)
+    Crypto_mpi_free(&ctx->RQ);
+    Crypto_mpi_free(&ctx->RP);
+    Crypto_mpi_free(&ctx->QP);
+    Crypto_mpi_free(&ctx->DQ);
+    Crypto_mpi_free(&ctx->DP);
+#endif /* CRYPTO_RSA_NO_CRT */
+    return E_OK;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -3811,6 +371,8 @@ CRYPTO_62_LOCAL int asn1_get_nonzero_mpi(unsigned char** p, const unsigned char*
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_parse_key(Crypto_rsa_context* rsa, const unsigned char* key, uint32 keylen)
 {
     int            ret, version;
@@ -3948,6 +510,7 @@ int Crypto_rsa_parse_key(Crypto_rsa_context* rsa, const unsigned char* key, uint
     {
         goto cleanup;
     }
+
 #if 0
     if (p != end)
     {
@@ -3957,8 +520,16 @@ int Crypto_rsa_parse_key(Crypto_rsa_context* rsa, const unsigned char* key, uint
 
 cleanup:
     Crypto_mpi_free(&T);
+
+    if (ret != 0)
+    {
+        Crypto_rsa_free(rsa);
+    }
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -3972,6 +543,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_parse_pubkey(Crypto_rsa_context* rsa, const unsigned char* key, uint32 keylen)
 {
     unsigned char* p   = (unsigned char*)key;
@@ -4026,14 +599,16 @@ int Crypto_rsa_parse_pubkey(Crypto_rsa_context* rsa, const unsigned char* key, u
     {
         return E_NOT_OK;
     }
-
+#if 0
     if (p != end)
     {
         return E_NOT_OK;
     }
-
-    return 0;
+#endif
+    return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4045,6 +620,8 @@ int Crypto_rsa_parse_pubkey(Crypto_rsa_context* rsa, const unsigned char* key, u
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_check_pubkey(const Crypto_rsa_context* ctx)
 {
     if (rsa_check_context(ctx, 0 /* public */, 0 /* no blinding */) != 0)
@@ -4065,6 +642,8 @@ int Crypto_rsa_check_pubkey(const Crypto_rsa_context* ctx)
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4078,6 +657,8 @@ int Crypto_rsa_check_pubkey(const Crypto_rsa_context* ctx)
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_check_privkey(const Crypto_rsa_context* ctx)
 {
     if (Crypto_rsa_check_pubkey(ctx) != 0 || rsa_check_context(ctx, 1 /* private */, 1 /* blinding */) != 0)
@@ -4099,6 +680,8 @@ int Crypto_rsa_check_privkey(const Crypto_rsa_context* ctx)
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4117,6 +700,8 @@ int Crypto_rsa_check_privkey(const Crypto_rsa_context* ctx)
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_validate_params(
     const Crypto_mpi* N,
     const Crypto_mpi* P,
@@ -4229,7 +814,10 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#if !defined(CRYPTO_RSA_NO_CRT)
 /******************************************************************************/
 /*
  * Brief               Check that RSA CRT parameters are in accordance with core
@@ -4246,6 +834,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_validate_crt(
     const Crypto_mpi* P,
     const Crypto_mpi* Q,
@@ -4332,6 +922,9 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 
 /******************************************************************************/
 /*
@@ -4349,6 +942,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_write_key(const Crypto_rsa_context* rsa, unsigned char* start, unsigned char** p)
 {
     uint32 len = 0;
@@ -4440,6 +1035,8 @@ end_of_export:
 
     return (int)len;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               Write a PKCS#1 (ASN.1) encoded public RSA key.
@@ -4456,6 +1053,8 @@ end_of_export:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_write_publickey(const Crypto_rsa_context* rsa, unsigned char* start, unsigned char** p)
 {
     uint32 len = 0;
@@ -4499,6 +1098,8 @@ end_of_export:
 
     return (int)len;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function performs the unpadding part of a PKCS#1
@@ -4520,6 +1121,8 @@ end_of_export:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
     unsigned char* input,
     uint32         ilen,
@@ -4579,7 +1182,7 @@ CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
      * buffer. Do it without branches to avoid leaking the padding
      * validity through timing. RSA keys are small enough that all the
      * uint32 values involved fit in unsigned int. */
-    plaintext_size = Crypto_ct_uint_if(bad, (unsigned)plaintext_max_size, (unsigned)(ilen - pad_count - 3));
+    plaintext_size = Crypto_ct_uint_if(bad, (uint32)plaintext_max_size, (uint32)(ilen - pad_count - 3));
 
     /* Set output_too_large to 0 if the plaintext fits in the output
      * buffer and to 1 otherwise. */
@@ -4604,7 +1207,7 @@ CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
      * Copy anyway to avoid revealing the length through timing, because
      * revealing the length is as bad as revealing the padding validity
      * for a Bleichenbacher attack. */
-    plaintext_size = Crypto_ct_uint_if(output_too_large, (unsigned)plaintext_max_size, (unsigned)plaintext_size);
+    plaintext_size = Crypto_ct_uint_if(output_too_large, (uint32)plaintext_max_size, (uint32)plaintext_size);
 
     /* Move the plaintext to the leftmost position where it can start in
      * the working buffer, i.e. make it start plaintext_max_size from
@@ -4634,6 +1237,8 @@ CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #if !defined(CRYPTO_RSA_ALT)
 
@@ -4653,6 +1258,8 @@ CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_import(
     Crypto_rsa_context* ctx,
     const Crypto_mpi*   N,
@@ -4679,6 +1286,8 @@ int Crypto_rsa_import(
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4701,6 +1310,8 @@ int Crypto_rsa_import(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_import_raw(
     Crypto_rsa_context*  ctx,
     const unsigned char* N,
@@ -4751,6 +1362,8 @@ cleanup:
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4767,6 +1380,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int rsa_check_context(const Crypto_rsa_context* ctx, int is_priv, int blinding_needed)
 {
 #if !defined(CRYPTO_RSA_NO_CRT)
@@ -4848,6 +1463,8 @@ CRYPTO_62_LOCAL int rsa_check_context(const Crypto_rsa_context* ctx, int is_priv
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -4870,6 +1487,8 @@ CRYPTO_62_LOCAL int rsa_check_context(const Crypto_rsa_context* ctx, int is_priv
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_complete(Crypto_rsa_context* ctx)
 {
     int ret = 0;
@@ -4970,6 +1589,8 @@ int Crypto_rsa_complete(Crypto_rsa_context* ctx)
 
     return rsa_check_context(ctx, is_priv, 1);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5000,6 +1621,8 @@ int Crypto_rsa_complete(Crypto_rsa_context* ctx)
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export_raw(
     const Crypto_rsa_context* ctx,
     unsigned char*            N,
@@ -5060,6 +1683,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5083,6 +1708,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export(
     const Crypto_rsa_context* ctx,
     Crypto_mpi*               N,
@@ -5122,6 +1749,8 @@ int Crypto_rsa_export(
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5139,6 +1768,8 @@ int Crypto_rsa_export(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_export_crt(const Crypto_rsa_context* ctx, Crypto_mpi* DP, Crypto_mpi* DQ, Crypto_mpi* QP)
 {
     int ret = E_NOT_OK;
@@ -5171,6 +1802,8 @@ int Crypto_rsa_export_crt(const Crypto_rsa_context* ctx, Crypto_mpi* DP, Crypto_
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5190,6 +1823,8 @@ int Crypto_rsa_export_crt(const Crypto_rsa_context* ctx, Crypto_mpi* DP, Crypto_
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_primes(
     const Crypto_mpi* N,
     const Crypto_mpi* E,
@@ -5322,6 +1957,8 @@ cleanup:
     Crypto_mpi_free(&T);
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5340,6 +1977,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_private_exponent(const Crypto_mpi* P, const Crypto_mpi* Q, const Crypto_mpi* E, Crypto_mpi* D)
 {
     int        ret = 0;
@@ -5379,6 +2018,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5387,13 +2028,15 @@ cleanup:
  * Param-Name[in]      mode: Indicate padding mode. It can be CRYPTO_RSA_PKCS_V15
  *                           for 1.5 padding and CRYPTO_RSA_PKCS_V21 for OAEP or
  *                           PSS.
- *                     secondaryFam: Hash identifier of Crypto_md_type_t type.
+ *                     secondaryFam: Hash identifier of Crypto_AlgorithmFamilyType type.
  *
  * Param-Name[in/out]  ctx: The context of RSA.
  * Param-Name[out]     None
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_rsa_init(Crypto_rsa_context* ctx, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam)
 {
     (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_rsa_context));
@@ -5401,6 +2044,8 @@ void Crypto_rsa_init(Crypto_rsa_context* ctx, Crypto_AlgorithmModeType mode, Cry
     ctx->padding = mode;
     ctx->hash_id = secondaryFam;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5415,6 +2060,8 @@ void Crypto_rsa_init(Crypto_rsa_context* ctx, Crypto_AlgorithmModeType mode, Cry
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_set_padding(Crypto_rsa_context* ctx, int padding, Crypto_AlgorithmFamilyType hash_id)
 {
     ctx->padding = padding;
@@ -5422,6 +2069,8 @@ int Crypto_rsa_set_padding(Crypto_rsa_context* ctx, int padding, Crypto_Algorith
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5434,10 +2083,14 @@ int Crypto_rsa_set_padding(Crypto_rsa_context* ctx, int padding, Crypto_Algorith
  * Return              int
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_get_padding_mode(const Crypto_rsa_context* ctx)
 {
     return ctx->padding;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5449,10 +2102,14 @@ int Crypto_rsa_get_padding_mode(const Crypto_rsa_context* ctx)
  * Return              int
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_get_md_alg(const Crypto_rsa_context* ctx)
 {
     return ctx->hash_id;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5464,10 +2121,14 @@ int Crypto_rsa_get_md_alg(const Crypto_rsa_context* ctx)
  * Return              uint32
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 uint32 Crypto_rsa_get_bitlen(const Crypto_rsa_context* ctx)
 {
     return Crypto_mpi_bitlen(&ctx->N);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5479,10 +2140,14 @@ uint32 Crypto_rsa_get_bitlen(const Crypto_rsa_context* ctx)
  * Return              uint32
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 uint32 Crypto_rsa_get_len(const Crypto_rsa_context* ctx)
 {
     return ctx->len;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5498,6 +2163,8 @@ uint32 Crypto_rsa_get_len(const Crypto_rsa_context* ctx)
  * Return              int
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_deduce_crt(
     const Crypto_mpi* P,
     const Crypto_mpi* Q,
@@ -5535,6 +2202,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5553,6 +2222,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_gen_key(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -5686,6 +2357,8 @@ cleanup:
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5699,6 +2372,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_public(Crypto_rsa_context* ctx, const unsigned char* input, unsigned char* output)
 {
     int        ret = E_NOT_OK;
@@ -5735,6 +2410,8 @@ cleanup:
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -5754,6 +2431,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     rsa_prepare_blinding(Crypto_rsa_context* ctx, Std_ReturnType (*f_rng)(void*, unsigned char*, uint32), void* p_rng)
 {
@@ -5814,615 +2493,8 @@ cleanup:
 
     return ret;
 }
-
-/******************************************************************************/
-/*
- * Brief               Fast Montgomery initialization.
- *
- * Param-Name[in]      N: Number input.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_montmul_init(const uint32* N)
-{
-    uint32 x = N[0];
-
-    x += ((N[0] + 2) & 4) << 1;
-
-    for (unsigned int i = biL; i >= 8; i /= 2)
-    {
-        x *= (2 - (N[0] * x));
-    }
-
-    return ~x + 1;
-}
-
-/******************************************************************************/
-/*
- * Brief               Calculate the square of the Montgomery constant.
- *                     (Needed for conversion and operations in Montgomery form.)
- * Param-Name[in]      N: Little-endian presentation of the modulus, which must be
- *                          odd.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: A pointer to the result of the calculation of the square
- *                        of the Montgomery constant: 2^{2*n*biL} mod N.
- * Return              int: E_OK: State accepted
- *                          E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-int Crypto_mpi_core_get_mont_r2_unsafe(Crypto_mpi* X, const Crypto_mpi* N)
-{
-    int ret = E_NOT_OK;
-
-    CRYPTO_MPI_CHK(Crypto_mpi_lset(X, 1));
-    CRYPTO_MPI_CHK(Crypto_mpi_shift_l(X, N->n * 2 * biL));
-    CRYPTO_MPI_CHK(Crypto_mpi_mod_mpi(X, X, N));
-    CRYPTO_MPI_CHK(Crypto_mpi_shrink(X, N->n));
-
-cleanup:
-    return ret;
-}
-
-/******************************************************************************/
-/*
- * Brief               Convert an MPI into Montgomery form. X may be aliased to A,
- *                     but may not otherwise overlap it. X may not alias N (it is
- *                     in canonical form, so must be strictly less than N). Nor
- *                     may it alias or overlap rr (this is unlikely to be required
- *                     in practice.)
- *
- * Param-Name[in]      A: The MPI to convert into Montgomery form. Must have the
- *                        same number of limbs as the modulus.
- *                     N: The address of the modulus, which gives the size of the
- *                        base R = 2^(biL*N->limbs).
- *                     AN_limbs: The number of limbs in X, A, N and rr.
- *                     mm: The Montgomery constant for N: -N^-1 mod 2^biL.
- *                     rr: The residue for 2^{2*n*biL} mod N.
- *                     T: Temporary storage. Its initial content is unused and its
- *                        final content is indeterminate. It must not alias or
- *                        otherwise overlap any of the other parameters.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The result of the conversion. Must have the same number
- *                        of limbs as A.
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_core_to_mont_rep(
-    uint32*       X,
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    const uint32* rr,
-    uint32*       T)
-{
-    Crypto_mpi_core_montmul(X, A, rr, AN_limbs, N, AN_limbs, mm, T);
-}
-/******************************************************************************/
-/*
- * Brief    Conversion from Montgomery to standard representation
- */
-/******************************************************************************/
-void Crypto_mpi_core_from_mont_rep(uint32* X, const uint32* A, const uint32* N, uint32 AN_limbs, uint32 mm, uint32* T)
-{
-    const uint32 Rinv = 1; /* 1/R in Mont. rep => 1 */
-
-    Crypto_mpi_core_montmul(X, A, &Rinv, 1, N, AN_limbs, mm, T);
-}
-/* Exponentiation: X := A^E mod N.
- *
- * A must already be in Montgomery form.
- *
- * As in other bignum functions, assume that AN_limbs and E_limbs are nonzero.
- *
- * RR must contain 2^{2*biL} mod N.
- *
- * The algorithm is a variant of Left-to-right k-ary exponentiation: HAC 14.82
- * (The difference is that the body in our loop processes a single bit instead
- * of a full window.)
- */
-void Crypto_mpi_core_exp_mod(
-    uint32*       X,
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    const uint32* E,
-    uint32        E_limbs,
-    const uint32* RR,
-    uint32*       T)
-{
-    const uint32 wsize = ((E_limbs * biL) > 79) ? CRYPTO_MPI_WINDOW_SIZE : 1;
-    const uint32 welem = ((uint32)1) << wsize;
-
-    /* This is how we will use the temporary storage T, which must have space
-     * for table_limbs, select_limbs and (2 * AN_limbs + 1) for montmul. */
-    const uint32 table_limbs  = welem * AN_limbs;
-    const uint32 select_limbs = AN_limbs;
-
-    /* Pointers to specific parts of the temporary working memory pool */
-    uint32* const Wtable  = T;
-    uint32* const Wselect = Wtable + table_limbs;
-    uint32* const temp    = Wselect + select_limbs;
-
-    /*
-     * Window precomputation
-     */
-
-    const uint32 mm = Crypto_mpi_core_montmul_init(N);
-
-    /* Set Wtable[i] = A^(2^i) (in Montgomery representation) */
-    exp_mod_precompute_window(A, N, AN_limbs, mm, RR, welem, Wtable, temp);
-
-    /*
-     * Fixed window exponentiation
-     */
-
-    /* X = 1 (in Montgomery presentation) initially */
-    (void)IStdLib_MemCpy(X, Wtable, AN_limbs * ciL);
-
-    /* We'll process the bits of E from most significant
-     * (limb_index=E_limbs-1, E_bit_index=biL-1) to least significant
-     * (limb_index=0, E_bit_index=0). */
-    uint32 E_limb_index = E_limbs;
-    uint32 E_bit_index  = 0;
-    /* At any given time, window contains window_bits bits from E.
-     * window_bits can go up to wsize. */
-    uint32 window_bits = 0;
-    uint32 window      = 0;
-
-    do
-    {
-        /* Square */
-        Crypto_mpi_core_montmul(X, X, X, AN_limbs, N, AN_limbs, mm, temp);
-
-        /* Move to the next bit of the exponent */
-        if (E_bit_index == 0)
-        {
-            --E_limb_index;
-            E_bit_index = biL - 1;
-        }
-        else
-        {
-            --E_bit_index;
-        }
-        /* Insert next exponent bit into window */
-        ++window_bits;
-        window <<= 1;
-        window |= (E[E_limb_index] >> E_bit_index) & 1;
-
-        /* Clear window if it's full. Also clear the window at the end,
-         * when we've finished processing the exponent. */
-        if (window_bits == wsize || (E_bit_index == 0 && E_limb_index == 0))
-        {
-            /* Select Wtable[window] without leaking window through
-             * memory access patterns. */
-            Crypto_mpi_core_ct_uint_table_lookup(Wselect, Wtable, AN_limbs, welem, window);
-            /* Multiply X by the selected element. */
-            Crypto_mpi_core_montmul(X, X, Wselect, AN_limbs, N, AN_limbs, mm, temp);
-            window      = 0;
-            window_bits = 0;
-        }
-    } while (!(E_bit_index == 0 && E_limb_index == 0));
-}
-/******************************************************************************/
-/*
- * Brief               Subtract two fixed-size large unsigned integers, returning
- *                      the borrow. Calculate A - B where A and B have the same
- *                     size. This function operates modulo 2^(biL*limbs) and
- *                     returns the carry (1 if there was a wraparound, i.e. if A < B,
- *                     and 0 otherwise). X may be aliased to A or B, or even both,
- *                     but may not overlap either otherwise.
- *
- * Param-Name[in]      A: Little-endian presentation of left operand.
- *                     B: Little-endian presentation of right operand.
- *                     limbs: Number of limbs of X, A and B.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The result of the subtraction.
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_sub(uint32* X, const uint32* A, const uint32* B, uint32 limbs)
-{
-    uint32 c = 0;
-
-    for (uint32 i = 0; i < limbs; i++)
-    {
-        uint32 z = (A[i] < c);
-        uint32 t = A[i] - c;
-        c        = (t < B[i]) + z;
-        X[i]     = t - B[i];
-    }
-
-    return c;
-}
-/******************************************************************************/
-/*
- * Brief  Multi-precision integer minus single-precision integer
- *
- * Param-Name[in]   A:Subtracted number (multi-precision integer)
- *                  c:Decrement (single precision integer)
- *                  limbs:Length of the A and X arrays
- * Param-Name[in/out]  None
- * Param-Name[out]   X:Target array for storing the result of the operation
- * Return
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_sub_int(
-    uint32*       X,
-    const uint32* A,
-    uint32        c, /* doubles as carry */
-    uint32        limbs)
-{
-    for (uint32 i = 0; i < limbs; i++)
-    {
-        uint32 s = A[i];
-        uint32 t = s - c;
-        c        = (t > s);
-        X[i]     = t;
-    }
-
-    return c;
-}
-/******************************************************************************/
-/*
- * Brief    Check if a multi-precision integer is all 0
- *
- * Param-Name[in] A: Multi-precision integer array to be checked
- *                limbs:Length of array A
- * Param-Name[in/out]  None
- * Param-Name[out] None
- * Return Crypto_ct_bool(bits)
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_check_zero_ct(const uint32* A, uint32 limbs)
-{
-    const volatile uint32* force_read_A = A;
-    uint32                 bits         = 0;
-
-    for (uint32 i = 0; i < limbs; i++)
-    {
-        bits |= force_read_A[i];
-    }
-
-    return Crypto_ct_bool(bits);
-}
-/******************************************************************************/
-/*
- * Brief    Pre-calculate a window table to speed up subsequent modulo operations.
- *
- * Param-Name[in]   A:The base to be modulo idempotent
- *                  N:modulus
- *                  AN_limbs:Length of the A and N arrays
- *                  mm:Constants for multiplication
- *                  RR:The RR constant used in multiplication
- *                  welem:Number of window elements to count
- *                  temp:Buffer for temporary storage
- * Param-Name[in/out]  None
- * Param-Name[out]  Wtable: Window table for storing calculation results
- * Return
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL void exp_mod_precompute_window(
-    const uint32* A,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    const uint32* RR,
-    uint32        welem,
-    uint32*       Wtable,
-    uint32*       temp)
-{
-    /* W[0] = 1 (in Montgomery presentation) */
-    (void)IStdLib_MemSet(Wtable, 0, AN_limbs * ciL);
-    Wtable[0] = 1;
-    Crypto_mpi_core_montmul(Wtable, Wtable, RR, AN_limbs, N, AN_limbs, mm, temp);
-
-    /* W[1] = A (already in Montgomery presentation) */
-    uint32* W1 = Wtable + AN_limbs;
-    (void)IStdLib_MemCpy(W1, A, AN_limbs * ciL);
-
-    /* W[i+1] = W[i] * W[1], i >= 2 */
-    uint32* Wprev = W1;
-    for (uint32 i = 2; i < welem; i++)
-    {
-        uint32* Wcur = Wprev + AN_limbs;
-        Crypto_mpi_core_montmul(Wcur, Wprev, W1, AN_limbs, N, AN_limbs, mm, temp);
-        Wprev = Wcur;
-    }
-}
-/******************************************************************************/
-/*
- * Brief  Perform a conditional table lookup operation
- *
- * Param-Name[in]  table：Pointer to the input form
- *                 limbs：This is the length of each data item
- *                 count：Total number of data items in the table
- *                 index：Index value to look up
- * Param-Name[in/out]  None
- * Param-Name[out] dest:Storing search results
- * Return
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL void
-    Crypto_mpi_core_ct_uint_table_lookup(uint32* dest, const uint32* table, uint32 limbs, uint32 count, uint32 index)
-{
-    for (uint32 i = 0; i < count; i++, table += limbs)
-    {
-        uint32 assign = Crypto_ct_uint_eq(i, index);
-        Crypto_mpi_core_cond_assign(dest, table, limbs, assign);
-    }
-}
-/******************************************************************************/
-/*
- * Brief   Conditionally copying an array A into an array X
- *
- * Param-Name[in]   A：Pointer to source array
- *                  limbs：Length of the array
- *                  assign：Conditional flag to decide whether to copy A to X.
- * Param-Name[in/out]  None
- * Param-Name[out] X：Pointer to the target array, elements of the array will be conditionally assigned values
- * Return
- */
-/******************************************************************************/
-void Crypto_mpi_core_cond_assign(uint32* X, const uint32* A, uint32 limbs, uint32 assign)
-{
-    if (X == A)
-    {
-        return;
-    }
-
-    /* This function is very performance-sensitive for RSA. For this reason
-     * we have the loop below, instead of calling Crypto_ct_memcpy_if
-     * (this is more optimal since here we don't have to handle the case where
-     * we copy awkwardly sized data).
-     */
-    for (uint32 i = 0; i < limbs; i++)
-    {
-        X[i] = Crypto_ct_if(assign, A[i], X[i]);
-    }
-}
-/******************************************************************************/
-/*
- * Brief  Determine the amount of working memory required to perform modulo power operations
- *
- * Param-Name[in]      AN_limbs：Bit length of base A and modulus N
- *                     E_limbs：The bit length of the index E
- * Param-Name[in/out]  None
- * Param-Name[out] None
- * Return
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_exp_mod_working_limbs(uint32 AN_limbs, uint32 E_limbs)
-{
-    const uint32 wsize = ((E_limbs * biL) > 79) ? CRYPTO_MPI_WINDOW_SIZE : 1;
-    const uint32 welem = ((uint32)1) << wsize;
-
-    /* How big does each part of the working memory pool need to be? */
-    const uint32 table_limbs  = welem * AN_limbs;
-    const uint32 select_limbs = AN_limbs;
-    const uint32 temp_limbs   = 2 * AN_limbs + 1;
-
-    return table_limbs + select_limbs + temp_limbs;
-}
-/******************************************************************************/
-/*
- * Brief               Perform a fixed-size multiply accumulate operation:
- *                     d += b * s d may be aliased to s (when d_limbs == s_limbs),
- *                     but may not otherwise overlap. This function operates
- *                     modulo 2^(biL*d_limbs).
- *
- * Param-Name[in]      d_len: The number of limbs of d.
- *                     s: The pointer to the (little-endian) array representing
- *                        the bignum to multiply with.
- *                     s_len: The number of limbs of A.
- *                     b: d scalar to multiply with.
- * Param-Name[in/out]  d: The pointer to the (little-endian) array representing
- *                        the bignum to accumulate onto.
- * Param-Name[out]     None
- * Return              uint32
- */
-/******************************************************************************/
-uint32 Crypto_mpi_core_mla(uint32* d, uint32 d_len, const uint32* s, uint32 s_len, uint32 b)
-{
-    uint32 c = 0; /* carry */
-    /*
-     * It is a documented precondition of this function that d_len >= s_len.
-     * If that's not the case, we swap these round: this turns what would be
-     * a buffer overflow into an incorrect result.
-     */
-    if (d_len < s_len)
-    {
-        s_len = d_len;
-    }
-    uint32 excess_len = d_len - s_len;
-    uint32 steps_x8   = s_len / 8;
-    uint32 steps_x1   = s_len & 7;
-
-    while (steps_x8--)
-    {
-        MULADDC_X8_INIT
-        MULADDC_X8_CORE
-        MULADDC_X8_STOP
-    }
-
-    while (steps_x1--)
-    {
-        MULADDC_X1_INIT
-        MULADDC_X1_CORE
-        MULADDC_X1_STOP
-    }
-
-    while (excess_len--)
-    {
-        *d += c;
-        c = (*d < c);
-        d++;
-    }
-
-    return c;
-}
-
-/******************************************************************************/
-/*
- * Brief               Conditional memcpy. Functionally equivalent to: if
- *                      (condition) { memcpy(dest, src1, len); } else { if
- *                     (src2 != NULL) memcpy(dest, src2, len); } It will always
- *                     read len bytes from src1. If src2 != NULL, it will always
- *                     read len bytes from src2. If src2 == NULL, it will instead
- *                     read len bytes from dest (as if src2 == dest).
- *
- * Param-Name[in]      condition: The condition.
- *                     src1: Pointer to copy from. This may be equal to dest,
- *                            but may not overlap in other ways.
- *                     src2: Pointer to copy from. May be NULL. This may be
- *                           equal to dest, but may not overlap it in other ways.
- *                           It may overlap with src1.
- *                     len: Number of bytes to copy.
- * Param-Name[in/out]  None
- * Param-Name[out]     dest: Destination pointer.
- * Return              None
- */
-/******************************************************************************/
-void Crypto_ct_memcpy_if(
-    uint64               condition,
-    unsigned char*       dest,
-    const unsigned char* src1,
-    const unsigned char* src2,
-    uint32               len)
-{
-#if defined(Crypto_CT_SIZE_64)
-    const uint64_t mask     = (uint64_t)condition;
-    const uint64_t not_mask = (uint64_t)~Crypto_ct_compiler_opaque(condition);
-#else
-    const uint32 mask     = (uint32)condition;
-    const uint32 not_mask = (uint32)~Crypto_ct_compiler_opaque(condition);
-#endif
-
-    /* If src2 is NULL, setup src2 so that we read from the destination address.
-     *
-     * This means that if src2 == NULL && condition is false, the result will be a
-     * no-op because we read from dest and write the same data back into dest.
-     */
-    if (src2 == NULL_PTR)
-    {
-        src2 = dest;
-    }
-
-    /* dest[i] = c1 == c2 ? src[i] : dest[i] */
-    uint32 i = 0;
-
-#if defined(Crypto_CT_SIZE_64)
-    for (; (i + 8) <= len; i += 8)
-    {
-        uint64_t a = Crypto_get_unaligned_uint64(src1 + i) & mask;
-        uint64_t b = Crypto_get_unaligned_uint64(src2 + i) & not_mask;
-        Crypto_put_unaligned_uint64(dest + i, a | b);
-    }
-#else
-    for (; (i + 4) <= len; i += 4)
-    {
-        uint32 a = Crypto_Get_Unaligned_Uint32(src1 + i) & mask;
-        uint32 b = Crypto_Get_Unaligned_Uint32(src2 + i) & not_mask;
-        Crypto_put_unaligned_uint32(dest + i, a | b);
-    }
-#endif /* defined(Crypto_CT_SIZE_64) */
-
-    for (; i < len; i++)
-    {
-        dest[i] = (src1[i] & mask) | (src2[i] & not_mask);
-    }
-}
-
-/******************************************************************************/
-/*
- * Brief               Montgomery multiplication: X = A * B * R^-1 mod N (HAC 14.36)
- *                      A and B must be in canonical form. That is, < N. X may be
- *                     aliased to A or N, or even B (if AN_limbs == B_limbs) but may
- *                     not overlap any parameters otherwise. A and B may alias each
- *                     other, if AN_limbs == B_limbs. They may not alias N (since
- *                     they must be in canonical form, they cannot == N).
- * Param-Name[in]      A: Little-endian presentation of first operand. Must have
- *                        the same number of limbs as N.
- *                     B: Little-endian presentation of second operand.
- *                     B_limbs: The number of limbs in B. Must be <= AN_limbs.
- *                     N: Little-endian presentation of the modulus. This must be odd,
- *                        and have exactly the same number of limbs as A. It may alias
- *                        X, but must not alias or otherwise overlap any of the other
- *                        parameters.
- *                     AN_limbs: The number of limbs in X, A and N.
- *                     mm: The Montgomery constant for N: -N^-1 mod 2^biL.
- *                     T: Temporary storage of size at least 2*AN_limbs+1 limbs. Its
- *                        initial content is unused and its final content is
- *                        indeterminate. It must not alias or otherwise overlap any
- *                        of the other parameters.
- * Param-Name[in/out]  None
- * Param-Name[out]     X: The destination MPI, as a little-endian array of length
- *                        AN_limbs. On successful completion, X contains the
- *                        result of the multiplication A * B * R^-1 mod N where
- *                        R = 2^(biL*AN_limbs).
- * Return              None
- */
-/******************************************************************************/
-void Crypto_mpi_core_montmul(
-    uint32*       X,
-    const uint32* A,
-    const uint32* B,
-    uint32        B_limbs,
-    const uint32* N,
-    uint32        AN_limbs,
-    uint32        mm,
-    uint32*       T)
-{
-    (void)IStdLib_MemSet(T, 0, (2 * AN_limbs + 1) * ciL);
-
-    for (uint32 i = 0; i < AN_limbs; i++)
-    {
-        /* T = (T + u0*B + u1*N) / 2^biL */
-        uint32 u0 = A[i];
-        uint32 u1 = (T[0] + u0 * B[0]) * mm;
-
-        (void)Crypto_mpi_core_mla(T, AN_limbs + 2, B, B_limbs, u0);
-        (void)Crypto_mpi_core_mla(T, AN_limbs + 2, N, AN_limbs, u1);
-
-        T++;
-    }
-
-    /*
-     * The result we want is (T >= N) ? T - N : T.
-     *
-     * For better constant-time properties in this function, we always do the
-     * subtraction, with the result in X.
-     *
-     * We also look to see if there was any carry in the final additions in the
-     * loop above.
-     */
-
-    uint32 carry  = T[AN_limbs];
-    uint32 borrow = Crypto_mpi_core_sub(X, T, N, AN_limbs);
-
-    /*
-     * Using R as the Montgomery radix (auxiliary modulus) i.e. 2^(biL*AN_limbs):
-     *
-     * T can be in one of 3 ranges:
-     *
-     * 1) T < N      : (carry, borrow) = (0, 1): we want T
-     * 2) N <= T < R : (carry, borrow) = (0, 0): we want X
-     * 3) T >= R     : (carry, borrow) = (1, 1): we want X
-     *
-     * and (carry, borrow) = (1, 0) can't happen.
-     *
-     * So the correct return value is already in X if (carry ^ borrow) = 0,
-     * but is in (the lower AN_limbs limbs of) T if (carry ^ borrow) = 1.
-     */
-    Crypto_ct_memcpy_if(
-        Crypto_ct_bool(carry ^ borrow),
-        (unsigned char*)X,
-        (unsigned char*)T,
-        NULL_PTR,
-        AN_limbs * sizeof(uint32));
-}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6436,13 +2508,15 @@ void Crypto_mpi_core_montmul(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int rsa_unblind(Crypto_mpi* T, Crypto_mpi* Vf, const Crypto_mpi* N)
 {
-    int          ret    = E_NOT_OK;
-    const uint32 mm     = Crypto_mpi_core_montmul_init(N->p);
-    const uint32 nlimbs = N->n;
-    const uint32 tlimbs = Crypto_mpi_core_montmul_working_limbs(nlimbs);
-    Crypto_mpi   RR, M_T;
+    int                   ret    = E_NOT_OK;
+    const Crypto_mpi_uint mm     = Crypto_mpi_core_montmul_init(N->p);
+    const uint32          nlimbs = N->n;
+    const uint32          tlimbs = Crypto_mpi_core_montmul_working_limbs(nlimbs);
+    Crypto_mpi            RR, M_T;
 
     Crypto_mpi_init(&RR);
     Crypto_mpi_init(&M_T);
@@ -6470,6 +2544,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #define RSA_EXPONENT_BLINDING 28
 
@@ -6489,6 +2565,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_private(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -6677,6 +2755,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6693,6 +2773,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     mgf_mask(unsigned char* dst, uint32 dlen, unsigned char* src, uint32 slen, Crypto_AlgorithmFamilyType md_alg)
 {
@@ -6713,7 +2795,7 @@ CRYPTO_62_LOCAL int
     }
 
     (void)IStdLib_MemSet(&md_ctx, 0, sizeof(Crypto_Md_Context_t));
-    if ((ret = Crypto_md_setup(&md_ctx, md_info)) != 0)
+    if ((ret = Crypto_md_setup(&md_ctx, md_info, 0)) != 0)
     {
         goto exit;
     }
@@ -6762,9 +2844,11 @@ CRYPTO_62_LOCAL int
     }
 
 exit:
-
+    Crypto_md_free(&md_ctx);
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6781,6 +2865,8 @@ exit:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int hash_mprime(
     const unsigned char*       hash,
     uint32                     hlen,
@@ -6801,7 +2887,7 @@ CRYPTO_62_LOCAL int hash_mprime(
     }
 
     (void)IStdLib_MemSet(&md_ctx, 0, sizeof(Crypto_Md_Context_t));
-    if ((ret = Crypto_md_setup(&md_ctx, md_info)) != 0)
+    if ((ret = Crypto_md_setup(&md_ctx, md_info, 0)) != 0)
     {
         goto exit;
     }
@@ -6830,6 +2916,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6844,6 +2932,8 @@ exit:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     compute_hash(Crypto_AlgorithmFamilyType md_alg, const unsigned char* input, uint32 ilen, unsigned char* output)
 {
@@ -6857,6 +2947,8 @@ CRYPTO_62_LOCAL int
 
     return Crypto_md(md_info, input, ilen, output);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6883,6 +2975,8 @@ CRYPTO_62_LOCAL int
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsaes_oaep_encrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -6938,7 +3032,6 @@ int Crypto_rsa_rsaes_oaep_encrypt(
             return ret;
         }
     }
-
     p += hlen;
     p += olen - 2 * hlen - 2 - ilen;
     *p++ = 1;
@@ -6963,6 +3056,8 @@ int Crypto_rsa_rsaes_oaep_encrypt(
 
     return Crypto_rsa_public(ctx, output, output);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -6986,6 +3081,8 @@ int Crypto_rsa_rsaes_oaep_encrypt(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsaes_pkcs1_v15_encrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7043,6 +3140,8 @@ int Crypto_rsa_rsaes_pkcs1_v15_encrypt(
 
     return Crypto_rsa_public(ctx, output, output);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif /* CRYPTO_PKCS1_V15 */
 
 /******************************************************************************/
@@ -7062,6 +3161,8 @@ int Crypto_rsa_rsaes_pkcs1_v15_encrypt(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_pkcs1_encrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7104,6 +3205,8 @@ int Crypto_rsa_pkcs1_encrypt(
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7133,6 +3236,8 @@ int Crypto_rsa_pkcs1_encrypt(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsaes_oaep_decrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7269,6 +3374,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7294,6 +3401,8 @@ cleanup:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsaes_pkcs1_v15_decrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7334,6 +3443,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7353,6 +3464,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_pkcs1_decrypt(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7369,6 +3482,7 @@ int Crypto_rsa_pkcs1_decrypt(
     {
     case CRYPTO_ALGOMODE_RSAES_PKCS1_v1_5:
         ret = Crypto_rsa_rsaes_pkcs1_v15_decrypt(ctx, f_rng, p_rng, olen, input, output, output_max_len);
+
         break;
     case CRYPTO_ALGOMODE_RSAES_OAEP:
         ret = Crypto_rsa_rsaes_oaep_decrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, olen, input, output, output_max_len);
@@ -7378,6 +3492,8 @@ int Crypto_rsa_pkcs1_decrypt(
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7397,6 +3513,8 @@ int Crypto_rsa_pkcs1_decrypt(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int rsa_rsassa_pss_sign_no_mode_check(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7529,6 +3647,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pss_sign_no_mode_check(
 
     return Crypto_rsa_private(ctx, f_rng, p_rng, sig, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7548,6 +3668,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pss_sign_no_mode_check(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int rsa_rsassa_pss_sign(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7568,6 +3690,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pss_sign(
     }
     return rsa_rsassa_pss_sign_no_mode_check(ctx, f_rng, p_rng, md_alg, hashlen, hash, saltlen, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7588,6 +3712,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pss_sign(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_sign_no_mode_check(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7599,6 +3725,8 @@ int Crypto_rsa_rsassa_pss_sign_no_mode_check(
 {
     return rsa_rsassa_pss_sign_no_mode_check(ctx, f_rng, p_rng, md_alg, hashlen, hash, CRYPTO_RSA_SALT_LEN_ANY, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7620,6 +3748,8 @@ int Crypto_rsa_rsassa_pss_sign_no_mode_check(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_sign_ext(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7632,6 +3762,8 @@ int Crypto_rsa_rsassa_pss_sign_ext(
 {
     return rsa_rsassa_pss_sign(ctx, f_rng, p_rng, md_alg, hashlen, hash, saltlen, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7650,6 +3782,8 @@ int Crypto_rsa_rsassa_pss_sign_ext(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_sign(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7661,6 +3795,8 @@ int Crypto_rsa_rsassa_pss_sign(
 {
     return rsa_rsassa_pss_sign(ctx, f_rng, p_rng, md_alg, hashlen, hash, CRYPTO_RSA_SALT_LEN_ANY, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7679,6 +3815,8 @@ int Crypto_rsa_rsassa_pss_sign(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int rsa_rsassa_pkcs1_v15_encode(
     Crypto_AlgorithmFamilyType md_alg,
     unsigned int               hashlen,
@@ -7804,6 +3942,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pkcs1_v15_encode(
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7817,6 +3957,8 @@ CRYPTO_62_LOCAL int rsa_rsassa_pkcs1_v15_encode(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_oid_get_oid_by_md(Crypto_AlgorithmFamilyType md_alg, const char** oid, uint32* olen)
 {
     const Crypto_oid_md_alg_t* cur = (oid_md_alg);
@@ -7832,6 +3974,8 @@ CRYPTO_62_LOCAL int Crypto_oid_get_oid_by_md(Crypto_AlgorithmFamilyType md_alg, 
     }
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7850,6 +3994,8 @@ CRYPTO_62_LOCAL int Crypto_oid_get_oid_by_md(Crypto_AlgorithmFamilyType md_alg, 
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pkcs1_v15_sign(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7921,6 +4067,8 @@ cleanup:
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7940,6 +4088,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_pkcs1_sign(
     Crypto_rsa_context* ctx,
     Std_ReturnType (*f_rng)(void*, unsigned char*, uint32),
@@ -7966,6 +4116,8 @@ int Crypto_rsa_pkcs1_sign(
         return E_NOT_OK;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -7986,6 +4138,8 @@ int Crypto_rsa_pkcs1_sign(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_verify_ext(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
@@ -8115,6 +4269,8 @@ int Crypto_rsa_rsassa_pss_verify_ext(
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -8131,6 +4287,8 @@ int Crypto_rsa_rsassa_pss_verify_ext(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pss_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
@@ -8148,6 +4306,8 @@ int Crypto_rsa_rsassa_pss_verify(
 
     return Crypto_rsa_rsassa_pss_verify_ext(ctx, md_alg, hashlen, hash, mgf1_hash_id, CRYPTO_RSA_SALT_LEN_ANY, sig);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -8164,6 +4324,8 @@ int Crypto_rsa_rsassa_pss_verify(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_rsassa_pkcs1_v15_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
@@ -8239,6 +4401,8 @@ cleanup:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -8256,6 +4420,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_pkcs1_verify(
     Crypto_rsa_context*        ctx,
     Crypto_AlgorithmFamilyType md_alg,
@@ -8280,6 +4446,8 @@ int Crypto_rsa_pkcs1_verify(
         return E_NOT_OK;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -8292,6 +4460,8 @@ int Crypto_rsa_pkcs1_verify(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 int Crypto_rsa_copy(Crypto_rsa_context* dst, const Crypto_rsa_context* src)
 {
     int ret = E_NOT_OK;
@@ -8322,9 +4492,14 @@ int Crypto_rsa_copy(Crypto_rsa_context* dst, const Crypto_rsa_context* src)
     dst->hash_id = src->hash_id;
 
 cleanup:
-
+    if (ret != 0)
+    {
+        Crypto_rsa_free(dst);
+    }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /*
  * Example RSA-1024 keypair, for test purposes
@@ -8380,6 +4555,8 @@ cleanup:
  * Return              Std_ReturnType
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType myrand(void* rng_state, unsigned char* output, uint32 len)
 {
     uint32 i;
@@ -8396,6 +4573,8 @@ CRYPTO_62_LOCAL Std_ReturnType myrand(void* rng_state, unsigned char* output, ui
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the RSA Encrypt process and output cipher text.
@@ -8409,17 +4588,20 @@ CRYPTO_62_LOCAL Std_ReturnType myrand(void* rng_state, unsigned char* output, ui
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_Rsa_EncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam)
 {
     Std_ReturnType     ret = E_NOT_OK;
     Crypto_rsa_context rsa;
 
-    uint8* rsa_plaintext  = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-    uint8* rsa_ciphertext = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr);
-    uint32 inLen          = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32 keylength      = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
-    uint8* key;
+    uint8*  rsa_plaintext  = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    uint8*  rsa_ciphertext = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr);
+    uint32  inLen          = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32  keylength      = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
+    uint32* ciphertextLen  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint8*  key;
     key = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
 
     Crypto_rsa_init(&rsa, mode, secondaryFam);
@@ -8432,27 +4614,16 @@ Std_ReturnType
 
     if (ret == E_OK)
     {
-        ret = Crypto_rsa_pkcs1_encrypt(&rsa, myrand, NULL_PTR, inLen, rsa_plaintext, rsa_ciphertext);
+        ret            = Crypto_rsa_pkcs1_encrypt(&rsa, myrand, NULL_PTR, inLen, rsa_plaintext, rsa_ciphertext);
+        *ciphertextLen = rsa.len;
     }
     (void)IStdLib_MemSet(key, 0, keylength);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
-    Crypto_mpi_free(&rsa.Vi);
-    Crypto_mpi_free(&rsa.Vf);
-    Crypto_mpi_free(&rsa.RN);
-    Crypto_mpi_free(&rsa.D);
-    Crypto_mpi_free(&rsa.Q);
-    Crypto_mpi_free(&rsa.P);
-    Crypto_mpi_free(&rsa.E);
-    Crypto_mpi_free(&rsa.N);
-#if !defined(CRYPTO_RSA_NO_CRT)
-    Crypto_mpi_free(&rsa.RQ);
-    Crypto_mpi_free(&rsa.RP);
-    Crypto_mpi_free(&rsa.QP);
-    Crypto_mpi_free(&rsa.DQ);
-    Crypto_mpi_free(&rsa.DP);
-#endif /* CRYPTO_RSA_NO_CRT */
+    Crypto_rsa_free(&rsa);
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the RSA DEcrypt process and output cipher text.
@@ -8466,11 +4637,14 @@ Std_ReturnType
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_Rsa_DecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam)
 {
-    Std_ReturnType     ret = E_NOT_OK;
-    Crypto_rsa_context rsa;
+    Std_ReturnType ret = E_NOT_OK;
+
+    Crypto_rsa_context rsa_ctx;
     uint32             keylength = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
     uint8*             key;
     key                    = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
@@ -8478,36 +4652,27 @@ Std_ReturnType
     uint8*  rsa_ciphertext = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     uint8*  rsa_plaintext  = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr);
 
-    Crypto_rsa_init(&rsa, mode, secondaryFam);
+    Crypto_rsa_init(&rsa_ctx, mode, secondaryFam);
+
     ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &keylength);
     if (ret == E_OK)
     {
-        ret     = Crypto_rsa_parse_key(&rsa, key, keylength);
-        rsa.len = Crypto_mpi_size(&rsa.N);
+        ret         = Crypto_rsa_parse_key(&rsa_ctx, key, keylength);
+        rsa_ctx.len = Crypto_mpi_size(&rsa_ctx.N);
     }
     if (ret == E_OK)
     {
-        ret = Crypto_rsa_pkcs1_decrypt(&rsa, myrand, NULL_PTR, outLen, rsa_ciphertext, rsa_plaintext, keylength);
+        ret = Crypto_rsa_pkcs1_decrypt(&rsa_ctx, myrand, NULL_PTR, outLen, rsa_ciphertext, rsa_plaintext, keylength);
     }
     (void)IStdLib_MemSet(key, 0, keylength);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
-    Crypto_mpi_free(&rsa.Vi);
-    Crypto_mpi_free(&rsa.Vf);
-    Crypto_mpi_free(&rsa.RN);
-    Crypto_mpi_free(&rsa.D);
-    Crypto_mpi_free(&rsa.Q);
-    Crypto_mpi_free(&rsa.P);
-    Crypto_mpi_free(&rsa.E);
-    Crypto_mpi_free(&rsa.N);
-#if !defined(CRYPTO_RSA_NO_CRT)
-    Crypto_mpi_free(&rsa.RQ);
-    Crypto_mpi_free(&rsa.RP);
-    Crypto_mpi_free(&rsa.QP);
-    Crypto_mpi_free(&rsa.DQ);
-    Crypto_mpi_free(&rsa.DP);
-#endif /* CRYPTO_RSA_NO_CRT */
+
+    Crypto_rsa_free(&rsa_ctx);
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the RSA signature generate process and output signature text.
@@ -8521,6 +4686,8 @@ Std_ReturnType
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmModeType   mode,
@@ -8528,98 +4695,120 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
 {
     Std_ReturnType ret = E_NOT_OK;
 
-    Crypto_rsa_context rsa;
+    /**0. variable definition */
+    Crypto_rsa_context      rsa_ctx;
+    Crypto_Md_Context_t     md_ctx;
+    const Crypto_Md_Info_t* mdInfo       = NULL_PTR;
+    uint8*                  rsaSignature = NULL_PTR;
+    uint32                  sigLen;
+    uint8*                  key      = NULL_PTR;
+    uint8*                  mdOutput = NULL_PTR;
+    uint32                  mdSize;
+    const uint8*            inputPtr  = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    uint8*                  outputPtr = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr);
+    uint32                  inputLen  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32                  outBufLen = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint32 keyLength     = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
+    uint32 rsa_init_flag = CRYPTO_CONST_0;
 
-    Crypto_Md_Context_t     ctx;
-    const Crypto_Md_Info_t* md_info;
-
-    const uint8* input    = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-    uint32       inputlen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-
-    uint32 keylength     = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
-    uint8* key           = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint8* output        = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint8* rsa_signature = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint32 outputlen     = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
-
-    (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Md_Context_t));
-    Crypto_rsa_init(&rsa, mode, secondaryFam);
-    md_info = Crypto_Md_info_from_type(secondaryFam);
-    ret     = Crypto_md_setup(&ctx, md_info);
-    if (ret == E_OK)
+    if (inputPtr == NULL_PTR || outputPtr == NULL_PTR || outBufLen <= 0 || inputLen <= 0 || keyLength <= 0)
     {
-        ret = Crypto_Md_Start(&ctx);
-    }
-    if (ret == E_OK)
-    {
-        ret = Crypto_Md_Update(&ctx, input, inputlen);
-    }
-    if (ret == E_OK)
-    {
-        ret = Crypto_Md_Finish(&ctx, output);
-        (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
-        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
-#if (CRYPTO_SERVICE_HASH == STD_ON)
-        Crypto_Md_Free(&ctx);
-#endif
-    }
-    if (ret == E_OK)
-    {
-        ret = Crypto_62_KeyElementGet(
-            Crypto_62_StoredJob[objectId].cryptoKeyId,
-            CRYPTO_KE_SIGNATURE_KEY,
-            key,
-            &keylength);
-
-        /*need to analyze private key*/
-        if (ret == E_OK)
-        {
-            ret = Crypto_rsa_parse_key(&rsa, key, keylength);
-        }
-        if (ret == E_OK)
-        {
-            ret = Crypto_rsa_pkcs1_sign(&rsa, myrand, NULL_PTR, secondaryFam, ctx.md_info->size, output, rsa_signature);
-        }
-    }
-    (void)IStdLib_MemCpy(
-        (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr),
-        rsa_signature,
-        outputlen);
-
-    (void)IStdLib_MemSet(key, 0, keylength);
-    (void)IStdLib_MemSet(output, 0, keylength);
-    (void)IStdLib_MemSet(rsa_signature, 0, keylength);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, output);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, rsa_signature);
-
-    if (ctx.hmac_ctx != NULL)
-    {
-        if (ctx.md_info != NULL)
-        {
-            (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
-        }
-        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
-        ctx.hmac_ctx = NULL;
+        ret = E_NOT_OK;
+        goto exit;
     }
 
-    Crypto_mpi_free(&rsa.Vi);
-    Crypto_mpi_free(&rsa.Vf);
-    Crypto_mpi_free(&rsa.RN);
-    Crypto_mpi_free(&rsa.D);
-    Crypto_mpi_free(&rsa.Q);
-    Crypto_mpi_free(&rsa.P);
-    Crypto_mpi_free(&rsa.E);
-    Crypto_mpi_free(&rsa.N);
-#if !defined(CRYPTO_RSA_NO_CRT)
-    Crypto_mpi_free(&rsa.RQ);
-    Crypto_mpi_free(&rsa.RP);
-    Crypto_mpi_free(&rsa.QP);
-    Crypto_mpi_free(&rsa.DQ);
-    Crypto_mpi_free(&rsa.DP);
-#endif /* CRYPTO_RSA_NO_CRT */
+    /**1. compute digest */
+    (void)IStdLib_MemSet(&md_ctx, 0, sizeof(Crypto_Md_Context_t));
+    mdInfo = Crypto_Md_info_from_type(secondaryFam);
+    ret    = Crypto_md_setup(&md_ctx, mdInfo, 0);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+    mdSize   = md_ctx.md_info->size;
+    mdOutput = IStdLib_MemHeapMalloc(Crypto_62_MemPool, mdSize);
+    ret      = Crypto_Md_Start(&md_ctx);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+    ret = Crypto_Md_Update(&md_ctx, inputPtr, inputLen);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+    ret = Crypto_Md_Finish(&md_ctx, mdOutput);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    /**2. get key */
+    key = (uint8*)IStdLib_MemHeapCalloc(
+        Crypto_62_MemPool,
+        1u,
+        keyLength); // should assign according to the selected length passed in
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_SIGNATURE_KEY, key, &keyLength);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    /**3. compute signature */
+    Crypto_rsa_init(&rsa_ctx, mode, secondaryFam);
+    rsa_init_flag = CRYPTO_CONST_1;
+    ret           = Crypto_rsa_parse_key(&rsa_ctx, key, keyLength);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    sigLen       = rsa_ctx.len;
+    rsaSignature = IStdLib_MemHeapMalloc(Crypto_62_MemPool, sigLen);
+    ret          = Crypto_rsa_pkcs1_sign(&rsa_ctx, myrand, NULL_PTR, secondaryFam, mdSize, mdOutput, rsaSignature);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    /**4. return result */
+    if (ret == E_OK && outBufLen >= sigLen)
+    {
+        outBufLen = sigLen;
+        (void)IStdLib_MemCpy(outputPtr, rsaSignature, outBufLen);
+    }
+    else
+    {
+        ret = E_NOT_OK; // buffer len not enough
+        (void)IStdLib_MemCpy(outputPtr, rsaSignature, outBufLen);
+    }
+
+exit:
+    if (rsaSignature != NULL_PTR)
+    {
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, rsaSignature);
+    }
+    if (mdOutput != NULL_PTR)
+    {
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, mdOutput);
+    }
+    if (key != NULL_PTR)
+    {
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
+    }
+    if (md_ctx.md_ctx != NULL_PTR)
+    {
+        Crypto_md_free(&md_ctx);
+    }
+    if (rsa_init_flag == CRYPTO_CONST_1)
+    {
+        Crypto_rsa_free(&rsa_ctx);
+    }
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the RSA signature verify process and output result.
@@ -8633,50 +4822,83 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
     uint32                     objectId,
     Crypto_AlgorithmModeType   mode,
     Crypto_AlgorithmFamilyType secondaryFam)
 {
     Std_ReturnType ret = E_NOT_OK;
-
-    uint32              keylength = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
-    Crypto_Md_Context_t ctx;
-    Crypto_rsa_context  rsa;
+    /**0. variable definition */
+    Crypto_Md_Context_t     md_ctx;
+    Crypto_rsa_context      rsa_ctx;
     const Crypto_Md_Info_t* md_info;
-    uint8*       rsa_Signature = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputPtr;
-    const uint8* input         = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-    uint32       inLen         = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32                  mdSize;
+    uint8*                  key      = NULL_PTR;
+    uint8*                  mdOutput = NULL_PTR;
+    uint8*       inputRsaSigPtr      = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputPtr;
+    const uint8* inputPtr            = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    uint32       inputLen            = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32       keyLength = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
 
-    uint8* key  = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    md_info     = Crypto_Md_info_from_type(secondaryFam);
-    ret         = Crypto_md_setup(&ctx, md_info);
-    uint8* hash = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, ctx.md_info->size);
-    if (ret == E_OK)
+    if (inputPtr == NULL_PTR || inputRsaSigPtr == NULL_PTR || inputLen <= 0 || keyLength <= 0)
     {
-        ret = Crypto_Md_Start(&ctx);
-    }
-    if (ret == E_OK)
-    {
-        ret = Crypto_Md_Update(&ctx, input, inLen);
-    }
-    if (ret == E_OK)
-    {
-        ret = Crypto_Md_Finish(&ctx, hash);
+        ret = E_NOT_OK;
+        goto exit;
     }
 
-    Crypto_rsa_init(&rsa, mode, secondaryFam);
+    /**1. compute digest */
+    md_info  = Crypto_Md_info_from_type(secondaryFam);
+    mdSize   = md_info->size;
+    mdOutput = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, mdSize);
 
-    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_SIGNATURE_KEY, key, &keylength);
-    if (ret == E_OK)
+    ret = Crypto_md_setup(&md_ctx, md_info, 0);
+    if (ret != E_OK)
     {
-        ret = Crypto_rsa_parse_pubkey(&rsa, key, keylength);
+        goto exit;
     }
-    if (ret == E_OK)
+    ret = Crypto_Md_Start(&md_ctx);
+    if (ret != E_OK)
     {
-        ret = Crypto_rsa_pkcs1_verify(&rsa, secondaryFam, ctx.md_info->size, hash, rsa_Signature);
+        goto exit;
+    }
+    ret = Crypto_Md_Update(&md_ctx, inputPtr, inputLen);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+    ret = Crypto_Md_Finish(&md_ctx, mdOutput);
+    if (ret != E_OK)
+    {
+        goto exit;
     }
 
+    /**2. get key */
+    key = (uint8*)IStdLib_MemHeapCalloc(
+        Crypto_62_MemPool,
+        1u,
+        keyLength); // should assign according to the selected length passed in
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_SIGNATURE_KEY, key, &keyLength);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    /**3. rsa signature verify*/
+    Crypto_rsa_init(&rsa_ctx, mode, secondaryFam);
+    ret = Crypto_rsa_parse_pubkey(&rsa_ctx, key, keyLength);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+    ret = Crypto_rsa_pkcs1_verify(&rsa_ctx, secondaryFam, mdSize, mdOutput, inputRsaSigPtr);
+    if (ret != E_OK)
+    {
+        goto exit;
+    }
+
+    /**4. return result */
     if (E_OK == ret)
     {
         *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.verifyPtr) = CRYPTO_E_VER_OK;
@@ -8685,49 +4907,37 @@ Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
     {
         *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.verifyPtr) = CRYPTO_E_VER_NOT_OK;
     }
-    (void)IStdLib_MemSet(key, 0, keylength);
-    (void)IStdLib_MemSet(hash, 0, ctx.md_info->size);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, hash);
 
-    if (ctx.hmac_ctx != NULL)
+exit:
+    if (mdOutput != NULL_PTR)
     {
-        if (ctx.md_info != NULL)
-        {
-            (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
-        }
-        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
-        ctx.hmac_ctx = NULL;
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, mdOutput);
     }
+    if (key != NULL_PTR)
+    {
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
+    }
+    if (md_ctx.md_ctx != NULL_PTR)
+    {
+        Crypto_md_free(&md_ctx);
+    }
+    Crypto_rsa_free(&rsa_ctx);
 
-    Crypto_mpi_free(&rsa.Vi);
-    Crypto_mpi_free(&rsa.Vf);
-    Crypto_mpi_free(&rsa.RN);
-    Crypto_mpi_free(&rsa.D);
-    Crypto_mpi_free(&rsa.Q);
-    Crypto_mpi_free(&rsa.P);
-    Crypto_mpi_free(&rsa.E);
-    Crypto_mpi_free(&rsa.N);
-#if !defined(CRYPTO_RSA_NO_CRT)
-    Crypto_mpi_free(&rsa.RQ);
-    Crypto_mpi_free(&rsa.RP);
-    Crypto_mpi_free(&rsa.QP);
-    Crypto_mpi_free(&rsa.DQ);
-    Crypto_mpi_free(&rsa.DP);
-#endif /* CRYPTO_RSA_NO_CRT */
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #endif
 /* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 -- */
-/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 -- */
+/* PRQA S 1253,0288,0317,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277,4825 -- */
 /* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 -- */
 /* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 -- */
 /* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 -- */
 /* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 -- */
-/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 -- */
+/* PRQA S 3717,3762,3769,3772,3779,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 -- */
 /* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 -- */
 /* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 -- */
-/* PRQA S 2996,2992,2911,1503,2822,2896,2986 -- */
-/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 -- */
-/* PRQA S 2995,2997,2871,2990 -- */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,2996,2992,2911,1503,2822,2896,2986,2990 -- */
+/* PRQA S 2834,2982,2983,2955,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 -- */
+/* PRQA S 2995,2997,2871 -- */

@@ -244,6 +244,8 @@ DEM_LOCAL_INLINE uint32 Dem_GetEventDTC(Dem_EventIdType EventId);
 #if (                                                                                                     \
     (DEM_ENTRY_TRIGGER_ON_FDC_THRESHOLD == STD_ON) || (DEM_GENERAL_ED_TRIGGER_ON_FDC_THRESHOLD == STD_ON) \
     || (DEM_GENERAL_FF_TRIGGER_ON_FDC_THRESHOLD == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Updates event data due to exceeding a FDC threshold
  * @param[in]     EventId: Event ID
@@ -253,9 +255,13 @@ DEM_LOCAL_INLINE uint32 Dem_GetEventDTC(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCFdcTrip(Dem_EventIdType EventId, boolean FirstThisCycle);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Update event data 'maximum FDC since last clear'
  * @param[in]     EventId: Event ID
@@ -264,7 +270,11 @@ DEM_LOCAL void Dem_DTCFdcTrip(Dem_EventIdType EventId, boolean FirstThisCycle);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCUpdateFdcMax(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process DTC triggers on 'Passed' status report.
@@ -274,6 +284,8 @@ DEM_LOCAL void Dem_DTCUpdateFdcMax(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCPassedProcessDTCEffects(const Dem_DTCContextType* DTCContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculate DTC triggers
@@ -295,6 +307,8 @@ DEM_LOCAL_INLINE void Dem_DTCCalculateFailedEffects(Dem_DTCContextType* const DT
  */
 DEM_LOCAL_INLINE void Dem_DTCCalculateFailedEffectsOnStorage(Dem_DTCContextType* const DTCContext, uint8 Eventtriggers);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process Dtc storage into event memory
  * @param[in]     EventContext: The event context
@@ -304,6 +318,8 @@ DEM_LOCAL_INLINE void Dem_DTCCalculateFailedEffectsOnStorage(Dem_DTCContextType*
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCProcessStorage(Dem_EventContextType* EventContext, Dem_DTCContextType* DTCContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Due to excessive code duplication it was necessary to fall back to higher order functions. This
@@ -358,6 +374,8 @@ DEM_LOCAL_INLINE void Dem_DTCEnable(Dem_EventIdType EventId);
 #endif
 
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes the aging cycle for a DTC
  * @param[in]     EventId: Event ID
@@ -368,6 +386,8 @@ DEM_LOCAL_INLINE void Dem_DTCEnable(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCAgingCycle(Dem_EventIdType EventId, uint16 CycleCounter, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief Processes aging at the end of the DTC's operation cycle
@@ -431,6 +451,8 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the maximum fault detection counter this cycle of a combined event
  * @param[in]     GroupId: Group ID
@@ -440,6 +462,8 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL sint8 Dem_GetFDCMaxOfDTCCombined(Dem_CombinationNumType GroupId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 

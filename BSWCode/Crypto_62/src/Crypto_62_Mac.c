@@ -22,48 +22,49 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1505,2982,1505,1503,1532,2889,4446,4461,4544 ++ */                          /* VL_Crypto_62_General */
-
+/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863,2784 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434,4446,4461,4544 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1505,2982,1505,1503,1532,2889,2001,5209 ++ */ /* VL_QAC_Crypto */
 /* =================================================== inclusions =================================================== */
 
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_SERVICE_MAC == STD_ON)
+/*PRQA S 1753, 1501 ++ */ /*VL_Crypto_62_1753, VL_Crypto_62_1501*/
 #include "Crypto_62_Aes.h"
 #include "Crypto_62_Des.h"
 #include "Crypto_62_Hash.h"
 #include "Crypto_62_Mac.h"
+/*PRQA S 1753, 1501 -- */
 
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 #if (CRYPTO_ALGORITHMMODE_CMAC == STD_ON)
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Aes(Crypto_AESData* aes, uint8* key, uint8* k1, uint8* k2);
-CRYPTO_62_LOCAL void           Crypto_GenerateCmac_Aes(
-              Crypto_AESData* aes,
-              uint32          len,
-              const uint8*    add,
-              uint8*          macvalue,
-              uint8*          Key,
-              uint8*          k1,
-              uint8*          k2);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
+    Crypto_AESData* aes,
+    uint32          len,
+    const uint8*    add,
+    uint8*          macvalue,
+    uint8*          Key,
+    uint8*          k1,
+    uint8*          k2);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
     Crypto_Des3Data* Ctx,
     uint32           len,
@@ -72,7 +73,14 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
     uint8*           Key,
     uint8*           k1,
     uint8*           k2);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx, uint8* key, uint8* k1, uint8* k2);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 #endif
 /* ============================================ internal data definitions =========================================== */
@@ -93,6 +101,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx,
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Leftshift(uint32 len, uint8* add, uint8* des)
 {
     uint32 i;
@@ -102,6 +112,8 @@ void Crypto_Leftshift(uint32 len, uint8* add, uint8* des)
     }
     des[len - 1] = add[len - 1] << 1;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #if (CRYPTO_ALGORITHMMODE_CMAC == STD_ON)
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
 /******************************************************************************/
@@ -120,6 +132,8 @@ void Crypto_Leftshift(uint32 len, uint8* add, uint8* des)
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Aes(Crypto_AESData* aes, uint8* key, uint8* k1, uint8* k2)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -184,6 +198,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Aes(Crypto_AESData* aes, u
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
@@ -202,6 +218,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Aes(Crypto_AESData* aes, u
  */
 /******************************************************************************/
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx, uint8* key, uint8* k1, uint8* k2)
 {
     Std_ReturnType ret;
@@ -227,7 +245,9 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx,
         0x00U,
         0x1BU};
 
+    /* PRQA S 2784 ++ */ /* VL_QAC_Crypto */
     Crypto_Des3_Set3key_Enc(ctx, key);
+    /* PRQA S 2784 -- */
 
     ret = Crypto_3Des_Crypt_Cmac(ctx, CRYPTO_MODE_ENCRYPT, 8, plain, c0);
     if (c0[0] < 0x80) // generate k1
@@ -251,6 +271,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx,
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
@@ -270,6 +292,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Generate_Subkey_Des3(Crypto_Des3Data* ctx,
  */
 /******************************************************************************/
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
     Crypto_AESData* aes,
     uint32          len,
@@ -279,7 +303,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
     uint8*          k1,
     uint8*          k2)
 {
-    int   i, block;
+    uint8 i, block;
     uint8 Result[CRYPTO_CONST_128];
     uint8 Blocktemp[CRYPTO_CONST_128];
     (void)IStdLib_MemSet(Result, 0, 128);
@@ -303,7 +327,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
         if (len == 0)
         {
             Crypto_Aes_Setkey_Enc(aes, Key, 128); // load mac key
-            block        = 1; /* PRQA S 2983  */  /* VL_Crypto_62_General */
+            block        = 1; /* PRQA S 2983  */  /* VL_QAC_Crypto */
             Blocktemp[0] = 0x80;                  // padding the first bit with 1
             Crypto_Xor(16, Blocktemp, k2, Blocktemp);
             (void)Crypto_Aes_Crypt_Cmac(aes, CRYPTO_MODE_ENCRYPT, 16, Blocktemp, macvalue);
@@ -321,7 +345,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
             // the last block padding
             for (i = 0; i < remain; i++)
             {
-                Blocktemp[i] = add[(block - 1) * 16 + i];
+                Blocktemp[i] = add[(block - 1) * 16 + i]; /* PRQA S 1850 */ /* VL_QAC_Crypto */
             }
             Blocktemp[remain] = 0x80;
             for (i = remain + 1; i < 16; i++)
@@ -336,6 +360,8 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
         }
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
@@ -355,6 +381,8 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
  */
 /******************************************************************************/
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
     Crypto_Des3Data* Ctx,
     uint32           len,
@@ -364,7 +392,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
     uint8*           k1,
     uint8*           k2)
 {
-    int   i, block;
+    uint8 i, block;
     uint8 Result[CRYPTO_CONST_128];
     uint8 Blocktemp[CRYPTO_CONST_128];
     (void)IStdLib_MemSet(Result, 0, 128);
@@ -372,7 +400,9 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
 
     if (len % 8 == 0 && len != 0)
     {
-        Crypto_Des3_Set3key_Enc(Ctx, (const uint8*)Key); // load mac key
+        /* PRQA S 2784 ++ */               /* VL_QAC_Crypto */
+        Crypto_Des3_Set3key_Enc(Ctx, Key); // load mac key
+        /* PRQA S 2784 -- */
         block = len / 8;
         for (i = 0; i < block - 1; i++)
         {
@@ -387,15 +417,19 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
     {
         if (len == 0)
         {
-            Crypto_Des3_Set3key_Enc(Ctx, Key);   // load mac key
-            block        = 1; /* PRQA S 2983  */ /* VL_Crypto_62_General */
+            /* PRQA S 2784 ++ */               /* VL_QAC_Crypto */
+            Crypto_Des3_Set3key_Enc(Ctx, Key); // load mac key
+            /* PRQA S 2784 -- */
+            block        = 1; /* PRQA S 2983  */ /* VL_QAC_Crypto */
             Blocktemp[0] = 0x80;                 // padding the first bit with 1
             Crypto_Xor(8, Blocktemp, k2, Blocktemp);
             (void)Crypto_3Des_Crypt_Cmac(Ctx, CRYPTO_MODE_ENCRYPT, 8U, Blocktemp, macvalue);
         }
         else
         {
+            /* PRQA S 2784 ++ */               /* VL_QAC_Crypto */
             Crypto_Des3_Set3key_Enc(Ctx, Key); // load mac key
+            /* PRQA S 2784 -- */
             uint8 remain = len % 8;
             block        = len / 8 + 1;
             for (i = 0; i < block - 1; i++)
@@ -406,7 +440,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
             // the last block padding
             for (i = 0; i < remain; i++)
             {
-                Blocktemp[i] = add[(block - 1) * 8 + i];
+                Blocktemp[i] = add[(block - 1) * 8 + i]; /* PRQA S 1850 */ /* VL_QAC_Crypto */
             }
             Blocktemp[remain] = 0x80;
             for (i = remain + 1; i < 8; i++)
@@ -421,6 +455,8 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
         }
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 /******************************************************************************/
 /*
@@ -436,12 +472,14 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType ret                       = E_NOT_OK;
     uint8          k1[CRYPTO_CONST_24]       = {0X00};
     uint8          k2[CRYPTO_CONST_24]       = {0X00};
-    uint8          key[CRYPTO_CONST_24]      = {0X00};
+    uint8*         key                       = NULL_PTR;
     uint8          macValue[CRYPTO_CONST_24] = {0X00};
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     Crypto_AESData aes;
@@ -449,7 +487,7 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     Crypto_Des3Data ctx;
 #endif
-    uint32       keylength     = 24u;
+    uint32       keylength     = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
     uint32       inputlength   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     const uint8* add           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
     uint32       Verifylength  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputLength;
@@ -460,17 +498,22 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Des3Data));
 #endif
-    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_MAC_KEY, &key[0], &keylength);
+    key = (uint8*)IStdLib_MemHeapMalloc(Crypto_62_MemPool, keylength);
+    if (key == NULL_PTR)
+    {
+        return E_NOT_OK;
+    }
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_MAC_KEY, key, &keylength);
 
     if (E_OK == ret)
     {
         if (algorithmfamily == CRYPTO_ALGOFAM_AES)
         {
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
-            ret = Crypto_Generate_Subkey_Aes(&aes, &key[0], k1, k2);
+            ret = Crypto_Generate_Subkey_Aes(&aes, key, k1, k2);
             if (E_OK == ret)
             {
-                Crypto_GenerateCmac_Aes(&aes, inputlength, add, macValue, &key[0], k1, k2);
+                Crypto_GenerateCmac_Aes(&aes, inputlength, add, macValue, key, k1, k2);
             }
 #else
             ret = E_NOT_OK;
@@ -479,7 +522,7 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
         else if (algorithmfamily == CRYPTO_ALGOFAM_3DES)
         {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-            ret = Crypto_Generate_Subkey_Des3(&ctx, &key[0], k1, k2);
+            ret = Crypto_Generate_Subkey_Des3(&ctx, key, k1, k2);
             if (E_OK == ret)
             {
                 Crypto_GenerateCmac_3Des(&ctx, inputlength, add, macValue, key, k1, k2);
@@ -503,8 +546,13 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
             *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.verifyPtr) = CRYPTO_E_VER_NOT_OK;
         }
     }
+    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function generate the macvalue.
@@ -519,14 +567,17 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType ret                       = E_NOT_OK;
     uint8          k1[CRYPTO_CONST_24]       = {0X00};
     uint8          k2[CRYPTO_CONST_24]       = {0X00};
-    uint8          key[CRYPTO_CONST_24]      = {0X00};
+    uint8*         key                       = NULL_PTR;
     uint8          macValue[CRYPTO_CONST_24] = {0X00};
     uint32         inputlength               = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint8*         output                    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
     uint32*        outputlength              = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     Crypto_AESData aes;
@@ -534,7 +585,7 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     Crypto_Des3Data ctx;
 #endif
-    uint32       keylength = 24u;
+    uint32       keylength = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
     const uint8* add       = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     (void)IStdLib_MemSet(&aes, 0, sizeof(Crypto_AESData));
@@ -542,23 +593,31 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Des3Data));
 #endif
-    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_MAC_KEY, &key[0], &keylength);
+    key = (uint8*)IStdLib_MemHeapMalloc(Crypto_62_MemPool, keylength);
+    if (key == NULL_PTR)
+    {
+        return E_NOT_OK;
+    }
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_MAC_KEY, key, &keylength);
 
     if (E_OK == ret)
     {
         if (algorithmfamily == CRYPTO_ALGOFAM_AES)
         {
-            if (*outputlength < 16u)
-            {
-                return E_NOT_OK;
-            }
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
-            ret = Crypto_Generate_Subkey_Aes(&aes, &key[0], k1, k2);
+            ret = Crypto_Generate_Subkey_Aes(&aes, key, k1, k2);
             if (E_OK == ret)
             {
-                Crypto_GenerateCmac_Aes(&aes, inputlength, add, macValue, &key[0], k1, k2);
+                Crypto_GenerateCmac_Aes(&aes, inputlength, add, macValue, key, k1, k2);
+            }
+            if (*outputlength >= 16u)
+            {
                 *outputlength = 16u;
-                (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, macValue, 16u);
+                (void)IStdLib_MemCpy(output, macValue, 16u);
+            }
+            else
+            {
+                (void)IStdLib_MemCpy(output, macValue, *outputlength);
             }
 #else
             ret = E_NOT_OK;
@@ -566,20 +625,20 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
         }
         else if (algorithmfamily == CRYPTO_ALGOFAM_3DES)
         {
-            if (*outputlength < 8u)
-            {
-                return E_NOT_OK;
-            }
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-            ret = Crypto_Generate_Subkey_Des3(&ctx, &key[0], k1, k2);
+            ret = Crypto_Generate_Subkey_Des3(&ctx, key, k1, k2);
             if (E_OK == ret)
             {
                 Crypto_GenerateCmac_3Des(&ctx, inputlength, add, macValue, key, k1, k2);
+            }
+            if (*outputlength >= 8u)
+            {
                 *outputlength = 8u;
-                (void)IStdLib_MemCpy(
-                    Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
-                    macValue,
-                    *outputlength);
+                (void)IStdLib_MemCpy(output, macValue, 8u);
+            }
+            else
+            {
+                (void)IStdLib_MemCpy(output, macValue, *outputlength);
             }
 #else
             ret = E_NOT_OK;
@@ -591,10 +650,14 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
         }
     }
 
+    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
+
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
-#if (CRYPTO_ALGORITHMMODE_HMAC == STD_ON)
+
 /******************************************************************************/
 /*
  * Brief               This function sets the HMAC key and prepares to authenticate a new message.
@@ -610,13 +673,15 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
-Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, uint8* key, uint32 keylen)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, const uint8* key, uint32 keylen)
 {
     Std_ReturnType ret = E_NOT_OK;
     uint8          sum[CRYPTO_MD_MAX_SIZE];
     uint8 *        ipad, *opad;
 
-    if (ctx == NULL_PTR || ctx->md_info == NULL_PTR || ctx->hmac_ctx == NULL_PTR)
+    if ((ctx == NULL_PTR) || (ctx->md_info == NULL_PTR) || (ctx->hmac_ctx == NULL_PTR))
     {
         return E_NOT_OK;
     }
@@ -657,10 +722,12 @@ Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, uint8* key, u
         goto cleanup;
     }
 
-cleanup:
+cleanup: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function feeds an input buffer into an ongoing HMAC computation.
@@ -675,15 +742,19 @@ cleanup:
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac_Update(Crypto_Md_Context_t* ctx, const uint8* input, uint32 ilen)
 {
-    if (ctx == NULL_PTR || ctx->md_info == NULL_PTR || ctx->hmac_ctx == NULL_PTR)
+    if ((ctx == NULL_PTR) || (ctx->md_info == NULL_PTR) || (ctx->hmac_ctx == NULL_PTR))
     {
         return E_NOT_OK;
     }
 
     return Crypto_Md_Update(ctx, input, ilen);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function finishes the HMAC operation, and writes
@@ -698,13 +769,15 @@ Std_ReturnType Crypto_GenerateHmac_Update(Crypto_Md_Context_t* ctx, const uint8*
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac_Finish(Crypto_Md_Context_t* ctx, uint8* output)
 {
     Std_ReturnType ret = E_NOT_OK;
     uint8          tmp[CRYPTO_CONST_64];
     uint8*         opad;
 
-    if (ctx == NULL_PTR || ctx->md_info == NULL_PTR || ctx->hmac_ctx == NULL_PTR)
+    if ((ctx == NULL_PTR) || (ctx->md_info == NULL_PTR) || (ctx->hmac_ctx == NULL_PTR))
     {
         return E_NOT_OK;
     }
@@ -732,6 +805,9 @@ Std_ReturnType Crypto_GenerateHmac_Finish(Crypto_Md_Context_t* ctx, uint8* outpu
     }
     return Crypto_Md_Finish(ctx, output);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function prepares to authenticate a new message with
@@ -745,12 +821,14 @@ Std_ReturnType Crypto_GenerateHmac_Finish(Crypto_Md_Context_t* ctx, uint8* outpu
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_md_hmac_reset(Crypto_Md_Context_t* ctx)
 {
     Std_ReturnType ret = E_NOT_OK;
     unsigned char* ipad;
 
-    if (ctx == NULL_PTR || ctx->md_info == NULL_PTR || ctx->hmac_ctx == NULL_PTR)
+    if ((ctx == NULL_PTR) || (ctx->md_info == NULL_PTR) || (ctx->hmac_ctx == NULL_PTR))
     {
         return E_NOT_OK;
     }
@@ -763,6 +841,9 @@ Std_ReturnType Crypto_md_hmac_reset(Crypto_Md_Context_t* ctx)
     }
     return Crypto_Md_Update(ctx, ipad, ctx->md_info->block_size);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function call all the steps for hmac generate.
@@ -778,26 +859,36 @@ Std_ReturnType Crypto_md_hmac_reset(Crypto_Md_Context_t* ctx)
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType          result = E_NOT_OK;
     Crypto_Md_Context_t     ctx;
     const Crypto_Md_Info_t* md_info;
-    uint8                   key[CRYPTO_MD_MAX_SIZE];
-    uint32                  keyLength = CRYPTO_MD_MAX_SIZE;
-    uint8*                  output    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
-    const uint8*            input     = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
-    uint32                  ilen      = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32*                 olen      = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint8*                  key = NULL_PTR;
+    uint32       keyLength      = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
+    uint8*       output         = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
+    const uint8* input          = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
+    uint32       ilen           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32*      olen           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint8*       outputMac;
 
+    uint32 outputLen;
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Md_Context_t));
-    md_info       = Crypto_Md_info_from_type(algorithmfamily);
-    uint32 mdSize = Crypto_md_get_size(md_info);
-    if (*olen < mdSize)
+    md_info   = Crypto_Md_info_from_type(algorithmfamily);
+    outputLen = Crypto_md_get_size(md_info);
+    outputMac = (uint8*)IStdLib_MemHeapMalloc(Crypto_62_MemPool, outputLen);
+
+    result = Crypto_md_setup(&ctx, md_info, 1);
+    if (result == E_OK)
     {
-        return result;
+        key = (uint8*)IStdLib_MemHeapMalloc(Crypto_62_MemPool, keyLength);
+        if (key == NULL_PTR)
+        {
+            result = E_NOT_OK;
+        }
     }
-    result = Crypto_md_setup(&ctx, md_info);
     if (result == E_OK)
     {
         result = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_MAC_KEY, key, &keyLength);
@@ -812,17 +903,26 @@ Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType a
     }
     if (result == E_OK)
     {
-        result = Crypto_GenerateHmac_Finish(&ctx, output);
+        result = Crypto_GenerateHmac_Finish(&ctx, outputMac);
     }
     if (result == E_OK)
     {
-        *olen = mdSize;
+        if (*olen >= outputLen)
+        {
+            *olen = outputLen;
+        }
+        (void)IStdLib_MemCpy(output, outputMac, *olen);
     }
+    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.md_ctx);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
+    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, outputMac);
 
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function call all the steps for hmac verify.
@@ -838,19 +938,21 @@ Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType a
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_VerifyHmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily, Crypto_OperationModeType operateMode)
 {
     Std_ReturnType          result = E_NOT_OK;
     Crypto_Md_Context_t     ctx;
     const Crypto_Md_Info_t* md_info;
-    uint8                   key[CRYPTO_MD_MAX_SIZE];
-    uint32                  keyLength = CRYPTO_MD_MAX_SIZE;
-    const uint8*            inputMac  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputPtr;
-    uint32                  macLen    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputLength;
-    uint8                   output[CRYPTO_MD_MAX_SIZE];
-    const uint8*            input = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
-    uint32                  ilen  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint8*                  key = NULL_PTR;
+    uint32       keyLength      = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
+    const uint8* inputMac       = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputPtr;
+    uint32       macLen         = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputLength;
+    uint8        output[CRYPTO_MAC_MAX_SIZE];
+    const uint8* input = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
+    uint32       ilen  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
 
     switch (operateMode)
     {
@@ -864,7 +966,15 @@ Std_ReturnType
     case CRYPTO_OPERATIONMODE_STREAMSTART:
         (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Md_Context_t));
         md_info = Crypto_Md_info_from_type(algorithmfamily);
-        result  = Crypto_md_setup(&ctx, md_info);
+        result  = Crypto_md_setup(&ctx, md_info, 1);
+        if (result == E_OK)
+        {
+            key = (uint8*)IStdLib_MemHeapMalloc(Crypto_62_MemPool, keyLength);
+            if (key == NULL_PTR)
+            {
+                result = E_NOT_OK;
+            }
+        }
         if (result == E_OK)
         {
             result =
@@ -884,14 +994,11 @@ Std_ReturnType
         }
         if (result == E_OK)
         {
-            if (macLen < ctx.md_info->size)
+            if (macLen > ctx.md_info->size)
             {
-                result = IStdLib_MemCmp(inputMac, output, macLen);
+                macLen = ctx.md_info->size;
             }
-            else
-            {
-                result = IStdLib_MemCmp(inputMac, output, macLen);
-            }
+            result = IStdLib_MemCmp(inputMac, output, macLen);
 
             if (E_OK == result)
             {
@@ -901,7 +1008,9 @@ Std_ReturnType
             {
                 *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.verifyPtr) = CRYPTO_E_VER_NOT_OK;
             }
+            result = E_OK;
         }
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
         (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.md_ctx);
         (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
         break;
@@ -911,7 +1020,9 @@ Std_ReturnType
     }
     return result;
 }
-#endif
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function process macgenerate service with supported modes.
@@ -928,6 +1039,8 @@ Std_ReturnType
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_MacGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -935,6 +1048,8 @@ Std_ReturnType Crypto_62_MacGenerate_Process(
     Crypto_OperationModeType   operateMode)
 {
     Std_ReturnType result = E_NOT_OK;
+    (void)objectId;
+    (void)algorithmfamily;
     if ((CRYPTO_OPERATIONMODE_START == operateMode) || (CRYPTO_OPERATIONMODE_UPDATE == operateMode))
     {
         result = E_OK;
@@ -975,6 +1090,9 @@ Std_ReturnType Crypto_62_MacGenerate_Process(
     }
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function process macverify service with supported modes.
@@ -991,6 +1109,8 @@ Std_ReturnType Crypto_62_MacGenerate_Process(
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_MacVerify_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -998,6 +1118,8 @@ Std_ReturnType Crypto_62_MacVerify_Process(
     Crypto_OperationModeType   operateMode)
 {
     Std_ReturnType result = E_NOT_OK;
+    (void)objectId;
+    (void)algorithmfamily;
     if ((CRYPTO_OPERATIONMODE_START == operateMode) || (CRYPTO_OPERATIONMODE_UPDATE == operateMode))
     {
         result = E_OK;
@@ -1043,6 +1165,6 @@ Std_ReturnType Crypto_62_MacVerify_Process(
 #include "Crypto_62_MemMap.h"
 #endif
 
-/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863 -- */
-/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434 -- */
-/* PRQA S 1505,2982,1505,1503,1532,2889,4446,4461,4544 -- */
+/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863,2784 -- */
+/* PRQA S 3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434,4446,4461,4544 -- */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1505,2982,1505,1503,1532,2889,2001,5209 -- */

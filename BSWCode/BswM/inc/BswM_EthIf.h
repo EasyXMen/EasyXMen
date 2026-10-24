@@ -55,7 +55,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66296
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_EthIf_PortGroupLinkStateChg(EthIf_SwitchPortGroupIdxType PortGroupIdx, EthTrcv_LinkStateType PortGroupState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_ETHIF_ENABLED == STD_ON*/
 

@@ -37,6 +37,8 @@ extern "C" {
 
 /* connect */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Handle routing activation request when close tcp connection.
  * @return      void
@@ -45,6 +47,10 @@ extern "C" {
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandleRaWhenCloseTcpConnection(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* pending */
 
@@ -63,6 +69,10 @@ void DoIP_HandleRaWhenCloseTcpConnection(void);
  */
 Std_ReturnType
     DoIP_EnqueueNonDiagMsg(DoIP_NonDiagQueueType* queue, PduIdType soadTxPduRef, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle non diagnostic message in queued.
@@ -75,6 +85,10 @@ Std_ReturnType
  * @trace       CPD-PLACEHOLDER
  */
 boolean DoIP_HandlePendingNonDiagMsg(DoIP_TcpTxRxContextType* ctx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* rcv */
 
@@ -89,6 +103,8 @@ boolean DoIP_HandlePendingNonDiagMsg(DoIP_TcpTxRxContextType* ctx);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandleTcpNonDiagMsg(PduIdType soadTxPduRef, uint8 txRxCtxIdx, uint16 payloadType);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 #ifdef __cplusplus
 }

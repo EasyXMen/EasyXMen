@@ -33,7 +33,7 @@
  */
 /*============================================================================*/
 
-/* PRQA S 0883 ++ */ /* VL_MemMap_0883 */
+/* PRQA S 0883,0791,0793,3116 ++ */ /* VL_QAC_include,VL_QAC_identifier,VL_QAC_MacroLength,VL_MemMap_3116 */
 #define MEMMAP_ERROR
 
 /* Total section items: 8 */
@@ -74,7 +74,7 @@
 #error "iLib_MemMap.h, section is used consecutively many times."
 #endif
 #define ISTDLIB_START_SEC_CONST_NO_MATCH
-#define START_SEC_CONST
+#define START_SEC_CONST_32
 
 #elif defined ISTDLIB_STOP_SEC_CONST_32
 #undef ISTDLIB_STOP_SEC_CONST_32
@@ -87,7 +87,7 @@
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_CONST
+#define STOP_SEC_CONST_32
 
 #endif /* START_WITH_IF */
 
@@ -97,4 +97,4 @@
 
 #include "MemMap.h"
 
-/* PRQA S 0883 -- */
+/* PRQA S 0883,0791,0793,3116 -- */

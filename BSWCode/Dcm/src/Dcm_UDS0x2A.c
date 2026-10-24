@@ -35,7 +35,7 @@
 /**
  * @brief The stop transmissionMode
  */
-#define DCM_UDS2A_STOP 4u
+#define DCM_UDS2A_STOP      4u
 /* ================================================ type definitions ================================================ */
 /**
  * @brief UDS 0x2A scheduler manager structure type
@@ -69,28 +69,40 @@ typedef struct /* PRQA S 3213  */ /* VL_Dcm_3213 */
 #define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 DCM_LOCAL Dcm_SchedulerType Dcm_Scheduler[DCM_MAX_SCHEDULER_NUM];
-#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
-#if (DCM_DDDID_NUM > 0u)
-/* UDS 0x2A scheduler manager structure */
-DCM_LOCAL PduInfoType Dcm_PeriodicPduInfo; /* PRQA S 3218 */ /* VL_Dcm_3218 */
-#endif
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DID_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+/* UDS 0x2A scheduler manager structure */
+DCM_LOCAL PduInfoType Dcm_PeriodicPduInfo; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#endif
+#endif
 /**
  * @brief number of scheduling for each rate, index 0 stands for total
  */
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 DCM_LOCAL uint8 Dcm_ScheduledRate[4u];
-#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
-#if (DCM_DDDID_NUM > 0u)
-DCM_LOCAL uint8 Dcm_PeriodicDataBuffer[64u]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
-DCM_LOCAL uint8 Dcm_SchedulerMetaData[4u]; /* PRQA S 3218 */   /* VL_Dcm_3218 */
-#endif
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DID_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+DCM_LOCAL uint8 Dcm_PeriodicDataBuffer[64u]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+DCM_LOCAL uint8 Dcm_SchedulerMetaData[4u]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#endif
+#endif
 
 /* ============================================ external data definitions =========================================== */
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
@@ -104,6 +116,8 @@ boolean Dcm_PeriodicConnectionSent[DCM_PERIODIC_CONNECTION_NUM]; /* PRQA S 1037,
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by UDS 0x2A to initialize the scheduler
@@ -114,6 +128,10 @@ boolean Dcm_PeriodicConnectionSent[DCM_PERIODIC_CONNECTION_NUM]; /* PRQA S 1037,
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x2A_SchedulerInit(Dcm_SchedulerType* schedulerPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check conditions for UDS 0x2A
@@ -131,6 +149,10 @@ DCM_LOCAL void Dcm_UDS0x2A_SchedulerInit(Dcm_SchedulerType* schedulerPtr);
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x2A_ConditionCheck(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle did read for UDS 0x2A
@@ -153,6 +175,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
     const Dcm_MsgContextType*     pMsgContext,
     uint16                        connectionId,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handles did conditionCheck callout
@@ -172,6 +198,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDidConditionCheck(
     uint16                        didIndex,
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for dynamic did read
@@ -198,6 +228,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
     uint16*                  dataLength,
 #endif
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         setup scheduler for requested periodic read
@@ -222,6 +256,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
     uint16                        dataLength,
     const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         When the middle scheduling information is deleted, the subsequent ones shall fill in the gaps in
@@ -233,6 +271,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x2A_Move_Scheduler(uint16 Index);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         setup scheduler for requested periodic read for nonStop subfunction
@@ -254,9 +296,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
     uint16             connectionId,
     uint8              transMode,
     uint16             dataLength);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
-#if (DCM_DDDID_NUM > 0u)
+#if (DCM_DID_NUM > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         handle a operating scheduler
  * @param[in]     schedulerPtr : the target scheduler
@@ -266,6 +312,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare data and send periodic data
@@ -277,6 +327,8 @@ DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* schedulerPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
@@ -319,8 +371,11 @@ Std_ReturnType Dcm_UDS0x2A(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * MainFunction handle for 0x2A to periodically read and send data of dynamic did
  */
@@ -328,7 +383,7 @@ void Dcm_UDS0x2A_MainFunction(void)
 {
     for (uint8 index = 0u; index < DCM_MAX_SCHEDULER_NUM; index++)
     {
-#if (DCM_DDDID_NUM > 0u)
+#if (DCM_DID_NUM > 0u)
         Dcm_SchedulerType* schedulerPtr = &Dcm_Scheduler[index];
         uint16             DIdIndex     = schedulerPtr->DidIndex;
         if ((0u != schedulerPtr->Rate) && (DIdIndex < DCM_DID_NUM))
@@ -345,8 +400,11 @@ void Dcm_UDS0x2A_MainFunction(void)
 #endif
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * Deal with session/security/authentication/modeRule change to decide whether to continue onging periodic tranmission
  */
@@ -392,6 +450,10 @@ void Dcm_UDS0x2A_StatusChangeHandle(void)
         }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 /**
  * initialize targeted scheduler
@@ -409,7 +471,10 @@ DCM_LOCAL void Dcm_UDS0x2A_SchedulerInit(Dcm_SchedulerType* schedulerPtr)
     schedulerPtr->IsDDDID       = FALSE;
     SchM_Exit_Dcm_ExclusiveArea();
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* check conditions such as minimum length, invalid transmode for UDS 0x2A */
 /* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
 DCM_LOCAL Std_ReturnType
@@ -463,7 +528,10 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over requested did to initiate read */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -525,7 +593,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over signals and check for conditionCheckReadFnc callout */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDidConditionCheck(
     uint16                        didIndex,
@@ -554,7 +625,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDidConditionCheck(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over sourc elements and do check if configured checkSource and get dynamic dataLength */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
     uint16 connectionId,
@@ -635,7 +709,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
     }
     return finalResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x2A_Move_Scheduler(uint16 Index)
 {
     uint16             Cnt;
@@ -663,7 +740,10 @@ DCM_LOCAL void Dcm_UDS0x2A_Move_Scheduler(uint16 Index)
         Dcm_ScheduledRate[0u]--;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* find matched scheduler and reset if existed, otherwise find a idle scheduler and do initial setup */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
     uint16                        didIndex,
@@ -708,6 +788,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 void Dcm_UDS0x2A_Remove_Scheduler(uint16 DidIndex)
 {
     boolean            isDidExist = FALSE;
@@ -729,6 +813,10 @@ void Dcm_UDS0x2A_Remove_Scheduler(uint16 DidIndex)
         Dcm_ScheduledRate[transMode]--;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* setup the scheduler for nonStop subfunctions */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
     Dcm_SchedulerType* schedulerPtr,
@@ -784,9 +872,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
-#if (DCM_DDDID_NUM > 0u)
+#if (DCM_DID_NUM > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* try to send periodic message */
 DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr)
 {
@@ -817,7 +908,10 @@ DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr)
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* schedulerPtr)
 {
     Dcm_MsgLenType               offset  = 0u;
@@ -933,8 +1027,8 @@ DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* sch
         /* for qac idle */
     }
 }
-#endif
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
+#endif
 #endif

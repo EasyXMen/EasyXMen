@@ -111,32 +111,60 @@
 
 #if LWIP_NETIF_EXT_STATUS_CALLBACK
 #define TCPIP_VAR_EXT_CALLBACK(coreIndex)       g_ext_callback[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static netif_ext_callback_t *g_ext_callback[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #endif
 
 #if !LWIP_SINGLE_NETIF
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct netif *g_netif_list[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #endif /* !LWIP_SINGLE_NETIF */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct netif *g_netif_default[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #define netif_index_to_num(index)   ((index) - 1)
 #define TCPIP_VAR_NETIF_NUM(coreIndex)          g_netif_num[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_netif_num[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if LWIP_NUM_NETIF_CLIENT_DATA > 0
 #define TCPIP_VAR_NETIF_CLIENT_ID(coreIndex)    g_netif_client_id[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_netif_client_id[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #endif
 
 #define NETIF_REPORT_TYPE_IPV4  0x01
 #define NETIF_REPORT_TYPE_IPV6  0x02
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void netif_issue_reports(struct netif *netif, u8_t report_type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV6
 static err_t netif_null_output_ip6(struct netif *netif, struct pbuf *p, const ip6_addr_t *ipaddr);
 #endif /* LWIP_IPV6 */
 #if LWIP_IPV4
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t netif_null_output_ip4(struct netif *netif, struct pbuf *p, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4 */
 
 #if LWIP_HAVE_LOOPIF
@@ -194,6 +222,8 @@ netif_loopif_init(struct netif *netif)
 }
 #endif /* LWIP_HAVE_LOOPIF */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void
 netif_init(void)
 {
@@ -243,7 +273,11 @@ netif_init(void)
 
 #endif /* LWIP_HAVE_LOOPIF */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup lwip_nosys
  * Forwards a received packet for input processing with
@@ -268,7 +302,11 @@ netif_input(struct pbuf *p, struct netif *inp)
 #endif /* LWIP_ETHERNET */
     return ip_input(p, inp);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Add a network interface to the list of lwIP netifs.
@@ -284,7 +322,11 @@ netif_add_noaddr(struct netif *netif, void *state, netif_init_fn init, netif_inp
 #endif /* LWIP_IPV4*/
                    state, init, input);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Add a network interface to the list of lwIP netifs.
@@ -483,7 +525,11 @@ netif_add(struct netif *netif,
 
   return netif;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void
 netif_do_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_addr)
 {
@@ -497,8 +543,12 @@ netif_do_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_addr)
   raw_netif_ip_addr_changed(old_addr, new_addr);
 #endif /* LWIP_RAW */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int
 netif_do_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr, ip_addr_t *old_addr)
 {
@@ -535,7 +585,11 @@ netif_do_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr, ip_addr_t *ol
   }
   return 0; /* address unchanged */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif_ip4
  * Change the IP address of a network interface
@@ -568,7 +622,11 @@ netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr)
 #endif
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int
 netif_do_set_netmask(struct netif *netif, const ip4_addr_t *netmask, ip_addr_t *old_nm)
 {
@@ -595,7 +653,11 @@ netif_do_set_netmask(struct netif *netif, const ip4_addr_t *netmask, ip_addr_t *
   }
   return 0; /* netmask unchanged */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif_ip4
  * Change the netmask of a network interface
@@ -632,7 +694,11 @@ netif_set_netmask(struct netif *netif, const ip4_addr_t *netmask)
 #endif
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int
 netif_do_set_gw(struct netif *netif, const ip4_addr_t *gw, ip_addr_t *old_gw)
 {
@@ -657,7 +723,11 @@ netif_do_set_gw(struct netif *netif, const ip4_addr_t *gw, ip_addr_t *old_gw)
   }
   return 0; /* gateway unchanged */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif_ip4
  * Change the default gateway for a network interface
@@ -693,7 +763,11 @@ netif_set_gw(struct netif *netif, const ip4_addr_t *gw)
 #endif
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif_ip4
  * Change IP address configuration for a network interface (including netmask
@@ -781,8 +855,12 @@ netif_set_addr(struct netif *netif, const ip4_addr_t *ipaddr, const ip4_addr_t *
   }
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4*/
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Remove a network interface from the list of lwIP netifs.
@@ -866,7 +944,11 @@ netif_remove(struct netif *netif)
 #endif /* LWIP_NETIF_REMOVE_CALLBACK */
   LWIP_DEBUGF( NETIF_DEBUG, ("netif_remove: removed netif\n") );
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Set a network interface as the default network interface
@@ -890,7 +972,11 @@ netif_set_default(struct netif *netif)
   LWIP_DEBUGF(NETIF_DEBUG, ("netif: setting default interface %c%c\n",
                             netif ? netif->name[0] : '\'', netif ? netif->name[1] : '\''));
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Bring an interface up, available for processing
@@ -924,7 +1010,11 @@ netif_set_up(struct netif *netif)
 #endif /* LWIP_IPV6 */
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Send ARP/IGMP/MLD/RS events, e.g. on link-up/netif-up or addr-change
  */
 static void
@@ -973,7 +1063,11 @@ netif_issue_reports(struct netif *netif, u8_t report_type)
   }
 #endif /* LWIP_IPV6 */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Bring an interface down, disabling any traffic processing.
@@ -1010,6 +1104,8 @@ netif_set_down(struct netif *netif)
     NETIF_STATUS_CALLBACK(netif);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_NETIF_STATUS_CALLBACK
 /**
@@ -1043,6 +1139,8 @@ netif_set_remove_callback(struct netif *netif, netif_status_callback_fn remove_c
 }
 #endif /* LWIP_NETIF_REMOVE_CALLBACK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Called by a driver when its link goes up
@@ -1080,7 +1178,11 @@ netif_set_link_up(struct netif *netif)
 #endif
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Called by a driver when its link goes down
@@ -1117,6 +1219,8 @@ netif_set_link_down(struct netif *netif)
 #endif
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_NETIF_LINK_CALLBACK
 /**
@@ -1700,6 +1804,8 @@ netif_null_output_ip6(struct netif *netif, struct pbuf *p, const ip6_addr_t *ipa
 #endif /* LWIP_IPV6 */
 
 #if LWIP_IPV4
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Dummy IPv4 output function for netifs not supporting IPv4
  */
 static err_t
@@ -1711,8 +1817,12 @@ netif_null_output_ip4(struct netif *netif, struct pbuf *p, const ip4_addr_t *ipa
 
   return ERR_IF;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4 */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
 * @ingroup netif
 * Return the interface index for the netif with name
@@ -1730,7 +1840,11 @@ netif_name_to_index(const char *name)
   /* No name found, return invalid index */
   return NETIF_NO_INDEX;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
 * @ingroup netif
 * Return the interface name for the netif matching index
@@ -1752,7 +1866,11 @@ netif_index_to_name(u8_t idx, char *name)
   }
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
 * @ingroup netif
 * Return the interface for the netif index
@@ -1776,7 +1894,11 @@ netif_get_by_index(u8_t idx)
 
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Find a network interface by searching for its name
@@ -1813,8 +1935,12 @@ netif_find(const char *name)
   LWIP_DEBUGF(NETIF_DEBUG, ("netif_find: didn't find %c%c\n", name[0], name[1]));
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_NETIF_EXT_STATUS_CALLBACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Add extended netif events listener
@@ -1839,7 +1965,11 @@ netif_add_ext_callback(netif_ext_callback_t* callback, netif_ext_callback_fn fn,
   callback->next        = *ext_callback;
   *ext_callback          = callback;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup netif
  * Remove extended netif events listener
@@ -1874,7 +2004,11 @@ netif_remove_ext_callback(netif_ext_callback_t* callback)
   }
   callback->next = NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Invoke extended netif status event
  * @param netif netif that is affected by change
@@ -1900,4 +2034,6 @@ netif_invoke_ext_callback(struct netif *netif, netif_nsc_reason_t reason, const 
     callback = next;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_EXT_STATUS_CALLBACK */

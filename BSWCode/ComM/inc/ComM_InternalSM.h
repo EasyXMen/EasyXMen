@@ -42,6 +42,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Change the communication mode of a network with ComMBusType=COMM_BUS_TYPE_INTERNAL to the requested one.
  * @param[in]    Channel  See NetworkHandleType
@@ -51,6 +53,8 @@ extern "C" {
  * @trace        -
  */
 Std_ReturnType ComM_InternalSM_RequestComMode(NetworkHandleType Channel, ComM_ModeType ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef __cplusplus
 }

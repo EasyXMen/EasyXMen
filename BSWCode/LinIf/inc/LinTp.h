@@ -76,6 +76,11 @@
     Risk: No risk.
     Prevention: Functional reliability guaranteed by design.
 
+    \li PRQA S 1504 VL_LinTp_1504
+      Reason: Multi-partition variable design requires
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li PRQA S 5209 VL_LinTp_5209
     Reason: The LinTp module ensures the correctness that unsigned long is used.
     Risk: No risk.
@@ -86,20 +91,23 @@
     Risk: No risk.
     Prevention: Functional reliability guaranteed by design.
 
+    \li VL_LinTp_1510
+      Reason: '${name}' has external linkage and has incompatible declarations..
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
     \li VL_LinTp_1512
-      Reason: The issue shall be avoided in actual running environment and configs.
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_LinTp_1510
-      Reason: The issue shall be avoided in actual running environment and configs.
+    \li VL_LinTp_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 */
-
-/* PRQA S 1513 EOF */ /* VL_QAC_MultiDeclaration */
-/* PRQA S 1512 EOF */ /* VL_LinTp_1512 */
-/* PRQA S 1510 EOF */ /* VL_LinTp_1510 */
+/* PRQA S 1512,1513 EOF */ /* VL_LinTp_1512,VL_LinTp_1513 */
 #ifndef LINTP_H_
 #define LINTP_H_
 
@@ -142,8 +150,13 @@
  * @synchronous         TRUE
  * @trace               CPD-56893
  */
+/* PRQA S 1510 ++ */ /* VL_LinTp_1510 */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_Init(const LinTp_ConfigType* ConfigPtr);
-
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+/* PRQA S 1510 -- */
 /**
  * @brief               Requests the transfer of segmented data.
  * @param[in]           LinTpTxSduId: This parameter contains the unique
@@ -156,7 +169,11 @@ void LinTp_Init(const LinTp_ConfigType* ConfigPtr);
  * @synchronous         TRUE
  * @trace               CPD-56894
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_Transmit(PduIdType LinTpTxSduId, const PduInfoType* LinTpTxInfoPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief              Returns the version information of this module.
@@ -192,7 +209,11 @@ LINTP_LOCAL_INLINE void LinTp_GetVersionInfo(Std_VersionInfoType* versionInfo)
  * @synchronous         TRUE
  * @trace               CPD-56897
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_Shutdown(void);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               A dummy method introduced for interface compatibility
@@ -206,7 +227,11 @@ void LinTp_Shutdown(void);
  * @synchronous         TRUE
  * @trace               CPD-56898
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 

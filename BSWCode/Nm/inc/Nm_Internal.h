@@ -41,7 +41,7 @@
 #define NM_HANDLE_EIRA_TIMER_CHANNEL_INDEX (uint8)(0x0u)
 #define NM_INVALID_COM_SIGNELID            (uint8)(0xffu)
 /* claclulate array element count */
-#define NM_UBOND(x) (sizeof(x) / sizeof((x)[0]))
+#define NM_UBOND(x)                        (sizeof(x) / sizeof((x)[0]))
 
 /* ================================================ type definitions ================================================ */
 /* used cycle find */
@@ -138,7 +138,11 @@ typedef struct
 #endif
 /* =========================================== external data declarations =========================================== */
 #if NM_MULTIPLE_PARTITION_USED == STD_ON
+#define NM_START_SEC_CONFIG_DATA_32
+#include "Nm_MemMap.h"
 extern const ApplicationType Nm_OsApplications[NM_PARTITION_NUMBER];
+#define NM_STOP_SEC_CONFIG_DATA_32
+#include "Nm_MemMap.h"
 #endif
 /* ========================================== internal function definitions ========================================= */
 /* ========================================= external function declarations ========================================= */

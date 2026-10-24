@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_LINTPMODEREQUEST_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_LINTPMODEREQUEST_ENABLED == STD_ON)
 /**
  * Initializes the LIN TP request ports with their initial modes.
  * This function sets the initial mode for each LIN TP request port based on the configuration.
@@ -49,6 +49,8 @@
 void BswM_InitLinTpRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITLINTPREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -77,11 +79,17 @@ void BswM_InitLinTpRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITLINTPREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITLINTPREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the requested mode of the specified LIN TP channel.
  * This function returns the current requested mode for the given LIN TP channel.
@@ -101,8 +109,12 @@ LinTp_Mode BswM_GetLinTpRqstMode(NetworkHandleType linTpChIdx)
     }
     return retRqstMode;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINTPMODEREQUEST_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Requests a mode change for the specified LIN TP channel.
  * This function processes the mode request and updates the internal state accordingly.
@@ -112,6 +124,8 @@ LinTp_Mode BswM_GetLinTpRqstMode(NetworkHandleType linTpChIdx)
 void BswM_LinTp_RequestMode(NetworkHandleType Network, LinTp_Mode LinTpRequestedMode)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_LINTP_REQUEST_MODE, Network, LinTpRequestedMode);
+
 #if (BSWM_LINTPMODEREQUEST_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -177,9 +191,11 @@ void BswM_LinTp_RequestMode(NetworkHandleType Network, LinTp_Mode LinTpRequested
     (void)Network;
     (void)LinTpRequestedMode;
 #endif /*BSWM_LINTPMODEREQUEST_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_LINTP_REQUEST_MODE);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #endif /*BSWM_LINTP_ENABLED == STD_ON*/

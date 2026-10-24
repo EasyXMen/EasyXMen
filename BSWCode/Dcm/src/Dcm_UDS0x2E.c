@@ -46,17 +46,21 @@ Std_ReturnType Dcm_BndMResult[DCM_BNDMDID_NUM];
 #include "Dcm_MemMap.h"
 #endif
 #ifdef DCM_SECURE_CODING_DID_NUM
-#define DCM_START_SEC_VAR_CLEARED_16
+#define DCM_START_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
 /**
  * @brief store the secure coding did offset of the secure coding buffer
  */
 uint32 Dcm_SecureCodingDidOffset[DCM_SECURE_CODING_DID_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 /**
  * @brief store the current secure coding total data length
  */
 Dcm_MsgLenType Dcm_SecureCodingDataLength;
-#define DCM_STOP_SEC_VAR_CLEARED_16
+#define DCM_STOP_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
 /**
  * @brief secure coding buffer
@@ -68,6 +72,8 @@ uint8 Dcm_SecureCodingBuffer[DCM_SECURE_CODING_DATA_BUFFER_SIZE];
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         General condition checks for UDS 0x2E
  * @param[inout]  pMsgContext  : Message-related information for one diagnostic protocol identifier. The pointers
@@ -91,7 +97,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
     uint16*                       didIndex,
     Dcm_DidType*                  didType,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_SECURE_CODING_DID_NUM
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         process secure coding for UDS 0x2E
  * @param[out]    secureCoding : whether the requested did is configured to be secure coding did
@@ -115,7 +125,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_SecureCoding(
     uint16                        did,
     uint16                        didIndex,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process dspData write for signal
@@ -142,8 +156,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_WriteDspDataSignal(
     boolean isDynamic,
 #endif
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_USE_NVM)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         handle signal that use nvm block to write
  * @param[in]     blockId   : the configured nvm block id
@@ -163,6 +181,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_NvMSignalHandle(
     Dcm_ExtendedOpStatusType      OpStatus,
     const uint8*                  data,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -249,7 +269,10 @@ Std_ReturnType Dcm_UDS0x2E(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with data write, handle based on DidUsePort and DspDataUsePort
  */
@@ -325,8 +348,11 @@ Std_ReturnType Dcm_UDS0x2E_WriteDspData(
 
     return finalResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_SECURE_CODING_DID_NUM
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize secure coding vars
  */
@@ -340,9 +366,9 @@ void Dcm_UDS0x2E_Init(void)
         Dcm_SecureCodingDidOffset[index] = DCM_INVALID_UINT16;
     }
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 /* ========================================== internal function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -458,8 +484,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
 
     return result;
 }
-/* PRQA S 6010,6080 -- */
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_SECURE_CODING_DID_NUM
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+/* PRQA S 6010,6080 -- */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_SecureCoding(
     boolean*                      secureCoding,
     Dcm_MsgContextType*           pMsgContext,
@@ -535,8 +565,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_SecureCoding(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_WriteDspDataSignal(
     const uint8*             reqData,
@@ -602,8 +635,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_WriteDspDataSignal(
 
     return finalResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_USE_NVM)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_NvMSignalHandle(
     NvM_BlockIdType               blockId,
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -659,7 +695,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_NvMSignalHandle(
     }
     return result;
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif

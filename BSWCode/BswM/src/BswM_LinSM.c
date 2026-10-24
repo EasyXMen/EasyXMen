@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_LINSMINDICATION_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_LINSMINDICATION_ENABLED == STD_ON)
 /**
  * Initializes the LIN State Machine request ports.
  * This function sets the initial states for the LIN State Machine indicators based on the configuration.
@@ -50,6 +50,8 @@
 void BswM_InitLinSMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITLINSMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -78,11 +80,17 @@ void BswM_InitLinSMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITLINSMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITLINSMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current status of the specified LIN State Machine indicator.
  * This function queries the runtime configuration to get the status of a specific LIN SM indicator.
@@ -102,8 +110,12 @@ LinSM_ModeType BswM_GetLinSmIndStatus(NetworkHandleType linsmChIdx)
     }
     return retStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /* BSWM_LINSMINDICATION_ENABLED == STD_ON */
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current state of the specified LIN State Machine.
  * This function checks and updates the state of a specific LIN SM based on the provided network handle and current
@@ -113,6 +125,8 @@ LinSM_ModeType BswM_GetLinSmIndStatus(NetworkHandleType linsmChIdx)
 void BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentState)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_LINSM_CURRENT_STATE, Network, CurrentState);
+
 #if (BSWM_LINSMINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -178,8 +192,14 @@ void BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentSt
     (void)Network;
     (void)CurrentState;
 #endif /* BSWM_LINSMINDICATION_ENABLED == STD_ON */
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_LINSM_CURRENT_STATE);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current schedule of the specified LIN State Machine.
  * This function checks and updates the schedule of a specific LIN SM based on the provided network handle and current
@@ -189,6 +209,8 @@ void BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentSt
 void BswM_LinSM_CurrentSchedule(NetworkHandleType Network, LinIf_SchHandleType CurrentSchedule)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_LINSM_CURRENT_SCHEDULE, Network, CurrentSchedule);
+
 #if (BSWM_LINSCHEDULEINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -269,9 +291,15 @@ void BswM_LinSM_CurrentSchedule(NetworkHandleType Network, LinIf_SchHandleType C
     (void)Network;
     (void)CurrentSchedule;
 #endif /*BSWM_LINSCHEDULEINDICATION_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_LINSM_CURRENT_SCHEDULE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_LINSCHEDULEINDICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current schedule of the specified LIN State Machine channel.
  * This function returns the current schedule index for the given LIN SM channel.
@@ -291,9 +319,9 @@ LinIf_SchHandleType BswM_GetLinSmCurSchedule(NetworkHandleType linsmChIdx)
     }
     return curSch;
 }
-#endif /*BSWM_LINSCHEDULEINDICATION_ENABLED == STD_ON*/
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /*BSWM_LINSCHEDULEINDICATION_ENABLED == STD_ON*/
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_LINSM_ENABLED == STD_ON*/

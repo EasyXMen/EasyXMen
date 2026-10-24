@@ -29,6 +29,8 @@
  *  -------------------------------------------------------------------------------------------------------------------
  *  V2.1.0    2024-12-23 xiaojian.liang
  *      1. Support multi-partition distribution.
+ *  V2.1.1    2026-06-03 xiaojian.liang
+ *      CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  *
  ==================================================================================================================== */
 
@@ -97,14 +99,14 @@ extern "C" {
 /** @name Service ID
  *  @trace CPD-73902
  *  @{ */
-#define ETHSM_SID_INIT                0x07U
-#define ETHSM_SID_GETVERSIONINFO      0x02U
-#define ETHSM_SID_REQUESTCOMMODE      0x05U
-#define ETHSM_SID_GETCURRENTCOMMODE   0x04U
-#define ETHSM_SID_CTRLMODEINDICATION  0x09U
-#define ETHSM_SID_TRCVLINKSTATECHG    0x06U
-#define ETHSM_SID_TCPIPMODEINDICATION 0x08U
-#define ETHSM_SID_MAINFUNCTION        0x01U
+#define ETHSM_SID_INIT                0x07u
+#define ETHSM_SID_GETVERSIONINFO      0x02u
+#define ETHSM_SID_REQUESTCOMMODE      0x05u
+#define ETHSM_SID_GETCURRENTCOMMODE   0x04u
+#define ETHSM_SID_CTRLMODEINDICATION  0x09u
+#define ETHSM_SID_TRCVLINKSTATECHG    0x06u
+#define ETHSM_SID_TCPIPMODEINDICATION 0x08u
+#define ETHSM_SID_MAINFUNCTION        0x01u
 /** @} */
 
 /* ================================================ type definitions ================================================ */
@@ -128,6 +130,8 @@ typedef enum
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       This function initialize the EthSM.
  * @reentrant   TRUE (Reentrant for different partitions. Non reentrant for the same partition.)
@@ -135,7 +139,12 @@ typedef enum
  * @trace       CPD-69974
  */
 void EthSM_Init(void);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#if ETHSM_VERSION_INFO_API == STD_ON
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       This service puts out the version information of this module.
  * @param[out]  versioninfo Pointer where to put out the version information.
@@ -143,10 +152,13 @@ void EthSM_Init(void);
  * @synchronous TRUE
  * @trace       CPD-69975
  */
-#if ETHSM_VERSION_INFO_API == STD_ON
 void EthSM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 #endif
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       Handles the communication mode and sets the Ethernet network active or passive.
  * @param[in]   NetworkHandle   Handle of destinated communication network for request
@@ -158,7 +170,11 @@ void EthSM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-69976
  */
 Std_ReturnType EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeType ComM_Mode);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       This service shall put out the current communication mode of a Ethernet network.
  * @param[in]   NetworkHandle   Network handle whose current communication mode shall be put out
@@ -170,7 +186,11 @@ Std_ReturnType EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeTy
  * @trace       CPD-69977
  */
 Std_ReturnType EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_ModeType* ComM_ModePtr);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       Called when mode has been read out. Either triggered by previous EthIf_GetControllerMode or by
  *              EthIf_SetControllerMode call. Can directly be called within the trigger functions.
@@ -181,7 +201,11 @@ Std_ReturnType EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_Mod
  * @trace       CPD-69978
  */
 void EthSM_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       This service is called by the Ethernet Interface to report a transceiver link state change.
  * @param[in]   CtrlIdx               Index of the Ethernet controller within the context of the Ethernet Interface
@@ -191,6 +215,8 @@ void EthSM_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode);
  * @trace       CPD-69979
  */
 void EthSM_TrcvLinkStateChg(uint8 CtrlIdx, EthTrcv_LinkStateType TransceiverLinkState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #ifdef __cplusplus
 }

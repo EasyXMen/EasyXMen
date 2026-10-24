@@ -160,9 +160,9 @@ extern "C" {
 #define IPDUM_E_INIT_FAILED       (0x21u)
 #define IPDUM_E_INVALID_PARTITION (0x60u)
 /* Runtime Errors */
-#define IPDUM_E_HEADER    (0x30u)
-#define IPDUM_E_QUEUEOVFL (0x31u)
-#define IPDUM_E_CONTAINER (0x32u)
+#define IPDUM_E_HEADER            (0x30u)
+#define IPDUM_E_QUEUEOVFL         (0x31u)
+#define IPDUM_E_CONTAINER         (0x32u)
 
 /* Service ID */
 #define IPDUM_SERVICE_ID_INIT            (0x00u)
@@ -189,7 +189,11 @@ extern "C" {
  * @synchronous   TRUE
  * @trace         CPD-60204
  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 void IpduM_Init(const IpduM_ConfigType* config);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 #if (STD_ON == IPDUM_VERSION_INFO_API)
 /**
@@ -199,7 +203,11 @@ void IpduM_Init(const IpduM_ConfigType* config);
  * @synchronous   TRUE
  * @trace         CPD-60210
  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 void IpduM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 /**
@@ -211,7 +219,11 @@ void IpduM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous   TRUE
  * @trace         CPD-60203
  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 Std_ReturnType IpduM_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /**
  * @brief         Performs the rx-processes of the activities that are not directly.
@@ -221,7 +233,11 @@ Std_ReturnType IpduM_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
  * @synchronous   TRUE
  * @trace         CPD-60208
  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 void IpduM_MainFunctionTx(IpduM_PartitionIDType ipduMPartitionId);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /**
  * @brief         Performs the tx-processes of the activities that are not directly.
@@ -232,7 +248,11 @@ void IpduM_MainFunctionTx(IpduM_PartitionIDType ipduMPartitionId);
  * @synchronous   TRUE
  * @trace         CPD-60209
  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 void IpduM_MainFunctionRx(IpduM_PartitionIDType ipduMPartitionId);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 #ifdef __cplusplus
 }

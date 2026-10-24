@@ -23,10 +23,10 @@
  ***********************************************************************************************************************/
 
 /* =================================================== inclusions =================================================== */
-#include "Det_Types.h"
 #include "Det.h"
 #include "Det_Externals.h"
 #include "SchM_Det.h"
+#include "Det_Arti.h"
 
 #if (DET_FORWARD_TO_DLT == STD_ON)
 #include "Dlt.h"
@@ -40,13 +40,20 @@
 /* PRQA S 3414 -- */
 
 /* ================================================ type definitions ================================================ */
+/* The type is used to describe the running state in the DET module */
+typedef enum
+{
+    DET_UNINITIALIZED = 0,
+    DET_INITIALIZED   = 1,
+    DET_STARTED       = 2
+} Det_StateType;
 
 /* ========================================== internal function declarations ======================================== */
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
 #define DET_START_SEC_CODE
 #include "Det_MemMap.h"
 /* This API is used to check the matching result of parameter filtering */
-DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 faultId);
+DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId);
 #define DET_STOP_SEC_CODE
 #include "Det_MemMap.h"
 #endif
@@ -55,13 +62,6 @@ DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId, uint8 
 #define DET_START_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 DET_LOCAL Det_StateType Det_RunState;
-#define DET_STOP_SEC_VAR_CLEARED_8
-#include "Det_MemMap.h"
-
-#define DET_START_SEC_VAR_CLEARED_8
-#include "Det_MemMap.h"
-/* use this variable to configure DET debug operation */
-DET_LOCAL Det_StatusType Det_Status;
 #define DET_STOP_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 
@@ -74,46 +74,71 @@ DET_LOCAL const Det_ConfigType* Det_ConfigPtr;
 #endif
 
 /* ============================================ external data definitions =========================================== */
+#if (DET_REPORT_ERROR_RECURSIONLIMIT > 0u)
 #define DET_START_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 /* recursion limit counter for develop error */
-uint8 Det_RecursionCounterReportError; /* PRQA S 3408,1504 */ /* VL_Det_3408,VL_Det_1504 */
-/* recursion limit counter for runtime error */
-uint8 Det_RecursionCounterReportRuntimeError; /* PRQA S 3408,1504 */ /* VL_Det_3408,VL_Det_1504 */
-/* recursion limit counter for transient fault */
-uint8 Det_RecursionCounterReportTransientFault; /* PRQA S 3408,1504 */ /* VL_Det_3408,VL_Det_1504 */
+uint8 Det_RecursionCounterReportError;
 #define DET_STOP_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
+#endif
+#if (DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT > 0u)
+#define DET_START_SEC_VAR_CLEARED_8
+#include "Det_MemMap.h"
+/* recursion limit counter for runtime error */
+uint8 Det_RecursionCounterReportRuntimeError;
+#define DET_STOP_SEC_VAR_CLEARED_8
+#include "Det_MemMap.h"
+#endif
+#if (DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT > 0u)
+#define DET_START_SEC_VAR_CLEARED_8
+#include "Det_MemMap.h"
+/* recursion limit counter for transient fault */
+uint8 Det_RecursionCounterReportTransientFault;
+#define DET_STOP_SEC_VAR_CLEARED_8
+#include "Det_MemMap.h"
+#endif
 
 /* ========================================== external function definitions ========================================= */
 #define DET_START_SEC_CODE
 #include "Det_MemMap.h"
-
 /* This API is called by the EcuM module to initialize the Det module */
-void Det_Init(const Det_ConfigType* configPtr) /* PRQA S 1503 */ /* VL_Det_1503 */
+void Det_Init(const Det_ConfigType* configPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 2, 0x00, configPtr);
     /* Checks if the Det module is not initialized and configPtr is not null pointer */
     if ((Det_RunState == DET_UNINITIALIZED) && (NULL_PTR != configPtr))
     {
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
         /* Copy global Configuration item to store the configuration pointer. */
         Det_ConfigPtr = configPtr;
+#else
+        DET_PARAM_UNUSED(configPtr);
 #endif
-        /* Set the initial value for the DET module's logging */
-        Det_Status.LogActive = (boolean)FALSE;
         /* Set the status of the DET module to initialized */
         Det_RunState = DET_INITIALIZED;
         /* Set first value of recursion limit counter */
-        Det_RecursionCounterReportError          = 0u;
-        Det_RecursionCounterReportRuntimeError   = 0u;
+#if (DET_REPORT_ERROR_RECURSIONLIMIT > 0u)
+        Det_RecursionCounterReportError = 0u;
+#endif
+#if (DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT > 0u)
+        Det_RecursionCounterReportRuntimeError = 0u;
+#endif
+#if (DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT > 0u)
         Det_RecursionCounterReportTransientFault = 0u;
+#endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 1, 0x00);
 }
-
+#define DET_STOP_SEC_CODE
+#include "Det_MemMap.h"
 #if (STD_ON == DET_VERSION_INFO_API)
+#define DET_START_SEC_CODE
+#include "Det_MemMap.h"
 /* This API is used to get software version information from the DET module */
-void Det_GetVersionInfo(Std_VersionInfoType* versionInfoPtr) /* PRQA S 1503 */ /* VL_Det_1503 */
+void Det_GetVersionInfo(Std_VersionInfoType* versionInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 2, 0x03, versionInfoPtr);
     /* if versioninfo is no NULL pointer */
     if (NULL_PTR != versionInfoPtr)
     {
@@ -132,239 +157,227 @@ void Det_GetVersionInfo(Std_VersionInfoType* versionInfoPtr) /* PRQA S 1503 */ /
             (uint8)DET_SID_GETVERSIONINFO,
             (uint8)DET_E_PARAM_POINTER);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 1, 0x03);
 }
+#define DET_STOP_SEC_CODE
+#include "Det_MemMap.h"
 #endif /* STD_ON == DET_VERSION_INFO_API */
-
+#define DET_START_SEC_CODE
+#include "Det_MemMap.h"
 /* This API is used to start the DET module for error reporting */
-void Det_Start(void) /* PRQA S 1503 */ /* VL_Det_1503 */
+void Det_Start(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 1, 0x02);
     /* Checks if the Det module is initialized */
     if (Det_RunState == DET_INITIALIZED)
     {
         /* Set the status of the DET module to started */
         Det_RunState = DET_STARTED;
-        /* The logging of the DET module is set to active */
-        Det_Status.LogActive = (boolean)TRUE;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 1, 0x02);
 }
-
-/* PRQA S 6030,2991,2995 ++ */ /* VL_MTR_Det_STMIF,VL_Det_2991,VL_Det_2995 */
-
+#define DET_STOP_SEC_CODE
+#include "Det_MemMap.h"
+#define DET_START_SEC_CODE
+#include "Det_MemMap.h"
 /* This API is used to report development error for DET modules */
-/* PRQA S 1503 ++ */ /* VL_Det_1503 */
+/* PRQA S 6030 ++ */ /* VL_MTR_Det_STMIF */
 Std_ReturnType Det_ReportError(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId)
-/* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 5, 0x01, moduleId, instanceId, apiId, errorId);
     Std_ReturnType retVal = E_OK;
     /* Check if the running status of the DET module is Started */
     if (Det_RunState == DET_STARTED)
     {
+#if (DET_REPORT_ERROR_RECURSIONLIMIT > 0u)
         SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
+        ++Det_RecursionCounterReportError;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
         /* increment nesting counter for recursion detection */
-        if (++Det_RecursionCounterReportError < DET_REPORT_ERROR_RECURSIONLIMIT) /* PRQA S 3440 */ /* VL_Det_3440 */
+        if (Det_RecursionCounterReportError < DET_REPORT_ERROR_RECURSIONLIMIT)
+#endif
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
             /* Check if the parameter filter of the DET module is matched successfully */
-            if ((boolean)TRUE == Det_CheckFilterMatch(moduleId, instanceId, apiId, errorId))
+            if (TRUE == Det_CheckFilterMatch(moduleId, instanceId))
 #endif
             {
 #if (DET_SIZE_OF_ERROR_HOOK_TABLE > 0U)
-                SchM_Enter_Det_DET_EXCLUSIVE_AREA_0();
                 /* call error hooks (if configured) */
-                /* PRQA S 1290,2814,2986,1252 ++ */ /* VL_Det_1290,VL_QAC_DerefNullPtr,VL_Det_2986,VL_QAC_1252 */
-                for (uint32 iloop = 0u; (((Std_ReturnType)E_OK == retVal) && (iloop < DET_SIZE_OF_ERROR_HOOK_TABLE));
-                     ++iloop)
+                for (uint32 iloop = 0u; iloop < DET_SIZE_OF_ERROR_HOOK_TABLE; ++iloop)
                 {
                     if (NULL_PTR != Det_GetErrorHookTable[iloop])
                     {
                         retVal |= Det_GetErrorHookTable[iloop](moduleId, instanceId, apiId, errorId);
                     }
                 }
-                /* PRQA S 1290,2814,2986,1252 -- */
-                SchM_Exit_Det_DET_EXCLUSIVE_AREA_0();
 #endif /* DET_SIZE_OF_ERROR_HOOK_TABLE > 0U */
 #if (STD_ON == DET_FORWARD_TO_DLT)
                 /* forward DET error to DLT module (if configured) unless filtered out by a DLT filter */
                 Dlt_DetForwardErrorTrace(moduleId, instanceId, apiId, errorId);
 #endif /* STD_ON == DET_FORWARD_TO_DLT*/
-                if ((Std_ReturnType)E_OK == retVal)
+#if (DET_SIZE_OF_ERROR_HOOK_TABLE > 0U)
+                if (E_OK == retVal)
+#endif /* DET_SIZE_OF_ERROR_HOOK_TABLE > 0U */
                 {
                     /* Check if logging record are activated */
-                    if ((boolean)TRUE == Det_Status.LogActive)
-                    {
-                        /* Enter infinite loop */
-                        Det_EndlessLoop();
-                    }
+                    /* Enter infinite loop */
+                    Det_EndlessLoop();
                 }
             }
         }
+#if (DET_REPORT_ERROR_RECURSIONLIMIT > 0u)
         else
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+            /* Enter infinite loop */
+            Det_EndlessLoop();
         }
+        SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
+        --Det_RecursionCounterReportError;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+#endif
+#if ((DET_SIZE_OF_NON_BSW_MODULE_CFG == 0) && (DET_SIZE_OF_ERROR_HOOK_TABLE == 0U) && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(moduleId);
+        DET_PARAM_UNUSED(instanceId);
+#endif
+#if ((DET_SIZE_OF_ERROR_HOOK_TABLE == 0U) && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(apiId);
+        DET_PARAM_UNUSED(errorId);
+#endif
     }
-    DET_PARAM_UNUSED(moduleId);
-    DET_PARAM_UNUSED(instanceId);
-    DET_PARAM_UNUSED(apiId);
-    DET_PARAM_UNUSED(errorId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 2, 0x01, retVal);
     return retVal;
 }
-
+#define DET_STOP_SEC_CODE
+#include "Det_MemMap.h"
+#define DET_START_SEC_CODE
+#include "Det_MemMap.h"
 /* This API is used to report runtime error for DET modules */
-/* PRQA S 1503,3206 ++ */ /* VL_Det_1503,VL_Det_3206 */
 Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId)
-/* PRQA S 1503,3206 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 5, 0x04, moduleId, instanceId, apiId, errorId);
     Std_ReturnType retVal = E_OK;
     /* Check if the running status of the DET module is Started */
     if (Det_RunState == DET_STARTED)
     {
+#if (DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT > 0u)
         SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
-        /* increment nesting counter for recursion detection */ /* PRQA S 3440 ++ */ /* VL_Det_3440 */
-        if (++Det_RecursionCounterReportRuntimeError < DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT)
-        /* PRQA S 3440 -- */
+        ++Det_RecursionCounterReportRuntimeError;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+        /* increment nesting counter for recursion detection */
+        if (Det_RecursionCounterReportRuntimeError < DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT)
+#endif
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
             /* Check if the parameter filter of the DET module is matched successfully */
-            if ((boolean)TRUE == Det_CheckFilterMatch(moduleId, instanceId, apiId, errorId))
+            if (TRUE == Det_CheckFilterMatch(moduleId, instanceId))
 #endif
             {
-#if (DET_SIZE_OF_ERROR_HOOK_TABLE > 0U)
-                SchM_Enter_Det_DET_EXCLUSIVE_AREA_0();
-                /* call error hooks (if configured) */
-                /* PRQA S 1290,2814,2986,1252 ++ */ /* VL_Det_1290,VL_QAC_DerefNullPtr,VL_Det_2986,VL_QAC_1252 */
-                for (uint32 iloop = 0u; (((Std_ReturnType)E_OK == retVal) && (iloop < DET_SIZE_OF_ERROR_HOOK_TABLE));
-                     ++iloop)
-                {
-                    if (NULL_PTR != Det_GetErrorHookTable[iloop])
-                    {
-                        retVal |= Det_GetErrorHookTable[iloop](moduleId, instanceId, apiId, errorId);
-                    }
-                }
-                /* PRQA S 1290,2814,2986,1252 -- */
-                SchM_Exit_Det_DET_EXCLUSIVE_AREA_0();
-#endif /* DET_SIZE_OF_ERROR_HOOK_TABLE > 0U */
 #if (DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE > 0U)
-                SchM_Enter_Det_DET_EXCLUSIVE_AREA_0();
                 /* call runtime error callouts (if configured) */
-                /* PRQA S 1290,2814,2986,1252 ++ */ /* VL_Det_1290,VL_QAC_DerefNullPtr,VL_Det_2986,VL_QAC_1252 */
-                for (uint32 iloop = 0u;
-                     (((Std_ReturnType)E_OK == retVal) && (iloop < DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE));
-                     ++iloop)
+                for (uint32 iloop = 0u; iloop < DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE; ++iloop)
                 {
                     if (Det_GetRuntimeErrorCalloutTable[iloop] != NULL_PTR)
                     {
                         retVal |= Det_GetRuntimeErrorCalloutTable[iloop](moduleId, instanceId, apiId, errorId);
                     }
                 }
-                /* PRQA S 1290,2814,2986,1252 -- */
-                SchM_Exit_Det_DET_EXCLUSIVE_AREA_0();
 #endif /* DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE > 0U */
 #if (STD_ON == DET_FORWARD_TO_DLT)
                 /* forward DET error to DLT module (if configured) unless filtered out by a DLT filter */
                 Dlt_DetForwardErrorTrace(moduleId, instanceId, apiId, errorId);
 #endif /* STD_ON == DET_FORWARD_TO_DLT */
-                if ((Std_ReturnType)E_OK == retVal)
-                {
-                    /* Check if logging record are activated */
-                    if ((boolean)TRUE == Det_Status.LogActive)
-                    {
-                        /* do nothing */
-                    }
-                }
             }
         }
+#if (DET_REPORT_RUNTIMEERROR_RECURSIONLIMIT > 0u)
         else
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+            /* Enter infinite loop */
+            Det_EndlessLoop();
         }
+        SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
+        --Det_RecursionCounterReportRuntimeError;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+#endif
+#if (                                                                                        \
+    (DET_SIZE_OF_NON_BSW_MODULE_CFG == 0) && (DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE == 0U) \
+    && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(moduleId);
+        DET_PARAM_UNUSED(instanceId);
+#endif
+#if ((DET_SIZE_OF_RUNTIME_ERROR_CALLOUT_TABLE == 0U) && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(apiId);
+        DET_PARAM_UNUSED(errorId);
+#endif
     }
-    DET_PARAM_UNUSED(moduleId);
-    DET_PARAM_UNUSED(instanceId);
-    DET_PARAM_UNUSED(apiId);
-    DET_PARAM_UNUSED(errorId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 2, 0x04, retVal);
     return retVal;
 }
-
+#define DET_STOP_SEC_CODE
+#include "Det_MemMap.h"
+#define DET_START_SEC_CODE
+#include "Det_MemMap.h"
 /* This API is used to report transient fault for DET modules */
-/* PRQA S 1503 ++ */ /* VL_Det_1503 */
 Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 faultId)
-/* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Start, 5, 0x05, moduleId, instanceId, apiId, faultId);
     Std_ReturnType retVal = E_OK;
     /* Check if the running status of the DET module is Started */
     if (Det_RunState == DET_STARTED)
     {
+#if (DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT > 0u)
         SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
-        /* increment nesting counter for recursion detection */ /* PRQA S 3440 ++ */ /* VL_Det_3440 */
-        if (++Det_RecursionCounterReportTransientFault < DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT)
-        /* PRQA S 3440 -- */
+        ++Det_RecursionCounterReportTransientFault;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+        /* increment nesting counter for recursion detection */
+        if (Det_RecursionCounterReportTransientFault < DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT)
+#endif
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
             /* Check if the parameter filter of the DET module is matched successfully */
-            if ((boolean)TRUE == Det_CheckFilterMatch(moduleId, instanceId, apiId, faultId))
+            if (TRUE == Det_CheckFilterMatch(moduleId, instanceId))
 #endif
             {
-#if (DET_SIZE_OF_ERROR_HOOK_TABLE > 0U)
-                SchM_Enter_Det_DET_EXCLUSIVE_AREA_0();
-                /* call error hooks (if configured) */
-                /* PRQA S 1290,2814,2986,1252 ++ */ /* VL_Det_1290,VL_QAC_DerefNullPtr,VL_Det_2986,VL_QAC_1252 */
-                for (uint32 iloop = 0u; (((Std_ReturnType)E_OK == retVal) && (iloop < DET_SIZE_OF_ERROR_HOOK_TABLE));
-                     ++iloop)
-                {
-                    if (NULL_PTR != Det_GetErrorHookTable[iloop])
-                    {
-                        retVal |= Det_GetErrorHookTable[iloop](moduleId, instanceId, apiId, faultId);
-                    }
-                }
-                /* PRQA S 1290,2814,2986,1252-- */
-                SchM_Exit_Det_DET_EXCLUSIVE_AREA_0();
-#endif /* DET_SIZE_OF_ERROR_HOOK_TABLE > 0U */
 #if (DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE > 0U)
-                SchM_Enter_Det_DET_EXCLUSIVE_AREA_0();
                 /* call transient fault callouts (if configured) */
-                /* PRQA S 1290,2814,2986,1252 ++ */ /* VL_Det_1290,VL_QAC_DerefNullPtr,VL_Det_2986,VL_QAC_1252 */
-                for (uint32 iloop = 0u;
-                     (((Std_ReturnType)E_OK == retVal) && (iloop < DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE));
-                     ++iloop)
+                for (uint32 iloop = 0u; iloop < DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE; ++iloop)
                 {
                     if (Det_GetTransientFaultCalloutTable[iloop] != NULL_PTR)
                     {
                         retVal |= Det_GetTransientFaultCalloutTable[iloop](moduleId, instanceId, apiId, faultId);
                     }
                 }
-                /* PRQA S 1290,2814,2986,1252 -- */
-                SchM_Exit_Det_DET_EXCLUSIVE_AREA_0();
 #endif /* DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE > 0U */
 #if (STD_ON == DET_FORWARD_TO_DLT)
                 /* forward DET error to DLT module (if configured) unless filtered out by a DLT filter */
                 Dlt_DetForwardErrorTrace(moduleId, instanceId, apiId, faultId);
 #endif /* STD_ON == DET_FORWARD_TO_DLT */
-                if ((Std_ReturnType)E_OK == retVal)
-                {
-                    /* Check if logging record are activated */
-                    if ((boolean)TRUE == Det_Status.LogActive)
-                    {
-                        /* do nothing */
-                    }
-                }
             }
         }
+#if (DET_REPORT_TRANSIENTFAULT_RECURSIONLIMIT > 0u)
         else
         {
-            SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+            /* Enter infinite loop */
+            Det_EndlessLoop();
         }
+        SchM_Enter_Det_DET_EXCLUSIVE_AREA_1();
+        --Det_RecursionCounterReportTransientFault;
+        SchM_Exit_Det_DET_EXCLUSIVE_AREA_1();
+#endif
+#if (                                                                                          \
+    (DET_SIZE_OF_NON_BSW_MODULE_CFG == 0) && (DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE == 0U) \
+    && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(moduleId);
+        DET_PARAM_UNUSED(instanceId);
+#endif
+#if ((DET_SIZE_OF_TRANSIENT_FAULT_CALLOUT_TABLE == 0U) && (STD_OFF == DET_FORWARD_TO_DLT))
+        DET_PARAM_UNUSED(apiId);
+        DET_PARAM_UNUSED(faultId);
+#endif
     }
-    DET_PARAM_UNUSED(moduleId);
-    DET_PARAM_UNUSED(instanceId);
-    DET_PARAM_UNUSED(apiId);
-    DET_PARAM_UNUSED(faultId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Det, 0, Bsw_Return, 2, 0x05, retVal);
     return retVal;
 }
-
 #define DET_STOP_SEC_CODE
 #include "Det_MemMap.h"
 
@@ -372,51 +385,38 @@ Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8
 #if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
 #define DET_START_SEC_CODE
 #include "Det_MemMap.h"
-
 /* This API is used to check the matching result of parameter filtering */
-DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 faultId)
+DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId)
 {
-    boolean retVal = (boolean)TRUE;
+    boolean retVal = TRUE;
     /* Check if the range of the module ID is not BSW */
-    /* PRQA S 2814,2824,1290 ++ */ /* VL_QAC_DerefNullPtr,VL_QAC_DerefNullPtr,VL_Det_1290 */
-    if ((NULL_PTR != Det_ConfigPtr) && (moduleId >= DET_MAX_BSW_MODULE_ID))
+    if (moduleId >= DET_MAX_BSW_MODULE_ID)
     {
-        boolean               ModuleIdCheckFlag   = (boolean)FALSE;
-        boolean               InstanceIdCheckFlag = (boolean)FALSE;
-        const Det_ModuleType* moduleCfg           = Det_ConfigPtr->ModuleConfigPtr;
-        retVal                                    = (boolean)FALSE;
-        for (uint16 iloop = 0; (iloop < Det_ConfigPtr->ModuleConfigNbr) && ((boolean)FALSE == ModuleIdCheckFlag);
-             ++iloop)
+        const Det_ModuleType* moduleCfg = Det_ConfigPtr->ModuleConfigPtr;
+        retVal                          = FALSE;
+        uint16 moduleConfigNbr          = Det_ConfigPtr->ModuleConfigNbr;
+        for (uint16 iloop = 0u; (iloop < moduleConfigNbr) && (FALSE == retVal); ++iloop)
         {
-            const Det_ModuleType module = moduleCfg[iloop];
             /* Check if the request module ID is match as the user configuration ID */
-            if (module.ModuleId == moduleId)
+            if (moduleCfg->ModuleId == moduleId)
             {
-                for (uint16 jloop = 0; (jloop < module.InstanceConfigNbr) && ((boolean)FALSE == InstanceIdCheckFlag);
-                     jloop++)
+                uint16 instanceConfigNbr = moduleCfg->InstanceConfigNbr;
+                for (uint16 jloop = 0u; (jloop < instanceConfigNbr) && (FALSE == retVal); jloop++)
                 {
                     /* Check if the request instance ID is match as the user configuration ID */
-                    if (module.InstanceConfigPtr[jloop] == instanceId)
+                    if (moduleCfg->InstanceConfigPtr[jloop] == instanceId)
                     {
-                        InstanceIdCheckFlag = (boolean)TRUE;
+                        retVal = TRUE;
                     }
                 }
-                ModuleIdCheckFlag = (boolean)TRUE;
             }
-        }
-        /* Check if the module ID and instance ID are match */
-        if (((boolean)TRUE == ModuleIdCheckFlag) && ((boolean)TRUE == InstanceIdCheckFlag))
-        {
-            retVal = (boolean)TRUE;
+            moduleCfg++;
         }
     }
-    /* PRQA S 2814,2824,1290 -- */
-    DET_PARAM_UNUSED((apiId));
-    DET_PARAM_UNUSED((faultId));
     return retVal;
 }
-/* PRQA S 6030,2991,2995 -- */
-
 #define DET_STOP_SEC_CODE
 #include "Det_MemMap.h"
+/* PRQA S 6030 -- */
+
 #endif

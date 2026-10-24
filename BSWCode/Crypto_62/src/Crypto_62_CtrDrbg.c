@@ -22,17 +22,9 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 2997,2889,2972,1503,1505,1532 ++ */                                              /* VL_Crypto_62_General */
+/* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 2997,2889,2972,1503,1505,1532,6050,6060,6070,6080,6030,6040 ++ */                /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */                                                                      /* VL_MTR_Crypto_62_STCYC */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMMODE_CTRDRBG == STD_ON)
@@ -47,21 +39,32 @@
 /* ========================================== internal function declarations ======================================== */
 #define CRYPTO_62_START_SEC_CODE
 #include "Crypto_62_MemMap.h"
-
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
     uint8*                     output,
     const uint8*               data,
     uint32                     data_len,
     Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Ctr_Drbg_Update_Internal(
     Crypto_Ctr_Drbg_Context*   ctx,
     const uint8                data[CRYPTO_CTR_DRBG_SEEDLEN],
     Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_ctr_drbg_reseed_internal(
     Crypto_Ctr_Drbg_Context* ctx,
     const uint8*             additional,
     uint32                   len,
     uint32                   nonce_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -80,6 +83,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_ctr_drbg_reseed_internal(
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Init(Crypto_Ctr_Drbg_Context* ctx, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Ctr_Drbg_Context));
@@ -101,6 +106,8 @@ void Crypto_Ctr_Drbg_Init(Crypto_Ctr_Drbg_Context* ctx, Crypto_AlgorithmFamilyTy
     ctx->reseed_interval = CRYPTO_CTR_DRBG_RESEED_INTERVAL;
     ctx->algorithmfamily = algorithmfamily;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -112,10 +119,14 @@ void Crypto_Ctr_Drbg_Init(Crypto_Ctr_Drbg_Context* ctx, Crypto_AlgorithmFamilyTy
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_Prediction_Resistance(Crypto_Ctr_Drbg_Context* ctx, uint32 resistance)
 {
     ctx->prediction_resistance = resistance;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -127,10 +138,14 @@ void Crypto_Ctr_Drbg_Set_Prediction_Resistance(Crypto_Ctr_Drbg_Context* ctx, uin
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_Entropy_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len)
 {
     ctx->entropy_len = len;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -143,6 +158,8 @@ void Crypto_Ctr_Drbg_Set_Entropy_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len)
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ctr_Drbg_Set_Nonce_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -167,6 +184,8 @@ Std_ReturnType Crypto_Ctr_Drbg_Set_Nonce_Len(Crypto_Ctr_Drbg_Context* ctx, uint3
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -178,10 +197,14 @@ Std_ReturnType Crypto_Ctr_Drbg_Set_Nonce_Len(Crypto_Ctr_Drbg_Context* ctx, uint3
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_reseed_interval(Crypto_Ctr_Drbg_Context* ctx, uint32 interval)
 {
     ctx->reseed_interval = interval;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -197,6 +220,8 @@ void Crypto_Ctr_Drbg_Set_reseed_interval(Crypto_Ctr_Drbg_Context* ctx, uint32 in
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
     uint8*                     output,
     const uint8*               data,
@@ -235,9 +260,9 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
      *     (Total is padded to a multiple of 16-bytes with zeroes)
      */
     p = buf + CRYPTO_CTR_DRBG_BLOCKSIZE;
-    CRYPTO_PUT_UINT32_BE(data_len, p, 0); /* PRQA S 3138 */ /* VL_Crypto_62_General */
+    CRYPTO_PUT_UINT32_BE(data_len, p, 0); /* PRQA S 3138 */ /* VL_QAC_Crypto */
     p += CRYPTO_CONST_4 + CRYPTO_CONST_3;
-    *p++ = CRYPTO_CTR_DRBG_SEEDLEN; /* PRQA S 3387,3440 */ /* VL_Crypto_62_General */
+    *p++ = CRYPTO_CTR_DRBG_SEEDLEN; /* PRQA S 3387,3440 */ /* VL_QAC_Crypto */
     (void)IStdLib_MemCpy(p, data, data_len);
     p[data_len] = CRYPTO_CONST_0x80;
 
@@ -259,7 +284,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
     else
     {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-        Crypto_Des_Setkey(&des3_ctx, key);
+        Crypto_Des_Setkey((uint32*)&des3_ctx, key);
 #endif
     }
 
@@ -291,7 +316,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
             else
             {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-                Crypto_3Des_Crypt_Ecb(&des3_ctx, chain, chain);
+                Crypto_3Des_Crypt_Internal(&des3_ctx, chain, chain);
 #endif
             }
         }
@@ -316,7 +341,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
     else
     {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-        Crypto_Des_Setkey(&des3_ctx, tmp);
+        Crypto_Des_Setkey((uint32*)&des3_ctx, tmp);
 #endif
     }
 
@@ -338,7 +363,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
         else
         {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-            Crypto_3Des_Crypt_Ecb(&des3_ctx, iv, iv);
+            Crypto_3Des_Crypt_Internal(&des3_ctx, iv, iv);
 
 #endif
         }
@@ -354,6 +379,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -368,6 +395,8 @@ exit:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Ctr_Drbg_Update_Internal(
     Crypto_Ctr_Drbg_Context*   ctx,
     const uint8                data[CRYPTO_CTR_DRBG_SEEDLEN],
@@ -403,7 +432,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Ctr_Drbg_Update_Internal(
         else
         {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-            Crypto_3Des_Crypt_Ecb(&ctx->des3_ctx, ctx->counter, p);
+            Crypto_3Des_Crypt_Internal(&ctx->des3_ctx, ctx->counter, p);
 
 #endif
         }
@@ -425,7 +454,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Ctr_Drbg_Update_Internal(
     else
     {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-        Crypto_Des_Setkey(&ctx->des3_ctx, tmp);
+        Crypto_Des_Setkey((uint32*)&ctx->des3_ctx, tmp);
 #endif
     }
 
@@ -435,6 +464,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -450,6 +481,8 @@ exit:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_update(
     Crypto_Ctr_Drbg_Context*   ctx,
     const uint8*               additional,
@@ -478,6 +511,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -494,6 +529,8 @@ exit:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType
     Crypto_ctr_drbg_reseed_internal(Crypto_Ctr_Drbg_Context* ctx, const uint8* additional, uint32 len, uint32 nonce_len)
 {
@@ -557,6 +594,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -573,10 +612,14 @@ exit:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_reseed(Crypto_Ctr_Drbg_Context* ctx, const uint8* additional, uint32 len)
 {
     return Crypto_ctr_drbg_reseed_internal(ctx, additional, len, 0u);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -597,9 +640,11 @@ Std_ReturnType Crypto_ctr_drbg_reseed(Crypto_Ctr_Drbg_Context* ctx, const uint8*
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_seed(
     Crypto_Ctr_Drbg_Context* ctx,
-    /* PRQA S 1336,3672++ */ /* VL_Crypto_62_General */
+    /* PRQA S 1336,3672++ */ /* VL_QAC_Crypto */
     Std_ReturnType (*f_entropy)(void*, uint8*, uint32),
     /* PRQA S 1336,3672-- */
     void*        p_entropy,
@@ -623,7 +668,7 @@ Std_ReturnType Crypto_ctr_drbg_seed(
      * grab for a nonce (see Crypto_ctr_drbg_set_nonce_len()).
      * If it's -1, indicating that the entropy nonce length was not set
      * explicitly, use a sufficiently large nonce for security. */
-    /* PRQA S 3396++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3396++ */ /* VL_QAC_Crypto */
     nonce_len = (uint32)ctx->reseed_counter;
     /* PRQA S 3396-- */
     /* Initialize with an empty key. */
@@ -636,7 +681,7 @@ Std_ReturnType Crypto_ctr_drbg_seed(
     else
     {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-        Crypto_Des_Setkey(&ctx->des3_ctx, key);
+        Crypto_Des_Setkey((uint32*)&ctx->des3_ctx, key);
 #endif
     }
     ret = Crypto_ctr_drbg_reseed_internal(ctx, custom, len, nonce_len);
@@ -647,6 +692,8 @@ Std_ReturnType Crypto_ctr_drbg_seed(
     }
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -668,6 +715,8 @@ Std_ReturnType Crypto_ctr_drbg_seed(
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_random_with_add(
     void*        p_rng,
     uint8*       output,
@@ -746,7 +795,7 @@ Std_ReturnType Crypto_ctr_drbg_random_with_add(
         else
         {
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-            Crypto_3Des_Crypt_Ecb(&ctx->des3_ctx, ctx->counter, locals.tmp);
+            Crypto_3Des_Crypt_Internal(&ctx->des3_ctx, ctx->counter, locals.tmp);
 
 #endif
         }
@@ -771,6 +820,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -786,6 +837,8 @@ exit:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_random(void* p_rng, uint8* output, uint32 output_len)
 {
     Std_ReturnType           ret = E_NOT_OK;
@@ -795,6 +848,8 @@ Std_ReturnType Crypto_ctr_drbg_random(void* p_rng, uint8* output, uint32 output_
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the counter random process .
@@ -807,6 +862,8 @@ Std_ReturnType Crypto_ctr_drbg_random(void* p_rng, uint8* output, uint32 output_
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType          ret = E_NOT_OK;
@@ -815,10 +872,10 @@ Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType
     uint8*                  buf = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
     uint8                   key[CRYPTO_CONST_16];
     uint32                  keylength = CRYPTO_CONST_16;
-    uint32                  outLen    = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint64                  outLen    = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
     ret                               = Crypto_62_KeyElementGet(
         Crypto_62_StoredJob[objectId].cryptoKeyId,
-        /* PRQA S 1258++ */ /* VL_Crypto_62_General */
+        /* PRQA S 1258++ */ /* VL_QAC_Crypto */
         CRYPTO_KE_RANDOM_SEED_STATE,
         /* PRQA S 1258-- */
         &key[0],
@@ -844,10 +901,32 @@ Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+/*
+ *  This function resets CTR_DRBG context to the state immediately
+ *  after initial call of Crypto_ctr_drbg_init().
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_ctr_drbg_free(Crypto_Ctr_Drbg_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    Crypto_Aes_Free(&ctx->aes_ctx);
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Ctr_Drbg_Context));
+
+    ctx->reseed_interval = CRYPTO_CTR_DRBG_RESEED_INTERVAL;
+    ctx->reseed_counter  = -1;
+}
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 #endif
 
 /* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 -- */
-/* PRQA S 2997,2889,2972,1503,1505,1532 -- */
+/* PRQA S 2997,2889,2972,1503,1505,1532,6050,6060,6070,6080,6030,6040 -- */

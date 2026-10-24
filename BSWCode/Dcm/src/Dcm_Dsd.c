@@ -50,6 +50,8 @@ DCM_LOCAL uint8 Dcm_TempMetaData[DCM_PROTOCOLROW_NUM][DCM_METADATA_SIZE];
 #endif
 /* ========================================== internal function declarations ======================================== */
 #if ((DCM_SUPPLIER_NOTIFICATION_NUM > 0u) || (DCM_SUPPLIER_NOTIFICATION_NUM > 0u))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by DsdInternal_RxIndication do serviceRequest notification indication
  * @param[in]     protocolId      : current protocol Id
@@ -66,7 +68,11 @@ DCM_LOCAL Std_ReturnType DsdInternal_HandleIndication(
     uint8                                        protocolId,
     const Dcm_DsdServiceRequestNotificationType* notification,
     uint8                                        notificationNum);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by DsdInternal_RxIndication to check Service condition
@@ -82,6 +88,10 @@ DCM_LOCAL Std_ReturnType DsdInternal_HandleIndication(
  */
 DCM_LOCAL Std_ReturnType
     DsdInternal_CheckServiceCondition(uint16 ConnectionId, uint16* servIndex, Dcm_NegativeResponseCodeType* errorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by DsdInternal_RxIndication to check subService condition
@@ -101,8 +111,12 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckSubServiceCondition(
     uint16                        servIndex,
     Dcm_NegativeResponseCodeType* errorCode,
     uint16*                       subServIndex);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_ENABLE_SECURITY_EVENT_REPORTING)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by DsdInternal_SendResponse to report IdsM security events
  * @param[in]     ErrorCode : the nrc to send
@@ -112,7 +126,11 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckSubServiceCondition(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DsdInternal_SecurityEventReport(Dcm_NegativeResponseCodeType ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check service authentication, security and session
@@ -128,6 +146,10 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckServiceAuth(
     uint16                        ConnectionId,
     const Dcm_DsdServiceType*     DcmDsdServicePtr,
     Dcm_NegativeResponseCodeType* errorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         prepare for actual transmission
@@ -139,6 +161,8 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckServiceAuth(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DsdInternal_HandleTransmit(uint8 ProtocolId, Dcm_NegativeResponseCodeType errorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -217,7 +241,10 @@ void DsdInternal_RxIndication(uint8 protocolId)
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * asynchronous confirmation handled in mainfunction (involving callout to SWC, shall not be executed in ISR context)
  */
@@ -234,6 +261,8 @@ void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType
     uint16                        connectionId = Dcm_ProtocolCtrl[protocolId].ConnectionId;
 
     DcmInternal_GetMetaDataSATA(protocolId, &sourceAddress, NULL_PTR);
+#else
+    DCM_UNUSED(protocolId);
 #endif
 
 #if ((DCM_MANUFACTURER_NOTIFICATION_NUM == 0u) && (DCM_SUPPLIER_NOTIFICATION_NUM == 0u))
@@ -287,7 +316,10 @@ void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * assemble pduInfo, deal with positive/negative response suppression, call DslInternal_ProcessTransmit to synchronously
  * send on targeted application, set flag to asynchronously send on different application
@@ -412,7 +444,8 @@ DCM_LOCAL void DsdInternal_HandleTransmit(uint8 ProtocolId, Dcm_NegativeResponse
         pduInfo->SduLength = (PduLengthType)msgContextPtr->resDataLen + 1u;
     }
 
-    if ((DCM_COMM_FULL_COMMUNICATION == Dcm_CommState[connectionId]) && (Dcm_ResRejectedDueToAFTER_RESET == FALSE))
+    if ((DCM_COMM_FULL_COMMUNICATION == Dcm_CommState[connectionId])
+        && ((Dcm_ResRejectedDueToAFTER_RESET == FALSE) || (errorCode != DCM_POS_RESP)))
     {
         protocolCtrlPtr->TxCopyLen = 0u;
 #if (STD_ON == DCM_MULTICORE_ENABLED)
@@ -434,7 +467,10 @@ DCM_LOCAL void DsdInternal_HandleTransmit(uint8 ProtocolId, Dcm_NegativeResponse
         DslInternal_SetStateIdle(ProtocolId, &confirmationStatus, TRUE, FALSE);
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * iterate over servicetable to check whether the requested service is configured and set the configuration index
  */
@@ -469,7 +505,10 @@ Std_ReturnType DsdInternal_CheckService(uint8 protocolId, uint16* servIndex, con
 
     return furtherProcess;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * iterate over servicetable to check whether the requested subService is configured and set the configuration index
  */
@@ -542,8 +581,11 @@ Std_ReturnType DsdInternal_CheckSubService(
 
     return furtherProcess;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((DCM_SUPPLIER_NOTIFICATION_NUM > 0u) || (DCM_SUPPLIER_NOTIFICATION_NUM > 0u))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * iterate over requestNotification(supplier/Manufacturer) to call indication
  */
@@ -613,11 +655,13 @@ DCM_LOCAL Std_ReturnType DsdInternal_HandleIndication(
 
     return furtherProcess;
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 
 #if (STD_ON == DCM_ENABLE_SECURITY_EVENT_REPORTING)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void DsdInternal_SecurityEventReport(Dcm_NegativeResponseCodeType ErrorCode)
 {
     switch (ErrorCode) /* PRQA S 3315 */ /* VL_Dcm_3315 */
@@ -699,8 +743,12 @@ DCM_LOCAL void DsdInternal_SecurityEventReport(Dcm_NegativeResponseCodeType Erro
     }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* do general condition check for services */
 DCM_LOCAL Std_ReturnType
     DsdInternal_CheckServiceCondition(uint16 ConnectionId, uint16* servIndex, Dcm_NegativeResponseCodeType* errorCode)
@@ -752,7 +800,10 @@ DCM_LOCAL Std_ReturnType
 
     return furtherProcess;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType DsdInternal_CheckServiceAuth(
     uint16                        ConnectionId,
     const Dcm_DsdServiceType*     DcmDsdServicePtr,
@@ -799,7 +850,10 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckServiceAuth(
 
     return furtherProcess;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* do general condition check for subServices */
 DCM_LOCAL Std_ReturnType DsdInternal_CheckSubServiceCondition(
     uint8                         protocolId,
@@ -864,3 +918,5 @@ DCM_LOCAL Std_ReturnType DsdInternal_CheckSubServiceCondition(
 
     return furtherProcess;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"

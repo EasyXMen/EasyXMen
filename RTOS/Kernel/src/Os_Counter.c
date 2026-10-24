@@ -12,73 +12,117 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Counter.c                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : counter manager                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Counter.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Counter API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Hal_Define.h"
+#include "Os_Counter.h"
+#include "Os_Alarm.h"
+#include "Os_Sprot.h"
+#include "Os_ScheduleTable.h"
+#include "Os_Rpc.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Arti.h"
 
+/* ===================================================== macros ===================================================== */
+
+/* ================================================ type definitions ================================================ */
+
+/* ============================================ external data definitions =========================================== */
+
+/* ============================================ internal data definitions =========================================== */
+
+/* ========================================== internal function declarations ======================================== */
 #if (CFG_COUNTER_MAX > 0U)
-/*=======[M A C R O S]========================================================*/
-
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
-
-/*=======[E X T E R N A L   D A T A]==========================================*/
-
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[I N T E R N A L   D A T A]=========================================*/
-#define OS_START_SEC_VAR_CLONE_16
-#include "Os_MemMap.h"
-static Os_CounterType Os_CfgCounterMax; /* PRQA S 3218 */ /* VL_Os_3218 */
-#define OS_STOP_SEC_VAR_CLONE_16
-#include "Os_MemMap.h"
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Init the counter control block>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * @brief           Internally increments a counter and processes related alarms and schedule tables
+ * @param[in]       counterId: ID of the counter to increment
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
  */
-/******************************************************************************/
-void Os_InitCounter(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+OS_LOCAL void Os_IncrementCounterInternal(CounterType counterId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief           Retrieves the current value of a counter
+ * @param[in]       counterId: ID of the counter to query
+ * @param[out]      value: Pointer where to store the counter value
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetCounterValue(CounterType counterId, TickRefType value);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief           Calculates elapsed ticks since a previous counter value
+ * @param[in]       counterId: ID of the counter to query
+ * @param[inout]    value: Previous counter value (updated with current value)
+ * @param[out]      elapsedValue: Pointer where to store the elapsed ticks
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetElapsedValue(CounterType counterId, TickRefType value, TickRefType elapsedValue);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+/* ========================================== external function definitions ========================================= */
+#if (CFG_COUNTER_MAX > 0U)
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Init the counter control block
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitCounter(void)
+/* PRQA S 1532 -- */
 {
-    Os_CounterType i;
-    Os_CCBType*    pCCB;
-    uint16         vCoreId = Os_SCB.sysCore;
+    Os_CoreIdType  coreId       = Os_GetCoreIdLocal();
+    Os_CounterType idStartRange = Os_CounterRange[coreId].start;
+    Os_CounterType idEndRange   = Os_CounterRange[coreId].end;
 
-    Os_CounterCfg    = Os_CounterCfg_Inf[vCoreId];
-    Os_CCB           = Os_CCB_Inf[vCoreId];
-    Os_CfgCounterMax = Os_CfgCounterMax_Inf[vCoreId];
-
-    for (i = 0U; i < Os_CfgCounterMax; i++)
+    if (idStartRange > idEndRange)
     {
-        pCCB                    = &Os_CCB[i];
-        pCCB->counterCurVal     = 0u;
-        pCCB->counterLastVal    = 0u;
-        pCCB->counterAlmQue     = OS_ALARM_INVALID;
-        pCCB->counterStListHead = NULL_PTR;
+        Os_Panic();
+    }
+
+    Os_CCBType* pCCB = NULL_PTR;
+    for (uint16 i = (uint16)idStartRange; i < (uint16)idEndRange; i++)
+    {
+        pCCB                 = Os_CCB[i];
+        pCCB->CounterCurVal  = 0u;
+        pCCB->CounterLastVal = 0u;
+#if (CFG_ALARM_MAX > 0)
+        pCCB->CounterAlmQue = INVALID_ALARM;
+#endif
+
+#if (CFG_SCHEDTBL_MAX > 0U)
+        pCCB->CounterStListHead = NULL_PTR;
+#endif
     }
 }
 #define OS_STOP_SEC_CODE
@@ -86,31 +130,15 @@ void Os_InitCounter(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Calculate the absolute ticks that baseTick add the
- *                       offset>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-baseTick[in]   <the begin point>
- * param-offset[in]     <the offset from begin point>
- * param-CounterID[in]  <counter id>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <Os_TickType>
- * PreCondition         <None>
- * CallByAPI            <SetRelAlarm and so on>
- * REQ ID               <None>
+/**
+ * Calculate the absolute ticks that baseTick add the
+ *                       offset
  */
-/******************************************************************************/
-Os_TickType Os_CalcAbsTicks(Os_TickType baseTick, Os_TickType offset, Os_CounterType CounterID)
+Os_TickType Os_CalcAbsTicks(Os_TickType baseTick, Os_TickType offset, Os_CounterType counterId)
 {
-    Os_TickType counterTwiceMaxTicks;
     Os_TickType counterAbsTicks;
-
     /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-    counterTwiceMaxTicks = (Os_CounterCfg[CounterID].osCounterMaxAllowedValue * 2u) + 1u;
+    Os_TickType counterTwiceMaxTicks = (Os_CounterCfg[counterId].CounterMaxAllowedValue * 2u) + 1u;
     /* PRQA S 3120 -- */
 
     if ((baseTick + offset) <= counterTwiceMaxTicks)
@@ -129,33 +157,18 @@ Os_TickType Os_CalcAbsTicks(Os_TickType baseTick, Os_TickType offset, Os_Counter
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Get the distance from baseTick to destTick>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-baseTick[in]   <the begin point >
- * param-destTick[in]   <the end point>
- * param-CounterID[in]  <counter id>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <Os_TickType>
- * PreCondition         <None>
- * CallByAPI            <GetAlarm and so on>
- * REQ ID               <None>
+/**
+ * Get the distance from baseTick to destTick
  */
-/******************************************************************************/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-Os_TickType Os_GetDistance(Os_TickType baseTick, Os_TickType destTick, Os_CounterType CounterID)
+Os_TickType Os_GetDistance(Os_TickType baseTick, Os_TickType destTick, Os_CounterType counterId)
 /* PRQA S 1532 -- */
 {
-    Os_TickType counterTwiceMaxTicks;
     Os_TickType counterDistanceTicks;
-
     /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-    counterTwiceMaxTicks = (Os_CounterCfg[CounterID].osCounterMaxAllowedValue * 2u) + 1u;
+    Os_TickType counterTwiceMaxTicks = (Os_CounterCfg[counterId].CounterMaxAllowedValue * 2u) + 1u;
     /* PRQA S 3120 -- */
+
     if (baseTick <= destTick)
     {
         counterDistanceTicks = destTick - baseTick;
@@ -174,530 +187,380 @@ Os_TickType Os_GetDistance(Os_TickType baseTick, Os_TickType destTick, Os_Counte
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Increment Hardware counter>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-CounterID[in]  <reference to counter>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <ISR>
- * REQ ID               <None>
+/**
+ * Increment counter internal
  */
-/******************************************************************************/
+OS_LOCAL void Os_IncrementCounterInternal(CounterType counterId)
+{
+    Os_CCBType* pCcb = Os_CCB[counterId];
+    OS_HAL_DECLARE_CRITICAL();
+
+    /* update the Counter value. */
+    OS_HAL_ENTRY_CRITICAL();
+    pCcb->CounterLastVal = pCcb->CounterCurVal;
+    pCcb->CounterCurVal  = Os_CalcAbsTicks(pCcb->CounterCurVal, 1U, counterId);
+    OS_HAL_EXIT_CRITICAL();
+
+/* Alarm. */
+#if (CFG_ALARM_MAX > 0)
+    Os_WorkAlarm(counterId);
+#endif
+
+/* Schedule table. */
+#if (CFG_SCHEDTBL_MAX > 0U)
+    Os_WorkSchedTbl(counterId);
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Increment Hardware counter
+ */
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-StatusType Os_IncrementHardCounter(CounterType CounterID)
+void Os_IncrementHardCounter(CounterType counterId)
 /* PRQA S 1532 -- */
 {
-    Os_CCBType* pCcb;
-    StatusType  err = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    const Os_CounterCfgType* pCounterCfgRef;
-#endif
-
-    /* SWS_Os_00629:A COUNTER belonging to an OS-Application shall be
-     * incremented by the core on which the OS-Application resides. */
-    if (Os_SCB.sysCore != Os_GetObjCoreId(CounterID))
-    {
-        err = E_OS_CORE;
-    }
-    else
-    {
-        CounterID = Os_GetObjLocalId(CounterID); /* PRQA S 1338 */ /* VL_Os_1338 */
-
-/* OS285 :check CounterID */
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-        if (CounterID >= Os_CfgCounterMax)
-        {
-            err = E_OS_ID;
-        }
-        else
-        {
-            /* OS285 :check configuration, if the counter is a
-             * software counter, E_OS_ID shall be returned */
-            pCounterCfgRef = &Os_CounterCfg[CounterID];
-            if (COUNTER_SOFTWARE == pCounterCfgRef->osCounterType)
-            {
-                err = E_OS_ID;
-            }
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
-        {
-            /* update the Counter value. */
-            pCcb                 = &Os_CCB[CounterID];
-            pCcb->counterLastVal = pCcb->counterCurVal;
-            /* PRQA S 1290 ++ */ /* VL_Os_1290 */
-            pCcb->counterCurVal = Os_CalcAbsTicks(pCcb->counterCurVal, 1, CounterID);
-            /* PRQA S 1290 -- */
-
-/* Alarm. */
-#if (CFG_ALARM_MAX > 0)
-            Os_WorkAlarm(CounterID);
-#endif
-
-/* Schedule table. */
-#if (CFG_SCHEDTBL_MAX > 0U)
-            Os_WorkSchedTbl(CounterID);
-#endif
-        }
-    }
-
-    return err;
+    Os_IncrementCounterInternal(counterId);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Get current counter value>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-CounterID[in]  <reference to counter>
- * Param-Value[out]     <current value of the counter>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Get current counter value
  */
-/******************************************************************************/
-void Os_GetCounterValue(CounterType CounterID, TickRefType Value) /* PRQA S 1505 */ /* VL_Os_1505 */
+OS_LOCAL void Os_GetCounterValue(CounterType counterId, TickRefType value)
 {
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_AUTOSAR_CORES > 1)
-    CounterID = Os_GetObjLocalId(CounterID); /* PRQA S 1338 */ /* VL_Os_1338 */
-#endif
+    OS_HAL_DECLARE_CRITICAL();
 
     /* Timer type. */
-    OS_ARCH_ENTRY_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
     /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-    *Value = Os_CCB[CounterID].counterCurVal % (Os_CounterCfg[CounterID].osCounterMaxAllowedValue + 1u);
+    *value = Os_CCB[counterId]->CounterCurVal % (Os_CounterCfg[counterId].CounterMaxAllowedValue + 1u);
     /* PRQA S 2834 -- */
-    OS_ARCH_EXIT_CRITICAL();
+    OS_HAL_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                    <Get elapsed counter value>
- * Service ID               <None>
- * Sync/Async               <Synchronous>
- * Reentrancy               <Reentrant>
- * param-CounterID[in]      <reference to counter>
- * Param-Value[out]         <current value of the counter>
- * Param-ElapsedValue[out]  <Elapsed value of the counter>
- * Param-Name[in/out]       <None>
- * return                   <None>
- * PreCondition             <None>
- * CallByAPI                <None>
- * REQ ID                   <None>
+/**
+ * Get elapsed counter value
  */
-/******************************************************************************/
-StatusType Os_GetElapsedValue(CounterType CounterID, TickRefType Value, TickRefType ElapsedValue) /* PRQA S 1505 */ /* VL_Os_1505 */
+OS_LOCAL void Os_GetElapsedValue(CounterType counterId, TickRefType value, TickRefType elapsedValue)
 {
-#if (OS_AUTOSAR_CORES > 1)
-    CounterID = Os_GetObjLocalId(CounterID); /* PRQA S 1338 */ /* VL_Os_1338 */
-#endif
+    OS_HAL_DECLARE_CRITICAL();
+    Os_TickType counterMaxAllowedValue = Os_CounterCfg[counterId].CounterMaxAllowedValue;
 
-    StatusType  err = E_OK;
-    Os_TickType counterCurval;
-    Os_TickType counterMaxAllowedValue;
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+    /* PRQA S 2834 ++ */ /* VL_Os_2834 */
+    Os_TickType counterCurval = Os_CCB[counterId]->CounterCurVal % (counterMaxAllowedValue + 1u);
 
-    if (*Value > Os_CounterCfg[CounterID].osCounterMaxAllowedValue)
-    {
-        err = E_OS_VALUE;
-    }
-    else
-    {
-        counterMaxAllowedValue = Os_CounterCfg[CounterID].osCounterMaxAllowedValue;
+    *elapsedValue = ((counterCurval + counterMaxAllowedValue) - (*value)) % counterMaxAllowedValue;
+    /* PRQA S 2834 -- */
 
-        OS_ARCH_ENTRY_CRITICAL();
-        /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-        counterCurval = Os_CCB[CounterID].counterCurVal % (counterMaxAllowedValue + 1u);
-        *ElapsedValue = ((counterCurval + counterMaxAllowedValue) - (*Value)) % counterMaxAllowedValue;
-        /* PRQA S 2834 -- */
-        *Value = counterCurval;
-        OS_ARCH_EXIT_CRITICAL();
-    }
-    return err;
+    *value = counterCurval;
+    OS_HAL_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (FALSE == RTE_USER_MODE)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Increment counter>
- * Service ID           <0x0f>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-CounterID[in]  <reference to counter>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <ISR>
- * REQ ID               <None>
+/**
+ * Increment counter
  */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532, 1503 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
+/* PRQA S 3006,1532,3408 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_Os_3408 */
+/* PRQA S 6070,1503,1512 ++ */ /* VL_MTR_Os_STCAL, VL_QAC_NoUsedApi, VL_Os_1512 */
 StatusType IncrementCounter(CounterType CounterID)
-/* PRQA S 3006, 1532, 1503 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+/* PRQA S 6070,1503,1512 -- */
+/* PRQA S 3006,1532,3408 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
-    OS_ARCH_DECLARE_CRITICAL();
-    Os_CCBType* pCcb;
-
-    StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_IncrementCounter);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    /* SWS_Os_00629:A COUNTER belonging to an OS-Application shall be
-     * incremented by the core on which the OS-Application resides. */
-    if (Os_SCB.sysCore != Os_GetObjCoreId(CounterID))
-    {
-        err = E_OS_CORE;
-    }
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    else if (Os_GetObjLocalId(CounterID) >= Os_CfgCounterMax)
-    {
-        err = E_OS_ID;
-    }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    else if (Os_WrongContext(OS_CONTEXT_INCREMENT_COUNTER) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_COUNTER, CounterID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    else
-    {
-#if (OS_AUTOSAR_CORES > 1)
-
-        CounterID = Os_GetObjLocalId(CounterID); /* PRQA S 1338 */ /* VL_Os_1338 */
-
-#endif
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-        const Os_CounterCfgType* pCounterCfgRef;
-        /* SWS_Os_00285:If the input parameter <CounterID> in a call of
-         * IncrementCounter() is not valid OR the counter is a hardware
-         * counter,IncrementCounter() shall return E_OS_ID.  */
-
-        pCounterCfgRef = &Os_CounterCfg[CounterID];
-        if (COUNTER_HARDWARE == pCounterCfgRef->osCounterType)
-        {
-            err = E_OS_ID;
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
-        {
-            pCcb = &Os_CCB[CounterID];
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            pCcb->counterLastVal = pCcb->counterCurVal;
-            /* PRQA S 1290 ++ */ /* VL_Os_1290 */
-            pCcb->counterCurVal = Os_CalcAbsTicks(pCcb->counterCurVal, 1, CounterID);
-            /* PRQA S 1290 -- */
-            OS_ARCH_EXIT_CRITICAL();
-
-/* Alarm. */
-#if (CFG_ALARM_MAX > 0)
-            Os_WorkAlarm(CounterID);
-#endif
-
-/* Schedule table. */
-#if (CFG_SCHEDTBL_MAX > 0U)
-            Os_WorkSchedTbl(CounterID);
-#endif
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
-        Os_TraceErrorHook(OSError_Save_IncrementCounter(CounterID), OSServiceId_IncrementCounter, err);
-        /* PRQA S 3138 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    return err;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Get current counter value>
- * Service ID           <0x10>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-CounterID[in]  <reference to counter>
- * Param-Value[out]     <current value of the counter>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532, 1503 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
-StatusType GetCounterValue(CounterType CounterID, TickRefType Value)
-/* PRQA S 3006, 1532, 1503 -- */
-/* PRQA S 6010, 6030, 6070 -- */
-{
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
+    Os_CoreIdType curCoreId = Os_GetCoreIdLocal();
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetSystemContext(curCoreId);
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_IncrementCounter);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_IncrementCounter_Start, CounterID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
     StatusType err = E_OK;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetCounterValue);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (NULL_PTR == Value)
-    {
-        err = E_OS_PARAM_POINTER;
-    }
-    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
-    else if (CHECK_ID_INVALID(CounterID, Os_CfgCounterMax_Inf))
-    /* PRQA S 3432, 2986 -- */
-    {
-        err = E_OS_ID;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_COUNTER_VALUE) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_AddressWritable((uint32)Value) != TRUE) /* PRQA S 0306 */ /* VL_Os_0306 */
-    {
-        err = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_COUNTER, CounterID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-/* Cross core use shall be supported. */
-#if (OS_AUTOSAR_CORES > 1)
-        Os_CoreIdType coreId = Os_GetObjCoreId(CounterID);
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_GetCounterValue,
-                .srvPara0     = (uint32)CounterID,
-                /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-                .srvPara1 = (uint32)Value,
-                /* PRQA S 0306 -- */
-                /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral  */
-                .srvPara2 = (uint32)NULL_PARA,
-                /* PRQA S 1258 -- */
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            Os_GetCounterValue(CounterID, Value);
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
-        Os_TraceErrorHook(OSError_Save_GetCounterValue(CounterID, Value), OSServiceId_GetCounterValue, err);
-        /* PRQA S 3138 -- */
-    }
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_INCREMENT_COUNTER,
+        .ObjectType     = OS_OBJECT_COUNTER,
+        .ObjectID       = (Os_AppObjectId)CounterID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetCounterValue);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    return err;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                    <Get elapsed counter value>
- * Service ID               <0x11>
- * Sync/Async               <Synchronous>
- * Reentrancy               <Reentrant>
- * param-CounterID[in]      <reference to counter>
- * Param-Value[out]         <current value of the counter>
- * Param-ElapsedValue[out]  <Elapsed value of the counter>
- * Param-Name[in/out]       <None>
- * return                   <StatusType>
- * PreCondition             <None>
- * CallByAPI                <None>
- * REQ ID                   <None>
- */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532, 1503 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
-StatusType GetElapsedValue(CounterType CounterID, TickRefType Value, TickRefType ElapsedValue)
-/* PRQA S 3006, 1532, 1503 -- */
-/* PRQA S 6010, 6030, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-    StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetElapsedValue);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if ((NULL_PTR == Value) || (NULL_PTR == ElapsedValue))
+    /* SWS_Os_00285:If the input parameter <CounterID> in a call of
+     * IncrementCounter() is not valid OR the counter is a hardware
+     * counter,IncrementCounter() shall return E_OS_ID.  */
+    if (Os_ObjectIDCheck((ObjectType)CounterID, (uint8)OS_OBJECT_COUNTER) != TRUE)
     {
-        err = E_OS_PARAM_POINTER;
+        err = E_OS_ID;
     }
-    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
-    else if (CHECK_ID_INVALID(CounterID, Os_CfgCounterMax_Inf))
-    /* PRQA S 3432, 2986 -- */
+    else if (OS_COUNTER_HARDWARE == Os_CounterCfg[CounterID].CounterProperty)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_ELAPSED_COUNTER_VALUE) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)Value) != TRUE)
-    /* PRQA S 0306 -- */
-    {
-        err = E_OS_ILLEGAL_ADDRESS;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)ElapsedValue) != TRUE)
-    /* PRQA S 0306 -- */
-    {
-        err = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_COUNTER, CounterID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-/* Cross core use shall be supported. */
-#if (OS_AUTOSAR_CORES > 1)
-        Os_CoreIdType coreId = Os_GetObjCoreId(CounterID);
-        if (coreId != Os_SCB.sysCore)
+#endif
+        /* SWS_Os_00629:A COUNTER belonging to an OS-Application shall be
+         * incremented by the core on which the OS-Application resides. */
+        if (curCoreId != OS_COUNTER_GET_COREID(CounterID))
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_GetElapsedValue,
-                .srvPara0     = (uint32)CounterID,
-                /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-                .srvPara1 = (uint32)Value,
-                .srvPara2 = (uint32)ElapsedValue,
-                /* PRQA S 0306 -- */
-            };
-            err = Os_RpcCallService(&rpcData); /* PRQA S 0306 */ /* VL_Os_0306 */
+            err = E_OS_CORE;
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            err = Os_GetElapsedValue(CounterID, Value, ElapsedValue);
-        }
-    }
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            /* PRQA S 3326, 2004 ++ */ /* VL_Os_3326, VL_Os_2004 */
+            if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+            /* PRQA S 3326, 2004 -- */
+#endif
+            {
+                Os_IncrementCounterInternal(CounterID);
+            }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_GetElapsedValue(CounterID, Value, ElapsedValue),
-            OSServiceId_GetElapsedValue,
-            err);
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(OSError_Save_IncrementCounter(CounterID), OSServiceId_IncrementCounter, err, pScb);
         /* PRQA S 3138, 3141 -- */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetElapsedValue);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_IncrementCounter);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_IncrementCounter_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
     return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_COUNTER_MAX > 0U */
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Get current counter value
+ */
+/* PRQA S 1503,3006,3408,6070,1512 ++ */ /* VL_QAC_NoUsedApi,VL_Os_3006,VL_Os_3408,VL_MTR_Os_STCAL,VL_Os_1512 */
+StatusType GetCounterValue(CounterType CounterID, TickRefType Value)
+/* PRQA S 1503,3006,3408,6070,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    /* PRQA S 2983, 3678 ++ */ /* VL_Os_2983, VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 2983, 3678 -- */
+
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetCounterValue);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetCounterValue_Start, CounterID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_COUNTER_VALUE,
+        .ObjectType     = OS_OBJECT_COUNTER,
+        .ObjectID       = (Os_AppObjectId)CounterID,
+        /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+        .Address = (uint32)Value,
+        /* PRQA S 0306 -- */
+    };
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    Os_CoreIdType curCoreId = Os_GetCoreIdLocal();
+    if (Os_ObjectIDCheck((ObjectType)CounterID, (uint8)OS_OBJECT_COUNTER) != TRUE)
+    {
+        err = E_OS_ID;
+    }
+    else if (curCoreId != OS_COUNTER_GET_COREID(CounterID))
+    {
+        err = E_OS_CORE;
+    }
+    else
+#endif
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        /* PRQA S 3326, 2004 ++ */ /* VL_Os_3326, VL_Os_2004 */
+        if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+        /* PRQA S 3326, 2004 -- */
+#endif
+        {
+            Os_GetCounterValue(CounterID, Value);
+        }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 2880 ++ */       /* VL_Os_2880 */
+        Os_TraceErrorHook(OSError_Save_GetCounterValue(CounterID, Value), OSServiceId_GetCounterValue, err, pScb);
+        /* PRQA S 2880 -- */
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1258, 2997, 2995 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1258, VL_Os_2997, VL_Os_2995 */
+    OSRtiExitApi(pScb, OSApiId_GetCounterValue);
+    ARTI_TRACE(
+        NOSUSP,
+        AR_CP_OS_SERVICECALLS,
+        Os,
+        pScb->SysCore,
+        OsServiceCall_GetCounterValue_Return,
+        (err == E_OK) ? *Value : OS_TICK_INVALID);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544, 1258, 2997, 2995 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Get elapsed counter value
+ */
+/* PRQA S 1503,6030,3408 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_Os_STMIF, VL_Os_3408 */
+/* PRQA S 3006,6070,1512 ++ */ /* VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType GetElapsedValue(CounterType CounterID, TickRefType Value, TickRefType ElapsedValue)
+/* PRQA S 3006,6070,1512 -- */
+/* PRQA S 1503,6030,3408 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetElapsedValue);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetElapsedValue_Start, CounterID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_ELAPSED_COUNTER_VALUE,
+        .ObjectType     = OS_OBJECT_COUNTER,
+        .ObjectID       = (Os_AppObjectId)CounterID,
+        /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+        .Address = (uint32)ElapsedValue,
+        /* PRQA S 0306 -- */
+    };
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    Os_CoreIdType curCoreId = Os_GetCoreIdLocal();
+    if (Os_ObjectIDCheck((ObjectType)CounterID, (uint8)OS_OBJECT_COUNTER) != TRUE)
+    {
+        err = E_OS_ID;
+    }
+    else if (curCoreId != OS_COUNTER_GET_COREID(CounterID))
+    {
+        err = E_OS_CORE;
+    }
+    else
+#endif
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+        if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) != E_OK)
+        /* PRQA S 3326 -- */
+        {
+            /* do nothing */
+        }
+        /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+        else if (Os_AddressWritable(pScb, (uint32)Value) != TRUE)
+        /* PRQA S 0306 -- */
+        {
+            err = E_OS_ILLEGAL_ADDRESS;
+        }
+        else
+#endif
+            if (*Value > Os_CounterCfg[CounterID].CounterMaxAllowedValue)
+        {
+            err = E_OS_VALUE;
+        }
+        else
+        {
+            Os_GetElapsedValue(CounterID, Value, ElapsedValue);
+        }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_GetElapsedValue(CounterID, Value, ElapsedValue),
+            OSServiceId_GetElapsedValue,
+            err,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */       /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1258 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1258 */
+    OSRtiExitApi(pScb, OSApiId_GetElapsedValue);
+    ARTI_TRACE(
+        NOSUSP,
+        AR_CP_OS_SERVICECALLS,
+        Os,
+        pScb->SysCore,
+        OsServiceCall_GetElapsedValue_Return,
+        (err == E_OK) ? *ElapsedValue : OS_TICK_INVALID);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544, 1258 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/

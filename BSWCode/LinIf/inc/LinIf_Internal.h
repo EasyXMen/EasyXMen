@@ -79,8 +79,10 @@
 #define LINIF_NC_RESPONSE_POSITIVE_RESPONSE_SID 0x40u
 #define LINIF_NC_READBYIDENTIFIER_FUNCTION_ID   0x00u
 #define LINIF_NC_READBYIDENTIFIER_NEGTIVE       0x02u
-
-#define LINIF_NC_ASSIGN_FRAME_ID_DATA_LEN 0x04u
+#define LINIF_NC_RESERVED_VALUE                 0xFFu
+#define LINIF_NC_ASSIGN_FRAME_ID_DATA_LEN       0x04u
+#define LINIF_PDU_ID_INVAILD                    COMSTACK_PDUID_INVALID
+#define LINIF_NOUSED(parameter)                 (void)(parameter)
 
 #if !defined(LINIF_LOCAL)
 #define LINIF_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
@@ -92,7 +94,11 @@
 
 /* =========================================== internal data declarations =========================================== */
 /* Global configuration pointer of LINIF */
+#define LINIF_START_SEC_VAR_CLEARED_PTR
+#include "LinIf_MemMap.h"
 extern const LinIf_ConfigType* LinIf_ConfigPtr;
+#define LINIF_STOP_SEC_VAR_CLEARED_PTR
+#include "LinIf_MemMap.h"
 
 /* =========================================== inline function definition =========================================== */
 
@@ -181,6 +187,16 @@ LINIF_LOCAL_INLINE EcuM_WakeupSourceType LinIf_GetLinTrcvWakeupSource(uint8 ch)
     return LinIf_GetChannel(ch)->TransceiverDrvConfig->WakeUpSource;
 }
 
+LINIF_LOCAL_INLINE uint8 LinIf_GetLinTrcvDriverApiId(uint8 ch)
+{
+    return LinIf_GetChannel(ch)->TransceiverDrvConfig->TrcvDrvId;
+}
+
+LINIF_LOCAL_INLINE uint8 LinIf_GetLinTrcvChannelId(uint8 ch)
+{
+    return LinIf_GetChannel(ch)->TransceiverDrvConfig->TrcvIdRef;
+}
+
 LINIF_LOCAL_INLINE NetworkHandleType LinIf_GetComMNetwork(uint8 ch)
 {
     return LinIf_GetChannel(ch)->ComMNetworkHandleRef;
@@ -206,6 +222,7 @@ LINIF_LOCAL_INLINE ApplicationType LinIf_GetChannelApplicationId(uint8 ch)
 {
     return LinIf_GetChannel(ch)->ChannelApplicationId;
 }
+
 #endif
 
 LINIF_LOCAL_INLINE void LinIf_SetEvent(LinIf_MasterRuntimeType* chPtr, uint16 event)
@@ -217,7 +234,6 @@ LINIF_LOCAL_INLINE void LinIf_ClrEvent(LinIf_MasterRuntimeType* chPtr, uint16 ev
 {
     chPtr->RootEvent &= (uint16)(~event);
 }
-
 LINIF_LOCAL_INLINE boolean LinIf_IsEvent(const LinIf_MasterRuntimeType* chPtr, uint16 event)
 {
     return (chPtr->RootEvent & event) != 0u;
@@ -257,6 +273,7 @@ LINIF_LOCAL_INLINE ApplicationType LinIf_GetApplicationID(void)
     return applicationId;
 }
 
+#if (STD_ON == LINIF_MASTER_SUPPORT)
 /* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef */
 /**
  *  @brief         Check entry delat timer is expired
@@ -287,5 +304,37 @@ LINIF_LOCAL_INLINE void LinIf_ClearEvent(NetworkHandleType ch, uint16 event)
     LinIf_MasterRuntimeType* chPtr = LinIf_GetMasterRtDataPtr(ch);
     LinIf_ClrEvent(chPtr, event);
 }
+#endif
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+void LinIf_ReportRxFrameToMirror(
+    NetworkHandleType      ch,
+    const LinIf_FrameType* frame,
+    const uint8*           linSduPtr,
+    Lin_StatusType         status);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+void LinIf_ReportTxFrameToMirror(NetworkHandleType ch, LinIf_MirrorBufferType* mirrorBuffer, Lin_StatusType status);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+void LinIf_SaveTxDataToMirror(LinIf_MirrorBufferType* mirrorBufferPtr, const LinIf_FrameType* framePtr, uint8* sduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+void LinIf_ReportLinErrorToMirror(NetworkHandleType ch, const LinIf_FrameType* framePtr, Lin_SlaveErrorType error);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 /* PRQA S 1532,1503 -- */
+#endif
+
 #endif

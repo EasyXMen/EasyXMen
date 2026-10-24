@@ -101,13 +101,21 @@ typedef s8_t err_t;
  */
 
 #ifdef LWIP_DEBUG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 extern const char *lwip_strerr(err_t err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
 #define lwip_strerr(x) ""
 #endif /* LWIP_DEBUG */
 
 #if !NO_SYS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int err_to_errno(err_t err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* !NO_SYS */
 
 #ifdef __cplusplus

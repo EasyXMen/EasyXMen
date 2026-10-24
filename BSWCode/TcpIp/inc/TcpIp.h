@@ -258,27 +258,7 @@
       Risk: None.
       Prevention: Ensure that the project is working properly through unit testing.
 
-    \li VL_TcpIp_0388
-      Reason: The macro is defined in lwIp.
-      Risk: None.
-      Prevention: Ensure that the project is working properly through unit testing.
-
     \li VL_TcpIp_1505
-      Reason: The internal functions are all defined in the TcpIp_Internal.c file.
-      Risk: None.
-      Prevention: Ensure that the project is working properly through unit testing.
-
-    \li VL_TcpIp_1502
-      Reason: The internal functions are all defined in the TcpIp_Internal.c file.
-      Risk: None.
-      Prevention: Ensure that the project is working properly through unit testing.
-
-    \li VL_TcpIp_1501
-      Reason: The internal functions are all defined in the TcpIp_Internal.c file.
-      Risk: None.
-      Prevention: Ensure that the project is working properly through unit testing.
-
-    \li VL_TcpIp_1753
       Reason: The internal functions are all defined in the TcpIp_Internal.c file.
       Risk: None.
       Prevention: Ensure that the project is working properly through unit testing.
@@ -287,6 +267,26 @@
       Reason: The magic number can be easily understood according to the context.
       Risk: None.
       Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_TcpIp_1502
+      Reason: The variable is indirectly accessed.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_TcpIp_3449
+      Reason: external interface
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3451
+      Reason: external interface
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0388
+      Reason: external interface
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_TcpIp_STVAR
       Reason: The function prototype is defined in AUTOSAR standard.
@@ -310,17 +310,179 @@
       Prevention: Design and code review, and have a clear structure and annotated code.
 
     \li VL_MTR_TcpIp_STPAR
-      Reason: The external API of DcmClient is based on the design requirements for sending as an external
-              interface service, resulting in its metric being higher than the threshold
-      Risk: For the target uC, the stack usage and runtime are too high.
-      Prevention: When testing the result code on the target uC, the user must check the stack usage in the
-                  project context.
+      Reason: The external API of the module is defined by the AUTOSAR standard, resulting in its metric
+              being above the threshold.
+      Risk: For the target uC, the stack usage and runtime are too high
+      Prevention: When testing the result code on the target uC, the user must check the stack usage in
+                  the project context.
+
+    \li VL_MTR_TcpIp_STCYC
+      Reason: Because there are higher requirements for minimizing the stack and runtime usage of the applied code.
+      Risk: Understandability and testability become overly complex
+      Prevention: Design and code review, and have a clear structure and annotated code.
 
     \li VL_TcpIp_1536
       Reason: The tag '%1s' is declared but not used within this project.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
- */
+
+    \li VL_TcpIp_2985
+      Reason: Block information needs to be recorded in the current queue to sort multiple jobs.
+      Risk: This value is calculated on this interface only when it is in the queue, no risk.
+      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
+
+    \li VL_TcpIp_0686
+      Reason: To resolve the compilation warnings.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_4491
+      Reason: DataType is determined by the configuration.
+      Risk: Code redundancy and may difficult to maintain
+      Prevention: Code inspection and test of the different configurations in the component test.
+
+    \li VL_TcpIp_4461
+      Reason: Datatype conversion is necessary for functional usage
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_4434
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_2981
+      Reason: Init may be necessary for return variant.
+      Risk: There may be redundant assignments.
+      Prevention: Code inspection and test of the different configurations in the component test.
+
+    \li VL_TcpIp_2053
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3200
+      Reason: '${name}' returns a value which is not being used.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3678
+      Reason: The variable is modified in some cases.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_TcpIp_2740
+      Reason: Necessary logical design for while(1)
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_2870
+      Reason: Special scenario use
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0317
+      Reason: void is specified in the autosar prototype interface requirements.
+      Risk: In the subsequent use, operations are performed according to the specific type, no risk.
+      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
+
+    \li VL_TcpIp_4115
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3344
+      Reason: The OS module guarantees the correctness of applying shift operators to signed negative values.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3673
+      Reason: Parameter passing requires
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3219
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3387
+      Reason: The pointer increases or decreases by itself.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3440
+      Reason: Floating-point numbers are used in the for loop
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0770
+      Reason: design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_1881
+      Reason: The code is designed so
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0316
+      Reason: void is specified in the autosar prototype interface requirements.
+      Risk: In the subsequent use, operations are performed according to the specific type, no risk.
+      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
+
+    \li VL_TcpIp_3408
+      Reason: Configuration parameter, design needs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0703
+      Reason: Configuration data design is required.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3432
+      Reason: Function-like macros are used to allow more efficient code.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_2120
+      Reason: unsigned bit-field is required
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_0771
+      Reason: Ability to quickly jump out of loops in different situations with different configurations.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_TcpIp_3556
+      Reason: The macro is reserved.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_TcpIp_4603
+      Reason: Dereference pointer.
+      Risk: Pointer is NULL_PTR.
+      Prevention: The pointer corresponds to the configuration one by one and is not empty.
+
+    \li VL_TcpIp_1501
+      Reason: The function '${name}' is declared but is not used within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_TcpIp_1753
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+      \li VL_TcpIp_0432
+      Reason: Function argument is not of compatible pointer type.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+*/
+/* PRQA S 3449 EOF */ /* VL_TcpIp_3449 */
+/* PRQA S 3451 EOF */ /* VL_TcpIp_3451 */
 
 #ifndef TCPIP_H_
 #define TCPIP_H_
@@ -383,6 +545,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           This service initializes the TCP/IP Stack. TcpIp_Init may not block the start-up
                     process for an indefinite amount of time.
@@ -392,8 +556,12 @@ extern "C" {
  * @trace           CPD-69648
  */
 extern void TcpIp_Init(const TcpIp_ConfigType* ConfigPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_VERSION_INFO_API)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Returns the version information.
  * @param[out]      versioninfo: Pointer to where to store the version information of this module.
@@ -402,8 +570,12 @@ extern void TcpIp_Init(const TcpIp_ConfigType* ConfigPtr);
  * @trace           CPD-69649
  */
 extern void TcpIp_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to close the socket and release
                     all related resources.
@@ -421,7 +593,11 @@ extern void TcpIp_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace           CPD-69650
  */
 extern Std_ReturnType TcpIp_Close(TcpIp_SocketIdType SocketId, boolean Abort);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to bind a UDP or TCP socket to
                     a local resource.
@@ -440,8 +616,12 @@ extern Std_ReturnType TcpIp_Close(TcpIp_SocketIdType SocketId, boolean Abort);
  * @trace           CPD-69651
  */
 extern Std_ReturnType TcpIp_Bind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdType LocalAddrId, uint16* PortPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to establish a TCP connection to
                     the configured peer.
@@ -456,7 +636,11 @@ extern Std_ReturnType TcpIp_Bind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdT
  * @trace           CPD-69652
  */
 extern Std_ReturnType TcpIp_TcpConnect(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to listen on the TCP socket
                     specified by the socket identifier.
@@ -472,7 +656,11 @@ extern Std_ReturnType TcpIp_TcpConnect(TcpIp_SocketIdType SocketId, const TcpIp_
  * @trace           CPD-69653
  */
 extern Std_ReturnType TcpIp_TcpListen(TcpIp_SocketIdType SocketId, uint16 MaxChannels);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the reception of socket data is confirmed to the TCP/IP stack.
  * @param[in]       SocketId: Socket identifier of the related local socket resource.
@@ -485,8 +673,12 @@ extern Std_ReturnType TcpIp_TcpListen(TcpIp_SocketIdType SocketId, uint16 MaxCha
  * @trace           CPD-69654
  */
 extern Std_ReturnType TcpIp_TcpReceived(TcpIp_SocketIdType SocketId, uint32 Length);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to change the TcpIp state of the
                     communication network identified by EthIf controller index.
@@ -501,7 +693,11 @@ extern Std_ReturnType TcpIp_TcpReceived(TcpIp_SocketIdType SocketId, uint32 Leng
  * @trace           CPD-69655
  */
 extern Std_ReturnType TcpIp_RequestComMode(uint8 CtrlIdx, TcpIp_StateType State);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the local IP address assignment for the IP address
                     specified by LocalAddrId shall be initiated.
@@ -527,7 +723,11 @@ extern Std_ReturnType TcpIp_RequestIpAddrAssignment(
     const TcpIp_SockAddrType*  LocalIpAddrPtr,
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the local IP address assignment for the IP address specified
                     by LocalAddrId shall be released.
@@ -541,8 +741,12 @@ extern Std_ReturnType TcpIp_RequestIpAddrAssignment(
  * @trace           CPD-69657
  */
 extern Std_ReturnType TcpIp_ReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalAddrId);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if ((STD_ON == TCPIP_DHCP_CLIENT_ENABLED) && (STD_ON == TCPIP_RESET_IP_ASSIGNMENT_API))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Resets all learned IP-addresses to invalid values.
  * @return          Std_ReturnType
@@ -553,10 +757,13 @@ extern Std_ReturnType TcpIp_ReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalA
  * @trace           CPD-69658
  */
 extern Std_ReturnType TcpIp_ResetIpAssignment(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if (STD_ON == TCPIP_ICMP_ENABLED)
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#if (TCPIP_ICMP_ENABLED == STD_ON)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack sends an ICMP message according to the
                     specified parameters.
@@ -584,9 +791,13 @@ extern Std_ReturnType TcpIp_IcmpTransmit(
     uint8                     Code,
     uint16                    DataLength,
     const uint8*              DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack sends an ICMPv6 message according to
                     the specified parameters.
@@ -614,10 +825,13 @@ extern Std_ReturnType TcpIp_IcmpV6Transmit(
     uint8                     Code,
     uint16                    DataLength,
     const uint8*              DataPtr);
-#endif
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack retrieves DHCP option data identified by
                     parameter option for already received DHCP options.
@@ -636,9 +850,13 @@ extern Std_ReturnType TcpIp_IcmpV6Transmit(
  */
 extern Std_ReturnType
     TcpIp_DhcpReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8* DataLength, uint8* DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack retrieves DHCPv6 option data identified by
                     parameter option for already received DHCPv6 options.
@@ -657,9 +875,13 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     TcpIp_DhcpV6ReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint16 Option, uint16* DataLength, uint8* DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack writes the DHCP option data identified
                     by parameter option.
@@ -677,9 +899,13 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     TcpIp_DhcpWriteOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8 DataLength, const uint8* DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack writes the DHCPv6 option data identified
                     by parameter option.
@@ -700,8 +926,12 @@ extern Std_ReturnType TcpIp_DhcpV6WriteOption(
     uint16                Option,
     uint16                DataLength,
     const uint8*          DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack is requested to change a parameter of a socket.
                     E.g. the Nagle algorithm may be controlled by this API.
@@ -717,7 +947,11 @@ extern Std_ReturnType TcpIp_DhcpV6WriteOption(
  */
 extern Std_ReturnType
     TcpIp_ChangeParameter(TcpIp_SocketIdType SocketId, TcpIp_ParamIdType ParameterId, const uint8* ParameterValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Obtains the local IP address actually used by LocalAddrId, the netmask and
                     default router.
@@ -746,7 +980,11 @@ extern Std_ReturnType TcpIp_GetIpAddr(
     TcpIp_SockAddrType*   IpAddrPtr,
     uint8*                NetmaskPtr,
     TcpIp_SockAddrType*   DefaultRouterPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Obtains the physical source address used by the EthIf controller implicitly
                     specified via Local AddrId.
@@ -762,7 +1000,11 @@ extern Std_ReturnType TcpIp_GetIpAddr(
  * @trace           CPD-69667
  */
 extern Std_ReturnType TcpIp_GetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8* PhysAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           TcpIp_GetRemotePhysAddr queries the IP/physical address translation table specified
                     by Ctrl Idx and returns the physical address related to the IP address specified by
@@ -784,7 +1026,11 @@ extern Std_ReturnType TcpIp_GetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8
  */
 extern TcpIp_ReturnType
     TcpIp_GetRemotePhysAddr(uint8 CtrlIdx, const TcpIp_SockAddrType* IpAddrPtr, uint8* PhysAddrPtr, boolean initRes);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           TcpIp_GetCtrlIdx returns the index of the controller related to LocalAddrId.
  * @param[in]       LocalAddrId: Local address identifier implicitely specifing the EthIf controller
@@ -799,7 +1045,11 @@ extern TcpIp_ReturnType
  * @trace           CPD-69669
  */
 extern Std_ReturnType TcpIp_GetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8* CtrlIdxPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Copies entries from the physical address cache of the IPv4 instance that is active
                     on the EthIf controller specified by ctrlIdx into a user provided buffer. The function
@@ -822,7 +1072,11 @@ extern Std_ReturnType TcpIp_GetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8*
  */
 extern Std_ReturnType
     TcpIp_GetArpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_ArpCacheEntryType* entryListPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Copies entries from the physical address cache of the IPv6 instance that is active
                     on the EthIf controller specified by ctrlIdx into a user provided buffer. The
@@ -845,7 +1099,11 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     TcpIp_GetNdpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_NdpCacheEntryType* entryListPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Allows to read and reset detailed measurement data for diagnostic purposes.
                     Get all MeasurementIdx's at once is not supported. TCPIP_MEAS_ALL shall only
@@ -865,7 +1123,11 @@ extern Std_ReturnType TcpIp_GetAndResetMeasurementData(
     TcpIp_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
     uint32*                  MeasurementDataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           API allows to check if a communication over this socket is possible for
                     a dedicated remote address. It includes that the socket is bound, a physical
@@ -883,8 +1145,12 @@ extern Std_ReturnType TcpIp_GetAndResetMeasurementData(
  * @trace           CPD-69673
  */
 extern TcpIp_ReturnType TcpIp_IsConnectionReady(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           This service transmits data via UDP to a remote node. The transmission of the
                     data is immediately performed with this function call by forwarding it to EthIf.
@@ -907,9 +1173,13 @@ extern Std_ReturnType TcpIp_UdpTransmit(
     const uint8*              DataPtr,
     const TcpIp_SockAddrType* RemoteAddrPtr,
     uint16                    TotalLength);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           This service requests transmission of data via TCP to a remote node. The
                     transmission of the data is decoupled.
@@ -935,8 +1205,12 @@ extern Std_ReturnType TcpIp_UdpTransmit(
  */
 extern Std_ReturnType
     TcpIp_TcpTransmit(TcpIp_SocketIdType SocketId, const uint8* DataPtr, uint32 AvailableLength, boolean ForceRetrieve);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           By this API service the TCP/IP stack gets an indication and the data of
                     a received frame.
@@ -959,8 +1233,12 @@ extern void TcpIp_RxIndication(
     const uint8*  PhysAddrPtr,
     const uint8*  DataPtr,
     uint16        LenByte);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_PARTITION_USED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Schedules the TCP/IP stack. (Entry point for scheduling)
  * @param[in]       partitionIndex: Index of partition.
@@ -969,7 +1247,11 @@ extern void TcpIp_RxIndication(
  * @trace           CPD-69677
  */
 extern void TcpIp_MainFunction(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Schedules the TCP/IP stack. (Entry point for scheduling)
  * @synchronous     TRUE
@@ -977,7 +1259,24 @@ extern void TcpIp_MainFunction(ApplicationType partitionIndex);
  * @trace           CPD-69677
  */
 extern void TcpIp_MainFunction(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
+
+/**
+ * @brief         Encodes a 16-bit parameter into a buffer in big-endian format.
+ * @param[in,out] buffer: Pointer to the buffer where the parameter will be encoded.
+ * @param[in]     paramenter: The 16-bit parameter to encode.
+ * @return        None
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace       CPD-74662
+ */
+static inline void TCPIP_CHG_PARA_ENCODE_16(uint8* buffer, uint32 paramenter)
+{
+    (buffer)[0u] = (uint8)((paramenter) >> 8u);
+    (buffer)[1u] = (uint8)(paramenter);
+}
 
 #ifdef __cplusplus
 }

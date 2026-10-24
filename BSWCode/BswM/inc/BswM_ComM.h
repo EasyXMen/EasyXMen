@@ -50,7 +50,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66236
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_ComM_InitiateReset(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by ComM to indicate the current communication mode of a ComM channel.
@@ -61,7 +65,11 @@ void BswM_ComM_InitiateReset(void);
  * @synchronous TRUE
  * @trace       CPD-66238
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_ComM_CurrentMode(NetworkHandleType Network, ComM_ModeType RequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by ComM to indicate the current mode of the PNC.
@@ -72,7 +80,11 @@ void BswM_ComM_CurrentMode(NetworkHandleType Network, ComM_ModeType RequestedMod
  * @synchronous TRUE
  * @trace       CPD-66239
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_ComM_CurrentPNCMode(PNCHandleType PNC, ComM_PncModeType CurrentPncMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 

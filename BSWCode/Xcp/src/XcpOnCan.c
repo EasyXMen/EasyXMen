@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -49,6 +49,8 @@
 void Xcp_CanIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 1532 -- */
 {
+    Xcp_ArtiApiStart(3, XCP_SERVICE_ID_RXINDICATION, RxPduId, PduInfoPtr);
+
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
     if (!Xcp_RxIndCheckDetErr(RxPduId, PduInfoPtr))
 #else
@@ -62,9 +64,17 @@ void Xcp_CanIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
             Xcp_RxIndication(PduInfoPtr->SduLength, PduInfoPtr->SduDataPtr);
         }
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_RXINDICATION);
+
     return;
 }
 
+#define XCP_STOP_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 /**
  * Confirms the transmission of a CAN message. This function checks for errors
  * in the transmission process. If error detection is enabled and no errors
@@ -75,6 +85,8 @@ void Xcp_CanIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 void Xcp_CanIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 /* PRQA S 1532 -- */
 {
+    Xcp_ArtiApiStart(3, XCP_SERVICE_ID_TXCONFIRMATION, TxPduId, result);
+
     if (E_OK == result)
     {
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
@@ -84,6 +96,9 @@ void Xcp_CanIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             Xcp_TxConfirmation(TxPduId);
         }
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_TXCONFIRMATION);
+
     return;
 }
 #define XCP_STOP_SEC_CODE_FAST

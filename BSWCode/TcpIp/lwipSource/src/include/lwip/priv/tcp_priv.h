@@ -58,38 +58,110 @@ extern "C" {
 /* Functions for interfacing with TCP: */
 
 /* Lower layer interface to TCP: */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_init    (void);  /* Initialize this module. */
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_tmr     (void);  /* Must be called every
                                          TCP_TMR_INTERVAL
                                          ms. (Typically 250 ms). */
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /* It is also possible to call these two functions at the right
    intervals (instead of calling tcp_tmr()). */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_slowtmr (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_fasttmr (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Call this from a netif driver (watch out for threading issues!) that has
    returned a memory error on transmit and now has free buffers to send more.
    This iterates all active pcbs that had an error and tries to call
    tcp_output, so use this with care as it might slow down the system. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_txnow   (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Only used by IP to pass a TCP segment to TCP: */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_input   (struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /* Used within the TCP code only: */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb * tcp_alloc   (u8_t prio);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_free    (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_abandon (struct tcp_pcb *pcb, int reset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_send_empty_ack(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_TCP_TC8_EMPTY_ACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_send_empty_ack_used_last_seq(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TCP_TC8_EMPTY_ACK */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_rexmit  (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_rexmit_rto_prepare(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_rexmit_rto_commit(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_rexmit_rto  (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_rexmit_fast (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u32_t            tcp_update_rcv_ann_wnd(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_process_refused_data(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /**
  * This is the Nagle algorithm: try to combine user data to send as few TCP
@@ -332,25 +404,62 @@ struct tcp_seg {
 #define TCPIP_VAR_TCP_ACTIVE_PCBS_CHANGED(coreIndex)    g_tcp_active_pcbs_changed[(coreIndex)]
 #define TCPIP_VAR_TCP_INPUT_PCB(coreIndex)              g_tcp_input_pcb[(coreIndex)]
 
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct tcp_pcb *g_tcp_input_pcb[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern u32_t g_tcp_ticks[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern u8_t g_tcp_active_pcbs_changed[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* The TCP PCB lists. */
 union tcp_listen_pcbs_t { /* List of all TCP PCBs in LISTEN state. */
   struct tcp_pcb_listen *listen_pcbs;
   struct tcp_pcb *pcbs;
 };
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct tcp_pcb *g_tcp_bound_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern union tcp_listen_pcbs_t g_tcp_listen_pcbs[TCPIP_MULTICORE_NUMBER];
-extern struct tcp_pcb *g_tcp_active_pcbs[TCPIP_MULTICORE_NUMBER];  /* List of all TCP PCBs that are in a
-              state in which they accept or send
-              data. */
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+/* List of all TCP PCBs that are in a state in which they accept or send data. */
+extern struct tcp_pcb *g_tcp_active_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct tcp_pcb *g_tcp_tw_pcbs[TCPIP_MULTICORE_NUMBER];      /* List of all TCP PCBs in TIME-WAIT. */
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #define NUM_TCP_PCB_LISTS_NO_TIME_WAIT  3
 #define NUM_TCP_PCB_LISTS               4
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct tcp_pcb **g_tcp_pcb_lists[TCPIP_MULTICORE_NUMBER][NUM_TCP_PCB_LISTS];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* Axioms about the above lists:
    1) Every TCP PCB that is not CLOSED is in one of the lists.
@@ -446,13 +555,37 @@ extern struct tcp_pcb **g_tcp_pcb_lists[TCPIP_MULTICORE_NUMBER][NUM_TCP_PCB_LIST
 
 
 /* Internal functions: */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb *tcp_pcb_copy(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_pcb_purge(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_pcb_remove(struct tcp_pcb **pcblist, struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_segs_free(struct tcp_seg *seg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_seg_free(struct tcp_seg *seg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_seg *tcp_seg_copy(struct tcp_seg *seg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define tcp_ack(pcb)                               \
   do {                                             \
@@ -468,48 +601,120 @@ struct tcp_seg *tcp_seg_copy(struct tcp_seg *seg);
 #define tcp_ack_now(pcb)                           \
   tcp_set_flags(pcb, TF_ACK_NOW)
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_send_fin(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_enqueue_flags(struct tcp_pcb *pcb, u8_t flags);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_rexmit_seg(struct tcp_pcb *pcb, struct tcp_seg *seg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_TC8_RST_NACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_rst_no_ack(const struct tcp_pcb *pcb, u32_t seqno, u32_t ackno,
         const ip_addr_t *local_ip, const ip_addr_t *remote_ip,
         u16_t local_port, u16_t remote_port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif/* LWIP_TCP_TC8_RST_NACK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_rst(const struct tcp_pcb* pcb, u32_t seqno, u32_t ackno,
        const ip_addr_t *local_ip, const ip_addr_t *remote_ip,
        u16_t local_port, u16_t remote_port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_rst_netif(struct netif *netif, u32_t seqno, u32_t ackno,
                    const ip_addr_t *local_ip, const ip_addr_t *remote_ip,
                    u16_t local_port, u16_t remote_port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u32_t tcp_next_iss(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_keepalive(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_split_unsent_seg(struct tcp_pcb *pcb, u16_t split);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_zero_window_probe(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  tcp_trigger_input_pcb_close(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_CALCULATE_EFF_SEND_MSS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t tcp_eff_send_mss_netif(u16_t sendmss, struct netif *outif,
                              const ip_addr_t *dest);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define tcp_eff_send_mss(sendmss, src, dest) \
     tcp_eff_send_mss_netif(sendmss, ip_route(src, dest), dest)
 #endif /* TCP_CALCULATE_EFF_SEND_MSS */
 
 #if LWIP_CALLBACK_API
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_recv_null(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CALLBACK_API */
 
 #if TCP_DEBUG || TCP_INPUT_DEBUG || TCP_OUTPUT_DEBUG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_debug_print(struct tcp_hdr *tcphdr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_debug_print_flags(u8_t flags);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_debug_print_state(enum tcp_state s);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_debug_print_pcbs(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 s16_t tcp_pcbs_sane(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
 #  define tcp_debug_print(tcphdr)
 #  define tcp_debug_print_flags(flags)
@@ -520,16 +725,32 @@ s16_t tcp_pcbs_sane(void);
 
 /** External function (implemented in timers.c), called when TCP detects
  * that a timer is needed (i.e. active- or time-wait-pcb found). */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_timer_needed(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_netif_ip_addr_changed(const ip_addr_t* old_addr, const ip_addr_t* new_addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_QUEUE_OOSEQ
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_free_ooseq(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if LWIP_TCP_PCB_NUM_EXT_ARGS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcp_ext_arg_invoke_callbacks_passive_open(struct tcp_pcb_listen *lpcb, struct tcp_pcb *cpcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

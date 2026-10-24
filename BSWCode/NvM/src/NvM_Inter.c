@@ -44,9 +44,9 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
+
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
-
 /**
  * @brief       The requested task enters the replication data phase
  * @reentrant   Non Reentrant
@@ -54,8 +54,12 @@
  * @trace       CPD-76710
  */
 NVM_LOCAL void NvM_MemCpyStep(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_WRITE_VERIFY)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Phrase one during internal write verify
  * @param[in]   buffPtr: Pointer to data buffer
@@ -64,6 +68,10 @@ NVM_LOCAL void NvM_MemCpyStep(void);
  * @trace       CPD-76711
  */
 NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Phrase two during internal write verify
@@ -73,7 +81,11 @@ NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr);
  * @trace       CPD-76712
  */
 NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Process error when read redundant block
@@ -85,6 +97,10 @@ NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr);
  */
 NVM_LOCAL void
     NvM_ReadErrorHandleRedundant(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcStaticIdStatusType StaticIDResult);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Process error when read block
@@ -95,6 +111,10 @@ NVM_LOCAL void
  * @trace       CPD-76714
  */
 NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcStaticIdStatusType StaticIDResult);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief          Internal read block process
@@ -109,6 +129,10 @@ NVM_LOCAL void NvM_InterReadBlockSub(
     NvM_CrcStaticIdStatusType* tempCrcResultPtr,
     NvM_CrcStaticIdStatusType* tempStaticIdResultPtr,
     uint32                     tempCrc);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of internal WriteAll process
@@ -118,6 +142,10 @@ NVM_LOCAL void NvM_InterReadBlockSub(
  * @trace       CPD-76716
  */
 NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of internal write block process
@@ -126,6 +154,10 @@ NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId);
  * @trace       CPD-76717
  */
 NVM_LOCAL void NvM_InterWriteBlockSub(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Phrase two during internal reading block process
@@ -134,6 +166,10 @@ NVM_LOCAL void NvM_InterWriteBlockSub(void);
  * @trace       CPD-76718
  */
 NVM_LOCAL void NvM_InterReadBlockSubTwo(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Phrase one during internal reading block process
@@ -142,6 +178,10 @@ NVM_LOCAL void NvM_InterReadBlockSubTwo(void);
  * @trace       CPD-76719
  */
 NVM_LOCAL void NvM_InterReadBlockSubOne(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of internal read rom process
@@ -150,6 +190,10 @@ NVM_LOCAL void NvM_InterReadBlockSubOne(void);
  * @trace       CPD-76720
  */
 NVM_LOCAL void NvM_InterReadRomSubDeal(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of internal read rom process
@@ -158,6 +202,10 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void);
  * @trace       CPD-76721
  */
 NVM_LOCAL void NvM_InterReadRomSubTwo(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief           Subfunction of internal write block process
@@ -167,6 +215,10 @@ NVM_LOCAL void NvM_InterReadRomSubTwo(void);
  * @trace       CPD-76722
  */
 NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief Internal  read rom process
@@ -176,6 +228,10 @@ NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn);
  * @trace       CPD-76723
  */
 NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Internal write block process
@@ -184,6 +240,10 @@ NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId);
  * @trace       CPD-76724
  */
 NVM_LOCAL void NvM_InterWriteBlockProcess(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Copy data in NvM
@@ -197,6 +257,10 @@ NVM_LOCAL void NvM_InterWriteBlockProcess(void);
  * @trace       CPD-76725
  */
 NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Process and record the current operating status
@@ -205,6 +269,10 @@ NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr);
  * @trace       CPD-76726
  */
 NVM_LOCAL void NvM_RunTimeHandle(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Internal memory copy process
@@ -218,6 +286,10 @@ NVM_LOCAL void NvM_RunTimeHandle(void);
  * @trace       CPD-76727
  */
 NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Internal ReadAll process
@@ -227,8 +299,12 @@ NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPt
  * @trace       CPD-76728
  */
 NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Perform compression and encryption
  * @return      Std_ReturnType
@@ -239,6 +315,10 @@ NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId);
  * @trace       CPD-76729
  */
 NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Perform decompression and decryption
@@ -250,9 +330,9 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void);
  * @trace       CPD-76730
  */
 NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void);
-#endif
 #define NVM_STOP_SEC_CODE
 #include "NvM_MemMap.h"
+#endif
 
 /* ============================================ internal data definition ============================================ */
 
@@ -283,7 +363,10 @@ NvM_ModuleType NvM_Module = {
     NVM_MEMIF_JOB_IDLE,
     NVM_JOB_STEP_IDLE,
 };
-
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the multi-block job information in NvM module
  */
@@ -299,7 +382,10 @@ NvM_MultiJobType NvM_MultiJob = {
 #endif
 #endif
 };
-
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the automated job information in NvM Module
  */
@@ -314,7 +400,10 @@ NvM_AtomJobType NvM_AtomJob = {
         NVM_ATOMJOB_MAX_NONE,
     },
 };
-
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the block-related information currently processed
  */
@@ -355,55 +444,67 @@ NvM_CurRunningType NvM_CurRunning = {
     NULL_PTR,         /*InitCallback*/
     NULL_PTR,         /*SingleCallback*/
 };
-
+#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
 /**
  * @brief Management message information of the queue with immediately data
  */
-NvM_RoundRobinQueueManageType NvM_ImmedQueueManage = {0x00u, 0x00u, 0x00u};
+NvM_RoundRobinQueueManageType NvM_ImmedQueueManage;
 #else
 /**
  * @brief Management message information of the queue without immediately data
  */
-NvM_RoundRobinQueueManageType NvM_StandQueueManage = {0x00u, 0x00u, 0x00u};
+NvM_RoundRobinQueueManageType NvM_StandQueueManage;
 #endif
-#endif
-#define NVM_STOP_SEC_VAR_INIT_UNSPECIFIED
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "NvM_MemMap.h"
+#endif
 
-#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
-#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the priority list information
  */
 NvM_PriTable2QueueType NvM_PriTable2Queue[NVM_PRI_TAB_MAX_NUM][NVM_TOTAL_NUM_DIFF_PRI];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Immediate Queue
  */
 NvM_ImmedQueueType NvM_ImmedQueue[NVM_SIZE_IMMEDIATE_JOB_QUEUE];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Standard Queue
  */
 NvM_StandQueueType NvM_StandQueue[NVM_SIZE_STANDARD_JOB_QUEUE];
+#define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 #endif
-/**
- * @brief Record the management block information
- */
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "NvM_MemMap.h"
 NvM_AdminBlockType NvM_AdminBlock[NVM_BLOCK_NUM_ALL];
 #define NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "NvM_MemMap.h"
 
-#define NVM_START_SEC_VAR_CLEARED_8
+#define NVM_START_SEC_VAR_CLEARED_PTR
 #include "NvM_MemMap.h"
 /**
- * @brief BUffer of NVRAM block
+ * @brief Pointer to NVRAM block buffer
  */
-uint8 NvM_NvDataBuffer[NVM_MAX_LENGTH_NV_BLOCK + NVM_NV_CRC_MAX_LENGTH];
-#define NVM_STOP_SEC_VAR_CLEARED_8
+uint8* NvM_NvDataBuffer;
+#define NVM_STOP_SEC_VAR_CLEARED_PTR
 #include "NvM_MemMap.h"
 
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
@@ -459,11 +560,21 @@ void NvM_InterReadRom(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                                                  : AdminBlockPtr->SingleReqResult;
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
             NvM_JobOverSetFlag(AdminBlockPtr->SingleReqResult, NVM_CRC_DELETE);
+#if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
+            /** Recovery fails then this shall be reported to the DEM */
+            if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+            {
+                Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
+            }
+#endif
             /* PRQA S 2824, 2844 -- */
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief The length to be processed by the crc is obtained based on the number of bytes to be processed, and the
  * corresponding interface is called based on the type of computation of the crc
@@ -485,7 +596,7 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         NvM_BlockIdType                intBlockId      = NvM_GetIntBlockId(CurRunningPtr->BlockId);
         const NvM_BlockDescriptorType* BlockDescriptor = &(NvM_BlockDescriptor[intBlockId]);
 
-        /* PRQA S 2814, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844 */
+        /* PRQA S 2814, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2844 */
         CurRunningPtr->Length = (NULL_PTR != BlockDescriptor->NvMBlockCipheringRef)
                                     ? (BlockDescriptor->NvMBlockCipheringRef->NvMNvBlockNVRAMDataLength)
                                     : CurRunningPtr->Length;
@@ -547,7 +658,10 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     CurRunningPtr->CrcLength -= crcLength;
     CurRunningPtr->CrcAddr = &CurRunningPtr->CrcAddr[crcLength]; /* PRQA S 2824 */ /* VL_NvM_2824 */
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job step is copy, the corresponding data is copied. Otherwise, it sends a read request to the
  * underlying memif, invokes the corresponding processing interface, and sets the job flag
@@ -583,13 +697,21 @@ void NvM_InterReadBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         NvM_InterReadBlockSubTwo();
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief Initiate a read request to the underlying memif, and invoke the corresponding processing interface; If the
  * current job step is pending and the repeat count is not 0, the corresponding data is copied.
  */
 void NvM_InterWriteBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
+    {
+        NvM_InterWriteBlockSub(); // only copy data
+    }
+    NvM_InterWriteBlockProcess();
     NvM_MemIfReq(NVM_MEMIF_REQ_WRITE);
 
 #if (STD_ON == NVM_POLLING_MODE)
@@ -597,17 +719,17 @@ void NvM_InterWriteBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     {
         MemIf_JobResultType retValue = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
 
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retValue][(uint8)NVM_WRITE_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
 #endif
-
-    NvM_InterWriteBlockSub();
-    NvM_InterWriteBlockProcess();
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_SET_RAM_BLOCK_STATUS_API)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job phase is computing crc, set the corresponding flag bit. If the repeat count is not 0, the
  * corresponding data is copied to the current ram address, otherwise the current job is set to fail
@@ -634,6 +756,7 @@ void NvM_InterSetRamStatus(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                 CurRunningPtr->CrcAddr = NvM_NvDataBuffer;
                 ModulePtr->JobStep     = NVM_JOB_STEP_CALC_CRC;
                 NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
+                (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             }
         }
         else
@@ -645,9 +768,12 @@ void NvM_InterSetRamStatus(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job status is suspended and the current block has a default value, set the job result status to
  * suspended and update the corresponding job steps and job requests
@@ -668,14 +794,18 @@ void NvM_InterRestoreBlockDefaults(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef *
             NvM_AdminBlock[intBlockId].SingleReqResult = NVM_REQ_PENDING;
             ModulePtr->JobStep                         = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         /* PRQA S 2844 -- */
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job is in the pending state, set the corresponding job step and the job state of memif, then
  * send an erase request to the underlying memif and invoke the corresponding job interface
@@ -696,14 +826,17 @@ void NvM_InterEraseNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     {
         MemIf_JobResultType retVal = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
 
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retVal][(uint8)NVM_ERASE_NV_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
 #endif
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job is in the suspended state, set the corresponding job step and the job state of the memif,
  * and then send the invalidation request to the underlying memif and invoke the corresponding job interface
@@ -723,14 +856,17 @@ void NvM_InterInvalidateNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     {
         MemIf_JobResultType retVal = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
 
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retVal][(uint8)NVM_INVALIDATE_NV_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
 #endif
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current block is the first block, the read job request is directly switched. Otherwise, readall the
  * blocks configured with readall in sequence, and update the corresponding status and job steps
@@ -756,6 +892,7 @@ void NvM_InterReadAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         if (NVM_READALL_FIRST_BLOCKID == CurRunningPtr->BlockId) /*For MultiJob,start from first block*/
         {
             NvM_AtomJobReq(NVM_ATOMJOB_READBLOCK);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else if (NVM_READALL_FIRST_BLOCKID < CurRunningPtr->BlockId)
         {
@@ -780,7 +917,10 @@ void NvM_InterReadAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If canceling a write job has been requested, the remaining unwritten blocks are set to cancel, and the
  * corresponding job results and status are updated.
@@ -828,6 +968,13 @@ void NvM_InterWriteAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 #endif
         NvM_ModuleType* ModulePtr = &NvM_Module;
 
+#if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+        /* Check and switch priority table if the other table has pending jobs */
+        if (0u != NvM_PriorityTable[1u - ModulePtr->CurActPriTable][NVM_TABLE_SIZE_PRIORITY - 1U])
+        {
+            ModulePtr->CurActPriTable = 1u - ModulePtr->CurActPriTable;
+        }
+#endif
         ModulePtr->CurrentJobType = NVM_JOB_TYPE_NONE;
         ModulePtr->MemIfJobState  = NVM_MEMIF_JOB_IDLE;
         ModulePtr->JobStep        = NVM_JOB_STEP_IDLE;
@@ -837,8 +984,11 @@ void NvM_InterWriteAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         NvM_InterWriteAllSub(intBlockId);
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief Check whether firstinitall is configured for all blocks. If FirstinitAll is configured, set and update the
  * corresponding flag bits and job steps according to different block types
@@ -864,11 +1014,13 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                 NVM_GetRepeatMirrorOperation();
                 ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                 NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+                (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             }
             else
             {
                 ModulePtr->JobStep = NVM_JOB_STEP_PENDING;
                 NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
+                (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             }
             isProcessed = TRUE;
             break;
@@ -888,11 +1040,13 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                     NVM_GetRepeatMirrorOperation();
                     ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                     NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+                    (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
                 }
                 else
                 {
                     ModulePtr->JobStep = NVM_JOB_STEP_PENDING;
                     NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
+                    (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
                 }
             }
             break;
@@ -902,6 +1056,7 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
             CurRunningPtr->FailedNum = 0u;
             ModulePtr->JobStep       = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             isProcessed = TRUE;
             break;
 #endif
@@ -915,9 +1070,12 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
 #if (STD_ON == NVM_WRITE_VERIFY)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job step is to read the first nv or the second nv, the read request is sent to the underlying
  * memif, and the corresponding verification interface is invoked according to the memif job result
@@ -957,7 +1115,10 @@ void NvM_InterWriteVerification(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the verified size is smaller than the length of the current block, the check operation is performed.
  * Otherwise, the verification is considered to be complete, and the corresponding status and result are updated
@@ -1011,9 +1172,12 @@ void NvM_InterWriteVerificationOK(void)
 #endif
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job is to calculate crc, the corresponding job result and tag bit are updated. Otherwise, set
  * the corresponding flag bit, job request, and result based on the block configuration
@@ -1072,6 +1236,7 @@ void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                     /** After copy nvmbuffer to ram or mirror */
                     ModulePtr->JobStep = NVM_JOB_STEP_CALC_CRC;
                     NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
+                    (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
                 }
             }
             else
@@ -1087,8 +1252,11 @@ void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     According to the passed SingleReqResult to notify the job result callback interface, and then according to
  * the status of the passed CrcChange to update the Crc and crcvalid bit, and set the job status, result, and so on
@@ -1139,8 +1307,11 @@ void NvM_JobOverSetFlag(NvM_RequestResultType SingleReqResult, NvM_CrcChangeType
     NvM_Module.JobStep       = NVM_JOB_STEP_IDLE;
     NvM_AtomJob.Count        = 0u;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_ECUC_PARTITION_NUM > 1U)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Check feedback flag of all blocks, and call BswM interface to signal
  */
@@ -1158,8 +1329,11 @@ void NvM_SatelliteMainFunction(void)
         }
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Sends the single job result of the current block to the BswM module, sets the request result of the
  * current block, and invokes the configured callback interface
@@ -1233,7 +1407,10 @@ void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType 
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Set the current notification job and notify the BswM module of the results of the current service,
  * invoking the configured multijob callback interface
@@ -1268,7 +1445,10 @@ void NvM_MultiJobResultFeedBack(NvM_ServiceIdType ServiceId, NvM_RequestResultTy
     }
 #endif
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /* ========================================== internal function definition ========================================== */
 /**
  * @brief     If crc verification is configured for the current block, the update job step is to compute crc, and the
@@ -1291,6 +1471,7 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void)
         CurRunningPtr->CrcAddr = CurRunningPtr->RamAddr;
         NvM_Module.JobStep     = NVM_JOB_STEP_CALC_CRC;
         NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
     }
     else
 #endif
@@ -1300,6 +1481,7 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void)
         {
             NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_WRITEBLOCK);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else
 #endif
@@ -1321,7 +1503,10 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void)
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the job is FirstInitAll, switch to the write request, otherwise set the corresponding flag bit
  */
@@ -1334,6 +1519,7 @@ NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId)
     {
         NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
         NvM_AtomJobReq(NVM_ATOMJOB_WRITEBLOCK);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
     }
     else
 #endif
@@ -1357,7 +1543,10 @@ NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId)
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     The corresponding callback request interface is invoked based on the current service ID and the
  * corresponding operation is processed based on the returned value
@@ -1386,8 +1575,7 @@ NVM_LOCAL void NvM_InterReadRomSubTwo(void)
         /** idle, never happen */
         break;
     }
-    if ((Std_ReturnType)E_OK
-        == (*CurRunningPtr->InitCallback)(initBlockRequest)) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+    if ((Std_ReturnType)E_OK == (*CurRunningPtr->InitCallback)(initBlockRequest)) /* PRQA S 2814 */ /* VL_NvM_2814 */
     {
         NvM_InterReadRomSubDeal();
     }
@@ -1398,15 +1586,26 @@ NVM_LOCAL void NvM_InterReadRomSubTwo(void)
         {
             NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else
 #endif
         {
+#if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
+            /** Recovery fails then this shall be reported to the DEM */
+            if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+            {
+                Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
+            }
+#endif
             NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Perform crc checks and staticId
  */
@@ -1429,8 +1628,15 @@ NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn) /* PRQA S 3673 
         if (CurRunningPtr->Crc == CurRunningPtr->TempCrc)
         {
             NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
-            NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
-            *processOn = FALSE; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+            if (CurRunningPtr->ServiceId == NVM_WRITE_ALL_SERV_ID)
+            {
+                NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
+            }
+            else
+            {
+                NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
+            }
+            *processOn = FALSE; /* PRQA S 2814 */ /* VL_NvM_2814 */
         }
     }
 #endif
@@ -1467,7 +1673,10 @@ NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn) /* PRQA S 3673 
         NvM_WriteSequenceForManagementType();
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Check whether crc is used and switch job
  */
@@ -1486,6 +1695,7 @@ NVM_LOCAL void NvM_InterWriteBlockProcess(void)
             CurRunningPtr->CrcAddr = NvM_NvDataBuffer;
             NvM_Module.JobStep     = NVM_JOB_STEP_CALC_CRC;
             NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC); /** Shift the job to the CALCCRC */
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             processOn = FALSE;
         }
         else
@@ -1510,7 +1720,10 @@ NVM_LOCAL void NvM_InterWriteBlockProcess(void)
         NvM_InterWriteBlockProcessSub(&processOn);
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Store the static ID or CRC value
  */
@@ -1525,7 +1738,7 @@ NVM_LOCAL void NvM_InterReadBlockSub(
 
     if (CurRunningPtr->Crc == tempCrc)
     {
-        *tempCrcResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+        *tempCrcResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_NvM_2814 */
     }
     else
     {
@@ -1544,7 +1757,7 @@ NVM_LOCAL void NvM_InterReadBlockSub(
 #if (STD_ON == NVM_DEM_E_WRONG_BLOCK_ID)
             Dem_SetEventStatus(NVM_E_WRONG_BLOCK_ID, DEM_EVENT_STATUS_PASSED);
 #endif
-            *tempStaticIdResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+            *tempStaticIdResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_NvM_2814 */
             if (NVM_CRC_STATICID_OK == *tempCrcResultPtr)
             {
                 NvM_Module.JobStep = NVM_JOB_STEP_COPY;
@@ -1574,7 +1787,10 @@ NVM_LOCAL void NvM_InterReadBlockSub(
         /*idle*/
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief The current job is marked as failed. When the copy operation is completed, the job state is changed to the
  * verification. If the job phase is calculated crc, the calculated crc value is saved to the corresponding buffer
@@ -1582,95 +1798,60 @@ NVM_LOCAL void NvM_InterReadBlockSub(
 NVM_LOCAL void NvM_InterWriteBlockSub(void)
 {
     /** First Step */
-    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
-    {
-        NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
-        if (CurRunningPtr->RepeatMirrorCounter > 0U)
+    if (CurRunningPtr->RepeatMirrorCounter > 0U)
+    {
+        if (E_OK == NvM_MemCpy(CurRunningPtr->RamAddr, NvM_NvDataBuffer))
         {
-            if (E_OK == NvM_MemCpy(CurRunningPtr->RamAddr, NvM_NvDataBuffer))
-            {
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
-                Std_ReturnType retVal = NvM_CompressionAndCiphering();
-                if (CRYPTO_E_BUSY == retVal)
-                {
-                    /** Repeat again */
-                }
-                else if (E_OK != retVal)
-                {
-                    /** Compression or(and) Ciphering failed */
-                    NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-                    NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_DELETE);
-                }
-                else
-#endif
-                {
-                    NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
-                }
-            }
-            else
+            Std_ReturnType retVal = NvM_CompressionAndCiphering();
+            if (CRYPTO_E_BUSY == retVal)
             {
                 /** Repeat again */
+            }
+            else if (E_OK != retVal)
+            {
+                /** Compression or(and) Ciphering failed */
+                NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
+                NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_DELETE);
+            }
+            else
+#endif
+            {
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
             }
         }
         else
         {
-            NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-            NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_DELETE);
-#if (STD_ON == NVM_DEM_E_REQ_FAILED)
-            Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
-#endif
+            /** Repeat again */
         }
     }
+    else
+    {
+        NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
+        NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_DELETE);
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
+#endif
+    }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Check the memif status and set the corresponding NvM status
  */
 NVM_LOCAL void NvM_InterReadBlockSubTwo(void)
 {
-    NvM_ModuleType*           ModulePtr     = &NvM_Module;
-    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
-
-#if (STD_ON == NVM_POLLING_MODE)
-    if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
-    {
-        MemIf_JobResultType retValue = MemIf_GetJobResult(CurRunningPtr->DeviceId);
-
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
-        (*NvM_MemIfAsyncFuncTable[retValue][(uint8)NVM_READ_BLOCK_SERV_ID - 6U])();
-        /* PRQA S 2814, 2844, 3120 -- */
-    }
-#endif
-    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
-    {
-#if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
-        if ((NVM_BLOCK_DATASET == CurRunningPtr->ManagementType) && (CurRunningPtr->NvNum <= CurRunningPtr->Index))
-        {
-            NVM_GetRepeatMirrorOperation();
-            ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
-            NvM_AtomJobReq(NVM_ATOMJOB_READROM);
-        }
-        else
-#endif
-        {
-            ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
-            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
-        }
-    }
-}
-
-/**
- * @brief     Determine whether the calculated crc is consistent; Then perform static ID check or CRC static ID check;
- */
-NVM_LOCAL void NvM_InterReadBlockSubOne(void)
-{
     uint32                    tempCrc;
     NvM_ModuleType*           ModulePtr     = &NvM_Module;
     const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
-    if ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+    if (((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+         || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+        && (CurRunningPtr->CrcLength == 0u))
     {
         if (NVM_CRC16 == CurRunningPtr->CRCType)
         {
@@ -1713,8 +1894,9 @@ NVM_LOCAL void NvM_InterReadBlockSubOne(void)
         }
     }
     else if (
-        (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+        ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+         || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+        && (CurRunningPtr->CrcLength == 0u))
     {
         NvM_InterReadBlockSub(&tempCrcResult, &tempStaticIdResult, tempCrc);
     }
@@ -1726,7 +1908,51 @@ NVM_LOCAL void NvM_InterReadBlockSubOne(void)
     /** CRC Inconsist || StaticId error */
     NvM_ReadErrorHandle(tempCrcResult, tempStaticIdResult);
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+/**
+ * @brief     Determine whether the calculated crc is consistent; Then perform static ID check or CRC static ID check;
+ */
+NVM_LOCAL void NvM_InterReadBlockSubOne(void)
+{
+    NvM_ModuleType*           ModulePtr     = &NvM_Module;
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
+    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
+    {
+#if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+        if ((NVM_BLOCK_DATASET == CurRunningPtr->ManagementType) && (CurRunningPtr->NvNum <= CurRunningPtr->Index))
+        {
+            NVM_GetRepeatMirrorOperation();
+            ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
+            NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
+        }
+        else
+#endif
+        {
+            ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
+            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        }
+    }
+
+#if (STD_ON == NVM_POLLING_MODE)
+    if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
+    {
+        MemIf_JobResultType retValue = MemIf_GetJobResult(CurRunningPtr->DeviceId);
+
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
+        (*NvM_MemIfAsyncFuncTable[retValue][(uint8)NVM_READ_BLOCK_SERV_ID - 6U])();
+        /* PRQA S 2814, 2844, 3120 -- */
+    }
+#endif
+}
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Set the ram status, if it is currently the first block, it is set to valid. Otherwise, all other blocks
  * check whether writeall is configured, the write protection and lock status of the block, and send a write job request
@@ -1778,6 +2004,7 @@ NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId)
         {
             NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_WRITEBLOCK);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
     }
     else
@@ -1790,7 +2017,10 @@ NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId)
         NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the mirror function is enabled, the corresponding status and result are set after the replication
  * succeeds. Otherwise, the number of mirror retries is 0 and the result is not ok. If the mirror function is disabled,
@@ -1812,9 +2042,6 @@ NVM_LOCAL void NvM_MemCpyStep(void)
             if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
             {
                 NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
-#if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-                Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
-#endif
             }
             NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
@@ -1844,9 +2071,6 @@ NVM_LOCAL void NvM_MemCpyStep(void)
             if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
             {
                 NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
-#if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-                Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
-#endif
             }
             NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
@@ -1857,8 +2081,11 @@ NVM_LOCAL void NvM_MemCpyStep(void)
         /** MISRA */
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (STD_ON == NVM_WRITE_VERIFY)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the values in the nv block buffer and ram buffer are inconsistent, retry the write operation or set the
  * result to not ok. If the data is consistent, the verified number is updated
@@ -1902,7 +2129,10 @@ NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr)
         CurRunningPtr->VerificationCounter = CurRunningPtr->VerificationCounter + CurRunningPtr->VerificationSize;
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the values in the nv block buffer and ram buffer are inconsistent, retry the write operation or set the
  * result to not ok. The last updated checked number was 0
@@ -1948,8 +2178,11 @@ NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr)
         CurRunningPtr->VerificationSize = 0u;
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the first nv block fails to be read and the retry times are not 0, the first nv block continues to be
  * read again. Otherwise, reset the number of retries and read the second nv block. Otherwise, continue to re-read the
@@ -2009,11 +2242,7 @@ NVM_LOCAL void
                 Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-                /** Recovery fails if the result is fail */
-                if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
-                {
-                    Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
-                }
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
 #endif
             }
 #else
@@ -2030,6 +2259,7 @@ NVM_LOCAL void
             NVM_GetRepeatMirrorOperation();
             ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else
         {
@@ -2055,7 +2285,10 @@ NVM_LOCAL void
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Continue to retry the corresponding read operation according to different block types. If the configured
  * number of retries is exceeded, the result is INTEGRITY_FAILED
@@ -2066,8 +2299,10 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
     NvM_ModuleType*     ModulePtr     = &NvM_Module;
     NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
-    if ((NVM_JOB_STEP_CHECK == ModulePtr->JobStep) || (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+    if ((NVM_JOB_STEP_CHECK == ModulePtr->JobStep)
+        || (((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+             || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
+            && (CurRunningPtr->CrcLength == 0u)))
     {
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
         /** DATASET Block Type */
@@ -2146,6 +2381,7 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
                     NVM_GetRepeatMirrorOperation();
                     ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                     NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+                    (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
                 }
                 else
                 {
@@ -2160,9 +2396,13 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
         }
     }
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 /* PRQA S 6030 -- */
 
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the compression function is enabled, the corresponding compression callout interface is invoked. If the
  * encryption function is enabled, the data in the current block is encrypted. If the encryption fails, the data is
@@ -2177,9 +2417,11 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
     const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
+#if (STD_OFF == NVM_CIPHERING_ENABLE)
     boolean copyFlag = FALSE;
-    uint8   NvM_CompressionBuffer[NVM_BLOCKMAXLENGTH];
-    uint16  compressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
+#endif
+    uint8  NvM_CompressionBuffer[NVM_BLOCKMAXLENGTH];
+    uint16 compressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
 
     /** NvM_CompressionCallout :reserved
     Param1[in]: NvM_NvDataBuffer :Nv data ptr in
@@ -2193,10 +2435,12 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
             CurRunningPtr->Length,
             NvM_CompressionBuffer,
             &compressionOutLength);
+#if (STD_OFF == NVM_CIPHERING_ENABLE)
         if (E_OK == retVal)
         {
             copyFlag = TRUE;
         }
+#endif
     }
     /** do not deal NvM_CurRunning.Length,because read length is get from configuration not get from calculate, so
      * now Compression not recommended */
@@ -2208,7 +2452,7 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
         if (blockCipherPtr != NULL_PTR) /* PRQA S 2844 */ /* VL_NvM_2844 */
         {
             uint32 cipheringOutLength = (uint32)blockCipherPtr->NvMNvBlockNVRAMDataLength;
-            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
+            /* PRQA S 2814 ++ */ /* VL_NvM_2814 */
             retVal = Csm_Encrypt(
                 blockCipherPtr->NvMCsmEncryptJobId,
                 CRYPTO_OPERATIONMODE_SINGLECALL,
@@ -2275,7 +2519,10 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the decompression function is enabled, the corresponding callout interface is invoked. If decryption is
  * enabled, the data of the current block is decrypted. If decryption fails, the decryption is retried according to the
@@ -2289,9 +2536,11 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
     const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
+#if (STD_OFF == NVM_CIPHERING_ENABLE)
     boolean copyFlag = FALSE;
-    uint8   NvM_DecompressionBuffer[NVM_BLOCKMAXLENGTH];
-    uint16  decompressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
+#endif
+    uint8  NvM_DecompressionBuffer[NVM_BLOCKMAXLENGTH];
+    uint16 decompressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
 
     /** NvM_DecompressionCallout :reserved
     Param1[in]: NvM_NvDataBuffer :Nv data ptr in
@@ -2305,10 +2554,12 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
             CurRunningPtr->Length,
             NvM_DecompressionBuffer,
             &decompressionOutLength);
+#if (STD_OFF == NVM_CIPHERING_ENABLE)
         if (E_OK == retVal)
         {
             copyFlag = TRUE;
         }
+#endif
     }
     /** do not deal NvM_CurRunning.Length,because read length is get from configuration not get from calculate, so
      * now decompression not recommended */
@@ -2323,7 +2574,7 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
             uint8  NvM_DecipheringBuffer[NVM_BLOCKMAXLENGTH];
             uint32 decipheringOutLength = blockCipherPtr->NvMNvBlockNVRAMDataLength;
 
-            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
+            /* PRQA S 2814 ++ */ /* VL_NvM_2814 */
             retVal = Csm_Decrypt(
                 blockCipherPtr->NvMCsmDecryptJobId,
                 CRYPTO_OPERATIONMODE_SINGLECALL,
@@ -2390,8 +2641,11 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
     }
     return retVal;
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Copy specified length data from one memory to another
  */
@@ -2441,7 +2695,7 @@ NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr)
                     /* PRQA S 2844 -- */
                     NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
                 }
-                /* PRQA S 2814, 0314 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_0314 */
+                /* PRQA S 2814, 0314 ++ */ /* VL_NvM_2814, VL_NvM_0314 */
                 retVal = (*CurRunningPtr->NvM_ReadRamBlockFromNvm)((void*)DstAddrPtr);
                 /* PRQA S 2814, 0314 -- */
             }
@@ -2469,8 +2723,11 @@ NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr)
     }
     return retVal;
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 /* PRQA S 6030 -- */
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Detect and set module runtime type
  */
@@ -2498,7 +2755,10 @@ NVM_LOCAL void NvM_RunTimeHandle(void)
     }
 #endif
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Copy data in the mirror buffer
  */
@@ -2507,7 +2767,7 @@ NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPt
     Std_ReturnType      retVal;
     NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning; /* PRQA S 3678 */ /* VL_NvM_3678 */
 
-    /* PRQA S 2814, 0311, 0314 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_0311, VL_NvM_0314 */
+    /* PRQA S 2814, 0311, 0314 ++ */ /* VL_NvM_2814, VL_NvM_0311, VL_NvM_0314 */
     if (E_OK == (*CurRunningPtr->NvM_WriteRamBlockToNvm)((void*)SrcAddrPtr))
     /* PRQA S 2814, 0311, 0314 -- */
     {
@@ -2533,7 +2793,10 @@ NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPt
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Copy data in the mirror buffer
  */
@@ -2561,6 +2824,7 @@ NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId)
             NVM_GetRepeatMirrorOperation();
             NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else
         {
@@ -2575,8 +2839,8 @@ NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId)
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
         NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
         NvM_AtomJobReq(NVM_ATOMJOB_READBLOCK);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
     }
 }
-
 #define NVM_STOP_SEC_CODE
 #include "NvM_MemMap.h"

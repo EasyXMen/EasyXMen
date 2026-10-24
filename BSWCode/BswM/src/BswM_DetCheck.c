@@ -56,8 +56,12 @@ Std_ReturnType BswM_ChkBswMInitStatus(uint8 sid)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core before performing a partition restart.
  * It uses the BswM_ChkBswMInitStatus function to verify the core initialization status.
@@ -74,9 +78,13 @@ Std_ReturnType BswM_DetChkParRestart(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
 
 #if (BSWM_CANSM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the CanSM current state.
  * It reports a DET error if the core is not initialized or if the current state is out of range.
@@ -107,10 +115,13 @@ Std_ReturnType BswM_DetChkCanSMInd(CanSM_BswMCurrentStateType CurrentState)
     }
     return ret;
 }
-
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_CANSM_ENABLED == STD_ON*/
 
 #if (BSWM_COMM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the requested ComM mode.
  * It reports a DET error if the core is not initialized or if the requested mode is out of range.
@@ -142,8 +153,12 @@ Std_ReturnType BswM_DetChkComMInd(ComM_ModeType RequestedMode)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_COMM_PNC_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the current ComM Pnc mode.
  * It reports a DET error if the core is not initialized or if the current Pnc mode is out of range.
@@ -175,10 +190,14 @@ Std_ReturnType BswM_DetChkComMPnc(ComM_PncModeType CurrentPncMode)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_PNC_ENABLED == STD_ON*/
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_COMM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the ComM initiate reset request.
  * It returns E_OK if the core is initialized, otherwise E_NOT_OK.
@@ -195,10 +214,13 @@ Std_ReturnType BswM_DetChkComMInitRst(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_DCM_ENABLED == STD_ON)
-#if (BSWM_DEV_ERROR_DETECT == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the DCM application update status.
  * It reports a DET error if the core is not initialized.
@@ -215,8 +237,11 @@ Std_ReturnType BswM_DetChkDcmUpdate(void)
     }
     return ret;
 }
-#endif
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the requested Dcm communication mode.
  * It reports a DET error if the core is not initialized or if the requested mode is out of range.
@@ -247,9 +272,13 @@ Std_ReturnType BswM_DetChkDcmModeCurState(Dcm_CommunicationModeType RequestedMod
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_DCM_ENABLED == STD_ON*/
 
 #if (BSWM_ECUM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the current EcuM wakeup status.
  * It reports a DET error if the core is not initialized or if the wakeup status is out of range.
@@ -281,7 +310,11 @@ Std_ReturnType BswM_DetChkEcuMCurWakeUp(EcuM_WakeupStatusType state)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core, validates the requested EcuM state, and the current run
  * status. It reports a DET error if the core is not initialized, the requested state is out of range, or the current
@@ -321,7 +354,11 @@ Std_ReturnType BswM_DetChkRequestedState(EcuM_StateType State, EcuM_RunStatusTyp
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the current EcuM state.
  * It reports a DET error if the core is not initialized.
@@ -338,9 +375,13 @@ Std_ReturnType BswM_DetChkEcuMCurState(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ECUM_ENABLED == STD_ON*/
 
 #if (BSWM_ETHIF_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the Ethernet port group link state.
  * It reports a DET error if the core is not initialized or if the port group state is out of range.
@@ -370,9 +411,13 @@ Std_ReturnType BswM_DetChkEthIfPortGru(EthTrcv_LinkStateType PortGroupState)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHIF_ENABLED == STD_ON*/
 
 #if (BSWM_ETHSM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the current EthSM network mode state.
  * It reports a DET error if the core is not initialized or if the current state is out of range.
@@ -402,41 +447,13 @@ Std_ReturnType BswM_DetChkEthSMInd(EthSM_NetworkModeStateType CurrentState)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHSM_ENABLED == STD_ON*/
 
-#if (BSWM_FRSM_ENABLED == STD_ON)
-/**
- * Checks the initialization status of the BSW Manager core and validates the current FrSM state.
- * It reports a DET error if the core is not initialized or if the current state is out of range.
- */
-/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-Std_ReturnType BswM_DetChkFrSMInd(FrSM_BswM_StateType CurrentState)
-/* PRQA S 1503,1505,1532 --*/
-{
-    Std_ReturnType ret = E_OK;
-
-    if ((Std_ReturnType)E_OK != BswM_ChkBswMInitStatus(BSWM_API_ID_FRSM_CURRENT_STATE))
-    {
-        ret = E_NOT_OK;
-    }
-    else if ((CurrentState != FRSM_BSWM_READY) && ((CurrentState != FRSM_BSWM_READY_ECU_PASSIVE)))
-    {
-        ret = E_NOT_OK;
-        (void)Det_ReportError(
-            BSWM_MODULE_ID,
-            BSWM_INSTANCE_ID,
-            BSWM_API_ID_FRSM_CURRENT_STATE,
-            BSWM_E_REQ_MODE_OUT_OF_RANGE);
-    }
-    else
-    {
-        /*Do Nothing*/
-    }
-    return ret;
-}
-#endif /*BSWM_FRSM_ENABLED == STD_ON*/
-
 #if (BSWM_J1939DCM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for J1939 DCM broadcast status.
  * It returns an error if the core is not initialized.
@@ -453,15 +470,19 @@ Std_ReturnType BswM_DetChkJ1939DcmBroad(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_J1939DCM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939NM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for J1939 Network Management state change notifications.
  * It returns an error if the core is not initialized.
  */
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-Std_ReturnType BswM_DetChkJ1939NmInd(void)
+Std_ReturnType BswM_DetChkJ1939NmInd(Nm_StateType NmState)
 /* PRQA S 1503,1505,1532 --*/
 {
     Std_ReturnType ret = E_OK;
@@ -470,11 +491,28 @@ Std_ReturnType BswM_DetChkJ1939NmInd(void)
     {
         ret = E_NOT_OK;
     }
+    else if (NmState > NM_STATE_OFFLINE)
+    {
+        ret = E_NOT_OK;
+        (void)Det_ReportError(
+            BSWM_MODULE_ID,
+            BSWM_INSTANCE_ID,
+            BSWM_API_ID_J1939NM_STATE_CHANGE_NOTIFY,
+            BSWM_E_REQ_MODE_OUT_OF_RANGE);
+    }
+    else
+    {
+        /*Do Nothing*/
+    }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_J1939NM_ENABLED == STD_ON*/
 
 #if (BSWM_LINSM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the current LIN schedule.
  * It returns an error if the core is not initialized.
@@ -491,7 +529,11 @@ Std_ReturnType BswM_DetChkLinSMCurSch(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the current LinSM state.
  * It reports a DET error if the core is not initialized or if the current state is out of range.
@@ -521,9 +563,13 @@ Std_ReturnType BswM_DetChkLinSMInd(LinSM_ModeType CurrentState)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINSM_ENABLED == STD_ON*/
 
 #if (BSWM_LINTP_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the requested LinTP mode.
  * It reports a DET error if the core is not initialized or if the requested mode is out of range.
@@ -555,9 +601,13 @@ Std_ReturnType BswM_DetChkLinTpRqst(LinTp_Mode LinTpRequestedMode)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_LINTP_ENABLED == STD_ON*/
 
 #if (BSWM_NM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the Network Management car wake-up indication.
  * It returns an error if the core is not initialized.
@@ -574,13 +624,17 @@ Std_ReturnType BswM_DetChkNmCarWkUp(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the Network Management state change notification.
  * It returns an error if the core is not initialized.
  */
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-Std_ReturnType BswM_DetChkNmStateChange(void)
+Std_ReturnType BswM_DetChkNmStateChange(Nm_StateType currentState)
 /* PRQA S 1503,1505,1532 --*/
 {
     Std_ReturnType ret = E_OK;
@@ -589,12 +643,28 @@ Std_ReturnType BswM_DetChkNmStateChange(void)
     {
         ret = E_NOT_OK;
     }
+    else if (currentState > NM_STATE_OFFLINE)
+    {
+        ret = E_NOT_OK;
+        (void)Det_ReportError(
+            BSWM_MODULE_ID,
+            BSWM_INSTANCE_ID,
+            BSWM_API_ID_NM_STATECHANGENOTIFICATION,
+            BSWM_E_REQ_MODE_OUT_OF_RANGE);
+    }
+    else
+    {
+        /*Do Nothing*/
+    }
     return ret;
 }
-
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NM_ENABLED == STD_ON*/
 
 #if (BSWM_NVM_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the current NVM block mode.
  * It returns an error if the core is not initialized.
@@ -624,7 +694,11 @@ Std_ReturnType BswM_DetChkCurNvmBlockMode(NvM_RequestResultType CurrentBlockMode
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core for the current NVM job mode.
  * It returns an error if the core is not initialized.
@@ -657,9 +731,13 @@ Std_ReturnType BswM_DetChkCurNvmJobMode(NvM_MultiBlockRequestType MultiBlockRequ
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NVM_ENABLED == STD_ON*/
 
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the requesting user for a generic request.
  * It retrieves partition configuration pointers, checks if the requesting user is within the allowed range, and reports
@@ -718,9 +796,13 @@ Std_ReturnType BswM_DetChkGenericRqst(BswM_UserType requestingUser)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_GENERICREQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_SD_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the requested service ID.
  * It retrieves partition configuration pointers and checks if the requested service ID is within the allowed range.
@@ -751,7 +833,11 @@ Std_ReturnType BswM_DetChkClientCurState(Sd_ClientServiceCurrentStateType Curren
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the consumed event group current state.
  * It returns an error if the core is not initialized or if the state is out of the allowed range.
@@ -783,7 +869,11 @@ Std_ReturnType BswM_DetChkEvGruCurState(Sd_ConsumedEventGroupCurrentStateType Co
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Checks the initialization status of the BSW Manager core and validates the event handler current state.
  * It returns an error if the core is not initialized or if the state is out of the allowed range.
@@ -813,9 +903,13 @@ Std_ReturnType BswM_DetChkEvHandlerCurState(Sd_EventHandlerCurrentStateType Even
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SD_ENABLED == STD_ON*/
 
 #if (BSWM_SOAD_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * @brief
  *
@@ -832,11 +926,11 @@ Std_ReturnType BswM_DetChkSoAdSoConModeChg(void)
     }
     return ret;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /* BSWM_SOAD_ENABLED == STD_ON */
 
-#define BSWM_STOP_SEC_CODE
-#include "BswM_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/

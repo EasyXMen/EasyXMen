@@ -53,6 +53,8 @@
 /** @} */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Check Queue Overflow
  * @param[in]     QueueStatus: status of queue
@@ -65,6 +67,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_QueueCheckQueueOverflow(Dem_EventQueueStatusType QueueStatus, Dem_EventStatusType MonitorTrigger);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculate queue status based on event status
@@ -77,6 +83,10 @@ DEM_LOCAL boolean Dem_QueueCheckQueueOverflow(Dem_EventQueueStatusType QueueStat
  */
 DEM_LOCAL Dem_EventQueueStatusType
     Dem_QueueCalculateQueueStatus(Dem_EventQueueStatusType QueueStatus, Dem_EventStatusType MonitorTrigger);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Queued Event process by the action type
@@ -87,6 +97,10 @@ DEM_LOCAL Dem_EventQueueStatusType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessQueuedEventActions(Dem_EventIdType EventId, Dem_EventQueueStatusType QueueStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Queued Event process in Satellite
@@ -96,6 +110,10 @@ DEM_LOCAL void Dem_ProcessQueuedEventActions(Dem_EventIdType EventId, Dem_EventQ
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventQueuedProcess(Dem_SatelliteIdType SatelliteId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Event Queue Task process
@@ -104,6 +122,10 @@ DEM_LOCAL void Dem_EventQueuedProcess(Dem_SatelliteIdType SatelliteId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventQueueTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initialize the subcomponent Event Queue
@@ -112,6 +134,8 @@ DEM_LOCAL void Dem_EventQueueTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventQueueInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #if (DEM_PROCESS_EVENT_LIMIT_NUMBER > 0u)
 /* ============================================ internal data definitions =========================================== */
@@ -122,13 +146,19 @@ DEM_LOCAL void Dem_EventQueueInit(void);
  * @range 0..65535
  */
 DEM_LOCAL Dem_SatelliteIdType Dem_LastSatelliteId;
-
+#define DEM_STOP_SEC_VAR_CLEARED_16
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_VAR_CLEARED_16
+#include "Dem_MemMap.h"
 /**
  * @brief Last MonitorId
  * @range 0..65535
  */
 DEM_LOCAL Dem_MonitorIdType Dem_LastMonitorId;
-
+#define DEM_STOP_SEC_VAR_CLEARED_16
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_VAR_CLEARED_16
+#include "Dem_MemMap.h"
 /**
  * @brief Processed Event Number in this mainfunction
  * @range 0..65535
@@ -139,8 +169,6 @@ DEM_LOCAL Dem_EventIdType Dem_ProcessedEventNum;
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /* PRQA S 0759 ++ */ /* VL_Dem_0759 */
 /**
  * @brief         Reset QueueStatus
@@ -317,7 +345,8 @@ DEM_LOCAL_INLINE Dem_EventQueueStatusType Dem_QueueSetQueueAction(Dem_EventQueue
 {
     return (uint8)((QueueStatus & DEM_EVENTQUEUE_ACTION_MASK) | (Action & DEM_EVENTQUEUE_ACTION));
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check Queue Overflow
  */
@@ -334,7 +363,10 @@ DEM_LOCAL boolean Dem_QueueCheckQueueOverflow(Dem_EventQueueStatusType QueueStat
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculate queue status based on event status
  */
@@ -382,7 +414,10 @@ DEM_LOCAL Dem_EventQueueStatusType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Queued Event process by the action type
  */
@@ -451,7 +486,8 @@ DEM_LOCAL void Dem_ProcessQueuedEventActions(Dem_EventIdType EventId, Dem_EventQ
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Queued Event process
  * @param[in]     QueueStatus: status of queue
@@ -473,7 +509,8 @@ DEM_LOCAL_INLINE void Dem_ProcessEventQueuedEvent(Dem_EventIdType EventId, Dem_E
     Dem_EventPrestorageRelease();
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Queued Event process in Satellite
  */
@@ -520,7 +557,10 @@ DEM_LOCAL void Dem_EventQueuedProcess(Dem_SatelliteIdType SatelliteId)
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Event Queue Task process
  */
@@ -560,7 +600,10 @@ DEM_LOCAL void Dem_EventQueueTask(void)
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initialize the subcomponent Event Queue
  */
@@ -573,7 +616,6 @@ DEM_LOCAL void Dem_EventQueueInit(void)
 #endif
     Dem_EnableTask(Dem_Task_EventQueue);
 }
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
 

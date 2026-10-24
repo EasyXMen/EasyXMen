@@ -25,6 +25,7 @@
 /* =================================================== inclusions =================================================== */
 #include "Ea.h"
 #include "Ea_Cfg.h"
+#include "Ea_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 /**  EA block header info
@@ -39,7 +40,7 @@
  */
 #define EA_TOTAL_HEADER_LENGTH 14u /** Defines used as keyword for the total header length */
 
-/* PRQA S 3412 ++ */ /* VL_Fee_3412 */
+/* PRQA S 3412 ++ */ /* VL_Ea_3412 */
 #define EA_HEADER_ALIGNMENT_LENGTH                                                   \
     (((EA_TOTAL_HEADER_LENGTH + (EA_VIRTUAL_PAGE_SIZE - 1U)) / EA_VIRTUAL_PAGE_SIZE) \
      * EA_VIRTUAL_PAGE_SIZE) /** Defines used as keyword for the alignment header length */
@@ -145,6 +146,10 @@
  * @trace       CPD-75785
  */
 EA_LOCAL uint16 Ea_GetBlockIndex(uint16 BlockNumber);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Job finish, set runtime data
@@ -154,6 +159,10 @@ EA_LOCAL uint16 Ea_GetBlockIndex(uint16 BlockNumber);
  * @trace       CPD-75786
  */
 EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to report to this module the successful end of an asynchronous operation
@@ -162,6 +171,10 @@ EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult);
  * @trace       CPD-75787
  */
 EA_LOCAL void Ea_CallJobEndNotification(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to report to this module the failure of an asynchronous operation
@@ -170,6 +183,10 @@ EA_LOCAL void Ea_CallJobEndNotification(void);
  * @trace       CPD-75788
  */
 EA_LOCAL void Ea_CallJobErrorNotification(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to read
@@ -178,6 +195,10 @@ EA_LOCAL void Ea_CallJobErrorNotification(void);
  * @trace       CPD-75789
  */
 EA_LOCAL void Ea_InterRead(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Update runtime state when request read
@@ -186,6 +207,10 @@ EA_LOCAL void Ea_InterRead(void);
  * @trace       CPD-75790
  */
 EA_LOCAL void Ea_InterReadSub(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to write
@@ -194,6 +219,10 @@ EA_LOCAL void Ea_InterReadSub(void);
  * @trace       CPD-75791
  */
 EA_LOCAL void Ea_InterWrite(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Update runtime state when request write
@@ -203,6 +232,10 @@ EA_LOCAL void Ea_InterWrite(void);
  * @trace       CPD-75792
  */
 EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to invalidate
@@ -211,6 +244,10 @@ EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex);
  * @trace       CPD-75793
  */
 EA_LOCAL void Ea_InterInvalidate(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to erase
@@ -219,6 +256,10 @@ EA_LOCAL void Ea_InterInvalidate(void);
  * @trace       CPD-75794
  */
 EA_LOCAL void Ea_InterErase(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to cancel
@@ -227,6 +268,10 @@ EA_LOCAL void Ea_InterErase(void);
  * @trace       CPD-75795
  */
 EA_LOCAL void Ea_InterCancel(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Read job finish, copy data to upper buffer
@@ -235,6 +280,10 @@ EA_LOCAL void Ea_InterCancel(void);
  * @trace       CPD-75796
  */
 EA_LOCAL void Ea_InterCopyReadData(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to call MemAcc Api
@@ -244,6 +293,10 @@ EA_LOCAL void Ea_InterCopyReadData(void);
  * @trace       CPD-75797
  */
 EA_LOCAL void Ea_MemAccReq(Ea_RequestJobType Ea_RequestJob);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Read job finish, check read header
@@ -252,6 +305,10 @@ EA_LOCAL void Ea_MemAccReq(Ea_RequestJobType Ea_RequestJob);
  * @trace       CPD-75798
  */
 EA_LOCAL void Ea_InterCheckReadHeader(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Write or invalidate job process, prepare write header
@@ -263,11 +320,39 @@ EA_LOCAL void Ea_InterCheckReadHeader(void);
 EA_LOCAL void Ea_InterPrepareWriteHeader(uint8 status);
 #define EA_STOP_SEC_CODE
 #include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
+
+/**
+ * @brief       Handling of internal tasks
+ * @param[in]   JobType: The job type
+ * @param[in]   blockIndex: The block index
+ * @param[in]   deviceIndex: The device index
+ * @reentrant   Non Reentrant
+ * @synchronous TRUE
+ * @trace       -
+ */
+EA_LOCAL void Ea_InternalProcess(Ea_RequestJobType JobType, uint16 blockIndex, uint8 deviceIndex);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
+
+/**
+ * @brief       Handling after the successful completion of an internal task
+ * @param[in]   JobType: The job type
+ * @reentrant   Non Reentrant
+ * @synchronous TRUE
+ * @trace       -
+ */
+EA_LOCAL void Ea_InternalProcessOk(Ea_RequestJobType JobType);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 
 /* ============================================ internal data definition ============================================ */
 #define EA_START_SEC_VAR_CLEARED_8
 #include "Ea_MemMap.h"
-/* PRQA S 3408 ++ */ /* VL_Fee_3408 */
+/* PRQA S 3408 ++ */ /* VL_Ea_3408 */
 /**
  * @brief Record the status of the Ea module @range 0..3
  */
@@ -290,7 +375,11 @@ EA_LOCAL uint8 Ea_ReadWritBuffer[EA_BLOCK_MAX_SIZE + EA_TOTAL_HEADER_LENGTH];
  * @brief Record the management data of the current running task @range NA
  */
 EA_LOCAL Ea_RunTimeDataType Ea_RunTimeData;
+#define EA_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Ea_MemMap.h"
 
+#define EA_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Ea_MemMap.h"
 /**
  * @brief Used to record the management data of each Block @range NA
  */
@@ -322,12 +411,13 @@ EA_LOCAL const Ea_VoidFunctionVoidPtr EA_InterServFunc[] = {
 /* ========================================== external function definition ========================================== */
 #define EA_START_SEC_CODE
 #include "Ea_MemMap.h"
-/* PRQA S 1503 ++ */ /* VL_Ea_1503 */
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 /**
  * @brief Initialize all variables and states if the input parameters are valid, otherwise an error is reported
  */
 void Ea_Init(const Ea_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 2, 0x00, ConfigPtr);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR != ConfigPtr)
     {
@@ -341,7 +431,7 @@ void Ea_Init(const Ea_ConfigType* ConfigPtr)
         Ea_RunTimeData.LastJobResult              = MEMIF_BLOCK_INCONSISTENT;
         Ea_RunTimeData.RequestJob                 = EA_JOB_IDLE;
         Ea_RunTimeData.SubJobStatus               = EA_SUB_JOB_IDLE;
-        Ea_RunTimeData.EepState                   = EA_EEP_JOB_IDLE;
+        Ea_RunTimeData.MemHwAbState               = EA_MEMHWAB_JOB_IDLE;
         Ea_RunTimeData.PendReq.BlockNumber        = 0u;
         Ea_RunTimeData.PendReq.BlockOffset        = 0u;
         Ea_RunTimeData.PendReq.BlockIndex         = EA_BLOCKNUM_INVALID;
@@ -367,14 +457,19 @@ void Ea_Init(const Ea_ConfigType* ConfigPtr)
         }
         Ea_State = MEMIF_IDLE;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 1, 0x00);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Get the block id value, check the develop error, then put the read request into the queue
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Ea_STMIF */
 Std_ReturnType Ea_Read(uint16 BlockNumber, uint16 BlockOffset, uint8* DataBufferPtr, uint16 Length)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 5, 0x02, BlockNumber, BlockOffset, DataBufferPtr, Length);
     Std_ReturnType ret        = E_NOT_OK;
     uint16         blockIndex = Ea_GetBlockIndex(BlockNumber);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
@@ -428,14 +523,19 @@ Std_ReturnType Ea_Read(uint16 BlockNumber, uint16 BlockOffset, uint8* DataBuffer
         Ea_Det_ReportError((uint8)EA_SID_READ, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x02, ret);
     return ret;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Get the block id value, check the develop error, then put the write request into the queue
  */
 Std_ReturnType Ea_Write(uint16 BlockNumber, const uint8* DataBufferPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 3, 0x03, BlockNumber, DataBufferPtr);
     Std_ReturnType ret        = E_NOT_OK;
     uint16         blockIndex = Ea_GetBlockIndex(BlockNumber);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
@@ -452,79 +552,99 @@ Std_ReturnType Ea_Write(uint16 BlockNumber, const uint8* DataBufferPtr)
     {
         errorId = EA_E_INVALID_BLOCK_NO;
     }
-    else if (NULL_PTR == DataBufferPtr)
+    else if (
+        (NULL_PTR == DataBufferPtr)
+#if (EA_BUFFER_ALIGN_VALUE > 0uL)
+        || (0U != ((Ea_AddressType)DataBufferPtr % EA_BUFFER_ALIGN_VALUE))
+#endif
+    )
     {
         errorId = EA_E_PARAM_POINTER;
     }
     else
 #endif
-        if ((0uL == Ea_Config.BlockCfg->BlockCfg[blockIndex].NumberOfWriteCycles)
-            || (Ea_Config.BlockCfg->BlockCfg[blockIndex].NumberOfWriteCycles
-                > Ea_BlockInfo[blockIndex].BlockWriteCycle))
     {
-        Ea_State                                  = MEMIF_BUSY;
-        Ea_RunTimeData.LastJobResult              = MEMIF_JOB_PENDING;
-        Ea_RunTimeData.RequestJob                 = EA_JOB_WRITE;
-        Ea_RunTimeData.PendReq.BlockNumber        = BlockNumber;
-        Ea_RunTimeData.PendReq.BlockIndex         = blockIndex;
-        Ea_RunTimeData.PendReq.Length             = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockSize;
-        Ea_RunTimeData.PendReq.DataWriteBufferPtr = DataBufferPtr;
-        Ea_RunTimeData.PendReq.InterDataBufferPtr = Ea_ReadWritBuffer;
-        if (Ea_BlockInfo[blockIndex].BlockWriteCycle < EA_MAX_WRITE_CYCLE) /* PRQA S 1252 */ /* VL_QAC_1252 */
+        Ea_BlockInfoType*               blockInfoPtr = &(Ea_BlockInfo[blockIndex]);
+        const Ea_BlockConfigurationType blockCfg     = Ea_Config.BlockCfg->BlockCfg[blockIndex];
+        if ((0uL == blockCfg.NumberOfWriteCycles) || (blockCfg.NumberOfWriteCycles > blockInfoPtr->BlockWriteCycle))
         {
-            Ea_BlockInfo[blockIndex].BlockWriteCycle++;
+            Ea_State                                  = MEMIF_BUSY;
+            Ea_RunTimeData.LastJobResult              = MEMIF_JOB_PENDING;
+            Ea_RunTimeData.RequestJob                 = EA_JOB_WRITE;
+            Ea_RunTimeData.PendReq.BlockNumber        = BlockNumber;
+            Ea_RunTimeData.PendReq.BlockIndex         = blockIndex;
+            Ea_RunTimeData.PendReq.Length             = blockCfg.BlockSize;
+            Ea_RunTimeData.PendReq.DataWriteBufferPtr = DataBufferPtr;
+            Ea_RunTimeData.PendReq.InterDataBufferPtr = Ea_ReadWritBuffer;
+            if (blockInfoPtr->BlockWriteCycle < EA_MAX_WRITE_CYCLE) /* PRQA S 1252 */ /* VL_QAC_1252 */
+            {
+                blockInfoPtr->BlockWriteCycle++;
+            }
+            ret = E_OK;
         }
-        ret = E_OK;
     }
-    else
-    {
-        /*idle*/
-    }
+
 #if (STD_ON == EA_DEV_ERROR_DETECT)
     if (errorId != EA_E_NO_ERROR)
     {
         Ea_Det_ReportError((uint8)EA_SID_WRITE, errorId);
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x03, ret);
     return ret;
 }
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 /* PRQA S 6030 -- */
 
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the module has been initialized and the module is not busy, set the request job to cancel status
  */
 void Ea_Cancel(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 1, 0x04);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
     if (MEMIF_UNINIT == Ea_State)
     {
         Ea_Det_ReportError(EA_SID_CANCEL, EA_E_UNINIT);
     }
-    else
-#endif
-        if (MEMIF_BUSY != Ea_State)
+    else if (MEMIF_BUSY != Ea_State)
     {
         Ea_Det_ReportRunTimeError(EA_SID_CANCEL, EA_E_INVALID_CANCEL);
     }
     else
+#endif
     {
         Ea_RunTimeData.RequestJob = EA_JOB_CANCEL;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 1, 0x04);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief return the recorded module status
  */
 MemIf_StatusType Ea_GetStatus(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 1, 0x05);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x05, Ea_State);
     return Ea_State;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the module has been initialized, return the job result
  */
 MemIf_JobResultType Ea_GetJobResult(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 1, 0x06);
     MemIf_JobResultType ret = MEMIF_JOB_FAILED;
 #if (EA_DEV_ERROR_DETECT == STD_ON)
     if (MEMIF_UNINIT == Ea_State)
@@ -536,14 +656,19 @@ MemIf_JobResultType Ea_GetJobResult(void)
     {
         ret = Ea_RunTimeData.LastJobResult;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x06, ret);
     return ret;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Get the block id value, check the develop error, then put the invalidate request into the queue
  */
 Std_ReturnType Ea_InvalidateBlock(uint16 BlockNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 2, 0x07, BlockNumber);
     Std_ReturnType ret        = E_NOT_OK;
     uint16         blockIndex = Ea_GetBlockIndex(BlockNumber);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
@@ -577,15 +702,20 @@ Std_ReturnType Ea_InvalidateBlock(uint16 BlockNumber)
         Ea_Det_ReportError((uint8)EA_SID_INVALIDATEBLOCK, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x07, ret);
     return ret;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 #if (EA_VERSION_INFO_API == STD_ON)
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the module has been initialized, return the version information
  */
 void Ea_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 2, 0x08, VersionInfoPtr);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
     /** Development Error Checks */
     if (NULL_PTR == VersionInfoPtr)
@@ -601,14 +731,19 @@ void Ea_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
         VersionInfoPtr->sw_minor_version = EA_SW_MINOR_VERSION;
         VersionInfoPtr->sw_patch_version = EA_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 1, 0x08);
 }
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 #endif
-
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Get the block id value, check the develop error, then put the erase request into the queue
  */
 Std_ReturnType Ea_EraseImmediateBlock(uint16 BlockNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 2, 0x09, BlockNumber);
     Std_ReturnType ret        = E_NOT_OK;
     uint16         blockIndex = Ea_GetBlockIndex(BlockNumber);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
@@ -645,16 +780,22 @@ Std_ReturnType Ea_EraseImmediateBlock(uint16 BlockNumber)
         Ea_Det_ReportError((uint8)EA_SID_ERASEIMMEDIATE_BLOCK, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 2, 0x09, ret);
     return ret;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the module has been initialized, invokes the interface to notifies the upper-layer application that job is
  * completed
  */
 void Ea_JobEndNotification(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 1, 0x10);
 #if (EA_DEV_ERROR_DETECT == STD_ON)
+
     if (MEMIF_UNINIT == Ea_State)
     {
         Ea_Det_ReportError(EA_SID_JOBENDNOTIFICATION, EA_E_UNINIT);
@@ -683,14 +824,19 @@ void Ea_JobEndNotification(void)
         }
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 1, 0x10);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the status is not IDLE, then the process the job according to the request job
  */
 /* PRQA S 3408,1532,1512 ++ */ /* VL_Ea_3408,VL_QAC_OneFunRef,VL_Ea_1512 */
 void Ea_MainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Start, 1, 0x12);
     /** MainFunction is only processed if busy */
     if (Ea_State > MEMIF_IDLE)
     {
@@ -703,28 +849,33 @@ void Ea_MainFunction(void)
             Ea_InterInvalidate, /** EA_JOB_INVALIDATE */
             Ea_InterErase,      /** EA_JOB_ERASE */
         };
+#endif
         if (Ea_RunTimeData.RequestJob != EA_JOB_IDLE)
         {
             (*EA_InterServFunc[Ea_RunTimeData.RequestJob])();
         }
-#endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Ea, 0, Bsw_Return, 1, 0x12);
 }
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 /* PRQA S 3408,1532,1512 -- */
 
 /* ========================================== internal function definition ========================================== */
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Search the block index of all configured blocks
  */
 EA_LOCAL uint16 Ea_GetBlockIndex(uint16 BlockNumber)
 {
     uint16 ret = EA_BLOCKNUM_INVALID;
-
     if ((0u != BlockNumber) && (EA_BLOCKNUM_INVALID != BlockNumber))
     {
-        for (uint16 iloop = 0u; iloop < Ea_Config.BlockCfg->BlockNum; iloop++)
+        const Ea_BlockCfgType* blockCfgPtr = Ea_Config.BlockCfg;
+        for (uint16 iloop = 0u; iloop < blockCfgPtr->BlockNum; iloop++)
         {
-            if (BlockNumber == Ea_Config.BlockCfg->BlockCfg[iloop].BlockNumber)
+            if (BlockNumber == blockCfgPtr->BlockCfg[iloop].BlockNumber)
             {
                 ret = iloop;
                 break;
@@ -733,7 +884,10 @@ EA_LOCAL uint16 Ea_GetBlockIndex(uint16 BlockNumber)
     }
     return ret;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief According to the job result, set runtime variables and the end callback notification interface is invoked
  */
@@ -788,7 +942,7 @@ EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult)
 
     Ea_RunTimeData.RequestJob                 = EA_JOB_IDLE;
     Ea_RunTimeData.SubJobStatus               = EA_SUB_JOB_IDLE;
-    Ea_RunTimeData.EepState                   = EA_EEP_JOB_IDLE;
+    Ea_RunTimeData.MemHwAbState               = EA_MEMHWAB_JOB_IDLE;
     Ea_RunTimeData.PendReq.BlockNumber        = 0u;
     Ea_RunTimeData.PendReq.BlockOffset        = 0u;
     Ea_RunTimeData.PendReq.BlockIndex         = EA_BLOCKNUM_INVALID;
@@ -801,7 +955,10 @@ EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult)
 
     Ea_State = MEMIF_IDLE;
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Call the end notification interface if it is configurated
  */
@@ -812,7 +969,10 @@ EA_LOCAL void Ea_CallJobEndNotification(void)
         Ea_Config.NvmJobEndNotification();
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Call the error notification interface if it is configurated
  */
@@ -823,7 +983,10 @@ EA_LOCAL void Ea_CallJobErrorNotification(void)
         Ea_Config.NvmJobErrorNotification();
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Call the finish interface when the task is completed, otherwise request sub read tast, then the request is
  * sent to the bottom level, and if the bottom level processing is complete, the corresponding state is set and the
@@ -832,85 +995,54 @@ EA_LOCAL void Ea_CallJobErrorNotification(void)
 /* PRQA S 6030 ++ */ /* VL_MTR_Ea_STMIF */
 EA_LOCAL void Ea_InterRead(void)
 {
-    uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
-
-    if ((TRUE == Ea_BlockInfo[blockIndex].IsOperated) && (MEMIF_JOB_OK != Ea_BlockInfo[blockIndex].BlockVaild))
+    uint16           blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
+    Ea_BlockInfoType blockInfo   = Ea_BlockInfo[blockIndex];
+    uint8            deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
+    if ((TRUE == blockInfo.IsOperated) && (MEMIF_JOB_OK != blockInfo.BlockVaild))
     {
-        Ea_JobFinish(Ea_BlockInfo[blockIndex].BlockVaild);
+        Ea_JobFinish(blockInfo.BlockVaild);
     }
     else
     {
         Ea_InterReadSub();
-        Ea_MemAccReq(EA_JOB_READ);
-        uint8 deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
-        if ((EA_EEP_JOB_ASYNC_PENDING == Ea_RunTimeData.EepState)
-            && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())) /* PRQA S 3415 */ /* VL_Ea_3415 */
-        {
-            MemIf_JobResultType ret = Ea_Config.EepApiCfg[deviceIndex].EepGetJobResultApi();
-            switch (ret)
-            {
-            case MEMIF_JOB_OK:
-                if (EA_SUB_JOB_READ_HEADER == Ea_RunTimeData.SubJobStatus)
-                {
-                    /** check header */
-                    Ea_InterCheckReadHeader();
-                }
-                else if (EA_SUB_JOB_READ_DATA == Ea_RunTimeData.SubJobStatus)
-                {
-                    /** copy data */
-                    Ea_InterCopyReadData();
-                    Ea_JobFinish(MEMIF_JOB_OK);
-                }
-                else
-                {
-                    /** idle,never happen */
-                }
-                break;
-            case MEMIF_BLOCK_INCONSISTENT:
-                Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
-                break;
-            case MEMIF_JOB_CANCELED:
-                Ea_JobFinish(MEMIF_JOB_CANCELED);
-                break;
-            default:
-                Ea_JobFinish(MEMIF_JOB_FAILED);
-                break;
-            }
-            Ea_RunTimeData.EepState = EA_EEP_JOB_IDLE;
-        }
+        Ea_InternalProcess(EA_JOB_READ, blockIndex, deviceIndex);
     }
 }
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 /* PRQA S 6030 -- */
 
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Update the corresponding runtime state when a read request is generated
  */
 EA_LOCAL void Ea_InterReadSub(void)
 {
-    if (EA_EEP_JOB_IDLE == Ea_RunTimeData.EepState)
+    if (EA_MEMHWAB_JOB_IDLE == Ea_RunTimeData.MemHwAbState)
     {
         /** first to read header */
         if (EA_SUB_JOB_IDLE == Ea_RunTimeData.SubJobStatus)
         {
             Ea_RunTimeData.PendReq.DealSize = EA_HEADER_ALIGNMENT_LENGTH;
             Ea_RunTimeData.SubJobStatus     = EA_SUB_JOB_READ_HEADER;
-            Ea_RunTimeData.EepState         = EA_EEP_JOB_ASYNC_READY;
+            Ea_RunTimeData.MemHwAbState     = EA_MEMHWAB_JOB_ASYNC_READY;
         }
         /** second to read data */
         else if (EA_SUB_JOB_READ_HEADER_OK == Ea_RunTimeData.SubJobStatus)
         {
+            uint16 headerAlignLenCal          = EA_HEADER_ALIGNMENT_LENGTH - EA_TOTAL_HEADER_LENGTH;
             Ea_RunTimeData.PendReq.DealOffset = EA_HEADER_ALIGNMENT_LENGTH;
             Ea_RunTimeData.SubJobStatus       = EA_SUB_JOB_READ_DATA;
-            if (Ea_RunTimeData.PendReq.Length > (EA_HEADER_ALIGNMENT_LENGTH - EA_TOTAL_HEADER_LENGTH))
+            if (Ea_RunTimeData.PendReq.Length > headerAlignLenCal)
             {
-                Ea_RunTimeData.PendReq.DealSize =
-                    Ea_RunTimeData.PendReq.Length - (EA_HEADER_ALIGNMENT_LENGTH - EA_TOTAL_HEADER_LENGTH);
-                Ea_RunTimeData.EepState = EA_EEP_JOB_ASYNC_READY;
+                Ea_RunTimeData.PendReq.DealSize = Ea_RunTimeData.PendReq.Length - headerAlignLenCal;
+                Ea_RunTimeData.MemHwAbState     = EA_MEMHWAB_JOB_ASYNC_READY;
             }
             else
             {
                 /** data is already read out */
-                Ea_RunTimeData.EepState = EA_EEP_JOB_ASYNC_PENDING;
+                Ea_RunTimeData.MemHwAbState = EA_MEMHWAB_JOB_ASYNC_PENDING;
             }
         }
         else
@@ -919,7 +1051,10 @@ EA_LOCAL void Ea_InterReadSub(void)
         }
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Request sub write task, and then the request is sent to the bottom layer. If the bottom layer processing is
  * complete, the corresponding status is set and the finish interface is called
@@ -927,67 +1062,31 @@ EA_LOCAL void Ea_InterReadSub(void)
 /* PRQA S 6030 ++ */ /* VL_MTR_Ea_STMIF */
 EA_LOCAL void Ea_InterWrite(void)
 {
-    uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
-
+    uint16 blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
+    uint8  deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
     Ea_InterWriteSub(blockIndex);
-    Ea_MemAccReq(EA_JOB_WRITE);
-    uint8 deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
-    if ((EA_EEP_JOB_ASYNC_PENDING == Ea_RunTimeData.EepState)
-        && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())) /* PRQA S 3415 */ /* VL_Ea_3415 */
-    {
-        MemIf_JobResultType ret = Ea_Config.EepApiCfg[deviceIndex].EepGetJobResultApi();
-        switch (ret)
-        {
-        case MEMIF_JOB_OK:
-            if (EA_SUB_JOB_INVALID_HEADER == Ea_RunTimeData.SubJobStatus)
-            {
-                /** write invalid header ok */
-                Ea_RunTimeData.SubJobStatus = EA_SUB_JOB_INVALID_HEADER_OK;
-            }
-            else if (EA_SUB_JOB_WRITE_DATA == Ea_RunTimeData.SubJobStatus)
-            {
-                /** write data ok */
-                Ea_RunTimeData.SubJobStatus = EA_SUB_JOB_WRITE_DATA_OK;
-            }
-            else if (EA_SUB_JOB_WRITE_HEADER_VALID == Ea_RunTimeData.SubJobStatus)
-            {
-                /** write valid header ok */
-                Ea_JobFinish(MEMIF_JOB_OK);
-            }
-            else
-            {
-                /** idle,never happen */
-            }
-            break;
-        case MEMIF_BLOCK_INCONSISTENT:
-            Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
-            break;
-        case MEMIF_JOB_CANCELED:
-            Ea_JobFinish(MEMIF_JOB_CANCELED);
-            break;
-        default:
-            Ea_JobFinish(MEMIF_JOB_FAILED);
-            break;
-        }
-        Ea_RunTimeData.EepState = EA_EEP_JOB_IDLE;
-    }
+    Ea_InternalProcess(EA_JOB_WRITE, blockIndex, deviceIndex);
 }
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 /* PRQA S 6030 -- */
 
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the status of the request bottom layer is idle, Update the corresponding runtime state when a write request
  * is generated, the corresponding value is prepared to write
  */
 EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex)
 {
-    if (EA_EEP_JOB_IDLE == Ea_RunTimeData.EepState)
+    if (EA_MEMHWAB_JOB_IDLE == Ea_RunTimeData.MemHwAbState)
     {
         /** first to write invalid header */
         if (EA_SUB_JOB_IDLE == Ea_RunTimeData.SubJobStatus)
         {
             Ea_InterPrepareWriteHeader(EA_BLOCK_STATUS_INCONSISTENT);
             Ea_RunTimeData.PendReq.DealSize = EA_HEADER_ALIGNMENT_LENGTH;
-            Ea_RunTimeData.EepState         = EA_EEP_JOB_ASYNC_READY;
+            Ea_RunTimeData.MemHwAbState     = EA_MEMHWAB_JOB_ASYNC_READY;
             Ea_RunTimeData.SubJobStatus     = EA_SUB_JOB_INVALID_HEADER;
         }
         /** second to write data */
@@ -997,7 +1096,7 @@ EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex)
             Ea_RunTimeData.PendReq.DealSize =
                 Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockSize - EA_HEADER_ALIGNMENT_LENGTH;
             Ea_RunTimeData.SubJobStatus = EA_SUB_JOB_WRITE_DATA;
-            Ea_RunTimeData.EepState     = EA_EEP_JOB_ASYNC_READY;
+            Ea_RunTimeData.MemHwAbState = EA_MEMHWAB_JOB_ASYNC_READY;
             uint16       reqSize        = Ea_RunTimeData.PendReq.DealSize;
             uint8*       destPtr        = &Ea_RunTimeData.PendReq.InterDataBufferPtr[EA_HEADER_ALIGNMENT_LENGTH];
             const uint8* srcPtr =
@@ -1013,7 +1112,7 @@ EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex)
             Ea_InterPrepareWriteHeader(EA_BLOCK_STATUS_CONSISTENT);
             Ea_RunTimeData.PendReq.DealOffset = 0u;
             Ea_RunTimeData.PendReq.DealSize   = EA_HEADER_ALIGNMENT_LENGTH;
-            Ea_RunTimeData.EepState           = EA_EEP_JOB_ASYNC_READY;
+            Ea_RunTimeData.MemHwAbState       = EA_MEMHWAB_JOB_ASYNC_READY;
             Ea_RunTimeData.SubJobStatus       = EA_SUB_JOB_WRITE_HEADER_VALID;
         }
         else
@@ -1022,7 +1121,10 @@ EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex)
         }
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the status of the request bottom layer is idle, the invalid value is ready to write, and then the request
  * is sent to the bottom layer. If the bottom layer processing is complete, the corresponding status is set and the
@@ -1030,39 +1132,20 @@ EA_LOCAL void Ea_InterWriteSub(const uint16 blockIndex)
  */
 EA_LOCAL void Ea_InterInvalidate(void)
 {
-    uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
-
-    if (EA_EEP_JOB_IDLE == Ea_RunTimeData.EepState)
+    uint16 blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
+    uint8  deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
+    if (EA_MEMHWAB_JOB_IDLE == Ea_RunTimeData.MemHwAbState)
     {
         Ea_InterPrepareWriteHeader(EA_BLOCK_STATUS_INVALID);
         Ea_RunTimeData.PendReq.DealSize = EA_HEADER_ALIGNMENT_LENGTH;
-        Ea_RunTimeData.EepState         = EA_EEP_JOB_ASYNC_READY;
+        Ea_RunTimeData.MemHwAbState     = EA_MEMHWAB_JOB_ASYNC_READY;
     }
-    Ea_MemAccReq(EA_JOB_INVALIDATE);
-    uint8 deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
-    if ((EA_EEP_JOB_ASYNC_PENDING == Ea_RunTimeData.EepState)
-        && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())) /* PRQA S 3415 */ /* VL_Ea_3415 */
-    {
-        MemIf_JobResultType ret = Ea_Config.EepApiCfg[deviceIndex].EepGetJobResultApi();
-        switch (ret)
-        {
-        case MEMIF_JOB_OK:
-            Ea_JobFinish(MEMIF_JOB_OK);
-            break;
-        case MEMIF_BLOCK_INCONSISTENT:
-            Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
-            break;
-        case MEMIF_JOB_CANCELED:
-            Ea_JobFinish(MEMIF_JOB_CANCELED);
-            break;
-        default:
-            Ea_JobFinish(MEMIF_JOB_FAILED);
-            break;
-        }
-        Ea_RunTimeData.EepState = EA_EEP_JOB_IDLE;
-    }
+    Ea_InternalProcess(EA_JOB_INVALIDATE, blockIndex, deviceIndex);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the status of the request bottom layer is idle, set the size that need to be erased, and then the request
  * is sent to the bottom layer. If the bottom layer processing is complete, the corresponding status is set and the
@@ -1070,38 +1153,20 @@ EA_LOCAL void Ea_InterInvalidate(void)
  */
 EA_LOCAL void Ea_InterErase(void)
 {
-    uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
-
-    if (EA_EEP_JOB_IDLE == Ea_RunTimeData.EepState)
+    uint16                          blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
+    const Ea_BlockConfigurationType blockCfg    = Ea_Config.BlockCfg->BlockCfg[blockIndex];
+    uint8                           deviceIndex = blockCfg.DeviceIndex;
+    if (EA_MEMHWAB_JOB_IDLE == Ea_RunTimeData.MemHwAbState)
     {
-        Ea_RunTimeData.PendReq.DealSize = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockSize;
-        Ea_RunTimeData.EepState         = EA_EEP_JOB_ASYNC_READY;
+        Ea_RunTimeData.PendReq.DealSize = blockCfg.BlockSize;
+        Ea_RunTimeData.MemHwAbState     = EA_MEMHWAB_JOB_ASYNC_READY;
     }
-    Ea_MemAccReq(EA_JOB_ERASE);
-    uint8 deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
-    if ((EA_EEP_JOB_ASYNC_PENDING == Ea_RunTimeData.EepState)
-        && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())) /* PRQA S 3415 */ /* VL_Ea_3415 */
-    {
-        MemIf_JobResultType ret = Ea_Config.EepApiCfg[deviceIndex].EepGetJobResultApi();
-        switch (ret)
-        {
-        case MEMIF_JOB_OK:
-            Ea_JobFinish(MEMIF_JOB_OK);
-            break;
-        case MEMIF_BLOCK_INCONSISTENT:
-            Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
-            break;
-        case MEMIF_JOB_CANCELED:
-            Ea_JobFinish(MEMIF_JOB_CANCELED);
-            break;
-        default:
-            Ea_JobFinish(MEMIF_JOB_FAILED);
-            break;
-        }
-        Ea_RunTimeData.EepState = EA_EEP_JOB_IDLE;
-    }
+    Ea_InternalProcess(EA_JOB_ERASE, blockIndex, deviceIndex);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Read data according to the length of data to be read
  */
@@ -1115,7 +1180,10 @@ EA_LOCAL void Ea_InterCopyReadData(void)
         destPtr[iloop] = srcPtr[iloop];
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief After parsing the read alignment data, the interface is invoked based on the corresponding read information
  */
@@ -1132,22 +1200,24 @@ EA_LOCAL void Ea_InterCheckReadHeader(void)
      *  total header size: 14byte
      */
 
-    uint16          blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
-    const uint8*    srcPtr     = Ea_RunTimeData.PendReq.InterDataBufferPtr;
-    uint16          blockNumber;
-    uint16          blockSize;
-    uint32          blockWriteCycle;
-    uint16          blockValid;
-    Eep_AddressType blockStartAddress;
+    uint16                          blockNumber;
+    uint16                          blockSize;
+    uint32                          blockWriteCycle;
+    uint16                          blockValid;
+    Ea_AddressType                  blockStartAddress;
+    uint16                          blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
+    const uint8*                    srcPtr     = Ea_RunTimeData.PendReq.InterDataBufferPtr;
+    const Ea_BlockConfigurationType blockCfg   = Ea_Config.BlockCfg->BlockCfg[blockIndex];
+
     /* PRQA S 2743 ++ */ /* VL_Ea_2743 */
     EA_DESERIALIZE((srcPtr), (blockNumber), uint16)
     EA_DESERIALIZE((srcPtr), (blockSize), uint16)
     EA_DESERIALIZE((srcPtr), (blockWriteCycle), uint32)
     EA_DESERIALIZE((srcPtr), (blockValid), uint16)
-    EA_DESERIALIZE((srcPtr), (blockStartAddress), Eep_AddressType) /* PRQA S 2983 */ /* VL_Ea_2983 */
-    uint16          blockNumberCfg       = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockNumber;
-    uint16          blockSizeCfg         = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockSize;
-    Eep_AddressType blockStartAddressCfg = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockStartAddress;
+    EA_DESERIALIZE((srcPtr), (blockStartAddress), Ea_AddressType) /* PRQA S 2983 */ /* VL_Ea_2983 */
+    uint16         blockNumberCfg       = blockCfg.BlockNumber;
+    uint16         blockSizeCfg         = blockCfg.BlockSize;
+    Ea_AddressType blockStartAddressCfg = blockCfg.BlockStartAddress;
     /* PRQA S 2743 -- */
 
     if (EA_BLOCK_INVALID == blockValid)
@@ -1169,7 +1239,10 @@ EA_LOCAL void Ea_InterCheckReadHeader(void)
         Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief Prepare the data to be written, align it and place it in the target buffer
  */
@@ -1185,9 +1258,10 @@ EA_LOCAL void Ea_InterPrepareWriteHeader(uint8 status)
      *
      *  total header size: 14byte
      */
-    uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
+    uint16                          blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
+    const Ea_BlockConfigurationType blockCfg   = Ea_Config.BlockCfg->BlockCfg[blockIndex];
 
-    uint16 blockSize  = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockSize;
+    uint16 blockSize  = blockCfg.BlockSize;
     uint16 blockVaild = EA_BLOCK_VALID;
 
     if (EA_BLOCK_STATUS_INVALID == status)
@@ -1199,16 +1273,16 @@ EA_LOCAL void Ea_InterPrepareWriteHeader(uint8 status)
         blockSize = 0u;
     }
 
-    uint8*          destPtr           = Ea_RunTimeData.PendReq.InterDataBufferPtr;
-    uint16          blockNumber       = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockNumber;
-    uint32          blockWriteCycle   = Ea_BlockInfo[blockIndex].BlockWriteCycle;
-    Eep_AddressType blockStartAddress = Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockStartAddress;
+    uint8*         destPtr           = Ea_RunTimeData.PendReq.InterDataBufferPtr;
+    uint16         blockNumber       = blockCfg.BlockNumber;
+    uint32         blockWriteCycle   = Ea_BlockInfo[blockIndex].BlockWriteCycle;
+    Ea_AddressType blockStartAddress = blockCfg.BlockStartAddress;
     /* PRQA S 2743 ++ */ /* VL_Ea_2743 */
     EA_SERIALIZE((blockNumber), (destPtr), uint16)
     EA_SERIALIZE((blockSize), (destPtr), uint16)
     EA_SERIALIZE((blockWriteCycle), (destPtr), uint32)
     EA_SERIALIZE((blockVaild), (destPtr), uint16) /* PRQA S 2906 */ /* VL_Ea_2906 */
-    EA_SERIALIZE((blockStartAddress), (destPtr), Eep_AddressType)
+    EA_SERIALIZE((blockStartAddress), (destPtr), Ea_AddressType)
     /* PRQA S 2743 -- */
     /** if write job process, copy some write data to buffer*/
     if (NULL_PTR != Ea_RunTimeData.PendReq.DataWriteBufferPtr)
@@ -1220,90 +1294,180 @@ EA_LOCAL void Ea_InterPrepareWriteHeader(uint8 status)
         }
     }
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the underlying module is in the pengding state, the current task is set to cancelled
  */
 EA_LOCAL void Ea_InterCancel(void)
 {
-    uint16 blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
-    uint8  deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
-
-    if (MEMIF_JOB_PENDING == Ea_Config.EepApiCfg[deviceIndex].EepGetJobResultApi())
+    uint16                   blockIndex  = Ea_RunTimeData.PendReq.BlockIndex;
+    uint8                    deviceIndex = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
+    uint16                   areaId      = Ea_GetAddrAreaId(blockIndex);
+    const Ea_MemHwAbApiType* apiCfgPtr   = &(Ea_Config.MemHwAbApiCfg[deviceIndex]);
+    /* Check if the result of the current job is 'PENDING' */
+    if (MEMIF_JOB_PENDING == apiCfgPtr->MemHwAbGetJobResultApi(areaId))
     {
-        Ea_Config.EepApiCfg[deviceIndex].EepCancelApi();
+        /** Invokes the "Cancel" function of the underlying 'EEPROM' driver module
+         * selected by the parameter areaId. */
+        apiCfgPtr->MemHwAbCancelApi(areaId);
     }
+
     Ea_JobFinish(MEMIF_JOB_CANCELED);
 }
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief If the underlying state of the request is pengding and the underlying module is idle, set the corresponding
  * state based on the requested task and call the finish interface
  */
-/* PRQA S 3415 ++ */ /* VL_Ea_3415 */
 EA_LOCAL void Ea_MemAccReq(Ea_RequestJobType Ea_RequestJob)
 {
-    uint16          blockIndex    = Ea_RunTimeData.PendReq.BlockIndex;
-    uint8*          dataBufferPtr = &Ea_RunTimeData.PendReq.InterDataBufferPtr[Ea_RunTimeData.PendReq.DealOffset];
-    Eep_LengthType  dealLength    = (Eep_LengthType)Ea_RunTimeData.PendReq.DealSize;
-    Eep_AddressType dealAddress   = (Eep_AddressType)(Ea_RunTimeData.PendReq.DealOffset
-                                                    + Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockStartAddress);
-    uint8           deviceIndex   = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
+    uint16                          blockIndex    = Ea_RunTimeData.PendReq.BlockIndex;
+    const Ea_BlockConfigurationType blockCfg      = Ea_Config.BlockCfg->BlockCfg[blockIndex];
+    uint16                          dealOffset    = Ea_RunTimeData.PendReq.DealOffset;
+    uint8*                          dataBufferPtr = &(Ea_RunTimeData.PendReq.InterDataBufferPtr[dealOffset]);
+    Ea_LengthType                   dealLength    = (Ea_LengthType)Ea_RunTimeData.PendReq.DealSize;
+    Ea_AddressType                  dealAddress   = (Ea_AddressType)(dealOffset + blockCfg.BlockStartAddress);
+    const uint8                     deviceIndex   = blockCfg.DeviceIndex;
 
-    if (MEMIF_UNINIT == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())
+    uint16                   areaId    = Ea_GetAddrAreaId(blockIndex);
+    const Ea_MemHwAbApiType* apiCfgPtr = &(Ea_Config.MemHwAbApiCfg[deviceIndex]);
+
+    if (MEMIF_UNINIT == apiCfgPtr->MemHwAbGetStatusApi(areaId))
     {
         Ea_JobFinish(MEMIF_JOB_FAILED); /** Lower layer driver is not initialized */
     }
-    else if (
-        (EA_EEP_JOB_ASYNC_READY == Ea_RunTimeData.EepState)
-        && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi()))
+    else
     {
-        switch (Ea_RequestJob)
+        if ((EA_MEMHWAB_JOB_ASYNC_READY == Ea_RunTimeData.MemHwAbState)
+            && (MEMIF_IDLE == apiCfgPtr->MemHwAbGetStatusApi(areaId))) /* PRQA S 3415 */ /* VL_Ea_3415 */
         {
-        case EA_JOB_READ:
-            if ((Std_ReturnType)E_OK
-                == Ea_Config.EepApiCfg[deviceIndex].EepReadApi(dealAddress, dataBufferPtr, dealLength))
+            Std_ReturnType ret = E_OK;
+            switch (Ea_RequestJob)
             {
-                Ea_RunTimeData.EepState = EA_EEP_JOB_ASYNC_PENDING;
+            case EA_JOB_READ:
+                /** Invokes the "Read" function of the underlying 'EEPROM' driver module
+                 * selected by the parameter areaId/dealAddress/dataBufferPtr/dealLength. */
+                ret = apiCfgPtr->MemHwAbReadApi(areaId, dealAddress, dataBufferPtr, dealLength);
+                break;
+            case EA_JOB_WRITE:
+            case EA_JOB_INVALIDATE:
+                /** Invokes the "Write" function of the underlying 'EEPROM' driver module
+                 * selected by the parameter areaId/dealAddress/dataBufferPtr/dealLength. */
+                ret = apiCfgPtr->MemHwAbWriteApi(areaId, dealAddress, dataBufferPtr, dealLength);
+                break;
+            case EA_JOB_ERASE:
+                /** Invokes the "Erase" function of the underlying 'EEPROM' driver module
+                 * selected by the parameter areaId/dealAddress/dealLength. */
+                ret = apiCfgPtr->MemHwAbEraseApi(areaId, dealAddress, dealLength);
+                break;
+            default:
+                /** idle */
+                break;
+            }
+
+            if (E_OK == ret)
+            {
+                Ea_RunTimeData.MemHwAbState = EA_MEMHWAB_JOB_ASYNC_PENDING;
             }
             else
             {
                 Ea_JobFinish(MEMIF_JOB_FAILED);
             }
+        }
+    }
+}
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
+EA_LOCAL void Ea_InternalProcess(Ea_RequestJobType JobType, uint16 blockIndex, uint8 deviceIndex)
+{
+    Ea_MemAccReq(JobType);
+    uint16                  areaId    = Ea_GetAddrAreaId(blockIndex);
+    const Ea_MemHwAbApiType apiCfg    = Ea_Config.MemHwAbApiCfg[deviceIndex];
+    MemIf_StatusType        jobStatus = apiCfg.MemHwAbGetStatusApi(areaId);
+
+    if ((EA_MEMHWAB_JOB_ASYNC_PENDING == Ea_RunTimeData.MemHwAbState) && (MEMIF_IDLE == jobStatus))
+    {
+        MemIf_JobResultType retVal = apiCfg.MemHwAbGetJobResultApi(areaId);
+        switch (retVal)
+        {
+        case MEMIF_JOB_OK:
+            Ea_InternalProcessOk(JobType);
             break;
-        case EA_JOB_WRITE:
-        case EA_JOB_INVALIDATE:
-            if ((Std_ReturnType)E_OK
-                == Ea_Config.EepApiCfg[deviceIndex].EepWriteApi(dealAddress, dataBufferPtr, dealLength))
-            {
-                Ea_RunTimeData.EepState = EA_EEP_JOB_ASYNC_PENDING;
-            }
-            else
-            {
-                Ea_JobFinish(MEMIF_JOB_FAILED);
-            }
+        case MEMIF_BLOCK_INCONSISTENT:
+
+            Ea_JobFinish(MEMIF_BLOCK_INCONSISTENT);
             break;
-        case EA_JOB_ERASE:
-            if ((Std_ReturnType)E_OK == Ea_Config.EepApiCfg[deviceIndex].EepEraseApi(dealAddress, dealLength))
-            {
-                Ea_RunTimeData.EepState = EA_EEP_JOB_ASYNC_PENDING;
-            }
-            else
-            {
-                Ea_JobFinish(MEMIF_JOB_FAILED);
-            }
+        case MEMIF_JOB_CANCELED:
+
+            Ea_JobFinish(MEMIF_JOB_CANCELED);
             break;
         default:
-            /** idle */
+
+            Ea_JobFinish(MEMIF_JOB_FAILED);
             break;
+        }
+        Ea_RunTimeData.MemHwAbState = EA_MEMHWAB_JOB_IDLE;
+    }
+}
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
+EA_LOCAL void Ea_InternalProcessOk(Ea_RequestJobType JobType)
+{
+    if (JobType == EA_JOB_WRITE)
+    {
+        if (EA_SUB_JOB_INVALID_HEADER == Ea_RunTimeData.SubJobStatus)
+        {
+            /** write invalid header ok */
+            Ea_RunTimeData.SubJobStatus = EA_SUB_JOB_INVALID_HEADER_OK;
+        }
+        else if (EA_SUB_JOB_WRITE_DATA == Ea_RunTimeData.SubJobStatus)
+        {
+            /** write data ok */
+            Ea_RunTimeData.SubJobStatus = EA_SUB_JOB_WRITE_DATA_OK;
+        }
+        else if (EA_SUB_JOB_WRITE_HEADER_VALID == Ea_RunTimeData.SubJobStatus)
+        {
+            /** write valid header ok */
+            Ea_JobFinish(MEMIF_JOB_OK);
+        }
+        else
+        {
+            /** idle,never happen */
+        }
+    }
+    else if (JobType == EA_JOB_READ)
+    {
+        if (EA_SUB_JOB_READ_HEADER == Ea_RunTimeData.SubJobStatus)
+        {
+            /** check header */
+            Ea_InterCheckReadHeader();
+        }
+        else if (EA_SUB_JOB_READ_DATA == Ea_RunTimeData.SubJobStatus)
+        {
+            /** copy data */
+            Ea_InterCopyReadData();
+            Ea_JobFinish(MEMIF_JOB_OK);
+        }
+        else
+        {
+            /** idle,never happen */
         }
     }
     else
     {
-        /** idle */
+        Ea_JobFinish(MEMIF_JOB_OK);
     }
 }
-/* PRQA S 3415 -- */
 /* PRQA S 1503 -- */
 
 #define EA_STOP_SEC_CODE

@@ -65,8 +65,14 @@
 /* The maximum amount of data from the original packet to return in a dest-unreachable */
 #define ICMP_DEST_UNREACH_DATASIZE 8
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void icmp_send_response(struct pbuf *p, u8_t type, u8_t code);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Processes ICMP input packets, called from ip_input().
  *
@@ -294,7 +300,11 @@ icmperr:
   return;
 #endif /* LWIP_ICMP_ECHO_CHECK_INPUT_PBUF_LEN || !LWIP_MULTICAST_PING || !LWIP_BROADCAST_PING */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an icmp 'destination unreachable' packet, called from ip_input() if
  * the transport layer protocol is unknown and from udp_input() if the local
@@ -310,8 +320,12 @@ icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t)
   MIB2_STATS_INC(mib2.icmpoutdestunreachs);
   icmp_send_response(p, ICMP_DUR, t);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if IP_FORWARD || IP_REASSEMBLY
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send a 'time exceeded' packet, called from ip_forward() if TTL is 0.
  *
@@ -325,9 +339,13 @@ icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t)
   MIB2_STATS_INC(mib2.icmpouttimeexcds);
   icmp_send_response(p, ICMP_TE, t);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* IP_FORWARD || IP_REASSEMBLY */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an icmp packet in response to an incoming packet.
  *
@@ -403,5 +421,7 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
   }
   pbuf_free(q);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_IPV4 && LWIP_ICMP */

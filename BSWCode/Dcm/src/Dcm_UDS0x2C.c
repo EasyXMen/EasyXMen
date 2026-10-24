@@ -61,6 +61,8 @@ Dcm_DDDIDType Dcm_DDDID[DCM_DDDID_NUM]; /* PRQA S 1037,1504 */ /* VL_Dcm_1037,VL
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         General condition checks for UDS 0x2C
  * @param[in]     connectionId : current connection id
@@ -82,8 +84,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode,
     uint16*                       didIndex);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_UDS_0X2C_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         The service interpreter for UDS 0x2C subfunction 0x01
  * @param[in]     connectionId     : current connection id
@@ -107,9 +113,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_01(
     uint16                        DDDIDIndex,
     const Dcm_DspDidInfoType*     DcmDspDidInfoPtr,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X2C_0X2
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x2C subfunction 0x02
  * @param[in]     DDDIDIndex       : DDDID index for reqeusted did
@@ -131,6 +141,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02(
     uint16                        DDDIDIndex,
     const Dcm_DspDidInfoType*     DcmDspDidInfoPtr,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         general condition check for UDS 0x2C, subFunction 0x2
@@ -153,9 +167,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
     const Dcm_DspDidInfoType*     DcmDspDidInfoPtr,
     Dcm_MsgLenType*               SourceElementsNum,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X2C_0X3
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x2C subfunction 0x03
  * @param[in]     reqDataLen   : the request data length
@@ -168,8 +186,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X2A) && (DCM_DDDID_NUM > 0u))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x2C_GetDidIndex(uint16 DDDIDIndex, uint16* Didindex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 /* ========================================== external function definitions ========================================= */
@@ -329,8 +353,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_ConditionCheck(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_UDS_0X2C_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_01(
     uint16                        connectionId,
     Dcm_MsgContextType*           pMsgContext,
@@ -418,10 +445,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_01(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* PRQA S 6080 -- */
-
 #ifdef DCM_UDS_0X2C_0X2
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02(
     Dcm_MsgContextType*           pMsgContext,
     uint16                        DDDIDIndex,
@@ -476,7 +506,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     const Dcm_DspDidInfoType*     DcmDspDidInfoPtr,
@@ -535,10 +568,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-/* PRQA S 3673 -- */
 #ifdef DCM_UDS_0X2C_0X3
 #if ((STD_ON == DCM_UDS_0X2A) && (DCM_DDDID_NUM > 0u))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+/* PRQA S 3673 -- */
 DCM_LOCAL void Dcm_UDS0x2C_GetDidIndex(uint16 DDDIDIndex, uint16* Didindex)
 {
     for (uint16 i = 0u; i < DCM_DID_NUM; i++)
@@ -550,7 +587,11 @@ DCM_LOCAL void Dcm_UDS0x2C_GetDidIndex(uint16 DDDIDIndex, uint16* Didindex)
         }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDIndex)
 {
     Std_ReturnType result = E_OK;
@@ -586,8 +627,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDI
 
     return result;
 }
-#endif
-/* PRQA S 3120 -- */
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
+/* PRQA S 3120 -- */
 #endif

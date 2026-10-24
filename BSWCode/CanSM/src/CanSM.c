@@ -33,6 +33,7 @@
 #include "CanNm.h"
 #endif
 #include "Det.h"
+#include "CanSM_Arti.h"
 
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
 #include "ComM.h"
@@ -55,6 +56,8 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handles the request and indication timer periodically.
  * @param[inout] varPtr  Runtime pointer of the CAN network.
@@ -63,7 +66,11 @@
  * @trace        CPD-73301
  */
 CANSM_LOCAL void CanSM_TimerHandler(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Finds the index of the network in the CanSM configurations.
  * @param[in]    networkHandle  Handle of the addressed CAN network.
@@ -73,7 +80,11 @@ CANSM_LOCAL void CanSM_TimerHandler(CanSM_NetWorkRunTimeType* varPtr);
  * @trace        CPD-73302
  */
 CANSM_LOCAL const CanSM_ManagerNetworkType* CanSM_FindNetworkByNetworkHandle(NetworkHandleType networkHandle);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Calls the API ComM_BusSM_ModeIndication with the specified ComMode.
  * @param[in]    network           Affected CAN network.
@@ -85,7 +96,11 @@ CANSM_LOCAL const CanSM_ManagerNetworkType* CanSM_FindNetworkByNetworkHandle(Net
  */
 CANSM_LOCAL void
     CanSM_ComMModeIndication(NetworkHandleType network, ComM_ModeType comMode, CanSM_RequestModeType requestedComMode);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handles state transition in DEINITPNNOT_S_CC_STOPPED.
  * @param[in]    configPtr  Pointer to the network configuration
@@ -95,7 +110,11 @@ CANSM_LOCAL void
  * @trace        CPD-73304
  */
 CANSM_LOCAL void CanSM_PnNot_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -106,7 +125,11 @@ CANSM_LOCAL void CanSM_PnNot_CC_Stopped(const CanSM_ManagerNetworkType* configPt
  */
 CANSM_LOCAL void
     CanSM_PnNot_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_CC_SLEEP
  * @param[in]    configPtr  Pointer to the network configuration
@@ -116,7 +139,11 @@ CANSM_LOCAL void
  * @trace        CPD-73306
  */
 CANSM_LOCAL void CanSM_PnNot_CC_Sleep(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_CC_SLEEP_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -126,8 +153,12 @@ CANSM_LOCAL void CanSM_PnNot_CC_Sleep(const CanSM_ManagerNetworkType* configPtr,
  * @trace        CPD-73307
  */
 CANSM_LOCAL void CanSM_PnNot_CC_Sleep_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (CANSM_TRCV_ENABLED == STD_ON)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_TRCV_NORMAL
  * @param[in]    configPtr  Pointer to the network configuration
@@ -137,7 +168,11 @@ CANSM_LOCAL void CanSM_PnNot_CC_Sleep_Wait(const CanSM_ManagerNetworkType* confi
  * @trace        CPD-73308
  */
 CANSM_LOCAL void CanSM_PnNot_Trcv_Normal(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_TRCV_NORMAL_WAIT
  * @param[inout] varPtr  Runtime pointer of the CAN network
@@ -147,6 +182,11 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Normal(const CanSM_ManagerNetworkType* configP
  */
 
 CANSM_LOCAL void CanSM_PnNot_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_TRCV_STANDBY
  * @param[in]    configPtr  Pointer to the network configuration
@@ -156,7 +196,11 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
  * @trace        CPD-73310
  */
 CANSM_LOCAL void CanSM_PnNot_Trcv_Standby(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPNNOT_S_TRCV_STANDBY_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -167,8 +211,12 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Standby(const CanSM_ManagerNetworkType* config
  */
 CANSM_LOCAL void
     CanSM_PnNot_Trcv_Standby_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DeinitPnNotSupported
  * @param[in]    configPtr  Pointer to the network configuration
@@ -181,8 +229,12 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL boolean
     CanSM_DeinitPnNotSupported(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (STD_ON == CANSM_PNC_SUPPORT)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_PN_CLEAR_WUF
  * @param[in]    configPtr  Pointer to the network configuration
@@ -192,6 +244,11 @@ CANSM_LOCAL boolean
  * @trace        CPD-73314
  */
 CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_PN_CLEAR_WUF_WAIT
  * @param[inout] varPtr  RuntimePtr of the CAN network
@@ -200,6 +257,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF(const CanSM_ManagerNetworkType* configP
  * @trace        CPD-73315
  */
 CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_PN_CC_STOPPED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -209,6 +271,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF_Wait(CanSM_NetWorkRunTimeType* varPtr);
  * @trace        CPD-73316
  */
 CANSM_LOCAL void CanSM_Pn_S_Pn_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -219,6 +286,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_CC_Stopped(const CanSM_ManagerNetworkType* config
  */
 CANSM_LOCAL void
     CanSM_Pn_S_Pn_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_TRCV_NORMAL
  * @param[in]    configPtr  Pointer to the network configuration
@@ -228,6 +300,11 @@ CANSM_LOCAL void
  * @trace        CPD-73318
  */
 CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_TRCV_NORMAL_WAIT
  * @param[inout] varPtr  RuntimePtr of the CAN network
@@ -236,6 +313,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal(const CanSM_ManagerNetworkType* configPt
  * @trace        CPD-73319
  */
 CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_TRCV_STANDBY
  * @param[in]    configPtr  Pointer to the network configuration
@@ -245,6 +327,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
  * @trace        CPD-73320
  */
 CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_TRCV_STANDBY_WAIT
  * @param[inout] varPtr  RuntimePtr of the CAN network
@@ -253,6 +340,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby(const CanSM_ManagerNetworkType* configP
  * @trace        CPD-73321
  */
 CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CC_SLEEP
  * @param[in]    configPtr  Pointer to the network configuration
@@ -262,7 +354,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby_Wait(CanSM_NetWorkRunTimeType* varPtr);
  * @trace        CPD-73322
  */
 CANSM_LOCAL void CanSM_Pn_S_CC_Sleep(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CC_SLEEP_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -272,7 +368,11 @@ CANSM_LOCAL void CanSM_Pn_S_CC_Sleep(const CanSM_ManagerNetworkType* configPtr, 
  * @trace        CPD-73323
  */
 CANSM_LOCAL void CanSM_Pn_S_CC_Sleep_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_CC_SLEEP
  * @param[in]    configPtr  Pointer to the network configuration
@@ -283,7 +383,11 @@ CANSM_LOCAL void CanSM_Pn_S_CC_Sleep_Wait(const CanSM_ManagerNetworkType* config
  */
 CANSM_LOCAL void
     CanSM_Pn_Check_Wflag_InCCSleep(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CHECK_WUF_IN_CC_SLEEP_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -294,6 +398,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_Pn_Check_Wflag_InCCSleepWait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_NOT_CC_SLEEP
  * @param[in]    configPtr  Pointer to the network configuration
@@ -304,6 +413,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_Pn_CheckWflag_InNotCCSleep(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_NOT_CC_SLEEP
  * @param[inout] varPtr    RuntimePtr of the CAN network
@@ -312,6 +426,11 @@ CANSM_LOCAL void
  * @trace        CPD-73327
  */
 CANSM_LOCAL void CanSM_Pn_CheckWFlag_InNotCCSleepWait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in DeinitPnSupported
  * @param[in]    configPtr  Pointer to the network configuration
@@ -324,8 +443,12 @@ CANSM_LOCAL void CanSM_Pn_CheckWFlag_InNotCCSleepWait(CanSM_NetWorkRunTimeType* 
  */
 CANSM_LOCAL boolean
     CanSM_DeinitPnSupported(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_NoCom
  * @param[in]    configPtr  Pointer to the network configuration
@@ -337,6 +460,11 @@ CANSM_LOCAL boolean
  * @trace        CPD-73329
  */
 CANSM_LOCAL boolean CanSM_BsmSNoCom(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_CC_STOPPED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -346,6 +474,11 @@ CANSM_LOCAL boolean CanSM_BsmSNoCom(const CanSM_ManagerNetworkType* configPtr, C
  * @trace        CPD-73330
  */
 CANSM_LOCAL void CanSM_WUVAL_S_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -356,6 +489,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_CC_Stopped(const CanSM_ManagerNetworkType* config
  */
 CANSM_LOCAL void
     CanSM_WUVAL_S_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_CC_STARTED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -365,6 +503,11 @@ CANSM_LOCAL void
  * @trace        CPD-73332
  */
 CANSM_LOCAL void CanSM_WUVAL_S_CC_Started(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_CC_STARTED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -375,6 +518,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_CC_Started(const CanSM_ManagerNetworkType* config
  */
 CANSM_LOCAL void
     CanSM_WUVAL_S_CC_Started_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_WuValidation
  * @param[in]    configPtr  Pointer to the network configuration
@@ -386,8 +534,12 @@ CANSM_LOCAL void
  * @trace        CPD-73334
  */
 CANSM_LOCAL boolean CanSM_BsmWuValidation(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (CANSM_TRCV_ENABLED == STD_ON)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_TRCV_NORMAL
  * @param[in]    configPtr  Pointer to the network configuration
@@ -397,6 +549,11 @@ CANSM_LOCAL boolean CanSM_BsmWuValidation(const CanSM_ManagerNetworkType* config
  * @trace        CPD-73335
  */
 CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in WUVALIDATION_S_TRCV_NORMAL_WAIT
  * @param[inout] varPtr  Runtime pointer of the CAN network
@@ -405,6 +562,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal(const CanSM_ManagerNetworkType* confi
  * @trace        CPD-73336
  */
 CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_TRCV_NORMAL
  * @param[in]    configPtr  Pointer to the network configuration
@@ -415,6 +577,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr
  */
 CANSM_LOCAL void
     CanSM_Prefullcom_S_Trcv_Normal(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_TRCV_NORMAL_WAIT
  * @param[inout] varPtr  Runtime pointer of the CAN network
@@ -423,8 +590,12 @@ CANSM_LOCAL void
  * @trace        CPD-73338
  */
 CANSM_LOCAL void CanSM_Prefullcom_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_CC_STOPPED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -435,6 +606,11 @@ CANSM_LOCAL void CanSM_Prefullcom_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* v
  */
 CANSM_LOCAL void
     CanSM_Prefullcom_S_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -445,6 +621,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_Prefullcom_S_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_CC_STARTED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -455,6 +636,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_Prefullcom_S_CC_Started(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in PREFULLCOM_S_CC_STARTED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -465,6 +651,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_Prefullcom_S_CC_Started_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_Pre_FullCom
  * @param[in]    configPtr  Pointer to the network configuration
@@ -476,6 +667,11 @@ CANSM_LOCAL void
  * @trace        CPD-73343
  */
 CANSM_LOCAL boolean CanSM_BsmSPreFullCom(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_BUS_OFF_CHECK
  * @param[in]    configPtr  Pointer to the network configuration
@@ -486,6 +682,11 @@ CANSM_LOCAL boolean CanSM_BsmSPreFullCom(const CanSM_ManagerNetworkType* configP
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_Bus_off_Check(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_NO_BUS_OFF
  * @param[in]    configPtr  Pointer to the network configuration
@@ -496,6 +697,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_No_Bus_Off(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_CC_STOPPED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -506,6 +712,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -516,6 +727,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_CC_STARTED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -526,6 +742,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_CC_Started(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_CC_STARTED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -536,6 +757,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_CC_Started_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_RESTART_CC
  * @param[in]    configPtr  Pointer to the network configuration
@@ -546,6 +772,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_Restart_CC(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in FULLCOM_S_RESTART_CC_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -556,6 +787,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_FullCom_S_Restart_CC_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_CHANGE_BR_SYNC
  * @param[in]    configPtr  Pointer to the network configuration
@@ -565,6 +801,11 @@ CANSM_LOCAL void
  * @trace        CPD-73352
  */
 CANSM_LOCAL void CanSM_FullCom_S_Tx_Off(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_FullCom
  * @param[in]    configPtr  Pointer to the network configuration
@@ -576,8 +817,12 @@ CANSM_LOCAL void CanSM_FullCom_S_Tx_Off(const CanSM_ManagerNetworkType* configPt
  * @trace        CPD-73353
  */
 CANSM_LOCAL boolean CanSM_BsmSFullCom(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (STD_ON == CANSM_SET_BAUDRATE_API)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_CHANGE_BR_SYNC
  * @param[in]    configPtr  Pointer to the network configuration
@@ -588,6 +833,11 @@ CANSM_LOCAL boolean CanSM_BsmSFullCom(const CanSM_ManagerNetworkType* configPtr,
  */
 CANSM_LOCAL void
     CanSM_ChangeBR_Change_BR_Sync(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_S_CC_STOPPED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -598,6 +848,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_ChangeBR_S_CC_Stopped(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_S_CC_STOPPED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -608,7 +863,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_ChangeBR_S_CC_Stopped_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_S_CC_STARTED
  * @param[in]    configPtr  Pointer to the network configuration
@@ -619,7 +878,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_ChangeBR_S_CC_Started(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Substate CHANGEBR_S_CC_STARTED_WAIT
  * @param[in]    configPtr  Pointer to the network configuration
@@ -630,7 +893,11 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL void
     CanSM_ChangeBR_S_CC_Started_Wait(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_Change_Baudrate
  * @param[in]    configPtr  Pointer to the network configuration
@@ -643,8 +910,12 @@ CANSM_LOCAL void
  */
 CANSM_LOCAL boolean
     CanSM_BsmSChangeBaudrate(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_SilentCom
  * @param[in]    configPtr  Pointer to the network configuration
@@ -656,6 +927,11 @@ CANSM_LOCAL boolean
  * @trace        CPD-73360
  */
 CANSM_LOCAL boolean CanSM_BsmSSilentCom(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Handle state transition in Bsm_S_SilentCom_Bor
  * @param[in]    configPtr  Pointer to the network configuration
@@ -667,6 +943,11 @@ CANSM_LOCAL boolean CanSM_BsmSSilentCom(const CanSM_ManagerNetworkType* configPt
  * @trace        CPD-73361
  */
 CANSM_LOCAL boolean CanSM_BsmSSilentComBor(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        action of effect E_FULL_COM
  * @param[in]    configPtr  Pointer to the network configuration
@@ -676,7 +957,11 @@ CANSM_LOCAL boolean CanSM_BsmSSilentComBor(const CanSM_ManagerNetworkType* confi
  * @trace        CPD-73362
  */
 CANSM_LOCAL void CanSM_EFullComAction(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        action of effect E_FULL_TO_SILENT_COM
  * @param[in]    configPtr  Pointer to the network configuration
@@ -687,7 +972,11 @@ CANSM_LOCAL void CanSM_EFullComAction(const CanSM_ManagerNetworkType* configPtr,
  */
 CANSM_LOCAL void
     CanSM_EFullToSilentComAction(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        action of effect E_PRE_NOCOM
  * @param[in]    configPtr  Pointer to the network configuration
@@ -697,6 +986,11 @@ CANSM_LOCAL void
  * @trace        CPD-73364
  */
 CANSM_LOCAL void CanSM_EPreNoComAction(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        action of trigger T_BUS_OFF
  * @param[in]    configPtr  Pointer to the network configuration
@@ -706,7 +1000,11 @@ CANSM_LOCAL void CanSM_EPreNoComAction(const CanSM_ManagerNetworkType* configPtr
  * @trace        CPD-73365
  */
 CANSM_LOCAL void CanSM_EBusOffAction(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Check all controller mode of the networkindex
  * @param[in]    configPtr  Pointer to the network configuration
@@ -720,6 +1018,8 @@ CANSM_LOCAL void CanSM_SetControllerModeRepeat(
     const CanSM_ManagerNetworkType* configPtr,
     CanSM_NetWorkRunTimeType*       varPtr,
     Can_ControllerStateType         requestContorllerMode);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 /**
  * @brief        Check all controller mode of the networkindex
@@ -735,6 +1035,8 @@ CANSM_LOCAL_INLINE boolean CanSM_CheckNetworkAllControllerMode(
     const CanSM_ManagerNetworkType* configPtr,
     Can_ControllerStateType         controllerMode);
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        The mode request to CanIf time-out handle
  * @param[in]    configPtr  Pointer to the network configuration
@@ -744,6 +1046,8 @@ CANSM_LOCAL_INLINE boolean CanSM_CheckNetworkAllControllerMode(
  * @trace        CPD-73368
  */
 CANSM_LOCAL void CanSM_ModeRequestTimeout(const CanSM_ManagerNetworkType* configPtr, CanSM_NetWorkRunTimeType* varPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 /**
  * @brief        Find the index of the partition in the CanSM involved partition according to ApplicationID.
@@ -832,6 +1136,8 @@ CANSM_LOCAL_INLINE boolean CanSM_ValidateNetworkRange(uint8 apiId, NetworkHandle
 CANSM_LOCAL_INLINE boolean CanSM_ValidateAllNetworksNoCom(void);
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief        Forward pdu mode request to CanIf, if ecu is in passive mode, using CANIF_TX_OFFLINE_ACTIVE instead of
  * CANIF_ONLINE.
@@ -840,6 +1146,8 @@ CANSM_LOCAL_INLINE boolean CanSM_ValidateAllNetworksNoCom(void);
  * @trace        CPD-54754
  */
 CANSM_LOCAL void CanSM_SetPduMode(uint8 controllerId, CanIf_PduModeType pduModeRequest);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 #define CANSM_START_SEC_VAR_CLEARED_8
@@ -911,6 +1219,7 @@ CANSM_LOCAL boolean (*const CanSM_DoBehaviors[])(const CanSM_ManagerNetworkType*
  */
 void CanSM_Init(const CanSM_ConfigType* ConfigPtr) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_INIT, ConfigPtr);
 #if CANSM_DEV_ERROR_DETECT == STD_ON
     if (CanSM_ValidatePointer(SERVICE_ID_CANSM_INIT, ConfigPtr)
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -964,7 +1273,7 @@ void CanSM_Init(const CanSM_ConfigType* ConfigPtr) /* PRQA S 1503 */ /* VL_QAC_N
 #if (STD_ON == CANSM_SET_BAUDRATE_API)
             varPtr->BaudRateConfigID = 0u;
 #endif
-#if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
+#ifdef CANSM_GET_BUSOFF_DELAY_FUNCTION
             varPtr->BusOffDelayTime = 0u;
 #endif
             const CanSM_ControllerRefType* controllerRef = configPtr->ControllerRef;
@@ -976,13 +1285,19 @@ void CanSM_Init(const CanSM_ConfigType* ConfigPtr) /* PRQA S 1503 */ /* VL_QAC_N
         }
         CanSM_Status[partitionIndex] = CANSM_INITED;
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_INIT);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This service de-initializes the CanSM module.
  */
 void CanSM_DeInit(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    CanSM_ArtiApiStart(1, SERVICE_ID_CANSM_DEINIT);
 #if CANSM_DEV_ERROR_DETECT == STD_ON
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -994,15 +1309,21 @@ void CanSM_DeInit(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
         uint16 partitionIndex        = CanSM_GetPartitionIndex();
         CanSM_Status[partitionIndex] = CANSM_UNINITED;
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_DEINIT);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if CANSM_VERSION_INFO_API == STD_ON
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This service puts out the version information of this module (module ID, vendor ID, vendor specific version numbers
  * related to BSW00407)
  */
 void CanSM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_GETVERSIONINFO, VersionInfo);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (CanSM_ValidatePointer(SERVICE_ID_CANSM_GETVERSIONINFO, VersionInfo))
 #endif
@@ -1013,10 +1334,15 @@ void CanSM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
         VersionInfo->sw_patch_version = CANSM_SW_PATCH_VERSION;
         VersionInfo->vendorID         = CANSM_VENDOR_ID;
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_GETVERSIONINFO);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
 #if (STD_ON == CANSM_SET_BAUDRATE_API)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This service shall start an asynchronous process to change the baud rate
  * for the configured CAN controllers of a certain CAN network.
@@ -1025,6 +1351,7 @@ void CanSM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 Std_ReturnType CanSM_SetBaudrate(NetworkHandleType Network, uint16 BaudRateConfigID)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(3, SERVICE_ID_CANSM_SETBAUDRATE, Network, BaudRateConfigID);
 #if CANSM_DEV_ERROR_DETECT == STD_ON
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1055,17 +1382,23 @@ Std_ReturnType CanSM_SetBaudrate(NetworkHandleType Network, uint16 BaudRateConfi
             SchM_Exit_CanSM_Context();
         }
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_SETBAUDRATE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif /*STD_ON == CANSM_SET_BAUDRATE_API*/
 
 #if CANSM_TX_OFFLINE_ACTIVE_SUPPORT == STD_ON
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This function can be used to set all CanSM channels of the ECU to a receive only mode.
  */
 Std_ReturnType CanSM_SetEcuPassive(boolean CanSM_Passive)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_SETECUPASSIVE, CanSM_Passive);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1088,9 +1421,14 @@ Std_ReturnType CanSM_SetEcuPassive(boolean CanSM_Passive)
         }
         ret = E_OK;
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_SETECUPASSIVE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /** The implementation of ComM_ChannelGetCurrentComMode. */
 void CanSM_SetNetworkPassive(const uint8* controllerIds, uint8 networkControllerNumber)
 {
@@ -1117,13 +1455,18 @@ void CanSM_SetNetworkPassive(const uint8* controllerIds, uint8 networkController
         SchM_Exit_CanSM_Context();
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif /* CANSM_TX_OFFLINE_ACTIVE_SUPPORT == STD_ON */
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Scheduled function of the CanSM
  */
 void CanSM_MainFunction(CanSM_NetworkIndexType netIndex) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_MAINFUNCTION, netIndex);
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
     if (CanSM_ValidatePartitionContext(SERVICE_ID_CANSM_MAINFUNCTION))
 #endif
@@ -1152,8 +1495,13 @@ void CanSM_MainFunction(CanSM_NetworkIndexType netIndex) /* PRQA S 1532 */ /* VL
             }
         }
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_MAINFUNCTION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This service shall change the communication mode of a CAN network to the requested one.
  */
@@ -1162,6 +1510,7 @@ Std_ReturnType CanSM_RequestComMode(NetworkHandleType network, ComM_ModeType Com
 /* PRQA S 1532 -- */ /* VL_QAC_OneFunRef */
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(3, SERVICE_ID_CANSM_REQUESTCOMMODE, network, ComM_Mode);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1236,9 +1585,14 @@ Std_ReturnType CanSM_RequestComMode(NetworkHandleType network, ComM_ModeType Com
             break;
         }
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_REQUESTCOMMODE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This service shall put out the current communication mode of a CAN network
  */
@@ -1247,6 +1601,7 @@ Std_ReturnType CanSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
 /* PRQA S 1503,1532 -- */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(3, SERVICE_ID_CANSM_GETCURRENTCOMMODE, network, ComM_ModePtr);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (CanSM_ValidatePointer(SERVICE_ID_CANSM_GETCURRENTCOMMODE, ComM_ModePtr)
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1265,9 +1620,14 @@ Std_ReturnType CanSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
         *ComM_ModePtr                             = varPtr->CurComMode;
         ret                                       = E_OK;
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_GETCURRENTCOMMODE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This function shall be called by EcuM when a wakeup source shall be started.
  */
@@ -1276,6 +1636,7 @@ Std_ReturnType CanSM_StartWakeupSource(NetworkHandleType network)
 /* PRQA S 1503,1532 -- */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_STARTWAKEUPSOURCE, network);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1308,9 +1669,14 @@ Std_ReturnType CanSM_StartWakeupSource(NetworkHandleType network)
             ret                   = E_OK;
         }
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_STARTWAKEUPSOURCE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This function shall be called by EcuM when a wakeup source shall be stopped
  */
@@ -1319,6 +1685,7 @@ Std_ReturnType CanSM_StopWakeupSource(NetworkHandleType network)
 /* PRQA S 1503,1532 -- */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_STOPWAKEUPSOURCE, network);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1352,9 +1719,14 @@ Std_ReturnType CanSM_StopWakeupSource(NetworkHandleType network)
             ret = E_OK;
         }
     }
+    CanSM_ArtiApiReturn(2, SERVICE_ID_CANSM_STOPWAKEUPSOURCE, ret);
     return ret;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback function notifies the CanSM about a bus-off event on a certain CAN controller,
  * which needs to be considered with the specified bus-off recovery handling for the impacted
@@ -1362,6 +1734,7 @@ Std_ReturnType CanSM_StopWakeupSource(NetworkHandleType network)
  */
 void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532, 6030 */ /* VL_QAC_OneFunRef, VL_MTR_CanSM_STMIF */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_CONTROLLERBUSOFF, ControllerId);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1407,8 +1780,13 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532, 6030 */ /* VL_QA
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_CONTROLLERBUSOFF);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback shall notify the CanSM module about a CAN controller mode change.
  */
@@ -1416,6 +1794,7 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532, 6030 */ /* VL_QA
 void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 /* PRQA S 1532, 6030 -- */ /* VL_QAC_OneFunRef, VL_MTR_CanSM_STMIF */
 {
+    CanSM_ArtiApiStart(3, SERVICE_ID_CANSM_CONTROLLERMODEINDICATION, ControllerId, ControllerMode);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1459,8 +1838,13 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType 
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_CONTROLLERMODEINDICATION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback shall notify the CanSM module about a CAN transceiver mode change
  */
@@ -1468,6 +1852,7 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType 
 void CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 /* PRQA S 1503,1532, 6030 -- */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef, VL_MTR_CanSM_STMIF */
 {
+    CanSM_ArtiApiStart(3, SERVICE_ID_CANSM_TRANCEIVERMODEINDICATION, TransceiverId, TransceiverMode);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1524,8 +1909,13 @@ void CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType T
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_TRANCEIVERMODEINDICATION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This function shall notify the CanSM module, that the CanNm has detected for the affected
  * partial CAN network a tx timeout exception, which shall be recovered within the respective
@@ -1535,6 +1925,7 @@ void CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType T
 void CanSM_TxTimeoutException(NetworkHandleType Channel)
 /* PRQA S 1503,1532 -- */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_TXTIMEOUTEXCEPTION, Channel);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1562,15 +1953,21 @@ void CanSM_TxTimeoutException(NetworkHandleType Channel)
             SchM_Exit_CanSM_Context();
         }
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_TXTIMEOUTEXCEPTION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (STD_ON == CANSM_PNC_SUPPORT)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback function shall indicate the CanIf_ClearTrcvWufFlag API process end for the
  * notified CAN Transceiver.
  */
 void CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_CLEARTRCVWUFFLAGINDICATION, Transceiver);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1622,14 +2019,20 @@ void CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* VL
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_CLEARTRCVWUFFLAGINDICATION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback function indicates the CanIf_CheckTrcvWakeFlag API process end for the notified
  * CAN Transceiver.
  */
 void CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION, Transceiver);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1674,13 +2077,19 @@ void CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * This callback function indicates that the transceiver is running in PN communication mode
  */
 void CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    CanSM_ArtiApiStart(2, SERVICE_ID_CANSM_CONFIRMPNAVAILABILITY, TransceiverId);
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     if (
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
@@ -1724,11 +2133,15 @@ void CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* VL_QA
         }
 #endif
     }
+    CanSM_ArtiApiReturn(1, SERVICE_ID_CANSM_CONFIRMPNAVAILABILITY);
 }
-
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Function to handle the request and indication timer periodically
  */
@@ -1743,7 +2156,11 @@ CANSM_LOCAL void CanSM_TimerHandler(CanSM_NetWorkRunTimeType* varPtr)
         varPtr->WaitCanIfIndicatedStartTime--;
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * The implementation of CanSM_FindNetworkByNetworkHandle.
  */
@@ -1762,7 +2179,11 @@ CANSM_LOCAL const CanSM_ManagerNetworkType* CanSM_FindNetworkByNetworkHandle(Net
     }
     return configPtr;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * To call the API ComM_BusSM_ModeIndication with ComMode
  */
@@ -1774,7 +2195,11 @@ CANSM_LOCAL void
         ComM_BusSM_ModeIndication(network, comMode);
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_CC_STOPPED
  */
@@ -1787,7 +2212,11 @@ CANSM_LOCAL void CanSM_PnNot_CC_Stopped(const CanSM_ManagerNetworkType* configPt
     varPtr->DeinitPnNotSupportedState   = DEINITPNNOT_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_CC_STOPPED_WAIT
  */
@@ -1810,7 +2239,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_CC_SLEEP
  */
@@ -1823,7 +2256,11 @@ CANSM_LOCAL void CanSM_PnNot_CC_Sleep(const CanSM_ManagerNetworkType* configPtr,
     varPtr->DeinitPnNotSupportedState   = DEINITPNNOT_S_CC_SLEEP_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_CC_SLEEP_WAIT
  */
@@ -1856,8 +2293,12 @@ CANSM_LOCAL void CanSM_PnNot_CC_Sleep_Wait(const CanSM_ManagerNetworkType* confi
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (CANSM_TRCV_ENABLED == STD_ON)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_TRCV_NORMAL
  */
@@ -1915,7 +2356,11 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Normal(const CanSM_ManagerNetworkType* configP
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_TRCV_NORMAL_WAIT
  */
@@ -1936,7 +2381,11 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr)
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_TRCV_STANDBY
  */
@@ -1997,7 +2446,11 @@ CANSM_LOCAL void CanSM_PnNot_Trcv_Standby(const CanSM_ManagerNetworkType* config
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPNNOT_S_TRCV_STANDBY_WAIT
  */
@@ -2021,8 +2474,12 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DeinitPnNotSupported
  */
@@ -2069,8 +2526,12 @@ CANSM_LOCAL boolean
     }
     return (varPtr->DeinitPnNotSupportedState != lastState) || (varPtr->CurBsmState != CANSM_BSM_DEINITPNNOTSUPPORTED);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (STD_ON == CANSM_PNC_SUPPORT)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_PN_CLEAR_WUF
  */
@@ -2129,7 +2590,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF(const CanSM_ManagerNetworkType* configP
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_PN_CLEAR_WUF_WAIT
  */
@@ -2150,7 +2615,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_Clear_WUF_Wait(CanSM_NetWorkRunTimeType* varPtr)
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_PN_CC_STOPPED
  */
@@ -2163,7 +2632,11 @@ CANSM_LOCAL void CanSM_Pn_S_Pn_CC_Stopped(const CanSM_ManagerNetworkType* config
     varPtr->DeinitPnSupportedState      = DEINITPN_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CC_STOPPED_WAIT
  */
@@ -2186,7 +2659,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_TRCV_NORMAL
  */
@@ -2245,7 +2722,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal(const CanSM_ManagerNetworkType* configPt
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_TRCV_NORMAL_WAIT
  */
@@ -2266,7 +2747,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr)
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_TRCV_STANDBY
  */
@@ -2325,7 +2810,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby(const CanSM_ManagerNetworkType* configP
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_TRCV_STANDBY_WAIT
  */
@@ -2346,7 +2835,11 @@ CANSM_LOCAL void CanSM_Pn_S_Trcv_Standby_Wait(CanSM_NetWorkRunTimeType* varPtr)
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CC_SLEEP
  */
@@ -2359,7 +2852,11 @@ CANSM_LOCAL void CanSM_Pn_S_CC_Sleep(const CanSM_ManagerNetworkType* configPtr, 
     varPtr->DeinitPnSupportedState      = DEINITPN_S_CC_SLEEP_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CC_SLEEP_WAIT
  */
@@ -2382,7 +2879,11 @@ CANSM_LOCAL void CanSM_Pn_S_CC_Sleep_Wait(const CanSM_ManagerNetworkType* config
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_CC_SLEEP
  */
@@ -2443,7 +2944,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CHECK_WUF_IN_CC_SLEEP_WAIT
  */
@@ -2467,7 +2972,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_NOT_CC_SLEEP
  */
@@ -2527,7 +3036,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DEINITPN_S_CHECK_WFLAG_IN_NOT_CC_SLEEP
  */
@@ -2548,7 +3061,11 @@ CANSM_LOCAL void CanSM_Pn_CheckWFlag_InNotCCSleepWait(CanSM_NetWorkRunTimeType* 
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in DeinitPnSupported
  */
@@ -2613,8 +3130,12 @@ CANSM_LOCAL boolean CanSM_DeinitPnSupported(const CanSM_ManagerNetworkType* conf
     }
     return (varPtr->DeinitPnSupportedState != lastState) || (varPtr->CurBsmState != CANSM_BSM_DEINITPNSUPPORTED);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_NoCom
  */
@@ -2642,8 +3163,12 @@ CANSM_LOCAL boolean CanSM_BsmSNoCom(const CanSM_ManagerNetworkType* configPtr, C
     }
     return varPtr->CurBsmState != CANSM_BSM_S_NOCOM;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (CANSM_TRCV_ENABLED == STD_ON)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_TRCV_NORMAL
  */
@@ -2700,7 +3225,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal(const CanSM_ManagerNetworkType* confi
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_TRCV_NORMAL_WAIT
  */
@@ -2721,8 +3250,12 @@ CANSM_LOCAL void CanSM_WUVAL_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* varPtr
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_CC_STOPPED
  */
@@ -2734,7 +3267,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_CC_Stopped(const CanSM_ManagerNetworkType* config
     varPtr->WuValidationState           = WUVALIDATION_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_CC_STOPPED_WAIT
  */
@@ -2757,7 +3294,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_CC_STARTED
  */
@@ -2770,7 +3311,11 @@ CANSM_LOCAL void CanSM_WUVAL_S_CC_Started(const CanSM_ManagerNetworkType* config
     varPtr->WuValidationState           = WUVALIDATION_S_CC_STARTED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in WUVALIDATION_S_CC_STARTED_WAIT
  */
@@ -2793,7 +3338,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_WuValidation
  */
@@ -2855,8 +3404,12 @@ CANSM_LOCAL boolean CanSM_BsmWuValidation(const CanSM_ManagerNetworkType* config
     }
     return (varPtr->WuValidationState != lastState) || (varPtr->CurBsmState != CANSM_BSM_WUVALIDATION);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (CANSM_TRCV_ENABLED == STD_ON)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_TRCV_NORMAL
  */
@@ -2914,7 +3467,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_TRCV_NORMAL_WAIT
  */
@@ -2936,8 +3493,12 @@ CANSM_LOCAL void CanSM_Prefullcom_S_Trcv_Normal_Wait(CanSM_NetWorkRunTimeType* v
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_CC_STOPPED
  */
@@ -2951,7 +3512,11 @@ CANSM_LOCAL void
     varPtr->PreFullComState             = PREFULLCOM_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_CC_STOPPED_WAIT
  */
@@ -2975,7 +3540,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_CC_STARTED
  */
@@ -2989,7 +3558,11 @@ CANSM_LOCAL void
     varPtr->PreFullComState             = PREFULLCOM_S_CC_STARTED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in PREFULLCOM_S_CC_STARTED_WAIT
  */
@@ -3013,7 +3586,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_Pre_FullCom
  */
@@ -3049,7 +3626,11 @@ CANSM_LOCAL boolean CanSM_BsmSPreFullCom(const CanSM_ManagerNetworkType* configP
     }
     return (varPtr->PreFullComState != lastState) || (varPtr->CurBsmState != CANSM_BSM_S_PRE_FULLCOM);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_BUS_OFF_CHECK
  */
@@ -3117,7 +3698,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_NO_BUS_OFF
  */
@@ -3128,7 +3713,11 @@ CANSM_LOCAL void CanSM_FullCom_S_No_Bus_Off(const CanSM_ManagerNetworkType* conf
         CanSM_EBusOffAction(configPtr, varPtr);
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_CC_STOPPED
  */
@@ -3141,7 +3730,11 @@ CANSM_LOCAL void CanSM_FullCom_S_CC_Stopped(const CanSM_ManagerNetworkType* conf
     varPtr->FullComState                = FULLCOM_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_CC_STOPPED_WAIT
  */
@@ -3165,7 +3758,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_CC_STARTED
  */
@@ -3178,7 +3775,11 @@ CANSM_LOCAL void CanSM_FullCom_S_CC_Started(const CanSM_ManagerNetworkType* conf
     varPtr->FullComState                = FULLCOM_S_CC_STARTED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_CC_STARTED_WAIT
  */
@@ -3211,7 +3812,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_RESTART_CC
  */
@@ -3224,7 +3829,11 @@ CANSM_LOCAL void CanSM_FullCom_S_Restart_CC(const CanSM_ManagerNetworkType* conf
     varPtr->FullComState                = FULLCOM_S_RESTART_CC_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_RESTART_CC_WAIT
  */
@@ -3248,7 +3857,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in FULLCOM_S_TX_OFF
  */
@@ -3259,7 +3872,7 @@ CANSM_LOCAL void CanSM_FullCom_S_Tx_Off(const CanSM_ManagerNetworkType* configPt
     if (varPtr->BusOffCounter >= configPtr->BorCounterL1ToL2)
     {
         busOffContinueTime = configPtr->BorTimeL2
-#if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
+#ifdef CANSM_GET_BUSOFF_DELAY_FUNCTION
                              + (uint32)varPtr->BusOffDelayTime
 #endif
             ;
@@ -3267,7 +3880,7 @@ CANSM_LOCAL void CanSM_FullCom_S_Tx_Off(const CanSM_ManagerNetworkType* configPt
     else
     {
         busOffContinueTime = configPtr->BorTimeL1
-#if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
+#ifdef CANSM_GET_BUSOFF_DELAY_FUNCTION
                              + (uint32)varPtr->BusOffDelayTime
 #endif
             ;
@@ -3302,7 +3915,11 @@ CANSM_LOCAL void CanSM_FullCom_S_Tx_Off(const CanSM_ManagerNetworkType* configPt
 #endif
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_FullCom
  */
@@ -3360,8 +3977,13 @@ CANSM_LOCAL boolean CanSM_BsmSFullCom(const CanSM_ManagerNetworkType* configPtr,
     }
     return (varPtr->FullComState != lastState) || (varPtr->CurBsmState != CANSM_BSM_S_FULLCOM);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+
 /* PRQA S 5017 -- */ /* VL_CanSM_5017 */
 #if (STD_ON == CANSM_SET_BAUDRATE_API)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Substate CHANGEBR_CHANGE_BR_SYNC
  */
@@ -3405,7 +4027,11 @@ CANSM_LOCAL void
         varPtr->RepeatCounter       = 0u;
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Substate CHANGEBR_S_CC_STOPPED
  */
@@ -3419,7 +4045,11 @@ CANSM_LOCAL void
     varPtr->ChangeBaudrateState         = CHANGEBR_S_CC_STOPPED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Substate CHANGEBR_S_CC_STOPPED_WAIT
  */
@@ -3454,7 +4084,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Substate CHANGEBR_S_CC_STARTED
  */
@@ -3468,7 +4102,11 @@ CANSM_LOCAL void
     varPtr->ChangeBaudrateState         = CHANGEBR_S_CC_STARTED_WAIT;
     varPtr->WaitCanIfIndicatedStartTime = CanSM_ConfigPtr->CanSMModeRequestRepetitionTime;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Substate CHANGEBR_S_CC_STARTED_WAIT
  */
@@ -3503,7 +4141,11 @@ CANSM_LOCAL void
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_Change_Baudrate
  */
@@ -3535,8 +4177,12 @@ CANSM_LOCAL boolean
     }
     return (varPtr->ChangeBaudrateState != lastState) || (varPtr->CurBsmState != CANSM_BSM_S_CHANGE_BAUDRATE);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_SilentCom
  */
@@ -3560,7 +4206,11 @@ CANSM_LOCAL boolean CanSM_BsmSSilentCom(const CanSM_ManagerNetworkType* configPt
     }
     return varPtr->CurBsmState != CANSM_BSM_S_SILENTCOM;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Handle state transition in Bsm_S_SilentCom_Bor
  */
@@ -3609,7 +4259,11 @@ CANSM_LOCAL boolean CanSM_BsmSSilentComBor(const CanSM_ManagerNetworkType* confi
     }
     return (varPtr->SilentComBORState != lastState) || (varPtr->CurBsmState != CANSM_BSM_S_SILENTCOM_BOR);
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * action of effect E_FULL_COM
  */
@@ -3640,7 +4294,11 @@ CANSM_LOCAL void CanSM_EFullComAction(const CanSM_ManagerNetworkType* configPtr,
     /*Com Mode change to COMM_FULL_COMMUNICATION*/
     varPtr->CurComMode = COMM_FULL_COMMUNICATION;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * action of effect E_FULL_TO_SILENT_COM
  */
@@ -3663,7 +4321,11 @@ CANSM_LOCAL void
     CanSM_ComMModeIndication(configPtr->ComMNetworkHandleRef, COMM_SILENT_COMMUNICATION, varPtr->RequestComMode);
     varPtr->CurComMode = COMM_SILENT_COMMUNICATION;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * action of effect E_PRE_NOCOM
  */
@@ -3688,7 +4350,11 @@ CANSM_LOCAL void CanSM_EPreNoComAction(const CanSM_ManagerNetworkType* configPtr
     BswM_CanSM_CurrentState(configPtr->ComMNetworkHandleRef, CANSM_BSWM_NO_COMMUNICATION);
     varPtr->CurComMode = COMM_NO_COMMUNICATION;
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * action of trigger T_BUS_OFF
  */
@@ -3701,7 +4367,7 @@ CANSM_LOCAL void CanSM_EBusOffAction(const CanSM_ManagerNetworkType* configPtr, 
         CanSM_ComMModeIndication(configPtr->ComMNetworkHandleRef, varPtr->CurComMode, varPtr->RequestComMode);
         varPtr->FullComState = FULLCOM_S_RESTART_CC;
 
-#if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
+#ifdef CANSM_GET_BUSOFF_DELAY_FUNCTION
         if (configPtr->EnableBusOffDelay)
         {
             uint8 delayCycleNum = 0u;
@@ -3730,7 +4396,11 @@ CANSM_LOCAL void CanSM_EBusOffAction(const CanSM_ManagerNetworkType* configPtr, 
     }
 #endif
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * Switch the state of the controller
  */
@@ -3751,6 +4421,8 @@ CANSM_LOCAL void CanSM_SetControllerModeRepeat(
         }
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 /**
  * Check all controller mode of the networkindex
@@ -3772,6 +4444,8 @@ CANSM_LOCAL_INLINE boolean CanSM_CheckNetworkAllControllerMode(
     return TRUE;
 }
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * The mode request to CanIf time-out handle
  */
@@ -3803,6 +4477,8 @@ CANSM_LOCAL void CanSM_ModeRequestTimeout(const CanSM_ManagerNetworkType* config
         ++varPtr->RepeatCounter;
     }
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 /**
  * Find the index of the partition in the CanSM involved partition according to ApplicationID.
@@ -3823,6 +4499,8 @@ CANSM_LOCAL_INLINE uint16 CanSM_GetPartitionIndex(void)
     return index;
 }
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /** The implementation of CanSM_SetPduMode. */
 CANSM_LOCAL void CanSM_SetPduMode(uint8 controllerId, CanIf_PduModeType pduModeRequest)
 {
@@ -3836,6 +4514,8 @@ CANSM_LOCAL void CanSM_SetPduMode(uint8 controllerId, CanIf_PduModeType pduModeR
 #endif
     SchM_Exit_CanSM_Context();
 }
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if CANSM_DEV_ERROR_DETECT == STD_ON
 /**
@@ -3938,7 +4618,4 @@ CANSM_LOCAL_INLINE boolean CanSM_ValidateAllNetworksNoCom(void)
 }
 #endif
 /* PRQA S 2889 -- */
-
-#define CANSM_STOP_SEC_CODE
-#include "CanSM_MemMap.h"
 /* PRQA S 6060, 1532 -- */

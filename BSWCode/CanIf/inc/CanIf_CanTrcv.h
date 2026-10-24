@@ -51,7 +51,11 @@ extern "C" {
  * @reentrant       Reentrant
  * @trace           CPD-61419
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_ConfirmPnAvailability(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief           This service indicates that the transceiver has cleared the WufFlag referring to
@@ -62,7 +66,11 @@ extern void CanIf_ConfirmPnAvailability(uint8 TransceiverId);
  * @reentrant       Reentrant
  * @trace           CPD-61420
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief           This service indicates that the check of the transceivers wake-up flag has been
@@ -74,7 +82,11 @@ extern void CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId);
  * @reentrant       Reentrant
  * @trace           CPD-61421
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_TRCV_NUMBER > 0u)
@@ -88,7 +100,11 @@ extern void CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId);
  * @reentrant       Reentrant
  * @trace           CPD-61423
  */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #ifdef __cplusplus

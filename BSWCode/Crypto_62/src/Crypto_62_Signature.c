@@ -32,6 +32,12 @@
 #if (CRYPTO_ALGORITHMFAM_RSA == STD_ON)
 #include "Crypto_62_Rsa.h"
 #endif
+#if (CRYPTO_ALGORITHMFAM_SM2 == STD_ON)
+#include "Crypto_62_Sm2.h"
+#endif
+#if (CRYPTO_ALGORITHMFAM_ECDSA == STD_ON)
+#include "Crypto_62_Ecdsa.h"
+#endif
 
 /* ===================================================== macros ===================================================== */
 
@@ -44,8 +50,6 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /*
  * Brief               This function process signaturegenerate service with supported modes.
  *
@@ -61,6 +65,8 @@
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_SignatureGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -94,13 +100,17 @@ Std_ReturnType Crypto_62_SignatureGenerate_Process(
 
             break;
         case CRYPTO_ALGOFAM_ECDSA:
-
+#if (CRYPTO_ALGORITHMFAM_ECDSA == STD_ON)
+            result = Crypto_Ecdsa_SignatureGenerate_Process(objectId, mode, secondaryFam);
+#endif
             break;
         case CRYPTO_ALGOFAM_ED25519:
 
             break;
         case CRYPTO_ALGOFAM_SM2:
-
+#if (CRYPTO_ALGORITHMFAM_SM2 == STD_ON)
+            result = Crypto_Sm2_SignatureGenerate_Process(objectId, mode, secondaryFam);
+#endif
             break;
         default:
             /* do nothing*/
@@ -109,6 +119,9 @@ Std_ReturnType Crypto_62_SignatureGenerate_Process(
     }
     return result;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function process signatureverify service with supported modes.
@@ -125,6 +138,8 @@ Std_ReturnType Crypto_62_SignatureGenerate_Process(
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_SignatureVerify_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -158,13 +173,17 @@ Std_ReturnType Crypto_62_SignatureVerify_Process(
 
             break;
         case CRYPTO_ALGOFAM_ECDSA:
-
+#if (CRYPTO_ALGORITHMFAM_ECDSA == STD_ON)
+            result = Crypto_Ecdsa_SignatureVerify_Process(objectId, mode, secondaryFam);
+#endif
             break;
         case CRYPTO_ALGOFAM_ED25519:
 
             break;
         case CRYPTO_ALGOFAM_SM2:
-
+#if (CRYPTO_ALGORITHMFAM_SM2 == STD_ON)
+            result = Crypto_Sm2_SignatureVerifyProcess(objectId, mode, secondaryFam);
+#endif
             break;
         default:
             /* do nothing*/

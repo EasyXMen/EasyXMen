@@ -33,18 +33,20 @@
 #include "Dem_ClearDTC.h"
 #include "Dem_EnableCondition.h"
 #include "Dem_Mem.h"
+#include "Dem_Arti.h"
 /* ========================================== external function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 
 /* PRQA S 3415 EOF */             /* VL_Dem_3415 */
 /* PRQA S 3406, 1252, 1503  ++ */ /* VL_Dem_3406, VL_Dem_1252, VL_QAC_NoUsedApi */
 #if (DEM_VERSION_INFO_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Returns the version information of this module.
  */
 void Dem_GetVersionInfo(Std_VersionInfoType* versionInfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x00, versionInfo);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     /** ***** Development Error Checks ***** */
     if (NULL_PTR == versionInfo)
@@ -60,18 +62,23 @@ void Dem_GetVersionInfo(Std_VersionInfoType* versionInfo)
         versionInfo->sw_minor_version = DEM_SW_MINOR_VERSION;
         versionInfo->sw_patch_version = DEM_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x00);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the internal states necessary to process events reported by BSW-modules.
  */
 void Dem_PreInit(const Dem_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x01, ConfigPtr);
     Dem_MasterPreInit(ConfigPtr);
     if (Dem_CheckMasterInitStatus(DEM_PREINITIALIZED) == FALSE)
     {
-        Dem_DetReportError(DEM_SID_INTERNALAPIID, DEM_E_WRONG_CONDITION);
+        Dem_DetReportError(DEM_SID_PREINIT, DEM_E_WRONG_CONDITION);
     }
     else
     {
@@ -86,7 +93,7 @@ void Dem_PreInit(const Dem_ConfigType* ConfigPtr)
         }
         if (satelliteId >= Dem_GetNumOfSatellite())
         {
-            Dem_DetReportError(DEM_SID_INTERNALAPIID, DEM_E_WRONG_CONFIGURATION);
+            Dem_DetReportError(DEM_SID_PREINIT, DEM_E_WRONG_CONFIGURATION);
         }
         else
         {
@@ -96,13 +103,18 @@ void Dem_PreInit(const Dem_ConfigType* ConfigPtr)
         Dem_SatelliteSatPreInit(DEM_SATELLITE_APPLICATION_ZERO);
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x01);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes or reinitializes this module.
  */
 void Dem_Init(const Dem_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x02, ConfigPtr);
     if (Dem_CheckMasterInitStatus(DEM_SHUTDOWN) == TRUE)
     {
         Dem_MasterInit(ConfigPtr);
@@ -114,14 +126,19 @@ void Dem_Init(const Dem_ConfigType* ConfigPtr)
          * corresponding partition in case of multiple partitions. */
         Dem_SatelliteInit();
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x02);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 /**
  * @brief Shuts down this module.
  */
 void Dem_Shutdown(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 1, 0x03);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -156,14 +173,19 @@ void Dem_Shutdown(void)
         Dem_DetReportError(DEM_SID_SHUTDOWN, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x03);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPORT_CLEARDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Clears single DTCs, as well as groups of DTCs.
  */
 Std_ReturnType Dem_ClearDTC(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x23, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -216,11 +238,15 @@ Std_ReturnType Dem_ClearDTC(uint8 ClientId)
         Dem_DetReportError(DEM_SID_CLEARDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x23, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clears a prestored freeze frame of a specific event. This API can only be used through the RTE
  *                and therefore no declaration is exported via Dem.h. API Availability: This API will be available
@@ -228,6 +254,7 @@ Std_ReturnType Dem_ClearDTC(uint8 ClientId)
  */
 Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x07, EventId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -264,11 +291,15 @@ Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId)
         Dem_DetReportError(DEM_SID_CLEARPRESTOREDFREEZEFRAME, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x07, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_COMPONENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the failed status of a DemComponent.
  */
@@ -276,19 +307,25 @@ Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId)
 Std_ReturnType Dem_GetComponentFailed(Dem_ComponentIdType ComponentId, boolean* ComponentFailed)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x2A, ComponentId, ComponentFailed);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(ComponentId);
     DEM_PARAM_UNUSED(ComponentFailed);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x2A, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (STD_ON == DCM_UDS_0X14)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  */
 Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xB8, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -327,17 +364,22 @@ Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId)
         Dem_DetReportError(DEM_SID_GETDTCSELECTIONRESULT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB8, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (STD_ON == DCM_UDS_0X14)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs,
  * respecting the settings if the Dem shall clear only all DTCs.
  */
 Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xBB, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -376,15 +418,20 @@ Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId)
         Dem_DetReportError(DEM_SID_GETDTCSELECTIONRESULTFORCLEARDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xBB, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the current UDS status byte assigned to the DTC for the event
  */
 Std_ReturnType Dem_GetEventUdsStatus(Dem_EventIdType EventId, Dem_UdsStatusByteType* UDSStatusByte)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xB6, EventId, UDSStatusByte);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -415,14 +462,19 @@ Std_ReturnType Dem_GetEventUdsStatus(Dem_EventIdType EventId, Dem_UdsStatusByteT
         Dem_DetReportError(DEM_SID_GETEVENTUDSSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB6, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the current monitor status for an event.
  */
-Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusType* MonitorStatus)
+Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventId, Dem_MonitorStatusType* MonitorStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xB5, EventId, MonitorStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -436,7 +488,7 @@ Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusTy
     {
         errorId = DEM_E_UNINIT;
     }
-    else if (Dem_CheckEventIdInValid(EventID) == TRUE)
+    else if (Dem_CheckEventIdInValid(EventId) == TRUE)
     {
         errorId = DEM_E_PARAM_DATA;
     }
@@ -452,7 +504,7 @@ Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusTy
 #endif
         {
             /* return not ok, may be after shutdown be call by fim in cycle mode */
-            ret = Dem_MonitorGetStatus(EventID, MonitorStatus);
+            ret = Dem_MonitorGetStatus(EventId, MonitorStatus);
         }
     }
 
@@ -463,15 +515,20 @@ Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusTy
         Dem_DetReportError(DEM_SID_GETMONOTORSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB5, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the debouncing status of an event. This function shall not be used for EventId with native
  *                debouncing within their functions. It is rather for EventIds using debouncing within the Dem.
  */
 Std_ReturnType Dem_GetDebouncingOfEvent(Dem_EventIdType EventId, Dem_DebouncingStateType* DebouncingState)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x9F, EventId, DebouncingState);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -502,14 +559,19 @@ Std_ReturnType Dem_GetDebouncingOfEvent(Dem_EventIdType EventId, Dem_DebouncingS
         Dem_DetReportError(DEM_SID_GETDEBOUNCINGEVENT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x9F, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC of an event.
  */
 Std_ReturnType Dem_GetDTCOfEvent(Dem_EventIdType EventId, Dem_DTCFormatType DTCFormat, uint32* DTCOfEvent)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x0D, EventId, DTCFormat, DTCOfEvent);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -544,16 +606,21 @@ Std_ReturnType Dem_GetDTCOfEvent(Dem_EventIdType EventId, Dem_DTCFormatType DTCF
         Dem_DetReportError(DEM_SID_GETDTCOFEVENT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x0D, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Returns the suppression status of a specific DTC. API Availability: This API will be available
  *                only if ({ecuc(Dem/DemGeneral.DemSuppressionSupport)} == DEM_DTC_SUPPRESSION)
  */
 Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* SuppressionStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xBC, ClientId, SuppressionStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -602,16 +669,21 @@ Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* SuppressionStatus)
         Dem_DetReportError(DEM_SID_GETDTCSUPPRESSION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xBC, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the Event availability.
  */
 Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* AvailableStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xBE, EventId, AvailableStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -657,16 +729,21 @@ Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* Available
         Dem_DetReportError(DEM_SID_GETEVENTAVAILABLE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xBE, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the fault detection counter of an event. This API can only be used through the RTE, and
  *                therefore no declaration is exported via Dem.h.
  */
 Std_ReturnType Dem_GetFaultDetectionCounter(Dem_EventIdType EventId, sint8* FaultDetectionCounter)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x3E, EventId, FaultDetectionCounter);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -697,16 +774,21 @@ Std_ReturnType Dem_GetFaultDetectionCounter(Dem_EventIdType EventId, sint8* Faul
         Dem_DetReportError(DEM_SID_GETFAULTDETECTIONCOUNTER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3E, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_INDICATOR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the indicator status derived from the UDS status. API Availability: This API will be
  *                available only if ({ecuc(Dem/DemGeneral/DemEventMemorySet/DemIndicator)} != NULL)
  */
 Std_ReturnType Dem_GetIndicatorStatus(uint8 IndicatorId, Dem_IndicatorStatusType* IndicatorStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x29, IndicatorId, IndicatorStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -744,11 +826,15 @@ Std_ReturnType Dem_GetIndicatorStatus(uint8 IndicatorId, Dem_IndicatorStatusType
         Dem_DetReportError(DEM_SID_GETINDICATORSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x29, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the data of a freeze frame by event.
  */
@@ -761,6 +847,7 @@ Std_ReturnType Dem_GetEventFreezeFrameDataEx(
     uint16*         BufSize)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 6, 0x6E, EventId, RecordNumber, DataId, DestBuffer, BufSize);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -797,9 +884,13 @@ Std_ReturnType Dem_GetEventFreezeFrameDataEx(
         Dem_DetReportError(DEM_SID_GETEVENTFREEZEFRAMEDATAEX, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x6E, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the data of an extended data record by event.
  */
@@ -808,6 +899,7 @@ Std_ReturnType
     Dem_GetEventExtendedDataRecordEx(Dem_EventIdType EventId, uint8 RecordNumber, uint8* DestBuffer, uint16* BufSize)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0x6D, EventId, RecordNumber, DestBuffer, BufSize);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -844,16 +936,21 @@ Std_ReturnType
         Dem_DetReportError(DEM_SID_GETEVENTEXTENDEDDATARECORDEX, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x6D, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the event memory overflow indication status.
  */
 Std_ReturnType Dem_GetEventMemoryOverflow(uint8 ClientId, Dem_DTCOriginType DTCOrigin, boolean* OverflowIndication)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x32, ClientId, DTCOrigin, OverflowIndication);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -894,15 +991,20 @@ Std_ReturnType Dem_GetEventMemoryOverflow(uint8 ClientId, Dem_DTCOriginType DTCO
         Dem_DetReportError(DEM_SID_GETEVENTMEMORYOVERFLOW, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x32, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Returns the number of entries currently stored in the requested event memory.
  */
 Std_ReturnType
     Dem_GetNumberOfEventMemoryEntries(uint8 ClientId, Dem_DTCOriginType DTCOrigin, uint8* NumberOfEventMemoryEntries)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x35, ClientId, DTCOrigin, NumberOfEventMemoryEntries);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -943,10 +1045,14 @@ Std_ReturnType
         Dem_DetReportError(DEM_SID_GETNUMBEROFEVENTMEMORYENTRIES, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x35, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Control the internal debounce counter/timer by BSW modules and SW-Cs. The event qualification
  *                will not be affected by these debounce state changes. This API is available for BSW modules as
@@ -955,6 +1061,7 @@ Std_ReturnType
 /* PRQA S 6070,6030 ++ */ /* VL_MTR_Dem_STCAL,VL_MTR_Dem_STMIF */
 Std_ReturnType Dem_ResetEventDebounceStatus(Dem_EventIdType EventId, Dem_DebounceResetStatusType DebounceResetStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x09, EventId, DebounceResetStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1011,8 +1118,13 @@ Std_ReturnType Dem_ResetEventDebounceStatus(Dem_EventIdType EventId, Dem_Debounc
         Dem_DetReportError(DEM_SID_RESETEVENTDEBOUNCESTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x09, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070,6030 -- */
 
 /**
@@ -1021,6 +1133,7 @@ Std_ReturnType Dem_ResetEventDebounceStatus(Dem_EventIdType EventId, Dem_Debounc
  */
 Std_ReturnType Dem_ResetEventStatus(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x05, EventId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1057,14 +1170,19 @@ Std_ReturnType Dem_ResetEventStatus(Dem_EventIdType EventId)
         Dem_DetReportError(DEM_SID_RESETEVENTSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x05, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Resets the monitor failed status.
  */
 Std_ReturnType Dem_ResetMonitorStatus(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xC5, EventId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1101,9 +1219,13 @@ Std_ReturnType Dem_ResetMonitorStatus(Dem_EventIdType EventId)
         Dem_DetReportError(DEM_SID_RESETMONITORSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xC5, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets an operation cycle state. This API can only be used through the RTE and therefore no
  *                declaration is exported via Dem.h. The interface has an asynchronous behavior to avoid exceeding
@@ -1113,6 +1235,7 @@ Std_ReturnType Dem_ResetMonitorStatus(Dem_EventIdType EventId)
  */
 Std_ReturnType Dem_RestartOperationCycle(uint8 OperationCycleId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x08, OperationCycleId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1146,10 +1269,14 @@ Std_ReturnType Dem_RestartOperationCycle(uint8 OperationCycleId)
         Dem_DetReportError(DEM_SID_RESTARTOPERATIONCYCLE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x08, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Captures the freeze frame data for a specific event. This API can only be used through the RTE
  *                and therefore no declaration is exported via Dem.h. API Availability: This API will be available
@@ -1157,6 +1284,7 @@ Std_ReturnType Dem_RestartOperationCycle(uint8 OperationCycleId)
  */
 Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x06, EventId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1193,17 +1321,22 @@ Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId)
         Dem_DetReportError(DEM_SID_PRESTOREFREEZEFRAME, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x06, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_SELECTDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Selects a DTC or DTC group as target for further operations.
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Dem_STMIF */
 Std_ReturnType Dem_SelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0xB7, ClientId, DTC, DTCFormat, DTCOrigin);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1258,31 +1391,42 @@ Std_ReturnType Dem_SelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFo
         Dem_DetReportError(DEM_SID_SELECTDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB7, ret);
     return ret;
 }
-#endif
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030 -- */
+#endif
 
 #if (DEM_COMPONENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the availability of a specific DemComponent.
  */
 Std_ReturnType Dem_SetComponentAvailable(Dem_ComponentIdType ComponentId, boolean AvailableStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x2B, ComponentId, AvailableStatus);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(ComponentId);
     DEM_PARAM_UNUSED(AvailableStatus);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x2B, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the suppression status of a specific DTC. API Availability: This API will be available only
  *                if ({ecuc(Dem/DemGeneral.DemSuppressionSupport)} == DEM_DTC_SUPPRESSION)
  */
 Std_ReturnType Dem_SetDTCSuppression(uint8 ClientId, boolean SuppressionStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x33, ClientId, SuppressionStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1341,17 +1485,22 @@ Std_ReturnType Dem_SetDTCSuppression(uint8 ClientId, boolean SuppressionStatus)
         Dem_DetReportError(DEM_SID_SETDTCSUPPRESSION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x33, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_ENABLE_CONDITION_GROUP_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets an enable condition. API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral/DemEnableCondition)} != NULL)
  */
 Std_ReturnType Dem_SetEnableCondition(uint8 EnableConditionID, boolean ConditionFulfilled)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x39, EnableConditionID, ConditionFulfilled);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1392,16 +1541,21 @@ Std_ReturnType Dem_SetEnableCondition(uint8 EnableConditionID, boolean Condition
         Dem_DetReportError(DEM_SID_SETENABLECONDITION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x39, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the available status of a specific Event.
  */
 Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean AvailableStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x37, EventId, AvailableStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1445,16 +1599,21 @@ Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean AvailableS
         Dem_DetReportError(DEM_SID_SETEVENTAVAILABLE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x37, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the failure confirmation threshold of an event.
  */
 Std_ReturnType Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId, uint8 FailureCycleCounterThreshold)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x57, EventId, FailureCycleCounterThreshold);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1505,11 +1664,15 @@ Std_ReturnType Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId,
         Dem_DetReportError(DEM_SID_SETEVENTCONFIRMATIONTHRESHOLDCOUNTER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x57, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_EVENT_REPORTING_STANDARD == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Called by SW-Cs or BSW modules to report monitor status information to the Dem. BSW modules
  *                calling Dem_SetEventStatus can safely ignore the return value. This API will be available only
@@ -1517,6 +1680,7 @@ Std_ReturnType Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId,
  */
 Std_ReturnType Dem_SetEventStatus(Dem_EventIdType EventId, Dem_EventStatusType EventStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x04, EventId, EventStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1563,11 +1727,15 @@ Std_ReturnType Dem_SetEventStatus(Dem_EventIdType EventId, Dem_EventStatusType E
         Dem_DetReportError(DEM_SID_SETEVENTSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x04, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_EVENT_REPORTING_WITH_MONITOR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         This API will be available only if ({Dem/DemConfigSet/DemEventParameter/DemEventReportingType}
  *                == STANDARD_REPORTING_WITH_MONITOR_DATA)
@@ -1578,6 +1746,7 @@ Std_ReturnType Dem_SetEventStatusWithMonitorData(
     Dem_MonitorDataType monitorData0,
     Dem_MonitorDataType monitorData1)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0xBD, EventId, EventStatus, monitorData0, monitorData1);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1628,17 +1797,22 @@ Std_ReturnType Dem_SetEventStatusWithMonitorData(
         Dem_DetReportError(DEM_SID_SETEVENTSTATUSWITHMONITORDATA, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xBD, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_STORAGE_CONDITION_GROUP_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a storage condition.API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral/DemStorageCondition)} != NULL)
  */
 Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean ConditionFulfilled)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x38, StorageConditionID, ConditionFulfilled);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1679,17 +1853,22 @@ Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean Conditi
         Dem_DetReportError(DEM_SID_SETSTORAGECONDITION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x38, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_USER_CONTROLLED_WIR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the WIR status bit via failsafe SW-Cs. This API can only be used through the RTE and
  *                therefore no declaration is exported via Dem.h.
  */
 Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x7A, EventId, WIRStatus);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1722,17 +1901,22 @@ Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus)
         Dem_DetReportError(DEM_SID_SETWIRSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x7A, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETTRANSLATIONTYPE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the supported DTC formats of the ECU.The supported formats are configured via Dem
  *                TypeOfDTCSupported.
  */
 Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x3C, ClientId);
     Dem_DTCTranslationFormatType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1764,17 +1948,22 @@ Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId)
         Dem_DetReportError(DEM_SID_GETTRANSLATIONTYPE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3C, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  */
 Std_ReturnType
     Dem_GetDTCStatusAvailabilityMask(uint8 ClientId, Dem_UdsStatusByteType* DTCStatusMask, Dem_DTCOriginType DTCOrigin)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x16, ClientId, DTCOrigin, DTCStatusMask);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1814,11 +2003,15 @@ Std_ReturnType
         Dem_DetReportError(DEM_SID_GETDTCSTATUSAVAILABILITYMASK, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x16, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the status of a DTC. For large configurations and DTC-calibration, the interface behavior
  *                can be asynchronous (splitting the DTC-search into segments). The DTCs of OBD Events Suppression
@@ -1826,6 +2019,7 @@ Std_ReturnType
  */
 Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x15, ClientId, DTCStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1872,17 +2066,22 @@ Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus)
         Dem_DetReportError(DEM_SID_GETSTATUSOFDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x15, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the severity of the requested DTC. For large configurations and DTC-calibration, the
  *                interface behavior can be asynchronous (splitting the DTC-search into segments).
  */
 Std_ReturnType Dem_GetSeverityOfDTC(Dem_DTCSeverityType* DTCSeverity, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x0E, DTCSeverity, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1929,14 +2128,19 @@ Std_ReturnType Dem_GetSeverityOfDTC(Dem_DTCSeverityType* DTCSeverity, uint8 Clie
         Dem_DetReportError(DEM_SID_GETSEVERITYOFDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x0E, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the functional unit of the requested DTC.
  */
 Std_ReturnType Dem_GetFunctionalUnitOfDTC(uint8 ClientId, uint8* DTCFunctionalUnit)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x34, DTCFunctionalUnit, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1983,11 +2187,15 @@ Std_ReturnType Dem_GetFunctionalUnitOfDTC(uint8 ClientId, uint8* DTCFunctionalUn
         Dem_DetReportError(DEM_SID_GETFUNCTIONALUNITOFDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x34, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the DTC Filter. The server shall perform a bit-wise logical AND-ing operation between the
  *                parameter DTCStatusMask and the current UDS status in the server. In addition to the DTCStatus
@@ -2009,6 +2217,21 @@ Std_ReturnType Dem_SetDTCFilter(
     Dem_DTCSeverityType DTCSeverityMask,
     boolean             FilterForFaultDetectionCounter)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        8,
+        0x13,
+        ClientId,
+        DTCStatusMask,
+        DTCFormat,
+        DTCOrigin,
+        FilterWithSeverity,
+        DTCSeverityMask,
+        FilterForFaultDetectionCounter);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2054,8 +2277,13 @@ Std_ReturnType Dem_SetDTCFilter(
         Dem_DetReportError(DEM_SID_SETDTCFILTER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x13, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6040 -- */
 
 /**
@@ -2063,6 +2291,7 @@ Std_ReturnType Dem_SetDTCFilter(
  */
 Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilteredDTC)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x17, ClientId, NumberOfFilteredDTC);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2102,11 +2331,15 @@ Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilter
         Dem_DetReportError(DEM_SID_GETNUMBEROFFILTEREDDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x17, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC matching the filter criteria. For UDS services, the interface has an
  *                asynchronous behavior, because a large number of DTCs has to be processed.
@@ -2114,6 +2347,7 @@ Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilter
 /* PRQA S 6030 ++ */ /* VL_MTR_Dem_STMIF */
 Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x18, ClientId, DTC, DTCStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2159,11 +2393,15 @@ Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCSta
         Dem_DetReportError(DEM_SID_GETNEXTFILTEREDDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x18, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC and its associated Fault Detection Counter (FDC) matching the filter
  *                criteria. The interface has an asynchronous behavior, because a large number of DTCs has to be
@@ -2171,6 +2409,7 @@ Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCSta
  */
 Std_ReturnType Dem_GetNextFilteredDTCAndFDC(uint8 ClientId, uint32* DTC, sint8* DTCFaultDetectionCounter)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x3B, ClientId, DTC, DTCFaultDetectionCounter);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2216,11 +2455,15 @@ Std_ReturnType Dem_GetNextFilteredDTCAndFDC(uint8 ClientId, uint32* DTC, sint8* 
         Dem_DetReportError(DEM_SID_GETNEXTFILTEREDDTCANDFDC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3B, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC and its associated Severity matching the filter criteria. The
  *                interface has an asynchronous behavior, because a large number of DTCs has to be processed.
@@ -2233,6 +2476,19 @@ Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
     Dem_DTCSeverityType* DTCSeverity,
     uint8*               DTCFunctionalUnit)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        6,
+        0x3D,
+        ClientId,
+        DTC,
+        DTCStatus,
+        DTCSeverity,
+        DTCFunctionalUnit);
     /* PRQA S 3673 -- */
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
@@ -2282,17 +2538,22 @@ Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
         Dem_DetReportError(DEM_SID_GETNEXTFILTEREDDTCANDSEVERITY, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3D, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030 -- */
 #endif
-
 #if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a freeze frame record filter.
  */
 Std_ReturnType Dem_SetFreezeFrameRecordFilter(uint8 ClientId, Dem_DTCFormatType DTCFormat)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x3F, ClientId, DTCFormat);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2343,15 +2604,20 @@ Std_ReturnType Dem_SetFreezeFrameRecordFilter(uint8 ClientId, Dem_DTCFormatType 
         Dem_DetReportError(DEM_SID_SETFREEZEFRAMERECORDFILTER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3F, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         This function returns the number of all freeze frame records currently stored in the primary
  *                event memory
  */
 Std_ReturnType Dem_GetNumberOfFreezeFrameRecords(uint8 ClientId, uint16* NumberOfFilteredRecords)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x5A, ClientId, NumberOfFilteredRecords);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2395,15 +2661,20 @@ Std_ReturnType Dem_GetNumberOfFreezeFrameRecords(uint8 ClientId, uint16* NumberO
         Dem_DetReportError(DEM_SID_GETNUMBEROFFREEZEFRAMERECORDS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x5A, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next freeze frame record number and its associated DTC stored in the event memory. The
  *                interface has an asynchronous behavior, because NvRAM access might be required.
  */
 Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uint8* RecordNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x3A, ClientId, DTC, RecordNumber);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2446,17 +2717,22 @@ Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uint8* Rec
         Dem_DetReportError(DEM_SID_GETNEXTFILTEREDRECORD, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x3A, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC by occurrence time. There is no explicit parameter for the DTC-origin as the origin
  *                always is DEM_DTC_ORIGIN_PRIMARY_MEMORY.
  */
 Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTCRequest, uint32* DTC)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x19, ClientId, DTCRequest, DTC);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     /** ***** Development Error Checks ***** */
@@ -2497,16 +2773,21 @@ Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTC
         Dem_DetReportError(DEM_SID_GETDTCBYOCCURRENCETIME, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x19, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  */
 Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x1A, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2548,9 +2829,13 @@ Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId)
         Dem_DetReportError(DEM_SID_DISABLEDTCRECORDUPDATE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x1A, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Enables the event memory update of the DTC disabled by Dem_DisableDTCRecordUpdate() before.
  *                Note: As the call to Dem_EnableDTCRecordUpdate is the last action in the sequence of
@@ -2559,6 +2844,7 @@ Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId)
  */
 Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x1B, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2590,17 +2876,22 @@ Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId)
         Dem_DetReportError(DEM_SID_ENABLEDTCRECORDUPDATE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x1B, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the filter to be used by Dem_GetNextExtendedDataRecord and
  *                Dem_GetSizeOfExtendedDataRecordSelection.
  */
 Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 ExtendedDataNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xBA, ClientId, ExtendedDataNumber);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2647,15 +2938,20 @@ Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 ExtendedDataNu
         Dem_DetReportError(DEM_SID_SELSECTEXTENDEDDATARECORD, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xBA, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  */
 /* PRQA S 6030,6070 ++ */ /* VL_MTR_Dem_STMIF,VL_MTR_Dem_STCAL */
 Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, uint32* SizeOfExtendedDataRecord)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x21, ClientId, SizeOfExtendedDataRecord);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2704,15 +3000,20 @@ Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, uint32* 
         Dem_DetReportError(DEM_SID_GETSIZEOFEXTENDEDDATARECORDSELECTION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x21, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
  */
 Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, uint16* BufSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x20, ClientId, DestBuffer, BufSize);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2761,17 +3062,22 @@ Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, 
         Dem_DetReportError(DEM_SID_GETNEXTEXTENDEDDATARECORD, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x20, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030,6070 -- */
 #endif
-
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrame Selection.
  */
 Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xB9, ClientId, RecordNumber);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2818,15 +3124,20 @@ Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumber)
         Dem_DetReportError(DEM_SID_SELECTFREEZEFRAMEDATA, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB9, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  */
 /* PRQA S 6030,6070 ++ */ /* VL_MTR_Dem_STMIF,VL_MTR_Dem_STCAL */
 Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* SizeOfFreezeFrame)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x1F, ClientId, SizeOfFreezeFrame);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2872,18 +3183,23 @@ Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* SizeOfF
     /** ***** Development Error Report ***** */
     if (errorId != DEM_E_NO_ERROR)
     {
-        Dem_DetReportError(DEM_SID_GETNEXTEXTENDEDDATARECORD, errorId);
+        Dem_DetReportError(DEM_SID_GETSIZEOFFREEZEFRAMESELECTION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x1F, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
  */
 Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uint16* BufSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x1D, ClientId, DestBuffer, BufSize);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2929,20 +3245,26 @@ Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uin
     /** ***** Development Error Report ***** */
     if (errorId != DEM_E_NO_ERROR)
     {
-        Dem_DetReportError(DEM_SID_GETNEXTEXTENDEDDATARECORD, errorId);
+        Dem_DetReportError(DEM_SID_GETNEXTFREEZEFRAMEDATA, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x1D, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 6030,6070 -- */
 
 #if (STD_ON == DCM_UDS_0X85)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Disables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
  */
 Std_ReturnType Dem_DisableDTCSetting(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x24, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2975,14 +3297,19 @@ Std_ReturnType Dem_DisableDTCSetting(uint8 ClientId)
         Dem_DetReportError(DEM_SID_DISABLEDTCSETTING, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x24, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         (Re)-Enables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
  */
 Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x25, ClientId);
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -3015,12 +3342,16 @@ Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId)
         Dem_DetReportError(DEM_SID_ENABLEDTCSETTING, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x25, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 #if (DEM_OBD_READINESS_GROUP_HANDING == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service for reporting the event as disabled to the Dem for the PID $41 computation. API is
  *                needed in OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3028,13 +3359,18 @@ Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId)
  */
 Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x51, EventId);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(EventId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x51, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_RATIO_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service for reporting that faults are possibly found because all conditions are fullfilled. API
  *                is needed in OBD-relevant ECUs only API Availability: This API will be available only if
@@ -3042,11 +3378,16 @@ Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId)
  */
 Std_ReturnType Dem_RepIUMPRFaultDetect(Dem_RatioIdType RatioID)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x73, RatioID);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(RatioID);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x73, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         In order to communicate the status of the (additional) denominator conditions among the OBD
  *                relevant ECUs, the API is used to forward the condition status to a Dem of a particular ECU.
@@ -3056,12 +3397,17 @@ Std_ReturnType Dem_RepIUMPRFaultDetect(Dem_RatioIdType RatioID)
 Std_ReturnType
     Dem_SetIUMPRDenCondition(Dem_IumprDenomCondIdType ConditionId, Dem_IumprDenomCondStatusType ConditionStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xAE, ConditionId, ConditionStatus);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(ConditionId);
     DEM_PARAM_UNUSED(ConditionStatus);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xAE, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         In order to communicate the status of the (additional) denominator conditions among the OBD
  *                relevant ECUs, the API is used to forward the condition status to a Dem of a particular ECU.
@@ -3073,12 +3419,17 @@ Std_ReturnType
     Dem_GetIUMPRDenCondition(Dem_IumprDenomCondIdType ConditionId, Dem_IumprDenomCondStatusType* ConditionStatus)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xAF, ConditionId, ConditionStatus);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(ConditionId);
     DEM_PARAM_UNUSED(ConditionStatus);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xAF, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service is used to release a denominator of a specific monitor. API is needed in OBD-relevant
  *                ECUs only API Availability: This API will be available only if
@@ -3086,36 +3437,51 @@ Std_ReturnType
  */
 Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x72, RatioID);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(RatioID);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x72, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_USER_SUPPORT_SET_PTO_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         API is needed in OBD-relevant ECUs only API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
  */
 Std_ReturnType Dem_SetPtoStatus(boolean PtoStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x79, PtoStatus);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PtoStatus);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x79, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of PID $01 computed by the Dem. API is needed in OBD relevant ECUs only
  */
 Std_ReturnType Dem_ReadDataOfPID01(uint8* PID01value) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xB3, PID01value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID01value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB3, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU) && (DEM_OBD_CENTRALIZED_PID21_HANDING == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to get the value of PID $21 from the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3124,13 +3490,18 @@ Std_ReturnType Dem_ReadDataOfPID01(uint8* PID01value) /* PRQA S 3673 */ /* VL_QA
  */
 Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xB1, PID21value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID21value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB1, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_USER_SUPPORT_SET_PID_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to set the value of PID $21 in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3138,11 +3509,16 @@ Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value) /* PRQA S 3673 */ /* VL_QAC
  */
 Std_ReturnType Dem_SetDataOfPID21(const uint8* PID21value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xA6, PID21value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID21value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA6, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to set the value of PID $31 in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3150,11 +3526,16 @@ Std_ReturnType Dem_SetDataOfPID21(const uint8* PID21value)
  */
 Std_ReturnType Dem_SetDataOfPID31(const uint8* PID31value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xA7, PID31value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID31value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA7, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to set the value of PID $4D in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3162,11 +3543,16 @@ Std_ReturnType Dem_SetDataOfPID31(const uint8* PID31value)
  */
 Std_ReturnType Dem_SetDataOfPID4D(const uint8* PID4Dvalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xA8, PID4Dvalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID4Dvalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA8, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to set the value of PID $4E in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3174,13 +3560,18 @@ Std_ReturnType Dem_SetDataOfPID4D(const uint8* PID4Dvalue)
  */
 Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xA9, PID4Evalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID4Evalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA9, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Returns the qualification state of the dependent operation cycle. API Availability: This API
  *                will be available only if any of the
@@ -3188,24 +3579,34 @@ Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue)
  */
 Std_ReturnType Dem_GetCycleQualified(uint8 OperationCycleId, boolean* isQualified) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xAB, OperationCycleId, isQualified);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(OperationCycleId);
     DEM_PARAM_UNUSED(isQualified);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xAB, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a dependent operation cycle as qualified, so it may be processed along with its leading cycle.
  */
 Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x56, OperationCycleId);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(OperationCycleId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x56, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_SUPPORT_GETDTCSERVERITYAVAILABILITYMASK_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC Severity availability mask.
  */
@@ -3213,6 +3614,7 @@ Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId)
 Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverityType* DTCSeverityMask)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xB2, ClientId, DTCSeverityMask);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -3248,27 +3650,36 @@ Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverit
         Dem_DetReportError(DEM_SID_GETDTCSEVERITYAVAILABILITYMASK, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB2, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if (DEM_OBDII_SUPPORT == STD_ON)
 #if (DEM_DTR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of the B1 counter computed by the Dem. API is needed in WWH-OBD
  *                relevant ECUs only
  */
 Std_ReturnType Dem_GetB1Counter(uint16* B1Counter) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xB4, B1Counter);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(B1Counter);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xB4, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Reports a DTR result with lower and upper limit. The internal eventstatus serves as master
  *                whether the DTR values are forwarded or ignored, also taking the DTRUpdateKind into account.
@@ -3280,28 +3691,35 @@ Std_ReturnType Dem_GetB1Counter(uint16* B1Counter) /* PRQA S 3673 */ /* VL_QAC_3
 Std_ReturnType
     Dem_SetDTR(uint16 DTRId, sint32 TestResult, sint32 LowerLimit, sint32 UpperLimit, Dem_DTRControlType Ctrlval)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 6, 0xA2, DTRId, TestResult, LowerLimit, UpperLimit, Ctrlval);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(DTRId);
     DEM_PARAM_UNUSED(TestResult);
     DEM_PARAM_UNUSED(LowerLimit);
     DEM_PARAM_UNUSED(UpperLimit);
     DEM_PARAM_UNUSED(Ctrlval);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA2, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes all not event based Dem internal functions.
  */
 void Dem_MainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 1, 0x55);
     /** Dem_SatelliteMainFunction is called directly in case of single partition */
     Dem_SatelliteMainFunction();
     Dem_MasterMainFunction();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x55);
 }
-/* PRQA S 1532 -- */
-/* PRQA S 3406, 1252, 1503 -- */
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+/* PRQA S 1532 -- */
+/* PRQA S 3406, 1252, 1503 -- */
 
 #endif

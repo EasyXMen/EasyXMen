@@ -28,7 +28,7 @@
 
 #include "Os.h"
 #include "ComStack_Types.h"
-#include "Rte_SecOC_Type.h"
+#include "SecOC_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,9 +53,9 @@ extern "C" {
 /** Defined data values FF */
 #define SECOC_CONST_FFU 0xFFu
 /** SecOC_QueryFreshnessValueType */
-#define SECOC_CFUNC 0x00u
+#define SECOC_CFUNC     0x00u
 /** SecOC_QueryFreshnessValueType */
-#define SECOC_RTE 0x01u
+#define SECOC_RTE       0x01u
 /* ================================================ type definitions ================================================ */
 
 /**
@@ -198,6 +198,36 @@ typedef struct
 } SecOC_QueueInfoType;
 
 /**
+ * @brief    Define the verification status notification.
+ */
+typedef struct
+{
+    Std_ReturnType (*SecOC_FreshnessManagementGetRxFreshnessType)(
+        uint16       freshnessValueId,
+        const uint8* truncatedFreshnessValue,
+        uint32       truncatedFreshnessValueLength,
+        uint16       authVerifyAttempts,
+        uint8*       freshnessValue,
+        uint32*      freshnessValueLength); /**< Indicate the freshness value that is to be received.
+@range NA*/
+    Std_ReturnType (*SecOC_FreshnessManagementGetRxFreshnessAuthDataType)(
+        uint16       freshnessValueId,
+        const uint8* truncatedFreshnessValue,
+        uint32       truncatedFreshnessValueLength,
+        const uint8* authenticDataFreshnessValue,
+        uint16       authenticDataFreshnessValueLength,
+        uint16       authVerifyAttempts,
+        uint8*       freshnessValue,
+        uint32*      freshnessValueLength); /**< Indicate the freshness value that is to be received.
+@range NA*/
+    Std_ReturnType (*SecOC_VerificationStatusNotificationVerifyStatusType)(
+        const SecOC_VerificationStatusType*
+            verificationStatus); /**< Indicate the verification status notification. @range NA */
+    Std_ReturnType (*SecOC_WriteVerificationStatusverificationStatusType)(
+        const SecOC_VerificationStatusType* data); /**< Indicate the write verification status. @range NA */
+} SecOC_RxPduProcessingRteCallOutType;
+
+/**
  * @brief    Define the processing information of the Rx Pdu.
  */
 typedef struct
@@ -225,7 +255,33 @@ typedef struct
                                                             authentication.   @range NA */
     const SecOC_SameBufferPduCollectionType*
         SecOCSameBufferPduRef; /**< Used for collecting Pdus that are using the same SecOC buffer. @range NA */
+#if (SECOC_RTE == SECOC_QUERY_FRESHNESS_VALUE)
+    const SecOC_RxPduProcessingRteCallOutType*
+        rteCallOuts; /**< Point to the RTE callout functions for the verification status notification.
+                        @range NA */
+#endif               /* SECOC_RTE == SECOC_QUERY_FRESHNESS_VALUE */
 } SecOC_RxPduProcessingType;
+
+/**
+ * @brief    Define the RTE callout functions for the freshness management.
+ */
+typedef struct
+{
+    Std_ReturnType (*SecOC_FreshnessManagementGetTxFreshnessType)(
+        uint16  freshnessValueId,
+        uint8*  freshnessValue,
+        uint32* freshnessValueLength); /**< Indicate the freshness value that is to be transmitted. @range NA*/
+    Std_ReturnType (*SecOC_FreshnessManagementGetTxFreshnessTruncDataType)(
+        uint16  freshnessValueId,
+        uint8*  freshnessValue,
+        uint32* freshnessValueLength,
+        uint8*  truncatedFreshnessValue,
+        uint32* truncatedFreshnessValueLength); /**< Indicate the freshness value and truncated freshness value that is
+                                                to be transmitted.
+                                                @range NA*/
+    Std_ReturnType (*SecOC_SPduTxConfirmationType)(
+        uint16 freshnessValueId); /**< Indicate the transmission confirmation of the Secured Pdu. @range NA*/
+} SecOC_TxPduProcessingRteCallOutType;
 
 /**
  * @brief    Define the processing information of the Tx Pdu.
@@ -233,7 +289,7 @@ typedef struct
 typedef struct
 {
     uint16 SecOCAuthenticationBuildAttempts; /**< Indicate the number of authentication build attempts. @range 0x00 ~
-                                                0xFFFF */
+                                                 0xFFFF */
     boolean SecOCProvideTxTruncatedFreshnessValue; /**< specifies if the Tx query freshness function provides the
                                                       truncated freshness info instead of generating this by SecOC.
                                                       @range 0x00 ~ 0x01 */
@@ -246,6 +302,10 @@ typedef struct
                                                                        using the same SecOC buffer. @range NA */
     const SecOC_CsmJobType* SecOCTxAuthServiceConfigRef; /**< Indicate which crypto service function is called for
                                                             authentication. @range NA */
+#if (SECOC_RTE == SECOC_QUERY_FRESHNESS_VALUE)
+    const SecOC_TxPduProcessingRteCallOutType*
+        rteCallOuts; /**< Point to the RTE callout functions for the freshness management. @range NA */
+#endif               /* SECOC_RTE == SECOC_QUERY_FRESHNESS_VALUE */
 } SecOC_TxPduProcessingType;
 
 /**
@@ -466,15 +526,23 @@ typedef struct
 /**
  * @brief    Define configuration information at the post-build phase for the SecOC module.
  */
-/* PRQA S 1759 ++ */ /* VL_SecOC_1759 */
 typedef struct
 {
     const SecOC_PbRxPduProcessingType*
-        SecOC_PbRxPduProcessing; /**< Point to the Rx Pdu to be verified by SecOC. @range NA */
+        SecOCPbRxPduProcessing; /**< Point to the Rx Pdu to be verified by SecOC. @range NA */
     const SecOC_PbTxPduProcessingType*
-        SecOC_PbTxPduProcessing; /**< Point to the Rx Pdu to be secured by SecOC. @range NA */
+        SecOCPbTxPduProcessing; /**< Point to the Rx Pdu to be secured by SecOC. @range NA */
 } SecOC_PbConfigType;
-/* PRQA S 1759 -- */
+
+/**
+ * @brief define the SecOC partition configuration.
+ *
+ */
+typedef struct
+{
+    uint16        SecOCNumberofPuds; /**< Number of SecOC Pdus. @range 0x00 ~ 0xFFFF */
+    const uint16* SecOCPdus;         /**< Point to the SecOC Pdu array. @range NA */
+} SecOC_PartitionConfigType;
 
 /* ========================================== internal function definitions ========================================= */
 

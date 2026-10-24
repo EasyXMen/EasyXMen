@@ -27,9 +27,10 @@
 
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
+#if (CRYPTO_SERVICE_RANDOM == STD_ON)
 #if (CRYPTO_ALGORITHMMODE_HMAC == STD_ON)
-#include "Crypto_62_Random.h"
 #include "Crypto_62_Hash.h"
+#include "Crypto_62_Random.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +39,7 @@ extern "C" {
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
-typedef struct
+typedef struct Crypto_hmac_drbg_context_Tag
 {
     Crypto_Md_Context_t md_ctx;
     unsigned char       V[CRYPTO_CONST_64];
@@ -65,11 +66,108 @@ typedef struct
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_HmacDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               HMAC_DRBG random function.
+ *
+ * Param-Name[in]      p_rng: The HMAC_DRBG context.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     output: The buffer to fill.
+ *                     out_len: The length of the buffer in bytes.
+ * Return              int: E_OK: State accepted
+ *                          E_NOT_OK: State not accepted
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, uint32 out_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               This function resets HMAC_DRBG context to the initialized
+ *                     state.
+ *
+ * Param-Name[in]      None
+ * Param-Name[in/out]  None
+ * Param-Name[out]     ctx: The HMAC_DRBG context to free.
+ * Return              None
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_hmac_drbg_free(Crypto_hmac_drbg_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/**
+ * \brief               HMAC_DRBG context initialization.
+ *
+ * This function makes the context ready for Crypto_hmac_drbg_seed(),
+ * Crypto_hmac_drbg_seed_buf() or Crypto_hmac_drbg_free().
+ *
+ * \note                The reseed interval is #Crypto_HMAC_DRBG_RESEED_INTERVAL
+ *                      by default. Override this value by calling
+ *                      Crypto_hmac_drbg_set_reseed_interval().
+ *
+ * \param ctx           HMAC_DRBG context to be initialized.
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto(Crypto_hmac_drbg_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/**
+ * \param ctx           HMAC_DRBG context to be initialised.
+ * \param md_info       MD algorithm to use for HMAC_DRBG.
+ * \param data          Concatenation of the initial entropy string and
+ *                      the additional data.
+ * \param data_len      Length of \p data in bytes.
+ *
+ * \return              \c 0 if successful. or
+ * \return              #MBEDTLS_ERR_MD_BAD_INPUT_DATA if \p md_info is
+ *                      invalid.
+ * \return              #MBEDTLS_ERR_MD_ALLOC_FAILED if there was not enough
+ *                      memory to allocate context data.
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_hmac_drbg_seed_buf(
+    Crypto_hmac_drbg_context* ctx,
+    const Crypto_Md_Info_t*   md_info,
+    const unsigned char*      data,
+    uint32                    data_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               HMAC_DRBG context initialization.
+ *
+ * Param-Name[in]      ctx: HMAC_DRBG context to be initialized.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     None
+ * Return              None
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_hmac_drbg_init(Crypto_hmac_drbg_context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* CRYPTO_ALGORITHMMODE_HMAC == STD_ON */
+#endif /* CRYPTO_SERVICE_RANDOM == STD_ON */
 
 #endif /* CRYPTO_HMACDRBG_H */

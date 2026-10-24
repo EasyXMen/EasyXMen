@@ -154,96 +154,182 @@ typedef enum
 } Dcm_ActiveDiagnosticType;
 /* PRQA S 1271-- */ /* VL_Dcm_1271 */
 /* =========================================== external data declarations =========================================== */
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief current comm State @range NA
  */
 extern Dcm_CommStateType Dcm_CommState[DCM_MAINCONNECTION_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 extern boolean Dcm_RequestRejectedDueToBoot;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 extern boolean Dcm_ResRejectedDueToAFTER_RESET;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is pending setProgramConditions globally  @range 0..1
  */
 extern boolean Dcm_PendingSetProg;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is onging setProgramConditions which is process in Dcm_MainFunction  @range 0..1
  */
 extern boolean Dcm_ProcessingSetProg;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief current active diagnostic status  @range NA
  */
 extern Dcm_ActiveDiagnosticType Dcm_ActiveDiagnostic;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief session control unit  @range NA
  */
 extern Dcm_SessionCtrlType Dcm_SessionCtrl;
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief current security level  @range NA
  */
 extern Dcm_SecLevelType Dcm_CurrentSecurity;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X27) && (STD_ON == DCM_SECURITY_READOUT))
+#define DCM_START_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 /**
  * @brief current security readout timer for initial read  @range 0..0xFFFFFFFF
  */
 extern uint32 Dcm_SecurityReadoutTimer;
+#define DCM_STOP_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X27)
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief security control unit  @range NA
  */
 extern Dcm_SecurityCtrlType Dcm_SecurityCtrl[DCM_SECURITY_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
+#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is pending getAttemptCounter globally  @range 0..1
  */
 extern boolean Dcm_PendingGetAttemptCounter;
+#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is pending setAttemptCounter globally  @range 0..1
  */
 extern boolean Dcm_PendingSetAttemptCounter;
+#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+#include "Dcm_MemMap.h"
 #endif
 #endif
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief protocol control unit  @range NA
  */
 extern Dcm_ProtocolCtrlType Dcm_ProtocolCtrl[DCM_PROTOCOLROW_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief msgContext for storing reqData and resData  @range NA
  */
 extern Dcm_MsgContextType Dcm_MsgContext[DCM_PROTOCOLROW_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief the whole dcm buffer (all TX+RX)  @range 0..255
  */
 extern uint8 Dcm_Buffer[DCM_TOTAL_BUFFER_SIZE];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #if (DCM_METADATA_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief stored metadata  @range NA
  */
 extern uint8 Dcm_MetaData[DCM_METADATA_NUM * DCM_METADATA_SIZE];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief The current request queue index  @range 0..255
  */
 extern uint8 Dcm_QueuedIndex;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief request queue buffer  @range 0..255
  */
 extern uint8 Dcm_RequestQueuedBuffer[2u][DCM_REQUEST_QUEUED_BUFFER_SIZE];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief request queue control unit  @range NA
  */
 extern Dcm_QueuedRequestCtrlType Dcm_QueuedRequestCtrl[2u];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief confirmation info for delayed confirmation callout  @range NA
  */
 extern Dcm_ConfirmationHandleType Dcm_ConfirmationHandle[DCM_PROTOCOLROW_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief pduInfoBuffer for multicore transmission  @range NA
  */
 extern PduInfoType Dcm_TempPduInfo[DCM_PROTOCOLROW_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         initialize the session to default status
  * @return        void
@@ -252,6 +338,10 @@ extern PduInfoType Dcm_TempPduInfo[DCM_PROTOCOLROW_NUM];
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_SessionInit(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         initialize the security to default status
  * @return        void
@@ -260,6 +350,10 @@ void DslInternal_SessionInit(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_SecurityInit(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         initialize the protocolCtrl to initial status
  * @return        void
@@ -268,6 +362,10 @@ void DslInternal_SecurityInit(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_ProtocolInit(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function sets the security level
  * @param[in]     SecurityLevel : The requested sercurity level
@@ -277,6 +375,10 @@ void DslInternal_ProtocolInit(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_SetSecurityLevel(Dcm_SecLevelType SecurityLevel);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function resets to default session
  * @param[in]     Immediate : whether the request is immediately effective
@@ -286,6 +388,10 @@ void DslInternal_SetSecurityLevel(Dcm_SecLevelType SecurityLevel);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_ResetToDefaultSession(boolean Immediate);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function sets the session
  * @param[in]     ProtocolId   : the current protocolId
@@ -298,6 +404,10 @@ void DslInternal_ResetToDefaultSession(boolean Immediate);
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DslInternal_SetSesCtrlType(uint8 ProtocolId, Dcm_SesCtrlType SesCtrlType);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function searches for matched protocol and connection Id by RxPduId
  * @param[in]     Id           : Identification of the I-PDU.
@@ -311,6 +421,10 @@ Std_ReturnType DslInternal_SetSesCtrlType(uint8 ProtocolId, Dcm_SesCtrlType SesC
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DslInternal_FindProtocolRowByRxPduId(PduIdType Id, uint8* ProtocolId, uint16* connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function sets the current diagnosticState and notify ComM
  * @param[in]     ConnectionId    : the current connection id
@@ -321,6 +435,10 @@ Std_ReturnType DslInternal_FindProtocolRowByRxPduId(PduIdType Id, uint8* Protoco
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_SetDiagnosticState(uint16 ConnectionId, Dcm_DiagnosticStateType diagnosticState);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function sets the protocol State to idle
  * @param[in]     protocolId         : the current protocol id
@@ -338,8 +456,12 @@ void DslInternal_SetStateIdle(
     const Dcm_ConfirmationStatusType* confirmationStatus,
     boolean                           immediateHandle,
     boolean                           reachDsp);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function initialize the queued request ctrl status
  * @param[in]     index : the requested index of queued request ctrl
@@ -349,7 +471,11 @@ void DslInternal_SetStateIdle(
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_InitChannelQueuedRequestCtrl(uint8 index);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function stops the target protocol
@@ -362,6 +488,10 @@ void DslInternal_InitChannelQueuedRequestCtrl(uint8 index);
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DslInternal_StopProtocol(uint8 ProtocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function actually sends the data
@@ -372,8 +502,12 @@ Std_ReturnType DslInternal_StopProtocol(uint8 ProtocolId);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_ProcessTransmit(uint8 ProtocolId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function initialize pagedBuffer vars
  * @param[in]     protocolCtrlPtr : the target protocolCtrlPtr
@@ -383,6 +517,8 @@ void DslInternal_ProcessTransmit(uint8 ProtocolId);
  * @trace         CPD-PLACEHOLDE
  */
 void DslInternal_PagedBufferInit(Dcm_ProtocolCtrlType* protocolCtrlPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef __cplusplus

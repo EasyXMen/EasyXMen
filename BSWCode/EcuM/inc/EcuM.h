@@ -47,7 +47,7 @@
     \li VL_EcuM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_2743
       Reason: The macro defines format requirements.
@@ -57,7 +57,7 @@
     \li VL_EcuM_2740
       Reason:Necessary logical design for while(1) and have "break" to stop.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_3469
       Reason: A function should be used in preference to a function-like macro where they are interchangeable.
@@ -77,7 +77,7 @@
     \li VL_EcuM_3218
       Reason: file scoped variables only used in one function are necessary for functional usage
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_2991
       Reason: The control statement has no effect, but is reserved for better readability.
@@ -96,18 +96,18 @@
 
     \li VL_EcuM_FlexibleArray
       Reason:Misidentify flexible array.
-      Risk: No risk.
+      Risk: None.
       Prevention:None.
 
     \li VL_EcuM_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_3408
       Reason:Configuration parameter, design needs.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_ComputeInvalidPtr
       Reason: Use [] on pointer.
@@ -137,74 +137,69 @@
     \li VL_EcuM_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_2877
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_3332
       Reason:The corresponding macro definition has been obtained through the header file inclusion.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_4397
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_EcuM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_EcuM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_EcuM_STECT
       Reason: The total number of variables is related to the user configuration, allowing dynamic
     code to violate this under extreme conditions.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_1253
       Reason: Converted to different integer type.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_1502
-      Reason: The generated global configuration variables are used in the source code according to the configuration.
+      Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_EcuM_1501
-      Reason: Whether a function is used or not depends on the generated macro definition.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_EcuM_1753
-      Reason: The definition of the function is generated in the configuration file, and when a module uses the
-        function, the definition is generated.
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Ensure that the project is working properly through unit testing.
 
+    \li VL_EcuM_1501
+      Reason: The function '${name}' is declared but is not used within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
  */
 #ifndef ECUM_H_
 #define ECUM_H_
-
-/* PRQA S 1501 EOF */ /* VL_EcuM_1501 */
-/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "EcuM_PBcfg.h"
@@ -215,9 +210,9 @@ extern "C" {
 
 /* =============================================== version information ============================================== */
 /** Vendor ID */
-#define ECUM_VENDOR_ID 62u
+#define ECUM_VENDOR_ID   62u
 /** Module ID */
-#define ECUM_MODULE_ID 10u
+#define ECUM_MODULE_ID   10u
 /** Instance ID */
 #define ECUM_INSTANCE_ID 0u
 
@@ -243,19 +238,19 @@ extern "C" {
 /** Service ID for GoDownHaltPoll */
 #define ECUM_SID_GODOWNHALTPOLL 0x2cu
 /** Service ID for Init */
-#define ECUM_SID_INIT 0x01u
+#define ECUM_SID_INIT           0x01u
 /** Service ID for StartupTwo */
-#define ECUM_SID_STARTUPTWO 0x1au
+#define ECUM_SID_STARTUPTWO     0x1au
 /** Service ID for Shutdown */
-#define ECUM_SID_SHUTDOWN 0x02u
+#define ECUM_SID_SHUTDOWN       0x02u
 
 /* State Management */
 /** Service ID for SetState */
-#define ECUM_SID_SETSTATE 0x2bu
+#define ECUM_SID_SETSTATE        0x2bu
 /** Service ID for RequestRun */
-#define ECUM_SID_REQUESTRUN 0x03u
+#define ECUM_SID_REQUESTRUN      0x03u
 /** Service ID for ReleaseRun */
-#define ECUM_SID_RELEASERUN 0x04u
+#define ECUM_SID_RELEASERUN      0x04u
 /** Service ID for RequestPostRun */
 #define ECUM_SID_REQUESTPOST_RUN 0x0au
 /** Service ID for ReleasePostRun */
@@ -263,25 +258,25 @@ extern "C" {
 
 /* Shutdown Management */
 /** Service ID for SelectShutdownTarget */
-#define ECUM_SID_SELECTSHUTDOWNTARGET 0x06u
+#define ECUM_SID_SELECTSHUTDOWNTARGET  0x06u
 /** Service ID for GetShutdownTarget */
-#define ECUM_SID_GETSHUTDOWNTARGET 0x09u
+#define ECUM_SID_GETSHUTDOWNTARGET     0x09u
 /** Service ID for GetLastShutdownTarget */
 #define ECUM_SID_GETLASTSHUTDOWNTARGET 0x08u
 /** Service ID for SelectShutdownCause */
-#define ECUM_SID_SELECTSHUTDOWNCAUSE 0x1bu
+#define ECUM_SID_SELECTSHUTDOWNCAUSE   0x1bu
 /** Service ID for GetShutdownCause */
-#define ECUM_SID_GETSHUTDOWNCAUSE 0x1cu
+#define ECUM_SID_GETSHUTDOWNCAUSE      0x1cu
 
 /* Wakeup Handling */
 /** Service ID for GetPendingWakeupEvent */
-#define ECUM_SID_GETPENDINGWAKEUPEVENT 0x0du
+#define ECUM_SID_GETPENDINGWAKEUPEVENT   0x0du
 /** Service ID for ClearWakeupEvent */
-#define ECUM_SID_CLEARWAKEUPEVENT 0x16u
+#define ECUM_SID_CLEARWAKEUPEVENT        0x16u
 /** Service ID for GetValidatedWakeupEvent */
 #define ECUM_SID_GETVALIDATEDWAKEUPEVENT 0x15u
 /** Service ID for GetExpiredWakeupEvent */
-#define ECUM_SID_GETEXPIREDWAKEUPEVENT 0x19u
+#define ECUM_SID_GETEXPIREDWAKEUPEVENT   0x19u
 
 /* Alarm Clock */
 /** Service ID for SetRelWakeupAlarm */
@@ -289,25 +284,25 @@ extern "C" {
 /** Service ID for SetAbsWakeupAlarm */
 #define ECUM_SID_SETABSWAKEUPALARM 0x23u
 /** Service ID for AbortWakeupAlarm */
-#define ECUM_SID_ABORTWAKEUPALARM 0x24u
+#define ECUM_SID_ABORTWAKEUPALARM  0x24u
 /** Service ID for GetCurrentTime */
-#define ECUM_SID_GETCURRENTTIME 0x25u
+#define ECUM_SID_GETCURRENTTIME    0x25u
 /** Service ID for GetWakeupTime */
-#define ECUM_SID_GETWAKEUPTIME 0x26u
+#define ECUM_SID_GETWAKEUPTIME     0x26u
 /** Service ID for SetClock */
-#define ECUM_SID_SETCLOCK 0x27u
+#define ECUM_SID_SETCLOCK          0x27u
 
 /* Miscellaneous */
 /** Service ID for SelectBootTarget */
 #define ECUM_SID_SELECTBOOTTARGET 0x12u
 /** Service ID for GetBootTarget */
-#define ECUM_SID_GETBOOTTARGET 0x13u
+#define ECUM_SID_GETBOOTTARGET    0x13u
 
 /*Callbacks from Wakeup Sources*/
 /** Service ID for SetWakeupEvent */
-#define ECUM_SID_SETWAKEUPEVENT 0x0cu
+#define ECUM_SID_SETWAKEUPEVENT      0x0cu
 /** Service ID for CheckWakeup */
-#define ECUM_SID_CHECKWAKEUP 0x42u
+#define ECUM_SID_CHECKWAKEUP         0x42u
 /** Service ID for ValidateWakeupEvent */
 #define ECUM_SID_VALIDATEWAKEUPEVENT 0x14u
 
@@ -324,11 +319,11 @@ typedef uint8 EcuM_RunStatusType;
  * @brief Result of the Run Request Protocol sent to BswM.
  */
 /** Run Status Unknown */
-#define ECUM_RUNSTATUS_UNKNOWN (EcuM_RunStatusType)0u
+#define ECUM_RUNSTATUS_UNKNOWN   (EcuM_RunStatusType)0u
 /** Run Status Requested */
 #define ECUM_RUNSTATUS_REQUESTED (EcuM_RunStatusType)1u
 /** Run Status Released */
-#define ECUM_RUNSTATUS_RELEASED (EcuM_RunStatusType)2u
+#define ECUM_RUNSTATUS_RELEASED  (EcuM_RunStatusType)2u
 /** @} */
 
 /*The bit field provides one bit for each wake up source.
@@ -344,15 +339,15 @@ typedef uint32 EcuM_WakeupSourceType;
  * @brief The bit field provides one bit for each wake up source.
  */
 /** Wakeup Source Power */
-#define ECUM_WKSOURCE_POWER (EcuM_WakeupSourceType)0x00000001uL
+#define ECUM_WKSOURCE_POWER          (EcuM_WakeupSourceType)0x00000001uL
 /** Wakeup Source Reset */
-#define ECUM_WKSOURCE_RESET (EcuM_WakeupSourceType)0x00000002uL
+#define ECUM_WKSOURCE_RESET          (EcuM_WakeupSourceType)0x00000002uL
 /** Wakeup Source Internal Reset */
 #define ECUM_WKSOURCE_INTERNAL_RESET (EcuM_WakeupSourceType)0x00000004uL
 /** Wakeup Source Internal WDG */
-#define ECUM_WKSOURCE_INTERNAL_WDG (EcuM_WakeupSourceType)0x00000008uL
+#define ECUM_WKSOURCE_INTERNAL_WDG   (EcuM_WakeupSourceType)0x00000008uL
 /** Wakeup Source External WDG */
-#define ECUM_WKSOURCE_EXTERNAL_WDG (EcuM_WakeupSourceType)0x00000010uL
+#define ECUM_WKSOURCE_EXTERNAL_WDG   (EcuM_WakeupSourceType)0x00000010uL
 /** @} */
 
 /*The type describes the possible states of a wakeup source.*/
@@ -363,15 +358,15 @@ typedef uint8 EcuM_WakeupStatusType;
  * @brief The type describes the possible states of a wakeup source.
  */
 /** Wakeup Status None */
-#define ECUM_WKSTATUS_NONE (EcuM_WakeupStatusType)0u
+#define ECUM_WKSTATUS_NONE      (EcuM_WakeupStatusType)0u
 /** Wakeup Status Pending */
-#define ECUM_WKSTATUS_PENDING (EcuM_WakeupStatusType)1u
+#define ECUM_WKSTATUS_PENDING   (EcuM_WakeupStatusType)1u
 /** Wakeup Status Validated */
 #define ECUM_WKSTATUS_VALIDATED (EcuM_WakeupStatusType)2u
 /** Wakeup Status Expired */
-#define ECUM_WKSTATUS_EXPIRED (EcuM_WakeupStatusType)3u
+#define ECUM_WKSTATUS_EXPIRED   (EcuM_WakeupStatusType)3u
 /** Wakeup Status Enabled */
-#define ECUM_WKSTATUS_ENABLED (EcuM_WakeupStatusType)6u
+#define ECUM_WKSTATUS_ENABLED   (EcuM_WakeupStatusType)6u
 /** @} */
 
 /*This type describes the reset mechanisms supported by the ECU State Manager.
@@ -388,7 +383,7 @@ typedef uint8 EcuM_ResetType;
 /** Reset Type WDG */
 #define ECUM_RESET_WDG (EcuM_ResetType)1u
 /** Reset Type IO */
-#define ECUM_RESET_IO (EcuM_ResetType)2u
+#define ECUM_RESET_IO  (EcuM_ResetType)2u
 /** @} */
 
 /*Encode states and sub-states of the ECU Manager module.
@@ -401,19 +396,19 @@ typedef uint8 EcuM_StateType;
  * @brief Encode states and sub-states of the ECU Manager module.
  */
 /** Substate Mask */
-#define ECUM_SUBSTATE_MASK (EcuM_StateType)0x0fu
+#define ECUM_SUBSTATE_MASK      (EcuM_StateType)0x0fu
 /** State Startup */
-#define ECUM_STATE_STARTUP (EcuM_StateType)0x10u
+#define ECUM_STATE_STARTUP      (EcuM_StateType)0x10u
 /** State Run */
-#define ECUM_STATE_RUN (EcuM_StateType)0x30u
+#define ECUM_STATE_RUN          (EcuM_StateType)0x30u
 /** State App Run */
-#define ECUM_STATE_APP_RUN (EcuM_StateType)0x32u
+#define ECUM_STATE_APP_RUN      (EcuM_StateType)0x32u
 /** State App Post Run */
 #define ECUM_STATE_APP_POST_RUN (EcuM_StateType)0x33u
 /** State Shutdown */
-#define ECUM_STATE_SHUTDOWN (EcuM_StateType)0x40u
+#define ECUM_STATE_SHUTDOWN     (EcuM_StateType)0x40u
 /** State Sleep */
-#define ECUM_STATE_SLEEP (EcuM_StateType)0x50u
+#define ECUM_STATE_SLEEP        (EcuM_StateType)0x50u
 /** @} */
 
 /**
@@ -433,7 +428,11 @@ typedef EcuM_PBConfigType EcuM_ConfigType;
 
 /* =========================================== external data declarations =========================================== */
 /* Configuration Consistency Hash */
+#define ECUM_START_SEC_CONST_32
+#include "EcuM_MemMap.h"
 extern const uint32 EcuM_ConfigConsistencyHash;
+#define ECUM_STOP_SEC_CONST_32
+#include "EcuM_MemMap.h"
 /* ========================================= external function declarations ========================================= */
 #if (ECUM_VERSION_INFO_API == STD_ON)
 /**
@@ -444,7 +443,11 @@ extern const uint32 EcuM_ConfigConsistencyHash;
  * @synchronous TRUE
  * @trace       CPD-64728
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_VERSION_INFO_API == STD_ON*/
 
 /**
@@ -459,7 +462,11 @@ void EcuM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous TRUE
  * @trace       CPD-64730
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_GoDownHaltPoll(EcuM_UserType UserID);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Initializes the ECU state manager and carries out the startup procedure.
@@ -469,7 +476,11 @@ Std_ReturnType EcuM_GoDownHaltPoll(EcuM_UserType UserID);
  * @synchronous TRUE
  * @trace       CPD-64748
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_Init(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Implements the STARTUP II state.
@@ -478,7 +489,11 @@ void EcuM_Init(void);
  * @synchronous TRUE
  * @trace       CPD-64769
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_StartupTwo(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Typically called from the shutdown hook, this function takes over execution
@@ -488,7 +503,11 @@ void EcuM_StartupTwo(void);
  * @synchronous TRUE
  * @trace       CPD-64767
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_Shutdown(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Function called by BswM to notify about a state switch.
@@ -498,7 +517,11 @@ void EcuM_Shutdown(void);
  * @synchronous TRUE
  * @trace       CPD-64766
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_SetState(EcuM_StateType state);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (STD_ON == ECUM_MODE_HANDING)
 /**
@@ -513,7 +536,11 @@ void EcuM_SetState(EcuM_StateType state);
  * @synchronous TRUE
  * @trace       CPD-64756
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_RequestRUN(EcuM_UserType user);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Releases a RUN request previously done with a call to EcuM_RequestRUN.
@@ -527,7 +554,11 @@ Std_ReturnType EcuM_RequestRUN(EcuM_UserType user);
  * @synchronous TRUE
  * @trace       CPD-64754
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_ReleaseRUN(EcuM_UserType user);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Places a request for the POST RUN state. Requests can be placed by every user
@@ -543,7 +574,11 @@ Std_ReturnType EcuM_ReleaseRUN(EcuM_UserType user);
  * @synchronous TRUE
  * @trace       CPD-64755
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_RequestPOST_RUN(EcuM_UserType user);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Releases a POST RUN request previously done with a call to EcuM_RequestPOST_RUN.
@@ -557,7 +592,11 @@ Std_ReturnType EcuM_RequestPOST_RUN(EcuM_UserType user);
  * @synchronous TRUE
  * @trace       CPD-64753
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_ReleasePOST_RUN(EcuM_UserType user);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*STD_ON == ECUM_MODE_HANDING*/
 
 /**
@@ -572,7 +611,11 @@ Std_ReturnType EcuM_ReleasePOST_RUN(EcuM_UserType user);
  * @synchronous TRUE
  * @trace       CPD-64759
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget, EcuM_ShutdownModeType shutdownMode);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Returns the currently selected shutdown target as set by EcuM_SelectShutdownTarget.
@@ -590,7 +633,11 @@ Std_ReturnType EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget,
  * @synchronous TRUE
  * @trace       CPD-64726
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_GetShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, EcuM_ShutdownModeType* shutdownMode);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Returns the shutdown target of the previous shutdown process.
@@ -608,7 +655,11 @@ Std_ReturnType EcuM_GetShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, E
  * @synchronous TRUE
  * @trace       CPD-64723
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, EcuM_ShutdownModeType* shutdownMode);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Elects the cause for a shutdown. This function is part of the ECU Manager Module port interface.
@@ -620,7 +671,11 @@ Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarge
  * @synchronous TRUE
  * @trace       CPD-64758
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_SelectShutdownCause(EcuM_ShutdownCauseType cause);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Returns the selected shutdown cause as set by EcuM_SelectShutdownCause.
@@ -633,7 +688,11 @@ Std_ReturnType EcuM_SelectShutdownCause(EcuM_ShutdownCauseType cause);
  * @synchronous TRUE
  * @trace       CPD-64725
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Gets pending wakeup events.
@@ -642,7 +701,11 @@ Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause);
  * @synchronous TRUE
  * @trace       CPD-64724
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 EcuM_WakeupSourceType EcuM_GetPendingWakeupEvents(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Clears wakeup events.
@@ -652,7 +715,11 @@ EcuM_WakeupSourceType EcuM_GetPendingWakeupEvents(void);
  * @synchronous TRUE
  * @trace       CPD-64419
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_ClearWakeupEvent(EcuM_WakeupSourceType sources);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Gets validated wakeup events.
@@ -661,7 +728,11 @@ void EcuM_ClearWakeupEvent(EcuM_WakeupSourceType sources);
  * @synchronous TRUE
  * @trace       CPD-64727
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 EcuM_WakeupSourceType EcuM_GetValidatedWakeupEvents(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Gets expired wakeup events.
@@ -671,87 +742,13 @@ EcuM_WakeupSourceType EcuM_GetValidatedWakeupEvents(void);
  * @synchronous TRUE
  * @trace       CPD-64722
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 EcuM_WakeupSourceType EcuM_GetExpiredWakeupEvents(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
-/* PRQA S 4604 ++ */ /* VL_EcuM_4604 */
-/**
- * @brief       Sets a user's wakeup alarm relative to the current point in time.
- *              This function is part of the ECU Manager Module port interface.
- * @param[in]   user : The user that wants to set the wakeup alarm.
- * @param[in]   time : Relative time from now in seconds.
- * @return      Std_ReturnType: Status of the request.
- * @retval      E_OK: The service has succeeded.
- * @retval      E_NOT_OK: The service failed.
- * @retval      ECUM_E_EARLIER_ACTIVE: An earlier alarm is already set.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-64763
- */
-Std_ReturnType EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_TimeType time);
-/* PRQA S 4604 -- */
-
-/* PRQA S 4604 ++ */ /* VL_EcuM_4604 */
-/**
- * @brief       Sets the user's wakeup alarm to an absolute point in time.
- *              This function is part of the ECU Manager Module port interface.
- * @param[in]   user : The user that wants to set the wakeup alarm.
- * @param[in]   time : Absolute time in seconds. Note that absolute alarms use knowledge of the current time.
- * @return      Std_ReturnType: Status of the request.
- * @retval      E_OK: The service has succeeded.
- * @retval      E_NOT_OK: The service failed.
- * @retval      ECUM_E_EARLIER_ACTIVE: An earlier alarm is already set.
- * @retval      ECUM_E_PAST: The given point in time has already passed.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-64761
- */
-Std_ReturnType EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_TimeType time);
-/* PRQA S 4604 -- */
-
-/**
- * @brief       Aborts the wakeup alarm previously set by this user.
- *              This function is part of the ECU Manager Module port interface.
- * @param[in]   user : The user that wants to cancel the wakeup alarm.
- * @return      Std_ReturnType: Status of the request.
- * @retval      E_OK: The service has succeeded.
- * @retval      E_NOT_OK: The service failed.
- * @retval      ECUM_E_NOT_ACTIVE: No owned alarm found.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-64416
- */
-Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user);
-
-/* PRQA S 3432,4604 ++ */ /* VL_EcuM_3432, VL_EcuM_4604 */
-/**
- * @brief       Returns the current value of the EcuM clock (i.e., the time since battery connect).
- *              This function is part of the ECU Manager Module port interface.
- * @param[out]  time : Absolute time in seconds since battery connect.
- * @return      Std_ReturnType: Status of the request.
- * @retval      E_OK: The service has succeeded.
- * @retval      E_NOT_OK: `time` points to NULL or the module is not initialized.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-64721
- */
-Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time);
-/* PRQA S 3432,4604 -- */
-
-/* PRQA S 3432,4604 ++ */ /* VL_EcuM_3432, VL_EcuM_4604 */
-/**
- * @brief       Returns the current value of the master alarm clock (the minimum absolute time of all user alarm
- * clocks). This function is part of the ECU Manager Module port interface.
- * @param[out]  time : Absolute time in seconds for the next wakeup. 0xFFFFFFFF means no active alarm.
- * @return      Std_ReturnType: Status of the request.
- * @retval      E_OK: The service has succeeded.
- * @retval      E_NOT_OK: `time` points to NULL or the module is not initialized.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-64729
- */
-Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time);
-/* PRQA S 3432,4604 -- */
-
+#if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
 /* PRQA S 4604 ++ */ /* VL_EcuM_4604 */
 /**
  * @brief       Sets the EcuM clock time to the provided value. This API is useful for testing the alarm services;
@@ -766,8 +763,108 @@ Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time);
  * @synchronous TRUE
  * @trace       CPD-64762
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+/**
+ * @brief       Sets a user's wakeup alarm relative to the current point in time.
+ *              This function is part of the ECU Manager Module port interface.
+ * @param[in]   user : The user that wants to set the wakeup alarm.
+ * @param[in]   time : Relative time from now in seconds.
+ * @return      Std_ReturnType: Status of the request.
+ * @retval      E_OK: The service has succeeded.
+ * @retval      E_NOT_OK: The service failed.
+ * @retval      ECUM_E_EARLIER_ACTIVE: An earlier alarm is already set.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-64763
+ */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
+Std_ReturnType EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_TimeType time);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+/**
+ * @brief       Sets the user's wakeup alarm to an absolute point in time.
+ *              This function is part of the ECU Manager Module port interface.
+ * @param[in]   user : The user that wants to set the wakeup alarm.
+ * @param[in]   time : Absolute time in seconds. Note that absolute alarms use knowledge of the current time.
+ * @return      Std_ReturnType: Status of the request.
+ * @retval      E_OK: The service has succeeded.
+ * @retval      E_NOT_OK: The service failed.
+ * @retval      ECUM_E_EARLIER_ACTIVE: An earlier alarm is already set.
+ * @retval      ECUM_E_PAST: The given point in time has already passed.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-64761
+ */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
+Std_ReturnType EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_TimeType time);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 4604 -- */
+
+/**
+ * @brief       Aborts the wakeup alarm previously set by this user.
+ *              This function is part of the ECU Manager Module port interface.
+ * @param[in]   user : The user that wants to cancel the wakeup alarm.
+ * @return      Std_ReturnType: Status of the request.
+ * @retval      E_OK: The service has succeeded.
+ * @retval      E_NOT_OK: The service failed.
+ * @retval      ECUM_E_NOT_ACTIVE: No owned alarm found.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-64416
+ */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
+Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+/* PRQA S 3432,4604 ++ */ /* VL_EcuM_3432, VL_EcuM_4604 */
+/**
+ * @brief       Returns the current value of the EcuM clock (i.e., the time since battery connect).
+ *              This function is part of the ECU Manager Module port interface.
+ * @param[out]  time : Absolute time in seconds since battery connect.
+ * @return      Std_ReturnType: Status of the request.
+ * @retval      E_OK: The service has succeeded.
+ * @retval      E_NOT_OK: `time` points to NULL or the module is not initialized.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-64721
+ */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
+Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+/* PRQA S 3432,4604 -- */
+
+/* PRQA S 3432,4604 ++ */ /* VL_EcuM_3432, VL_EcuM_4604 */
+/**
+ * @brief       Returns the current value of the master alarm clock (the minimum absolute time of all user alarm
+ * clocks). This function is part of the ECU Manager Module port interface.
+ * @param[out]  time : Absolute time in seconds for the next wakeup. 0xFFFFFFFF means no active alarm.
+ * @return      Std_ReturnType: Status of the request.
+ * @retval      E_OK: The service has succeeded.
+ * @retval      E_NOT_OK: `time` points to NULL or the module is not initialized.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-64729
+ */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
+Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+/* PRQA S 3432,4604 -- */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
 /**
  * @brief       Selects a boot target.
@@ -780,7 +877,11 @@ Std_ReturnType EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time);
  * @synchronous TRUE
  * @trace       CPD-64757
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Returns the current boot target.
@@ -792,7 +893,11 @@ Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target);
  * @synchronous TRUE
  * @trace       CPD-64420
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 Std_ReturnType EcuM_GetBootTarget(EcuM_BootTargetType* target);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Sets the wakeup event.
@@ -807,7 +912,11 @@ Std_ReturnType EcuM_GetBootTarget(EcuM_BootTargetType* target);
  * @synchronous TRUE
  * @trace       CPD-68940
  */
+#define ECUM_START_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 void EcuM_SetWakeupEvent(EcuM_WakeupSourceType sources);
+#define ECUM_STOP_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       After wakeup, the ECU State Manager will stop the process during the WAKEUP VALIDATION state/sequence to
@@ -819,7 +928,11 @@ void EcuM_SetWakeupEvent(EcuM_WakeupSourceType sources);
  * @synchronous TRUE
  * @trace       CPD-68941
  */
+#define ECUM_START_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 void EcuM_ValidateWakeupEvent(EcuM_WakeupSourceType sources);
+#define ECUM_STOP_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This function can be called to check the given wakeup sources. It will pass the argument to the
@@ -831,7 +944,11 @@ void EcuM_ValidateWakeupEvent(EcuM_WakeupSourceType sources);
  * @synchronous TRUE
  * @trace       CPD-68942
  */
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (STD_ON == ECUM_DRIVER_INIT_LIST_BSWMS)
 /**
@@ -842,7 +959,11 @@ void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68943
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_DriverInitBswM(uint8 drvInitIdx);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 #endif
 
 #ifdef __cplusplus

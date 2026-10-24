@@ -77,9 +77,21 @@ enum icmp_te_type {
 
 #if LWIP_IPV4 && LWIP_ICMP /* don't build if not configured for use in lwipopts.h */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void icmp_input(struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_IPV4 && LWIP_ICMP */
 

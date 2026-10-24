@@ -39,7 +39,11 @@
  * @synchronous   TRUE
  * @trace         CPD-66519
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_EndianSwap(void* dataPtr, uint8 size); /* PRQA S 5015 */ /* VL_Com_UntrustedMethod */
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         unpack all byte value(group signal/signal cover),is called by Com_SignalUnPackHandle
  * @param[in]     SigLsbBytePos: Signal LSB byte position
@@ -53,11 +57,15 @@ COM_LOCAL void Com_EndianSwap(void* dataPtr, uint8 size); /* PRQA S 5015 */ /* V
  */
 #if (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     || ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_SignalUnPackDataHandle(
     Com_SignalPositionType   SigLsbBytePos,
     uint8                    SignalByteLength,
     const uint8*             IPduBufferPtr,
     Com_SignalEndiannessType SignalEndianness);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /* ============================================ internal data definitions =========================================== */
 
@@ -102,14 +110,14 @@ uint16 Com_RxSignalGroupTimeOutCnt[COM_MAX_RXSIGGRP_TIMEOUT_NUMBER];
 #include "Com_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /* PRQA S 2895 ++ */ /* VL_Com_NegtiveValueType */
 /**
  * @brief get partitionId from partitioIdList
  *
  */
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 uint16 Com_PartitonIdFromList(ApplicationType osApplicationId)
 /* PRQA S 1532 --*/
@@ -125,12 +133,16 @@ uint16 Com_PartitonIdFromList(ApplicationType osApplicationId)
     }
     return partitionId;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief  Init Runtime TMC of all tx signals and tx group siganls
  *         and GW dest signals,which the comfilter is not NULL
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 void Com_TxSignalTMCStateInit(Com_MainFunctionIdType TxMainfunctionId)
 /* PRQA S 1532 -- */
@@ -145,12 +157,16 @@ void Com_TxSignalTMCStateInit(Com_MainFunctionIdType TxMainfunctionId)
 #endif
     COM_NOUSED(TxMainfunctionId);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief set all tx signal group state to not need to trigger transmit
  *
  */
 #if (0u < COM_MAX_TXSIGNALGROUP_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 void Com_TxSignalGroupTriggerFlagInit(void)
 /* PRQA S 1532 -- */
@@ -161,6 +177,8 @@ void Com_TxSignalGroupTriggerFlagInit(void)
         Com_TxSignalGroupState[cirCnt].TxSigGrpRTStFlag &= COM_NTIMESTRANSMITNEED_DIS;
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -168,6 +186,8 @@ void Com_TxSignalGroupTriggerFlagInit(void)
  *
  */
 #if ((0u < COM_MAX_IPDUGROUP_NUMBER) || (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_InitSignalBuffer(
     Com_SignalType SignalType,
     uint16         SignalInitValueId,
@@ -246,6 +266,8 @@ void Com_InitSignalBuffer(
     COM_NOUSED(SignalInitValueId);
     COM_NOUSED(ComSignalLength);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief unpack all byte value(group signal/signal cover,except MSB byte).
@@ -253,6 +275,8 @@ void Com_InitSignalBuffer(
  */
 #if (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     || ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint64 Com_SignalUnPackHandle(
 #if (STD_ON == COM_SIGNAL_SIGNED_TYPE_ENABLE)
     Com_SignalType SignalType,
@@ -339,10 +363,10 @@ uint64 Com_SignalUnPackHandle(
         if (signalByteLength == 9u)
         {
             /* Handle MSB byte, MSB Byte is byte 0(BigEndian) or byte 8(LittleEndian) */
-            uint8 msbByteBitSize = (uint8)(lsbPosInByte + (bitSize & 0x07u));
+            uint8 msbByteBitSize = (uint8)((lsbPosInByte + bitSize) & 0x07u);
             SchM_Enter_Com_Context();
-            uint64 msbByteValue =
-                (COM_BIG_ENDIAN == signalEndianness) ? IPduBufferPtr[sigLsbBytePos - 8u] : IPduBufferPtr[sigLsbBytePos];
+            uint64 msbByteValue = (COM_BIG_ENDIAN == signalEndianness) ? IPduBufferPtr[sigLsbBytePos - 8u]
+                                                                       : IPduBufferPtr[sigLsbBytePos + 8u];
             SchM_Exit_Com_Context();
             signalValue |= (msbByteValue << (bitSize - msbByteBitSize));
             /* PRQA S 2986 */ /* VL_Com_OperationRedundant */
@@ -363,6 +387,8 @@ uint64 Com_SignalUnPackHandle(
 
     return signalValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -372,6 +398,8 @@ uint64 Com_SignalUnPackHandle(
  *
  */
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) || (0u < COM_MAX_TXSIGNAL_NUMBER) || (0u < COM_MAX_GWMAPPING_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_TxSignalPackHandle(
     Com_SignalConfigType SignalConfigType,
     const void*          TxSignalPtr,
@@ -393,6 +421,7 @@ void Com_TxSignalPackHandle(
     uint8                    signalByteLength = COM_UNUSED_UINT8;
     uint8                    bitSize          = COM_UNUSED_UINT8;
     Com_SignalEndiannessType signalEndianness = COM_ENDIAN_NONE;
+    boolean                  isTrue           = FALSE;
 
     switch (SignalConfigType)
     {
@@ -404,6 +433,7 @@ void Com_TxSignalPackHandle(
         bitSize          = txSignalPtr->ComBitSize;
         signalByteLength = txSignalPtr->ComSignalByteLength;
         signalEndianness = txSignalPtr->ComSignalEndianness;
+        isTrue           = TRUE;
         break;
 #endif
 #if ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))
@@ -414,6 +444,7 @@ void Com_TxSignalPackHandle(
         bitSize          = txGroupSignalPtr->ComBitSize;
         signalByteLength = txGroupSignalPtr->ComSignalByteLength;
         signalEndianness = txGroupSignalPtr->ComSignalEndianness;
+        isTrue           = TRUE;
         break;
 #endif
 #if (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)
@@ -424,6 +455,7 @@ void Com_TxSignalPackHandle(
         bitSize          = gwDestSignalPtr->ComBitSize;
         signalByteLength = gwDestSignalPtr->ComSignalByteLength;
         signalEndianness = gwDestSignalPtr->ComSignalEndianness;
+        isTrue           = TRUE;
         break;
 #endif
     default:
@@ -431,85 +463,94 @@ void Com_TxSignalPackHandle(
         break;
     }
 
-    uint64 signalValue = TxValue << lsbPosInByte; /* PRQA S 2792 */ /* VL_Com_ShiftOperation */
-#if (TRUE == CPU_32_WITH_16_ADR)
-    uint8 bufPtr[8u] = {0u};
-    for (uint8 i = 0u; i < tSignalByteLength; ++i)
+    if (isTrue)
     {
-        bufPtr[i]   = (uint8)(signalValue & COM_UNUSED_UINT8);
-        signalValue = signalValue >> 8u;
-    }
+        uint64 signalValue = TxValue << lsbPosInByte; /* PRQA S 2792 */ /* VL_Com_ShiftOperation */
+#if (TRUE == CPU_32_WITH_16_ADR)
+        uint8 bufPtr[8u] = {0u};
+        for (uint8 i = 0u; i < tSignalByteLength; ++i)
+        {
+            bufPtr[i]   = (uint8)(signalValue & COM_UNUSED_UINT8);
+            signalValue = signalValue >> 8u;
+        }
 #elif (FALSE == CPU_32_WITH_16_ADR)
-    uint8* bufPtr = (uint8*)&signalValue;
+        uint8* bufPtr = (uint8*)&signalValue;
 #endif
-    /* PRQA S 2907 ++ */ /* VL_Com_NegtiveValueType */
-    uint16 sigMsbBytePosBE   = 1u + (uint16)sigLsbBytePos - (uint16)signalByteLength;
-    uint16 sigMsbBytePosOt   = (uint16)((uint16)sigLsbBytePos + (uint16)signalByteLength - 1u);
-    uint16 sigMsbBytePos     = (COM_BIG_ENDIAN == signalEndianness) ? sigMsbBytePosBE : sigMsbBytePosOt;
-    uint8  tSignalByteLength = (signalByteLength < 9u) ? signalByteLength : 8u;
+        /* PRQA S 2907 ++ */ /* VL_Com_NegtiveValueType */
+        uint16 sigMsbBytePosBE   = 1u + (uint16)sigLsbBytePos - (uint16)signalByteLength;
+        uint16 sigMsbBytePosOt   = (uint16)((uint16)sigLsbBytePos + (uint16)signalByteLength - 1u);
+        uint16 sigMsbBytePos     = (COM_BIG_ENDIAN == signalEndianness) ? sigMsbBytePosBE : sigMsbBytePosOt;
+        uint8  tSignalByteLength = (signalByteLength < 9u) ? signalByteLength : 8u;
 
-    /* LSB Byte */
-    /* PRQA S 2792 ++ */ /* VL_Com_ShiftOperation */
+        /* LSB Byte */
+        SchM_Enter_Com_Context();
+        /* PRQA S 2792 ++ */ /* VL_Com_ShiftOperation */
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
-    bufPtr[0u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
+        bufPtr[0u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
 #else
-    bufPtr[7u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
+        bufPtr[7u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
 #endif
-    /* PRQA S 2792 -- */
-    /* MSB Byte*/
-    uint8 msbByteBitSize = (uint8)((lsbPosInByte + bitSize) & 0x07u);
-    if (0u != msbByteBitSize)
-    {
-        /* PRQA S 2921,2906 ++ */ /* VL_Com_ShiftOperation */
-        uint8 msbByteHighBitMask = (uint8)(COM_UNUSED_UINT8 << msbByteBitSize);
-        /* PRQA S 2921,2906 -- */
-        /* SignalByteLength range 1..9 */
-        if (signalByteLength < 9u)
+        /* PRQA S 2792 -- */
+        /* MSB Byte*/
+        uint8 msbByteBitSize = (uint8)((lsbPosInByte + bitSize) & 0x07u);
+        if (0u != msbByteBitSize)
         {
+            /* PRQA S 2921,2906 ++ */ /* VL_Com_ShiftOperation */
+            uint8 msbByteHighBitMask = (uint8)(COM_UNUSED_UINT8 << msbByteBitSize);
+            /* PRQA S 2921,2906 -- */
+            /* SignalByteLength range 1..9 */
+            if (signalByteLength < 9u)
+            {
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
-            bufPtr[signalByteLength - 1u] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
+                bufPtr[signalByteLength - 1u] &= (uint8)(~msbByteHighBitMask);
+                bufPtr[signalByteLength - 1u] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
 #else
-            bufPtr[8 - signalByteLength] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
+                bufPtr[8u - signalByteLength] &= (uint8)(~msbByteHighBitMask);
+                bufPtr[8u - signalByteLength] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
 #endif
+            }
+            else
+            {
+                /* PRQA S 2792 ++ */ /* VL_Com_ShiftOperation */
+                uint8 msbByteValue = (uint8)(TxValue >> (bitSize - msbByteBitSize));
+                /* PRQA S 2792 -- */
+                msbByteValue &= (uint8)(~msbByteHighBitMask);
+                IPduBufferPtr[sigMsbBytePos] =
+                    (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask) | (uint8)msbByteValue;
+            }
         }
-        else
-        {
-            /* PRQA S 2792 ++ */ /* VL_Com_ShiftOperation */
-            uint8 msbByteValue = (uint8)(TxValue >> (bitSize - msbByteBitSize));
-            /* PRQA S 2792 -- */
-            IPduBufferPtr[sigMsbBytePos] = (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask) | (uint8)msbByteValue;
-        }
-    }
-    uint16 srcStartIdx = 0u;
+        uint16 srcStartIdx = 0u;
 #if (TRUE == CPU_32_WITH_16_ADR)
-    if (COM_BIG_ENDIAN == signalEndianness)
-    {
-        Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
-    }
+        if (COM_BIG_ENDIAN == signalEndianness)
+        {
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
+        }
 #elif (FALSE == CPU_32_WITH_16_ADR)
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
-    if (COM_BIG_ENDIAN == signalEndianness)
-    {
-        Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
-    }
+        if (COM_BIG_ENDIAN == signalEndianness)
+        {
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
+        }
 #else
-    srcStartIdx = 8u - tSignalByteLength;
-    if (COM_LITTLE_ENDIAN == signalEndianness)
-    {
-        Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
-    }
+        srcStartIdx = 8u - tSignalByteLength;
+        if (COM_LITTLE_ENDIAN == signalEndianness)
+        {
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
+        }
 #endif
 #endif
-    uint16 destStartIdx = (COM_BIG_ENDIAN == signalEndianness)
-                              ? ((uint16)1u + (uint16)sigLsbBytePos - (uint16)tSignalByteLength)
-                              : (uint16)sigLsbBytePos;
-    /* PRQA S 2907 -- */
+        uint16 destStartIdx = (COM_BIG_ENDIAN == signalEndianness)
+                                  ? ((uint16)1u + (uint16)sigLsbBytePos - (uint16)tSignalByteLength)
+                                  : (uint16)sigLsbBytePos;
+        /* PRQA S 2907 -- */
 
-    SchM_Enter_Com_Context();
-    (void)IStdLib_MemCpy(&IPduBufferPtr[destStartIdx], &bufPtr[srcStartIdx], tSignalByteLength);
-    SchM_Exit_Com_Context();
+        (void)IStdLib_MemCpy(&IPduBufferPtr[destStartIdx], &bufPtr[srcStartIdx], tSignalByteLength);
+        SchM_Exit_Com_Context();
+    }
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -520,6 +561,8 @@ void Com_TxSignalPackHandle(
  */
 #if (COM_MAX_TXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISOUTSIDE_NUMBER > 0u) \
     || (COM_MAX_TXNEWISOUTSIDE_NUMBER > 0U)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1505 ++ */ /* VL_Com_1505 */
 boolean Com_NewIsWInWOtFilterCalculate(
     Com_SignalType    SignalType,
@@ -572,6 +615,8 @@ boolean Com_NewIsWInWOtFilterCalculate(
 
     return IsWith == Within; /* PRQA S 2109 */ /* VL_Com_BoolPromoted */
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
@@ -580,6 +625,8 @@ boolean Com_NewIsWInWOtFilterCalculate(
  *        calculate dest signal/group signal/description signal TMC
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 boolean Com_DestSignalTMCCalculate(
     Com_SignalType          SignalType,
@@ -664,6 +711,8 @@ boolean Com_DestSignalTMCCalculate(
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Called by Com_TxSignalTMHandle,Com_TxIpduTMSHandle.
@@ -674,6 +723,8 @@ boolean Com_DestSignalTMCCalculate(
     (0u < COM_MAX_TXSIGNAL_NUMBER) || ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER)) \
     || (0u < COM_MAX_GWMAPPING_NUMBER))                                                                     \
     && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdType TxMainfunctionId)
 {
     boolean ret = TRUE;
@@ -743,6 +794,8 @@ boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainFunction
     COM_NOUSED(TxMainfunctionId);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -753,6 +806,8 @@ boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainFunction
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) || (0u < COM_MAX_GWMAPPING_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 void Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, uint16* RptNum)
 /* PRQA S 3673 -- */
@@ -761,10 +816,9 @@ void Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_T
     uint8   oldTMS    = TxIpduStatePtr->TxIpduRTStFlag & COM_TX_TMS_EN;
     boolean txIpduTMS = Com_TxIpduTMSCalculate(TxIpduPtr, TxIpduPtr->TxMainfunctionId);
 #endif
-#if (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER)    \
-    || (0u < COM_MAX_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_PERIOD_NUMBER) \
-    || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER)   \
-    || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+#if (                                                                                     \
+    (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) \
+    || (STD_ON == COM_TMS_ENABLE))
     const Com_TxModeAndSignalFilterPtrType* txModeAmdSignalFilterPtr = Com_CfgTxModeAndSignalFilterPtr;
 #if (STD_ON == COM_TMS_ENABLE)
     /*According to the TMS get send mode, event trigger send times, send cycles*/
@@ -852,9 +906,13 @@ void Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_T
         }
     }
 #endif
+    COM_NOUSED(TxIpduStatePtr);
+    COM_NOUSED(TxIpduPtr);
     COM_NOUSED(RptNum);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -864,6 +922,8 @@ void Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_T
 #if (0u < COM_MAX_TXIPDU_NUMBER)                                                                      \
     && ((STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) \
         || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 void Com_SetSignalUpdateBit(
     Com_TxIpduBufIdType    IpduBufferIndex,
@@ -885,6 +945,8 @@ void Com_SetSignalUpdateBit(
     COM_NOUSED(TxIpduRuntimeBuffPtr);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /* PRQA S 2895 -- */
 /**
@@ -895,6 +957,8 @@ void Com_SetSignalUpdateBit(
  *
  */
 #if (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 boolean Com_MaskedNewDiffersMaskedOldFilterCalculate(
     Com_SignalType     SignalType,
@@ -982,6 +1046,8 @@ boolean Com_MaskedNewDiffersMaskedOldFilterCalculate(
     COM_NOUSED(ComFilterMask);
     return filterOk;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -990,6 +1056,8 @@ boolean Com_MaskedNewDiffersMaskedOldFilterCalculate(
  */
 #if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE) \
     || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_SubstituteSignalBuffer(
     Com_SignalType SignalType,
     uint16         SignalInitValueId,
@@ -997,19 +1065,19 @@ void Com_SubstituteSignalBuffer(
     uint16         SignalSubstituteValueId,
     uint16         PartitionId)
 {
-#if (0u < COM_MAX_SIGNAL_BOOLBUFF_SIZE)
+#if (0u < COM_MAX_SIGNAL_BOOL_SUBSTITUTE_SIZE)
     boolean* signalBoolRuntimeBuffPtr = Com_SignalBoolRuntimeBuff[PartitionId];
 #endif
-#if (0u < COM_MAX_SIGNAL_8BITBUFF_SIZE)
+#if (0u < COM_MAX_SIGNAL_8BIT_SUBSTITUTE_SIZE)
     uint8* signal8BitRuntimeBuffPtr = Com_Signal8BitRuntimeBuff[PartitionId];
 #endif
-#if (0u < COM_MAX_SIGNAL_16BITBUFF_SIZE)
+#if (0u < COM_MAX_SIGNAL_16BIT_SUBSTITUTE_SIZE)
     uint16* signalBit16RuntimeBuffPtr = Com_SignalBit16RuntimeBuff[PartitionId];
 #endif
-#if (0u < COM_MAX_SIGNAL_32BITBUFF_SIZE)
+#if (0u < COM_MAX_SIGNAL_32BIT_SUBSTITUTE_SIZE)
     uint32* signal32BitRuntimeBuffPtr = Com_Signal32BitRuntimeBuff[PartitionId];
 #endif
-#if (0u < COM_MAX_SIGNAL_64BITBUFF_SIZE)
+#if (0u < COM_MAX_SIGNAL_64BIT_SUBSTITUTE_SIZE)
     uint64* signal64BitRuntimeBuffPtr = Com_Signal64BitRuntimeBuff[PartitionId];
 #endif
     const Com_SignalSubstituteValueType* ComSignalSubstitueteValuePtr = Com_ConfigStd->SignalSubstitueteValuePtr;
@@ -1072,16 +1140,16 @@ void Com_SubstituteSignalBuffer(
     COM_NOUSED(ComSignalLength);
     COM_NOUSED(SignalSubstituteValueId);
 }
-#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
 /* ========================================== internal function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /**
  * @brief Called by Com_SignalUnPackHandle for Endian convert,Swap byte mirror
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 COM_LOCAL void Com_EndianSwap(void* dataPtr, uint8 size)
 /* PRQA S 3673 -- */
@@ -1101,12 +1169,16 @@ COM_LOCAL void Com_EndianSwap(void* dataPtr, uint8 size)
         data[i]      = temp;
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief unpack all byte value(group signal/signal cover),is called by Com_SignalUnPackHandle
  *
  */
 #if (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     || ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_SignalUnPackDataHandle(
     Com_SignalPositionType   SigLsbBytePos,
     uint8                    SignalByteLength,
@@ -1158,9 +1230,9 @@ COM_LOCAL uint64 Com_SignalUnPackDataHandle(
 #endif
     return signalValue;
 }
-#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
 /* PRQA S 0316,2844 -- */
 /* PRQA S 2814,2824 -- */
 /* PRQA S 3120,3132 -- */

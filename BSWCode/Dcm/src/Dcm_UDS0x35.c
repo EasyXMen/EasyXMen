@@ -49,12 +49,16 @@
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x35_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     uint32*                       memoryAddress,
     uint32*                       memorySize,
     uint8*                        memoryIdentifier,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

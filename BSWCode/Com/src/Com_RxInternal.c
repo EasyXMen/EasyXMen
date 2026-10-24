@@ -33,9 +33,7 @@
 /* PRQA S 2814,2824 ++ */ /* VL_QAC_DerefNullPtr */
 /* PRQA S 0316,2844 ++ */ /* VL_QAC_0316,VL_Com_NullPtrValue */
 /* PRQA S 6520 EOF */     /* VL_MTR_Com_STVAR */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
-/* PRQA S 5015 ++ */ /* VL_Com_UntrustedMethod */
+/* PRQA S 5015 ++ */      /* VL_Com_UntrustedMethod */
 /**
  * @brief         Receive Rx Pdu handle
  * @param[in]     RxIpduStatePtr:State pointer of RxIpdu:state pointer of RxIpdu
@@ -48,6 +46,8 @@
  * @trace         CPD-66482
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxPduHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -56,6 +56,8 @@ COM_LOCAL void Com_RxPduHandle(
 #endif
     const PduInfoType*     PduInfoPtr,
     Com_MainFunctionIdType RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         RxSignalGroup receive timeout handle
@@ -67,10 +69,14 @@ COM_LOCAL void Com_RxPduHandle(
  * @trace         CPD-66483
  */
 #if ((0u < COM_MAX_RXIPDU_NUMBER) && (COM_MAX_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     Com_MainFunctionIdType      RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx source description signal to gateway buffer.
@@ -83,11 +89,15 @@ COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
  * @trace         CPD-66484
  */
 #if (0u < COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER) && (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SourceSignalUnPack(
     const Com_GwSourceSignalType* GwSourceSignalPtr,
     uint8*                        RxIpduRuntimeBuffPtr,
     uint16                        RxDynSignalLength,
     Com_RxIpduBufIdType           IpduBufferId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx signal and notification up layer.
@@ -100,11 +110,15 @@ COM_LOCAL void Com_SourceSignalUnPack(
  * @trace         CPD-66485
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SignalRxIndication(
     const Com_RxSignalType* RxSignalPtr,
     uint8*                  RxIpduRuntimeBuffPtr,
     uint16                  RxDynSignalLength,
     Com_RxIpduBufIdType     IpduBufferId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx signal(signal type is COM_UINT8_N) and notification up layer.
@@ -116,8 +130,12 @@ COM_LOCAL void Com_SignalRxIndication(
  * @trace         CPD-66486
  */
 #if ((0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_Rx8NSignalHandle(const Com_RxSignalType* RxSignalPtr, uint16 ComSignalLength, Com_RxIpduBufIdType IpduBufferId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx signal(signal type is COM_UINT8_DYN) invalidate value.
@@ -132,10 +150,14 @@ COM_LOCAL void
 #if (                                                                \
     (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_MAX_RX_SIGNAL_8BIT_INVALIDVALUE_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_Rx8DYNSignalInvalidHandle(
     const Com_RxSignalType* RxSignalPtr,
     uint16                  ComSignalLength,
     Com_RxIpduBufIdType     IpduBufferId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx signal(signal type is COM_UINT8_DYN) and notification up layer.
@@ -149,10 +171,14 @@ COM_LOCAL boolean Com_Rx8DYNSignalInvalidHandle(
 #if (                                                                \
     (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_Rx8DYNSignalHandle(
     const Com_RxSignalType* RxSignalPtr,
     uint16                  ComSignalLength,
     Com_RxIpduBufIdType     IpduBufferId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         called by Com_RxSignalHandle.
@@ -168,11 +194,15 @@ COM_LOCAL void Com_Rx8DYNSignalHandle(
  *
  */
 #if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalInvalidHandle(
     const Com_RxSignalType* RxSignalPtr,
     Com_SignalType          SignalType,
     uint64*                 UnPackValue,
     uint16                  PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Unpack the rx signal(signal type isn't COM_UINT8_N or COM_UINT8_DYN) and notification up layer.
@@ -183,7 +213,11 @@ COM_LOCAL boolean Com_RxSignalInvalidHandle(
  * @trace         CPD-66488
  */
 #if ((0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxSignalHandle(const Com_RxSignalType* RxSignalPtr, uint8* RxIpduRuntimeBuffPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Judge the rx (group) signal value is invalid value or not.
@@ -196,7 +230,11 @@ COM_LOCAL void Com_RxSignalHandle(const Com_RxSignalType* RxSignalPtr, uint8* Rx
  * @trace         CPD-66489
  */
 #if ((STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE) || (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SignalInvalidateHandle(Com_SignalType SignalType, uint16 InvalidValueId, uint64 Value);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Get the rx (group) signal's init value.
@@ -211,8 +249,11 @@ COM_LOCAL boolean Com_SignalInvalidateHandle(Com_SignalType SignalType, uint16 I
 #if (                                                                                          \
     ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)) \
     || ((0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE)))
-
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_RxSignalReplaceHanlde(Com_SignalType SignalType, uint16 InitValueId, uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Calculate the rx signal value is filter out or not.
@@ -230,6 +271,8 @@ COM_LOCAL uint64 Com_RxSignalReplaceHanlde(Com_SignalType SignalType, uint16 Ini
 #if (                                                                                 \
     ((0u < COM_MAX_RXSIGNAL_NUMBER) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)) \
     || ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalFilter(
     Com_SignalType          SignalType,
     Com_FilterAlgorithmType FilterType,
@@ -239,6 +282,8 @@ COM_LOCAL boolean Com_RxSignalFilter(
     uint16 PartitionId,
 #endif
     uint64 NewSignalValue);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Update the rx signal value buffer.
@@ -251,7 +296,11 @@ COM_LOCAL boolean Com_RxSignalFilter(
  * @trace         CPD-66492
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) || (0u < COM_MAX_RXGROUPSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxSignalBuffHandle(uint64 Value, Com_SignalType SignalType, uint16 InitValueId, uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Update the rx signal value buffer.
@@ -264,7 +313,11 @@ COM_LOCAL void Com_RxSignalBuffHandle(uint64 Value, Com_SignalType SignalType, u
  */
 #if (((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER)) || (0u < COM_MAX_RXSIGNAL_NUMBER)) \
     && (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_UpdateGWSignalBuffer(uint64 Value, uint16 GWSignalBufferId, Com_SignalType SignalType);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Rx signal value replace,and notification.
@@ -275,7 +328,11 @@ COM_LOCAL void Com_UpdateGWSignalBuffer(uint64 Value, uint16 GWSignalBufferId, C
  * @trace         CPD-66494
  */
 #if ((STD_ON == COM_RXTPPDU_SUPPORT) && (0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_InvalidSignalReplaceAndNotification(const Com_RxSignalType* RxSignalPtr, uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Handle signal group RxIndication of one rx pdu.
@@ -288,11 +345,15 @@ COM_LOCAL void Com_InvalidSignalReplaceAndNotification(const Com_RxSignalType* R
  * @trace         CPD-66495
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SignalGroupRxIndication(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     uint16                       RxDynSignalLength,
     Com_RxIpduBufIdType          IpduBufferId,
     uint16                       PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Update the rx group signal value buffer.
@@ -305,11 +366,15 @@ COM_LOCAL void Com_SignalGroupRxIndication(
  * @trace         CPD-66496
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxGroupSignalBuffHanlde(
     boolean                 InvalidSignalGroup,
     Com_RxGroupSignalIdType RxGroupId,
     Com_RxIpduBufIdType     IpduBufferId,
     uint16                  RxDynSignalLength);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Uint8_Dyn/Uint8_N Group Signal Invalid Calculate.
@@ -324,6 +389,8 @@ COM_LOCAL void Com_RxGroupSignalBuffHanlde(
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
 #if ((STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
     uint16                       ComSignalLength,
     const Com_RxGroupSignalType* RxGroupSignalPtr,
@@ -332,6 +399,8 @@ COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
 #endif
     Com_RxIpduBufIdType    IpduBufferId,
     Com_MainFunctionIdType RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Signal Group Invalid Calculate.
@@ -343,10 +412,14 @@ COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
  * @synchronous   TRUE
  * @trace         CPD-66498
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     Com_RxIpduBufIdType          IpduBufferId,
     uint16                       RxDynSignalLength);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         RxSignal receive timeout handle
@@ -357,7 +430,11 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
  * @trace         CPD-66499
  */
 #if ((0u < COM_MAX_RXIPDU_NUMBER) && (COM_MAX_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Rx ipdu based receive DM timeout handle
@@ -371,10 +448,14 @@ COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduState
 #if (                                                                            \
     ((0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
     || ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxIpduBaseDMTimeOutHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     Com_MainFunctionIdType      RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Rx ipdu based receive DM timeout handle signal
@@ -385,7 +466,11 @@ COM_LOCAL void Com_RxIpduBaseDMTimeOutHandle(
  * @trace         CPD-66501
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Rx ipdu based receive DM timeout handle signal group
@@ -397,10 +482,14 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduSta
  * @trace         CPD-66502
  */
 #if (0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxDMTimeOutHandleSignalGroup(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     Com_MainFunctionIdType      RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Reset receive MD timer for all signals/signal groups (which is update) of one rx pdu
@@ -413,10 +502,14 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignalGroup(
  */
 #if (COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER > 0u) \
     && ((STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetUpdateDMTime(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     const PduInfoType*          PduInfo);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Copy the Rx Pdu data to RxPdu Buffer
@@ -428,11 +521,15 @@ COM_LOCAL void Com_ResetUpdateDMTime(
  * @synchronous   TRUE
  * @trace         CPD-66504
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_CopyPduDataToRxBuffer(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     const PduInfoType*          PduInfoPtr,
     Com_MainFunctionIdType      RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief         Unpack the rx pdu data and invoke notification
  * @param[in]     RxIpduStatePtr:State pointer of RxIpdu
@@ -443,10 +540,14 @@ COM_LOCAL void Com_CopyPduDataToRxBuffer(
  * @trace         CPD-66505
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_IndicationProcess(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
     Com_MainFunctionIdType      RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Execute all configured ComDataInvalidActions for all included signals and signal groups.
@@ -458,8 +559,12 @@ COM_LOCAL void Com_IndicationProcess(
  */
 #if (STD_ON == COM_RXTPPDU_SUPPORT) \
     && ((STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_TpPduInvalidAction(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Rx data timeout action handle
@@ -478,6 +583,8 @@ COM_LOCAL void
     || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
     || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
         || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxDataTimeOutActionHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -485,6 +592,8 @@ COM_LOCAL void Com_RxDataTimeOutActionHandle(
     const void*                 RxArgPtr,
     boolean                     IsRxSignal,
     Com_SignalIdType            SubstituteBufId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief         Judge the rx signal group value is filter out or not.
@@ -498,27 +607,29 @@ COM_LOCAL void Com_RxDataTimeOutActionHandle(
  * @trace         CPD-66508
  */
 #if (COM_MAX_RXIPDU_NUMBER > 0u) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalGroupFilter(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     boolean                      InvalidSignalGroup,
     Com_RxIpduBufIdType          IpduBufferId,
     uint16                       PartitionId);
-#endif
-/* PRQA S 5015 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+/* PRQA S 5015 -- */
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /**
  * @brief TP RxPdu RxIndication handle
  *
  */
 #if (STD_ON == COM_RXTPPDU_SUPPORT)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 void Com_TpRxIndicationHandle(
     PduIdType                   RxIpduId,
@@ -619,10 +730,14 @@ void Com_TpRxIndicationHandle(
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief TP Pdu copy receive data handle
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 BufReq_ReturnType Com_CopyRxDataHandle(
     PduIdType              RxIpduId,
@@ -654,10 +769,14 @@ BufReq_ReturnType Com_CopyRxDataHandle(
     }
     return bufReq;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief TP Pdu Start receive handle
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532,6030 ++ */ /* VL_Com_ReferencedOnlyOne,VL_MTR_Com_STMIF */
 BufReq_ReturnType Com_StartOfReceptionHandle(
     PduIdType              RxIpduId,
@@ -720,6 +839,8 @@ BufReq_ReturnType Com_StartOfReceptionHandle(
     }
     return bufReq;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /* PRQA S 2895 ++ */ /* VL_Com_NegtiveValueType */
 /**
@@ -728,6 +849,8 @@ BufReq_ReturnType Com_StartOfReceptionHandle(
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) \
     && ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 uint8 Com_ReceiveSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, uint8* SignalGroupArrayPtr)
 /* PRQA S 1532 -- */
@@ -769,12 +892,16 @@ uint8 Com_ReceiveSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, uin
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief If RxPdu RxIndication handle
  *
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_Com_ReferencedOnlyOne */
 void Com_RxIndicationHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
@@ -791,30 +918,37 @@ void Com_RxIndicationHandle(
     uint8  activeEnable = RxIpduStatePtr->RxIpduRTStFlag & COM_RX_ACTIVE_EN;
 
     /*the rx pdu is active,the receive length is suited to pdu configuration length*/
-    if ((COM_RX_ACTIVE_EN == activeEnable) && (PduInfoPtr->SduLength >= minPduLength)
-        && (PduInfoPtr->SduLength <= maxPduLength))
+    if ((COM_RX_ACTIVE_EN == activeEnable) && (PduInfoPtr->SduLength >= minPduLength))
     {
+        PduInfoType processPduInfo = *PduInfoPtr;
+        if (PduInfoPtr->SduLength > maxPduLength)
+        {
+            /* @SWS_Com_00575 does not copy or handle additional received data. */
+            processPduInfo.SduLength = maxPduLength;
+        }
 #if ((STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE))
         uint8 DMEnable = RxIpduStatePtr->RxIpduRTStFlag & COM_RX_DM_EN;
         if (COM_RX_DM_EN == DMEnable)
         {
             /*reset all signals and signal groups DM time(except the signal/signal group have update bit and the
              * update bit is not 1)*/
-            Com_ResetUpdateDMTime(RxIpduStatePtr, RxIpduPtr, PduInfoPtr);
+            Com_ResetUpdateDMTime(RxIpduStatePtr, RxIpduPtr, (const PduInfoType*)&processPduInfo);
         }
 #endif
 
-        Com_CopyPduDataToRxBuffer(RxIpduStatePtr, RxIpduPtr, PduInfoPtr, RxMainfunctionId);
+        Com_CopyPduDataToRxBuffer(RxIpduStatePtr, RxIpduPtr, (const PduInfoType*)&processPduInfo, RxMainfunctionId);
         Com_RxPduHandle(
             RxIpduStatePtr,
             RxIpduPtr,
 #if (STD_ON == COM_RX_IPDU_CALLOUT_ENABLE)
             RxIpduId,
 #endif
-            PduInfoPtr,
+            (const PduInfoType*)&processPduInfo,
             RxMainfunctionId);
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -822,6 +956,8 @@ void Com_RxIndicationHandle(
  *
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_MainFunctionRxHandle(Com_MainFunctionIdType RxMainfunctionId) /* PRQA S 1532 */ /* VL_Com_ReferencedOnlyOne */
 {
     PduIdType                   rxIpduStartId  = Com_GetStartOfMainFunctionRx(RxMainfunctionId);
@@ -875,6 +1011,8 @@ void Com_MainFunctionRxHandle(Com_MainFunctionIdType RxMainfunctionId) /* PRQA S
         rxIpduStatePtr++;
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -885,6 +1023,8 @@ void Com_MainFunctionRxHandle(Com_MainFunctionIdType RxMainfunctionId) /* PRQA S
     ((COM_MAX_RXSIGNALGROUP_NUMBER > 0u) && (COM_MAX_RXGROUPSIGNAL_NUMBER > 0u)) \
     && (0u < COM_MAX_RXGROUPSIGNAL_8BITBUFF_SIZE))                               \
     && (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length)
 {
     const Com_RxGroupSignalType* rxGroupSignalPtr = &Com_CfgRxGroupSignalPtr[SignalId - Com_CfgRxSignalNum];
@@ -906,9 +1046,9 @@ uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDat
         /*IPDU is not receiving data*/
         if (COM_RX_RECEIVING_EN != Receiving)
         {
-            Com_RxIPduType* rxIpduPtr   = &Com_CfgRxIPduPtr[rxMainfunctionId];
-            uint16          partitionId = rxIpduPtr->IpduPartitionId;
-            signalLength                = (rxIpduStatePtr->RxIpduLength - rxIpduPtr->IPduNoDynSignalLength);
+            const Com_RxIPduType* rxIpduPtr   = &Com_CfgRxIPduPtr[rxMainfunctionId];
+            uint16                partitionId = rxIpduPtr->IpduPartitionId;
+            signalLength                      = (rxIpduStatePtr->RxIpduLength - rxIpduPtr->IPduNoDynSignalLength);
             if (signalLength > (*Length))
             {
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -938,6 +1078,8 @@ uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDat
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Receive Dynamic Signal handle
@@ -947,6 +1089,8 @@ uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDat
     (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_SIGNAL_8BITBUFF_SIZE) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE))                   \
     && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673,1532 ++ */ /* VL_QAC_3673,VL_Com_ReferencedOnlyOne */
 uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length)
 /* PRQA S 3673,1532 -- */
@@ -1000,6 +1144,8 @@ uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr,
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1007,6 +1153,8 @@ uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr,
  *
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1532,3673 ++ */ /* VL_Com_ReferencedOnlyOne,VL_QAC_3673 */
 void Com_ReceiveSignalGroupHandle(
     const Com_RxIPduType*       RxIpduPtr,
@@ -1112,6 +1260,8 @@ void Com_ReceiveSignalGroupHandle(
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1119,6 +1269,8 @@ void Com_ReceiveSignalGroupHandle(
  *
  */
 #if (0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673,1532 ++ */ /*  VL_QAC_3673,VL_Com_ReferencedOnlyOne */
 uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr)
 /* PRQA S 3673,1532 -- */
@@ -1228,6 +1380,8 @@ uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPt
     COM_NOUSED(SignalDataPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1235,6 +1389,8 @@ uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPt
  *
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673, 1532, 6010, 5017 ++ */ /* VL_QAC_3673, VL_Com_ReferencedOnlyOne, VL_MTR_Com_STCYC, VL_Com_5017 */
 uint8 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr)
 /* PRQA S 3673, 1532, 6010, 5017 -- */
@@ -1340,17 +1496,17 @@ uint8 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr)
     COM_NOUSED(SignalDataPtr);
     return ret;
 }
-#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
 /* ========================================== internal function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /**
  * @brief Receive Rx Pdu handle
  *
  */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxPduHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -1388,6 +1544,8 @@ COM_LOCAL void Com_RxPduHandle(
     COM_NOUSED(PduInfoPtr);
     COM_NOUSED(RxMainfunctionId);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1395,6 +1553,8 @@ COM_LOCAL void Com_RxPduHandle(
  *
  */
 #if ((0u < COM_MAX_RXIPDU_NUMBER) && (COM_MAX_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
@@ -1470,9 +1630,12 @@ COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
                     {
                         rxGroupSignalPtr = &Com_CfgRxGroupSignalPtr[groupSignalStartId];
 #if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
-                        substituteBufId =
-                            Com_ConfigStd->SignalSubstitueteValuePtr->RxGrpSigSubstituteValueId[substituteStartId];
-                        substituteStartId++;
+                        if (COM_TIMEOUT_ACTION_SUBSTITUTE == timeoutAction)
+                        {
+                            substituteBufId =
+                                Com_ConfigStd->SignalSubstitueteValuePtr->RxGrpSigSubstituteValueId[substituteStartId];
+                            substituteStartId++;
+                        }
 #endif
                         Com_RxDataTimeOutActionHandle(
                             RxIpduStatePtr,
@@ -1499,6 +1662,8 @@ COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
     COM_NOUSED(RxMainfunctionId);
     COM_NOUSED(RxIpduStatePtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_IndicationProcess.
@@ -1506,6 +1671,8 @@ COM_LOCAL void Com_RxSignalGroupTimeOutHandle(
  *
  */
 #if (0u < COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER) && (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_SourceSignalUnPack(
     const Com_GwSourceSignalType* GwSourceSignalPtr,
@@ -1577,6 +1744,8 @@ COM_LOCAL void Com_SourceSignalUnPack(
     COM_NOUSED(IpduBufferId);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1585,6 +1754,8 @@ COM_LOCAL void Com_SourceSignalUnPack(
  *
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SignalRxIndication(
     const Com_RxSignalType* RxSignalPtr,
     uint8*                  RxIpduRuntimeBuffPtr,
@@ -1592,8 +1763,8 @@ COM_LOCAL void Com_SignalRxIndication(
     Com_RxIpduBufIdType     IpduBufferId)
 {
 #if (0u < COM_MAX_RXIPDUBUFF_SIZE)
-    Com_SignalType signalType = RxSignalPtr->ComSignalType;
 #if (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)
+    Com_SignalType signalType = RxSignalPtr->ComSignalType;
     if ((signalType != COM_UINT8_N) && (signalType != COM_UINT8_DYN))
 #endif
     {
@@ -1656,6 +1827,8 @@ COM_LOCAL void Com_SignalRxIndication(
     COM_NOUSED(IpduBufferId);
     COM_NOUSED(RxDynSignalLength);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1664,6 +1837,8 @@ COM_LOCAL void Com_SignalRxIndication(
  *
  */
 #if ((0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_Rx8NSignalHandle(const Com_RxSignalType* RxSignalPtr, uint16 ComSignalLength, Com_RxIpduBufIdType IpduBufferId)
 {
@@ -1755,6 +1930,8 @@ COM_LOCAL void
     COM_NOUSED(ComSignalLength);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief Unpack the rx signal(signal type is COM_UINT8_DYN) invalidate value.
@@ -1763,6 +1940,8 @@ COM_LOCAL void
 #if (                                                                \
     (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_MAX_RX_SIGNAL_8BIT_INVALIDVALUE_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_Rx8DYNSignalInvalidHandle(
     const Com_RxSignalType* RxSignalPtr,
     uint16                  ComSignalLength,
@@ -1844,6 +2023,8 @@ COM_LOCAL boolean Com_Rx8DYNSignalInvalidHandle(
 
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_SignalRxIndication.
@@ -1853,6 +2034,8 @@ COM_LOCAL boolean Com_Rx8DYNSignalInvalidHandle(
 #if (                                                                \
     (0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE) \
     && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_Rx8DYNSignalHandle(
     const Com_RxSignalType* RxSignalPtr,
     uint16                  ComSignalLength,
@@ -1894,6 +2077,8 @@ COM_LOCAL void Com_Rx8DYNSignalHandle(
     COM_NOUSED(ComSignalLength);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_RxSignalHandle.
@@ -1901,6 +2086,8 @@ COM_LOCAL void Com_Rx8DYNSignalHandle(
  *
  */
 #if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalInvalidHandle(
     const Com_RxSignalType* RxSignalPtr,
     Com_SignalType          SignalType,
@@ -1934,6 +2121,8 @@ COM_LOCAL boolean Com_RxSignalInvalidHandle(
     }
     return needFilter;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_SignalRxIndication.
@@ -1941,6 +2130,8 @@ COM_LOCAL boolean Com_RxSignalInvalidHandle(
  *
  */
 #if ((0u < COM_MAX_RXSIGNAL_NUMBER) && (0u < COM_MAX_RXIPDUBUFF_SIZE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxSignalHandle(const Com_RxSignalType* RxSignalPtr, uint8* RxIpduRuntimeBuffPtr)
 /* PRQA S 3673 -- */
@@ -2005,6 +2196,8 @@ COM_LOCAL void Com_RxSignalHandle(const Com_RxSignalType* RxSignalPtr, uint8* Rx
     }
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2013,6 +2206,8 @@ COM_LOCAL void Com_RxSignalHandle(const Com_RxSignalType* RxSignalPtr, uint8* Rx
  *
  */
 #if ((STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE) || (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SignalInvalidateHandle(Com_SignalType SignalType, uint16 InvalidValueId, uint64 Value)
 {
     boolean                           ret                         = FALSE;
@@ -2089,6 +2284,8 @@ COM_LOCAL boolean Com_SignalInvalidateHandle(Com_SignalType SignalType, uint16 I
     COM_NOUSED(Value);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2099,6 +2296,8 @@ COM_LOCAL boolean Com_SignalInvalidateHandle(Com_SignalType SignalType, uint16 I
 #if (                                                                                          \
     ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)) \
     || ((0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_RxSignalReplaceHanlde(Com_SignalType SignalType, uint16 InitValueId, uint16 PartitionId)
 {
     uint64                         unPackValue        = COM_UNUSED_UINT64;
@@ -2148,6 +2347,8 @@ COM_LOCAL uint64 Com_RxSignalReplaceHanlde(Com_SignalType SignalType, uint16 Ini
     COM_NOUSED(InitValueId);
     return unPackValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2157,6 +2358,8 @@ COM_LOCAL uint64 Com_RxSignalReplaceHanlde(Com_SignalType SignalType, uint16 Ini
  *
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) || (0u < COM_MAX_RXGROUPSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxSignalBuffHandle(uint64 Value, Com_SignalType SignalType, uint16 InitValueId, uint16 PartitionId)
 {
 #if (0u < COM_MAX_SIGNAL_BOOLBUFF_SIZE)
@@ -2215,6 +2418,8 @@ COM_LOCAL void Com_RxSignalBuffHandle(uint64 Value, Com_SignalType SignalType, u
     COM_NOUSED(InitValueId);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_RxSignalHandle,Com_SignalGroupRxIndication.
@@ -2223,6 +2428,8 @@ COM_LOCAL void Com_RxSignalBuffHandle(uint64 Value, Com_SignalType SignalType, u
  */
 #if (((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER)) || (0u < COM_MAX_RXSIGNAL_NUMBER)) \
     && (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_UpdateGWSignalBuffer(uint64 Value, uint16 GWSignalBufferId, Com_SignalType SignalType)
 {
     /*the rx signal need gateway,store signal value in gateway buffer*/
@@ -2269,6 +2476,8 @@ COM_LOCAL void Com_UpdateGWSignalBuffer(uint64 Value, uint16 GWSignalBufferId, C
     COM_NOUSED(Value);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2277,6 +2486,8 @@ COM_LOCAL void Com_UpdateGWSignalBuffer(uint64 Value, uint16 GWSignalBufferId, C
  *
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SignalGroupRxIndication(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     uint16                       RxDynSignalLength,
@@ -2350,6 +2561,8 @@ COM_LOCAL void Com_SignalGroupRxIndication(
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2358,6 +2571,8 @@ COM_LOCAL void Com_SignalGroupRxIndication(
  *
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /******************************************************************************/
 COM_LOCAL void Com_RxGroupSignalBuffHanlde(
     boolean                 InvalidSignalGroup,
@@ -2441,6 +2656,8 @@ COM_LOCAL void Com_RxGroupSignalBuffHanlde(
     COM_NOUSED(InvalidSignalGroup);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2449,6 +2666,8 @@ COM_LOCAL void Com_RxGroupSignalBuffHanlde(
  *
  */
 #if ((STD_ON == COM_RXTPPDU_SUPPORT) && (0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_InvalidSignalReplaceAndNotification(const Com_RxSignalType* RxSignalPtr, uint16 PartitionId)
 {
     uint16         initValueId = RxSignalPtr->SignalInitValueId;
@@ -2514,6 +2733,8 @@ COM_LOCAL void Com_InvalidSignalReplaceAndNotification(const Com_RxSignalType* R
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2524,6 +2745,8 @@ COM_LOCAL void Com_InvalidSignalReplaceAndNotification(const Com_RxSignalType* R
 #if (                                                                                 \
     ((0u < COM_MAX_RXSIGNAL_NUMBER) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)) \
     || ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalFilter(
     Com_SignalType          SignalType,
     Com_FilterAlgorithmType FilterType,
@@ -2537,11 +2760,24 @@ COM_LOCAL boolean Com_RxSignalFilter(
     boolean ret = TRUE;
     if (COM_FILTER_NONE != FilterType)
     {
+#if (                                                                                \
+    (COM_MAX_RXMASKNEWDIFFERX_NUMBER > 0u) || (COM_MAX_RXMASKNEWEQUALSX_NUMBER > 0u) \
+    || (COM_MAX_RXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISOUTSIDE_NUMBER > 0u)   \
+    || (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u) || (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u))
         const Com_TxModeAndSignalFilterPtrType* rxFilter = Com_CfgTxModeAndSignalFilterPtr;
-        Com_FilterMaskType                      filterMask;
-        Com_FilterXType                         filterX;
-        Com_FilterMaxType                       filterMax;
-        Com_FilterMinType                       filterMin;
+#endif
+#if (                                                                                \
+    (COM_MAX_RXMASKNEWDIFFERX_NUMBER > 0u) || (COM_MAX_RXMASKNEWEQUALSX_NUMBER > 0u) \
+    || (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u))
+        Com_FilterMaskType filterMask;
+#endif
+#if ((COM_MAX_RXMASKNEWDIFFERX_NUMBER > 0u) || (COM_MAX_RXMASKNEWEQUALSX_NUMBER > 0u))
+        Com_FilterXType filterX;
+#endif
+#if ((COM_MAX_RXNEWISWITHIN_NUMBER > 0u) || (COM_MAX_RXNEWISOUTSIDE_NUMBER > 0u))
+        Com_FilterMaxType filterMax;
+        Com_FilterMinType filterMin;
+#endif
 #if (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
         Com_SignalIdType filterOffset;
         Com_SignalIdType filterPeriod;
@@ -2627,8 +2863,13 @@ COM_LOCAL boolean Com_RxSignalFilter(
             break;
         }
     }
+    COM_NOUSED(SignalType);
+    COM_NOUSED(FilterIndex);
+    COM_NOUSED(NewSignalValue);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2638,6 +2879,8 @@ COM_LOCAL boolean Com_RxSignalFilter(
  */
 #if ((0u < COM_MAX_RXSIGNALGROUP_NUMBER) && (0u < COM_MAX_RXGROUPSIGNAL_NUMBER))
 #if ((STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
     uint16                       ComSignalLength,
     const Com_RxGroupSignalType* RxGroupSignalPtr,
@@ -2700,6 +2943,8 @@ COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2707,6 +2952,8 @@ COM_LOCAL void Com_Uint8NDynGroupSignalInvalidCalculate(
  *        Signal Group Invalid Calculate.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     Com_RxIpduBufIdType          IpduBufferId,
@@ -2718,8 +2965,12 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
 
     for (; groupSignalStartId < groupSignalEndId; ++groupSignalStartId)
     {
+#if (                                                                                                        \
+    (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
+    || (COM_MAX_GWMAPPING_NUMBER > 0u) || (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
         const Com_RxGroupSignalType* rxGroupSignalPtr = &Com_CfgRxGroupSignalPtr[groupSignalStartId];
         Com_SignalType               signalType       = rxGroupSignalPtr->ComSignalType;
+#endif
 #if (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
         if ((COM_UINT8_N == signalType) || (COM_UINT8_DYN == signalType))
         {
@@ -2740,6 +2991,7 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
         else
 #endif
         {
+#if ((COM_MAX_GWMAPPING_NUMBER > 0u) || (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
             const uint8* rxIpduRuntimeBuffPtr = Com_RxIPduRuntimeBuff[RxSignalGroupPtr->RxMainfunctionId];
             uint64       unPackValue          = Com_SignalUnPackHandle(
 #if (STD_ON == COM_SIGNAL_SIGNED_TYPE_ENABLE)
@@ -2748,6 +3000,7 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
                 COM_RX_GROUP_SIGNAL,
                 rxGroupSignalPtr,
                 &rxIpduRuntimeBuffPtr[IpduBufferId]);
+#endif
 #if (COM_MAX_GWMAPPING_NUMBER > 0u)
             SchM_Enter_Com_MultiCore_Lock();
             uint16 gwSignalBufferId = rxGroupSignalPtr->GWSignalBufferId;
@@ -2775,8 +3028,11 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
 #endif
     }
     COM_NOUSED(RxDynSignalLength);
+    COM_NOUSED(IpduBufferId);
     return signalGroupInvalid;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2784,6 +3040,8 @@ COM_LOCAL boolean Com_SignalGroupInvalidCalculate(
  *
  */
 #if (COM_MAX_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
 /* PRQA S 3673 -- */
@@ -2792,11 +3050,19 @@ COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduState
     ipduSignalTimeoutRefNumber            = RxIpduPtr->IPduSignalsTimeoutRefEndId;
     cnt                                   = RxIpduPtr->IPduSignalsTimeoutRefStartId;
     const uint16* rxSignalTimeoutValuePtr = Com_CfgSignalTimeoutPtr->RxSignalTimeoutVal;
-    const uint16* timeoutRxSignalId       = Com_CfgSignalTimeoutPtr->TimeoutRxSignalId;
+#if ((COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)                                      \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+    const uint16* timeoutRxSignalId = Com_CfgSignalTimeoutPtr->TimeoutRxSignalId;
+#endif
 
     for (; cnt < ipduSignalTimeoutRefNumber; ++cnt)
     {
+#if ((COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)                                      \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
         const Com_RxSignalType* rxSignalPtr = &Com_CfgRxSignalPtr[timeoutRxSignalId[cnt]];
+#endif
         if (Com_RxSignalTimeOutCnt[cnt] > 0u)
         {
             Com_RxSignalTimeOutCnt[cnt] -= 1u;
@@ -2845,6 +3111,8 @@ COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduState
     COM_NOUSED(RxIpduStatePtr);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2854,6 +3122,8 @@ COM_LOCAL void Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduState
 #if (                                                                            \
     ((COM_MAX_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
     || ((0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxIpduBaseDMTimeOutHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -2876,6 +3146,8 @@ COM_LOCAL void Com_RxIpduBaseDMTimeOutHandle(
     }
     COM_NOUSED(RxMainfunctionId);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2883,6 +3155,8 @@ COM_LOCAL void Com_RxIpduBaseDMTimeOutHandle(
  *
  */
 #if (0u < COM_MAX_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
 /* PRQA S 3673 -- */
@@ -2896,8 +3170,12 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduSta
     cnt                        = RxIpduPtr->IPduSignalsTimeoutRefStartId;
     for (; cnt < ipduSignalTimeoutRefNumber; ++cnt)
     {
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (COM_MAX_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)                                  \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
         const uint16*           timeoutRxSignalId = Com_CfgSignalTimeoutPtr->TimeoutRxSignalId;
         const Com_RxSignalType* rxSignalPtr       = &Com_CfgRxSignalPtr[timeoutRxSignalId[cnt]];
+#endif
 #if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
         /*rx signal ComTimeout > 0 and have not update-bit*/
         if (COM_UNUSED_SIGNALPOSITION == rxSignalPtr->UpdateLsbBytePos)
@@ -2948,6 +3226,8 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduSta
     }
     COM_NOUSED(RxIpduStatePtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2955,6 +3235,8 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduSta
  *
  */
 #if (0u < COM_MAX_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxDMTimeOutHandleSignalGroup(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
@@ -3058,6 +3340,8 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignalGroup(
     COM_NOUSED(RxMainfunctionId);
     COM_NOUSED(RxIpduStatePtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief reset receive MD timer for all signals/signal groups (which is update) of one rx pdu
@@ -3065,6 +3349,8 @@ COM_LOCAL void Com_RxDMTimeOutHandleSignalGroup(
  */
 #if (COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER > 0u) \
     && ((STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetUpdateDMTime(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -3175,12 +3461,16 @@ COM_LOCAL void Com_ResetUpdateDMTime(
     COM_NOUSED(PduInfo);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
  * @brief copy the Rx Pdu data to RxPdu Buffer
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_CopyPduDataToRxBuffer(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -3210,12 +3500,16 @@ COM_LOCAL void Com_CopyPduDataToRxBuffer(
     RxIpduStatePtr->RxIpduLength = (uint16)PduInfoPtr->SduLength;
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * @brief  unpack the rx pdu data and invoke notification
  *
  */
-/* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 #if (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
+/* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_IndicationProcess(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
     const Com_RxIPduType*       RxIpduPtr,
@@ -3300,6 +3594,8 @@ COM_LOCAL void Com_IndicationProcess(
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief execute all configured ComDataInvalidActions for all included signals and signal groups.
@@ -3307,6 +3603,8 @@ COM_LOCAL void Com_IndicationProcess(
  */
 #if (STD_ON == COM_RXTPPDU_SUPPORT) \
     && ((STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TpPduInvalidAction(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
 {
     uint16 partitionId = RxIpduPtr->IpduPartitionId;
@@ -3320,8 +3618,8 @@ COM_LOCAL void Com_TpPduInvalidAction(const Com_RxIPduRunTimeStateType* RxIpduSt
         Com_RxSignalInvalidIdType signalInvalidId = rxSignalPtr->SignalInvalidRefId;
         if (COM_UNUSED_RXSIGNALINVALIDID != signalInvalidId)
         {
-#if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ACTION_NOTIFY_ENABLE)
             const Com_SignalInvalidValueType* signalInvalidValue = Com_ConfigStd->SignalInvalidValuePtr;
+#if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ACTION_NOTIFY_ENABLE)
             if ((COM_INVALID_ACTION_NOTIFY == signalInvalidValue->RxSignalDataInvalidAction[signalInvalidId])
                 && (NULL_PTR != signalInvalidValue->RxInvalidNotificationCfg[signalInvalidId]))
             {
@@ -3380,6 +3678,8 @@ COM_LOCAL void Com_TpPduInvalidAction(const Com_RxIPduRunTimeStateType* RxIpduSt
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3391,6 +3691,8 @@ COM_LOCAL void Com_TpPduInvalidAction(const Com_RxIPduRunTimeStateType* RxIpduSt
     || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
     || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
         || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++*/ /* VL_QAC_3673 */
 COM_LOCAL void Com_RxDataTimeOutActionHandle(
     Com_RxIPduRunTimeStateType* RxIpduStatePtr,
@@ -3462,6 +3764,8 @@ COM_LOCAL void Com_RxDataTimeOutActionHandle(
     COM_NOUSED(SubstituteBufId);
     COM_NOUSED(RxIpduStatePtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief called by Com_SignalGroupRxIndication,Com_TpPduInvalidAction.
@@ -3469,6 +3773,8 @@ COM_LOCAL void Com_RxDataTimeOutActionHandle(
  *
  */
 #if (COM_MAX_RXIPDU_NUMBER > 0u) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_RxSignalGroupFilter(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     boolean                      InvalidSignalGroup,
@@ -3539,10 +3845,10 @@ COM_LOCAL boolean Com_RxSignalGroupFilter(
 
     return signalGroupFilter;
 }
-#endif
-/* PRQA S 2895 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+/* PRQA S 2895 -- */
 /* PRQA S 0316,2844 -- */
 /* PRQA S 2814,2824 -- */
 /* PRQA S 3120,3132 -- */

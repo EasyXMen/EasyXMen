@@ -22,27 +22,16 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743 ++ */                     /* VL_Crypto_62_General */
-/* PRQA S 2784,1532 ++ */                                                        /* VL_Crypto_62_General */
+/* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743,6030,6040,2784,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6010 ++ */                                         /* VL_QAC_Crypto */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
 
 #include "Crypto_62_Sha256.h"
 
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /* ===================================================== macros ===================================================== */
 
 /*
@@ -96,12 +85,22 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType
-                       Crypto_internal_sha256_process(Crypto_Sha256_Context* ctx, const uint8 data[CRYPTO_CONST_64]);
+    Crypto_internal_sha256_process(Crypto_Sha256_Context* ctx, const uint8 data[CRYPTO_CONST_64]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL uint32 Crypto_internal_sha256_process_Many(Crypto_Sha256_Context* ctx, const uint8* data, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
-
+#define CRYPTO_62_START_SEC_VAR_INIT_32
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL uint32 K[] = {
     0x428A2F98U, 0x71374491U, 0xB5C0FBCFU, 0xE9B5DBA5U, 0x3956C25BU, 0x59F111F1U, 0x923F82A4U, 0xAB1C5ED5U,
     0xD807AA98U, 0x12835B01U, 0x243185BEU, 0x550C7DC3U, 0x72BE5D74U, 0x80DEB1FEU, 0x9BDC06A7U, 0xC19BF174U,
@@ -112,6 +111,8 @@ CRYPTO_62_LOCAL uint32 K[] = {
     0x19A4C116U, 0x1E376C08U, 0x2748774CU, 0x34B0BCB5U, 0x391C0CB3U, 0x4ED8AA4AU, 0x5B9CCA4FU, 0x682E6FF3U,
     0x748F82EEU, 0x78A5636FU, 0x84C87814U, 0x8CC70208U, 0x90BEFFFAU, 0xA4506CEBU, 0xBEF9A3F7U, 0xC67178F2U,
 };
+#define CRYPTO_62_STOP_SEC_VAR_INIT_32
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ external data definitions =========================================== */
 
@@ -129,6 +130,8 @@ CRYPTO_62_LOCAL uint32 K[] = {
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha256_Starts(Crypto_Sha256_Context* ctx, boolean is224)
 {
     ctx->total[0] = 0;
@@ -157,6 +160,8 @@ void Crypto_Sha256_Starts(Crypto_Sha256_Context* ctx, boolean is224)
         ctx->state[CRYPTO_CONST_7] = 0xBEFA4FA4U;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -173,6 +178,8 @@ void Crypto_Sha256_Starts(Crypto_Sha256_Context* ctx, boolean is224)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* input, uint32 ilen)
 {
     Std_ReturnType ret = E_OK;
@@ -196,7 +203,7 @@ Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* inp
         ctx->total[1]++;
     }
 
-    if (left && ilen >= fill) /* PRQA S 3397,3400 */ /*VL_Crypto_62_General */
+    if (left && ilen >= fill) /* PRQA S 3397,3400 */ /*VL_QAC_0311 */
     {
         (void)IStdLib_MemCpy((void*)(ctx->buffer + left), input, fill);
 
@@ -230,6 +237,8 @@ Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* inp
 exit:
     return (ret);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -246,6 +255,8 @@ exit:
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRYPTO_CONST_32])
 {
     uint32         used;
@@ -256,7 +267,7 @@ Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRY
      */
     used = ctx->total[0] & 0x3F;
 
-    ctx->buffer[used++] = 0x80; /* PRQA S 3440  */ /* VL_Crypto_62_General */
+    ctx->buffer[used++] = 0x80; /* PRQA S 3440  */ /* VL_QAC_Crypto */
 
     if (used <= CRYPTO_CONST_56)
     {
@@ -301,7 +312,22 @@ Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRY
 exit:
     return (ret);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha256_free(Crypto_Sha256_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Sha256_Context));
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function divides data into groups and processes one
@@ -315,6 +341,8 @@ exit:
  * Return              uint32
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL uint32 Crypto_internal_sha256_process_Many(Crypto_Sha256_Context* ctx, const uint8* data, uint32 len)
 {
     uint32 processed = 0;
@@ -334,6 +362,8 @@ CRYPTO_62_LOCAL uint32 Crypto_internal_sha256_process_Many(Crypto_Sha256_Context
 
     return processed;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -346,8 +376,10 @@ CRYPTO_62_LOCAL uint32 Crypto_internal_sha256_process_Many(Crypto_Sha256_Context
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL Std_ReturnType
-    Crypto_internal_sha256_process(Crypto_Sha256_Context* ctx, const uint8 data[CRYPTO_CONST_64])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL
+Std_ReturnType Crypto_internal_sha256_process(Crypto_Sha256_Context* ctx, const uint8 data[CRYPTO_CONST_64])
 {
     struct
     {
@@ -543,6 +575,8 @@ CRYPTO_62_LOCAL Std_ReturnType
     (void)IStdLib_MemSet(&local, 0, sizeof(local));
     return (ret);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-224 or SHA-256 checksum
@@ -562,6 +596,8 @@ CRYPTO_62_LOCAL Std_ReturnType
  */
 /******************************************************************************/
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boolean is224)
 {
     Std_ReturnType        ret;
@@ -573,11 +609,13 @@ Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boo
     ret = Crypto_Sha256_Update(&ctx, input, ilen);
     if (E_OK == ret)
     {
-        ret = Crypto_Sha256_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
+        ret = Crypto_Sha256_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
     }
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA2-256 checksum and output result.
@@ -590,6 +628,8 @@ Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boo
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -598,7 +638,7 @@ Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224)
     uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     const uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
@@ -636,5 +676,5 @@ Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224)
 
 /* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 -- */
 /* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 -- */
-/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743 -- */
-/* PRQA S 2784,1532   -- */
+/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743,6030,6040,2784,1532 -- */
+/* PRQA S 6050,6060,6070,6080,6010   -- */

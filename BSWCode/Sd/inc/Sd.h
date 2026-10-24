@@ -117,7 +117,8 @@
  *  V02.00.26  2024/07/17  hurongbo       1> Remove the ues of Frt module function
  *  V02.01.00  2024/12/17  zouzhijia      1> R23-11 development first release.
  *  V02.02.00  2025/04/29  zouzhijia      1> Optimize Code.
- *  V02.02.01  2025/9/30   zouzhijia      fix bug CPT-15379,CPT-15841
+ *  V02.02.01  2025/12/26  zouzhijia      fix bug CPT-15379,CPT-15841,CPT-16162,CPT-16228
+ *  V02.02.02  2026/03/20  zouzhijia      Optimize conditional compilation macros
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -236,6 +237,11 @@
   Risk: No risk.
   Prevention: Functional reliability guaranteed by design.
 
+  \li PRQA S 2996 VL_Sd_2996 .<br>
+    Reason: The result of this logical operation is always 'false'.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
   \li PRQA S 6050 VL_MTR_Sd_STST3 .<br>
     Reason: Splitting their implementation will result in a decrease in performance.
     Risk: The code is difficult to maintain.
@@ -257,13 +263,30 @@
     Prevention: Design and code review + clear structure and well-commented code.
 
   \li PRQA S 6040 VL_MTR_Sd_STPAR
-      Reason: The parameters of the function need.
+    Reason: The parameters of the function need.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+  \li PRQA S 6010 VL_MTR_Sd_STCYC
+    Reason: Due to the implementation requirements of some diagnostic message functions, the functions were not
+  separated into sub-functions Risk: Understandability and testability become overly complex Prevention: Design and code
+  review, and have a clear structure and annotated code.
+
+    \li VL_Sd_1501
+      Reason: The function '${name}' is declared but is not used within this project.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_Sd_1753
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
  */
 
 #ifndef SD_H
 #define SD_H
+
+/* PRQA S 1501,1753 EOF */ /* VL_Sd_1501,VL_Sd_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "Sd_PBcfg.h"
@@ -283,7 +306,7 @@ extern "C" {
 
 #define SD_SW_MAJOR_VERSION 2u
 #define SD_SW_MINOR_VERSION 2u
-#define SD_SW_PATCH_VERSION 0u
+#define SD_SW_PATCH_VERSION 1u
 
 /**
  * Instance ID for the Service Discovery module.
@@ -386,6 +409,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Initializes the Service Discovery.
  * @param[in]          ConfigPtr: Pointer to a selected configuration structure.
@@ -394,7 +419,11 @@ extern "C" {
  * @trace              CPD-71984
  */
 extern void Sd_Init(const Sd_ConfigType* ConfigPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Returns the version information of this module.
  * @param[out]         versioninfo: Pointer to where to store the version
@@ -404,7 +433,11 @@ extern void Sd_Init(const Sd_ConfigType* ConfigPtr);
  * @trace              CPD-71985
  */
 extern void Sd_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              This API function is used by the BswM to set the Server
  *                     Service Instance state.
@@ -420,7 +453,11 @@ extern void Sd_GetVersionInfo(Std_VersionInfoType* versioninfo);
  */
 extern Std_ReturnType
     Sd_ServerServiceSetState(uint16 SdServerServiceHandleId, Sd_ServerServiceSetStateType ServerServiceState);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              This API function is used by the BswM to set the Client
  *                     Service Instance state.
@@ -436,7 +473,11 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientServiceSetStateType ClientServiceState);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Starts a preconfigured SdServiceGroup.
  * @param[in]          ServiceGroupId: Id of SdServiceGroup to be started
@@ -445,7 +486,11 @@ extern Std_ReturnType
  * @trace              CPD-71988
  */
 extern void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Stops a preconfigured SdServiceGroup.
  * @param[in]          ServiceGroupId: Id of SdServiceGroup to be stopped
@@ -454,7 +499,11 @@ extern void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId);
  * @trace              CPD-71989
  */
 extern void Sd_ServiceGroupStop(Sd_ServiceGroupIdType ServiceGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              This API function is used by the BswM to set the requested
  *                     state of the EventGroupStatus.
@@ -471,7 +520,11 @@ extern void Sd_ServiceGroupStop(Sd_ServiceGroupIdType ServiceGroupId);
 extern Std_ReturnType Sd_ConsumedEventGroupSetState(
     uint16                            SdConsumedEventGroupHandleId,
     Sd_ConsumedEventGroupSetStateType ConsumedEventGroupState);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              This function gets called by the SoAd if an IP address
  *                     assignment related to a socket connection changes (i.e.
@@ -484,7 +537,11 @@ extern Std_ReturnType Sd_ConsumedEventGroupSetState(
  * @trace              CPD-71991
  */
 extern void Sd_LocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType State);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Notification about a SoAd socket connection state change,
  *                     e.g. socket connection gets online.
@@ -497,7 +554,11 @@ extern void Sd_LocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrSt
  * @trace              CPD-71992
  */
 extern void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Indication of a received I-PDU from a lower layer
  *                     communication interface module.
@@ -512,6 +573,8 @@ extern void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode);
  * @trace              CPD-71993
  */
 void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #endif
 

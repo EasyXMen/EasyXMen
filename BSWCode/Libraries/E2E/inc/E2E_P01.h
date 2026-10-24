@@ -34,10 +34,7 @@
 extern "C" {
 #endif
 /* ===================================================== macros ===================================================== */
-E2E_LOCAL_INLINE uint8 E2E_P01_Min(uint8 a, uint8 b)
-{
-    return (((a) <= (b)) ? (a) : (b));
-}
+
 /* ================================================ type definitions ================================================ */
 /*E2E P01 DataID mode*/
 typedef enum
@@ -169,6 +166,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Protects the array/buffer to be transmitted using the E2E profile 1.
  *               This includes checksum calculation, handling of counter and Data ID.
@@ -186,7 +185,11 @@ typedef struct
  */
 
 Std_ReturnType E2E_P01Protect(const E2E_P01ConfigType* ConfigPtr, E2E_P01ProtectStateType* StatePtr, uint8* DataPtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the protection state.
  * @param[out] StatePtr : Pointer to port/data communication state.
@@ -199,7 +202,11 @@ Std_ReturnType E2E_P01Protect(const E2E_P01ConfigType* ConfigPtr, E2E_P01Protect
  */
 
 Std_ReturnType E2E_P01ProtectInit(E2E_P01ProtectStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Checks the Data received using the E2E profile 1.
  *               This includes CRC calculation, handling of Counter and Data ID.
@@ -217,7 +224,11 @@ Std_ReturnType E2E_P01ProtectInit(E2E_P01ProtectStateType* StatePtr);
  */
 
 Std_ReturnType E2E_P01Check(const E2E_P01ConfigType* Config, E2E_P01CheckStateType* State, const uint8* Data);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        Initializes the check state.
  * @param[out] State : Pointer to port/data communication state.
@@ -230,7 +241,11 @@ Std_ReturnType E2E_P01Check(const E2E_P01ConfigType* Config, E2E_P01CheckStateTy
  */
 
 Std_ReturnType E2E_P01CheckInit(E2E_P01CheckStateType* State);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief       The function maps the check status of Profile 1 to a generic check status, which can be
  *              used by E2E state machine check function. The E2E Profile 1 delivers a more fine-granular
@@ -246,6 +261,8 @@ Std_ReturnType E2E_P01CheckInit(E2E_P01CheckStateType* State);
  */
 E2E_PCheckStatusType
     E2E_P01MapStatusToSM(Std_ReturnType CheckReturn, E2E_P01CheckStatusType Status, boolean ProfileBehavior);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 #ifdef __cplusplus
 
 #endif

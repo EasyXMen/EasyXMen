@@ -332,6 +332,8 @@ PACK_STRUCT_END
 #endif /* LWIP_TCP */
 #endif /* !LWIP_DISABLE_TCP_SANITY_CHECKS */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup lwip_nosys
  * Initialize all modules.
@@ -387,3 +389,5 @@ lwip_init(void)
   sys_timeouts_init();
 #endif /* LWIP_TIMERS */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"

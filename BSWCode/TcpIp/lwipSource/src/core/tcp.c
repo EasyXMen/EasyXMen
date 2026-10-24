@@ -1,4 +1,18 @@
 /**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+
+/**
  * @file
  * Transmission Control Protocol for IP
  * See also @ref tcp_raw
@@ -141,6 +155,8 @@
 #define INITIAL_MSS TCP_MSS
 #endif
 
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static const char *const tcp_state_str[] = {
   "CLOSED",
   "LISTEN",
@@ -154,6 +170,8 @@ static const char *const tcp_state_str[] = {
   "LAST_ACK",
   "TIME_WAIT"
 };
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #define TCPIP_VAR_TCP_PORT(coreIndex)                 g_tcp_port[(coreIndex)]
 #define TCPIP_VAR_TCP_TIMER(coreIndex)                g_tcp_timer[(coreIndex)]
@@ -162,47 +180,118 @@ static const char *const tcp_state_str[] = {
 #define TCPIP_VAR_TCP_EXT_ARG_ID(coreIndex)           g_tcp_ext_arg_id[(coreIndex)]
 
 /* last local TCP port */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_tcp_port[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* Incremented every coarse grained timer shot (typically every 500 ms). */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 u32_t g_tcp_ticks[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static const u8_t tcp_backoff[13] =
 { 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7};
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 /* Times per slowtmr hits */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static const u8_t tcp_persist_backoff[7] = { 3, 6, 12, 24, 48, 96, 120 };
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* The TCP PCB lists. */
 
 /** List of all TCP PCBs bound but not yet (connected || listening) */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct tcp_pcb *g_tcp_bound_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 /** List of all TCP PCBs in LISTEN state */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 union tcp_listen_pcbs_t g_tcp_listen_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 /** List of all TCP PCBs that are in a state in which
  * they accept or send data. */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct tcp_pcb *g_tcp_active_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 /** List of all TCP PCBs in TIME-WAIT state */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct tcp_pcb *g_tcp_tw_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /** An array with all (non-temporary) PCB lists, mainly used for smaller code size */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct tcp_pcb **g_tcp_pcb_lists[TCPIP_MULTICORE_NUMBER][NUM_TCP_PCB_LISTS];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 u8_t g_tcp_active_pcbs_changed[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /** Timer counter to handle calling slow-timer from tcp_tmr() */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_tcp_timer[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_tcp_timer_ctr[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static u16_t tcp_new_port(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t tcp_close_shutdown_fin(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_TCP_PCB_NUM_EXT_ARGS
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_tcp_ext_arg_id[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void tcp_ext_arg_invoke_callbacks_destroyed(struct tcp_pcb_ext_args *ext_args);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef LWIP_HOOK_TCP_ISN
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u32_t g_iss_for_tcp_next_iss[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Initialize this module.
  */
@@ -243,7 +332,11 @@ tcp_init(void)
   TCPIP_VAR_TCP_EXT_ARG_ID(coreIndex) = 0u;
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Free a tcp pcb */
 void
 tcp_free(struct tcp_pcb *pcb)
@@ -254,7 +347,11 @@ tcp_free(struct tcp_pcb *pcb)
 #endif
   memp_free(MEMP_TCP_PCB, pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Free a tcp listen pcb */
 static void
 tcp_free_listen(struct tcp_pcb *pcb)
@@ -265,7 +362,11 @@ tcp_free_listen(struct tcp_pcb *pcb)
 #endif
   memp_free(MEMP_TCP_PCB_LISTEN, pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called periodically to dispatch TCP timers.
  */
@@ -283,8 +384,12 @@ tcp_tmr(void)
     tcp_slowtmr();
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Called when a listen pcb is closed. Iterates one pcb list and removes the
  * closed listener pcb from pcb->listener if matching.
  */
@@ -301,8 +406,12 @@ tcp_remove_listener(struct tcp_pcb *list, struct tcp_pcb_listen *lpcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Called when a listen pcb is closed. Iterates all pcb lists and removes the
  * closed listener pcb from pcb->listener if matching.
  */
@@ -322,8 +431,12 @@ tcp_listen_closed(struct tcp_pcb *pcb)
 #endif
   LWIP_UNUSED_ARG(pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_LISTEN_BACKLOG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup tcp_raw
  * Delay accepting a connection in respect to the listen backlog:
  * the number of outstanding connections is increased until
@@ -347,7 +460,11 @@ tcp_backlog_delayed(struct tcp_pcb *pcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup tcp_raw
  * A delayed-accept a connection is accepted (or closed/aborted): decreases
  * the number of outstanding connections after calling tcp_backlog_delayed().
@@ -370,8 +487,12 @@ tcp_backlog_accepted(struct tcp_pcb *pcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_LISTEN_BACKLOG */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Closes the TX side of a connection held by the PCB.
  * For tcp_close(), a RST is sent if the application didn't receive all data
@@ -453,7 +574,11 @@ tcp_close_shutdown(struct tcp_pcb *pcb, u8_t rst_on_unacked_data)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t
 tcp_close_shutdown_fin(struct tcp_pcb *pcb)
 {
@@ -507,7 +632,11 @@ tcp_close_shutdown_fin(struct tcp_pcb *pcb)
   }
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Closes the connection held by the PCB.
@@ -546,7 +675,11 @@ tcp_close(struct tcp_pcb *pcb)
   /* ... and close */
   return tcp_close_shutdown(pcb, 1);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Causes all or part of a full-duplex connection of this PCB to be shut down.
@@ -599,7 +732,11 @@ tcp_shutdown(struct tcp_pcb *pcb, int shut_rx, int shut_tx)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Abandons a connection and optionally sends a RST to the remote
  * host.  Deletes the local protocol control block. This is done when
@@ -675,7 +812,11 @@ tcp_abandon(struct tcp_pcb *pcb, int reset)
     tcp_free(pcb);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Aborts the connection by sending a RST (reset) segment to the remote
@@ -692,7 +833,11 @@ tcp_abort(struct tcp_pcb *pcb)
 {
   tcp_abandon(pcb, 1);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Binds the connection to a local port number and IP address. If the
@@ -806,7 +951,11 @@ tcp_bind(struct tcp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port)
   LWIP_DEBUGF(TCP_DEBUG, ("tcp_bind: bind to port %"U16_F"\n", port));
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Binds the connection to a netif and IP address.
@@ -827,8 +976,12 @@ tcp_bind_netif(struct tcp_pcb *pcb, const struct netif *netif)
     pcb->netif_idx = NETIF_NO_INDEX;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_CALLBACK_API
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Default accept callback if no accept callback is specified by the user.
  */
@@ -844,8 +997,12 @@ tcp_accept_null(void *arg, struct tcp_pcb *pcb, err_t err)
 
   return ERR_ABRT;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CALLBACK_API */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Set the state of the connection to be LISTEN, which means that it
@@ -885,7 +1042,11 @@ tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog)
   LWIP_ASSERT_CORE_LOCKED();
   return tcp_listen_with_backlog_and_err(pcb, backlog, NULL);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Set the state of the connection to be LISTEN, which means that it
@@ -984,7 +1145,11 @@ done:
   }
   return (struct tcp_pcb *)lpcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Update the state that tracks the available window space to advertise.
  *
@@ -1019,7 +1184,11 @@ tcp_update_rcv_ann_wnd(struct tcp_pcb *pcb)
     return 0;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * This function should be called by the application when it has
@@ -1066,7 +1235,11 @@ tcp_recved(struct tcp_pcb *pcb, u16_t len)
   LWIP_DEBUGF(TCP_DEBUG, ("tcp_recved: received %"U16_F" bytes, wnd %"TCPWNDSIZE_F" (%"TCPWNDSIZE_F").\n",
                           len, pcb->rcv_wnd, (u16_t)(TCP_WND_MAX(pcb) - pcb->rcv_wnd)));
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Allocate a new local TCP port.
  *
@@ -1102,7 +1275,11 @@ again:
   }
   return *tcp_port;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Connects to another host. The function given as the "connected"
@@ -1139,6 +1316,8 @@ tcp_connect(struct tcp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port,
   const u8_t coreIndex = TcpIp_MulticoreIndex;
   struct tcp_pcb **const tcp_bound_pcbs = &TCPIP_VAR_TCP_BOUND_PCBS(coreIndex);
   struct tcp_pcb ***const tcp_pcb_lists = TCPIP_VAR_TCP_PCB_LISTS(coreIndex);
+
+  LWIP_UNUSED_ARG(tcp_pcb_lists);
 
   struct netif *netif = NULL;
   err_t ret;
@@ -1253,7 +1432,11 @@ tcp_connect(struct tcp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port,
   }
   return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called every 500 ms and implements the retransmission timer and the timer that
  * removes PCBs that have been in TIME-WAIT for enough time. It also increments
@@ -1546,7 +1729,11 @@ tcp_slowtmr_start:
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Is called every TCP_FAST_INTERVAL (250 ms) and process data previously
  * "refused" by upper layer (application) and sends delayed ACKs or pending FINs.
@@ -1602,7 +1789,11 @@ tcp_fasttmr_start:
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Call tcp_output for all active pcbs that have TF_NAGLEMEMERR set */
 void
 tcp_txnow(void)
@@ -1618,7 +1809,11 @@ tcp_txnow(void)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Pass pcb->refused_data to the recv callback */
 err_t
 tcp_process_refused_data(struct tcp_pcb *pcb)
@@ -1683,7 +1878,11 @@ tcp_process_refused_data(struct tcp_pcb *pcb)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Deallocates a list of TCP segments (tcp_seg structures).
  *
@@ -1698,7 +1897,11 @@ tcp_segs_free(struct tcp_seg *seg)
     seg = next;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Frees a TCP segment (tcp_seg structure).
  *
@@ -1717,7 +1920,11 @@ tcp_seg_free(struct tcp_seg *seg)
     memp_free(MEMP_TCP_SEG, seg);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp
  * Sets the priority of a connection.
@@ -1734,8 +1941,12 @@ tcp_setprio(struct tcp_pcb *pcb, u8_t prio)
 
   pcb->prio = prio;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_QUEUE_OOSEQ
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Returns a copy of the given TCP segment.
  * The pbuf and data are not copied, only the pointers
@@ -1758,9 +1969,13 @@ tcp_seg_copy(struct tcp_seg *seg)
   pbuf_ref(cseg->p);
   return cseg;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_QUEUE_OOSEQ */
 
 #if LWIP_CALLBACK_API
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Default receive callback that is called if the user didn't register
  * a recv callback for the pcb.
@@ -1780,8 +1995,12 @@ tcp_recv_null(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CALLBACK_API */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Kills the oldest active connection that has a lower priority than 'prio'.
  *
@@ -1831,7 +2050,11 @@ tcp_kill_prio(u8_t prio)
     tcp_abort(inactive);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Kills the oldest connection that is in specific state.
  * Called from tcp_alloc() for LAST_ACK and CLOSING if no more connections are available.
@@ -1866,7 +2089,11 @@ tcp_kill_state(enum tcp_state state)
     tcp_abandon(inactive, 0);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Kills the oldest connection that is in TIME_WAIT state.
  * Called from tcp_alloc() if no more connections are available.
@@ -1895,12 +2122,16 @@ tcp_kill_timewait(void)
     tcp_abort(inactive);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Called when allocating a pcb fails.
  * In this case, we want to handle all pcbs that want to close first: if we can
  * now send the FIN (which failed before), the pcb might be in a state that is
  * OK for us to now free it.
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void
 tcp_handle_closepend(void)
 {
@@ -1920,7 +2151,11 @@ tcp_handle_closepend(void)
     pcb = next;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Allocate a new tcp_pcb structure.
  *
@@ -2028,7 +2263,11 @@ tcp_alloc(u8_t prio)
   }
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Creates a new TCP protocol control block but doesn't place it on
@@ -2049,7 +2288,11 @@ tcp_new(void)
 {
   return tcp_alloc(TCP_PRIO_NORMAL);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Creates a new TCP protocol control block but doesn't
@@ -2077,7 +2320,11 @@ tcp_new_ip_type(u8_t type)
 #endif /* LWIP_IPV4 && LWIP_IPV6 */
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Specifies the program specific state that should be passed to all
@@ -2098,8 +2345,12 @@ tcp_arg(struct tcp_pcb *pcb, void *arg)
     pcb->callback_arg = arg;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_CALLBACK_API
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Sets the callback function that will be called when new data
@@ -2120,7 +2371,11 @@ tcp_recv(struct tcp_pcb *pcb, tcp_recv_fn recv)
     pcb->recv = recv;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Specifies the callback function that should be called when data has
@@ -2140,7 +2395,11 @@ tcp_sent(struct tcp_pcb *pcb, tcp_sent_fn sent)
     pcb->sent = sent;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Used to specify the function that should be called when a fatal error
@@ -2166,7 +2425,11 @@ tcp_err(struct tcp_pcb *pcb, tcp_err_fn err)
     pcb->errf = err;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Used for specifying the function that should be called when a
@@ -2186,9 +2449,13 @@ tcp_accept(struct tcp_pcb *pcb, tcp_accept_fn accept)
     lpcb->accept = accept;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CALLBACK_API */
 
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Specifies the polling interval and the callback function that should
@@ -2221,7 +2488,11 @@ tcp_poll(struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interval)
 #endif /* LWIP_CALLBACK_API */
   pcb->pollinterval = interval;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Purges a TCP PCB. Removes any buffered data and frees the buffer memory
  * (pcb->ooseq, pcb->unsent and pcb->unacked are freed).
@@ -2271,7 +2542,11 @@ tcp_pcb_purge(struct tcp_pcb *pcb)
 #endif /* TCP_OVERSIZE */
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Purges the PCB and removes it from a PCB list. Any delayed ACKs are sent first.
  *
@@ -2310,7 +2585,11 @@ tcp_pcb_remove(struct tcp_pcb **pcblist, struct tcp_pcb *pcb)
 
   LWIP_ASSERT("tcp_pcb_remove: tcp_pcbs_sane()", tcp_pcbs_sane());
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Calculates a new initial sequence number for new connections.
  *
@@ -2332,8 +2611,12 @@ tcp_next_iss(struct tcp_pcb *pcb)
   return TCPIP_VAR_TCP_NEXT_ISS(coreIndex);
 #endif /* LWIP_HOOK_TCP_ISN */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_CALCULATE_EFF_SEND_MSS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Calculates the effective send mss that can be used for a specific IP address
  * by calculating the minimum of TCP_MSS and the mtu (if set) of the target
@@ -2397,8 +2680,12 @@ tcp_eff_send_mss_netif(u16_t sendmss, struct netif *outif, const ip_addr_t *dest
   }
   return sendmss;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_CALCULATE_EFF_SEND_MSS */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Helper function for tcp_netif_ip_addr_changed() that iterates a pcb list */
 static void
 tcp_netif_ip_addr_changed_pcblist(const ip_addr_t *old_addr, struct tcp_pcb *pcb_list)
@@ -2426,7 +2713,11 @@ tcp_netif_ip_addr_changed_pcblist(const ip_addr_t *old_addr, struct tcp_pcb *pcb
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** This function is called from netif.c when address is changed or netif is removed
  *
  * @param old_addr IP address of the netif before change
@@ -2459,13 +2750,21 @@ tcp_netif_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_addr)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 const char *
 tcp_debug_state_str(enum tcp_state s)
 {
   return tcp_state_str[s];
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t
 tcp_tcp_get_tcp_addrinfo(struct tcp_pcb *pcb, int local, ip_addr_t *addr, u16_t *port)
 {
@@ -2489,9 +2788,13 @@ tcp_tcp_get_tcp_addrinfo(struct tcp_pcb *pcb, int local, ip_addr_t *addr, u16_t 
   }
   return ERR_VAL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_QUEUE_OOSEQ
 /* Free all ooseq pbufs (and possibly reset SACK state) */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void
 tcp_free_ooseq(struct tcp_pcb *pcb)
 {
@@ -2503,6 +2806,8 @@ tcp_free_ooseq(struct tcp_pcb *pcb)
 #endif /* LWIP_TCP_SACK_OUT */
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_QUEUE_OOSEQ */
 
 #if TCP_DEBUG || TCP_INPUT_DEBUG || TCP_OUTPUT_DEBUG
@@ -2668,6 +2973,8 @@ tcp_pcbs_sane(void)
 
 
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw_extargs
  * Allocate an index to store data in ext_args member of struct tcp_pcb.
@@ -2702,7 +3009,11 @@ tcp_ext_arg_alloc_id(void)
   LWIP_ASSERT("Increase LWIP_TCP_PCB_NUM_EXT_ARGS in lwipopts.h", result < LWIP_TCP_PCB_NUM_EXT_ARGS);
   return result;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw_extargs
  * Set callbacks for a given index of ext_args on the specified pcb.
@@ -2722,7 +3033,11 @@ tcp_ext_arg_set_callbacks(struct tcp_pcb *pcb, u8_t id, const struct tcp_ext_arg
 
   pcb->ext_args[id].callbacks = callbacks;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw_extargs
  * Set data for a given index of ext_args on the specified pcb.
@@ -2740,7 +3055,11 @@ void tcp_ext_arg_set(struct tcp_pcb *pcb, u8_t id, void *arg)
 
   pcb->ext_args[id].data = arg;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw_extargs
  * Set data for a given index of ext_args on the specified pcb.
@@ -2758,7 +3077,11 @@ void *tcp_ext_arg_get(const struct tcp_pcb *pcb, u8_t id)
 
   return pcb->ext_args[id].data;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** This function calls the "destroy" callback for all ext_args once a pcb is
  * freed.
  */
@@ -2776,7 +3099,11 @@ tcp_ext_arg_invoke_callbacks_destroyed(struct tcp_pcb_ext_args *ext_args)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** This function calls the "passive_open" callback for all ext_args if a connection
  * is in the process of being accepted. This is called just after the SYN is
  * received and before a SYN/ACK is sent, to allow to modify the very first
@@ -2802,6 +3129,8 @@ tcp_ext_arg_invoke_callbacks_passive_open(struct tcp_pcb_listen *lpcb, struct tc
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TCP_PCB_NUM_EXT_ARGS */
 
 #endif /* LWIP_TCP */

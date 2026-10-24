@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -48,6 +48,8 @@
  */
 void Xcp_SoAdRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
+    Xcp_ArtiApiStart(3, XCP_SERVICE_ID_RXINDICATION, RxPduId, PduInfoPtr);
+
     uint16 counter = 0u;
     uint16 len     = 0u;
 
@@ -71,9 +73,17 @@ void Xcp_SoAdRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
         Xcp_CopyU1BufferToU2(&(PduInfoPtr->SduDataPtr[0u]), &len, LOW_BYTE_FIRST);
         Xcp_RxIndication(len, &(PduInfoPtr->SduDataPtr[4u]));
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_RXINDICATION);
+
     return;
 }
 
+#define XCP_STOP_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE_FAST
+#include "Xcp_MemMap.h"
 /**
  * Confirms the transmission of an Ethernet message. This function checks for
  * errors in the transmission process. If error detection is enabled and no
@@ -82,6 +92,8 @@ void Xcp_SoAdRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
  */
 void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    Xcp_ArtiApiStart(3, XCP_SERVICE_ID_TXCONFIRMATION, TxPduId, result);
+
     if (E_OK == result)
     {
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
@@ -91,6 +103,9 @@ void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             Xcp_TxConfirmation(TxPduId);
         }
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_TXCONFIRMATION);
+
     return;
 }
 #define XCP_STOP_SEC_CODE_FAST

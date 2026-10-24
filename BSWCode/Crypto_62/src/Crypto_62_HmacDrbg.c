@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -22,8 +22,8 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0488,0316,0772,1253,1258,1291,1290,1331,1336,1823,1840,1842,1843 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 2001,2015,4434,1252,3219,3396,3397,3672,3715,4443 ++ */                /* VL_Crypto_62_General */
+/* PRQA S 0488,0316,0772,1253,1258,1291,1290,1331,1336,1823,1840,1842,1843 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 2001,2015,4434,1252,3219,3396,3397,3672,3715,4443 ++ */                /* VL_QAC_Crypto */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_SERVICE_RANDOM == STD_ON)
@@ -31,8 +31,6 @@
 
 #include "Crypto_62_HmacDrbg.h"
 #include "Crypto_62_Mac.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
 /**
@@ -59,10 +57,21 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-CRYPTO_62_LOCAL void Crypto_hmac_drbg_init(Crypto_hmac_drbg_context* ctx);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     Crypto_hmac_drbg_update(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 add_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_hmac_drbg_reseed(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
     Crypto_hmac_drbg_context* ctx,
     const Crypto_Md_Info_t*   md_info,
@@ -70,48 +79,51 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
     void*                p_entropy,
     const unsigned char* custom,
     uint32               len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_hmac_drbg_random_with_add(
     void*                p_rng,
     unsigned char*       output,
     uint32               out_len,
     const unsigned char* additional,
     uint32               add_len);
-CRYPTO_62_LOCAL int            Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, uint32 out_len);
-CRYPTO_62_LOCAL void           Crypto_hmac_drbg_free(Crypto_hmac_drbg_context* ctx);
-CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed_buf(
-    Crypto_hmac_drbg_context* ctx,
-    const Crypto_Md_Info_t*   md_info,
-    const unsigned char*      data,
-    uint32                    data_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     hmac_drbg_reseed_core(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 len, int use_nonce);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#if 0
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_prediction_resistance(Crypto_hmac_drbg_context* ctx, int resistance);
-CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_entropy_len(Crypto_hmac_drbg_context* ctx, uint32 len);
-CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_reseed_interval(Crypto_hmac_drbg_context* ctx, int interval);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_entropy_len(Crypto_hmac_drbg_context* ctx, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_reseed_interval(Crypto_hmac_drbg_context* ctx, int interval);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== internal function definitions ========================================= */
-/******************************************************************************/
-/*
- * Brief               HMAC_DRBG context initialization.
- *
- * Param-Name[in]      ctx: HMAC_DRBG context to be initialized.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-CRYPTO_62_LOCAL void Crypto_hmac_drbg_init(Crypto_hmac_drbg_context* ctx)
-{
-    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_hmac_drbg_context));
-
-    ctx->reseed_interval = CRYPTO_HMAC_DRBG_RESEED_INTERVAL;
-}
-
 /******************************************************************************/
 /*
  * Brief               This function updates the state of the HMAC_DRBG context.
@@ -126,11 +138,13 @@ CRYPTO_62_LOCAL void Crypto_hmac_drbg_init(Crypto_hmac_drbg_context* ctx)
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     Crypto_hmac_drbg_update(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 add_len)
 {
     uint32 md_len = Crypto_md_get_size(ctx->md_ctx.md_info);
-    /* PRQA S 3400,4461,3844,1844 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3400,4461,3844,1844 ++ */ /* VL_QAC_Crypto */
     unsigned char rounds = (additional != NULL_PTR && add_len != 0) ? CRYPTO_CONST_2 : 1;
     /* PRQA S 3400,4461,3844,1844 -- */
     unsigned char sep[1];
@@ -186,6 +200,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -202,14 +218,16 @@ exit:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed_buf(
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_hmac_drbg_seed_buf(
     Crypto_hmac_drbg_context* ctx,
     const Crypto_Md_Info_t*   md_info,
     const unsigned char*      data,
     uint32                    data_len)
 {
     Std_ReturnType ret = E_NOT_OK;
-    ret                = Crypto_md_setup(&ctx->md_ctx, md_info);
+    ret                = Crypto_md_setup(&ctx->md_ctx, md_info, 1);
     if (ret != E_OK)
     {
         return ret;
@@ -234,6 +252,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed_buf(
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -250,6 +270,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed_buf(
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int
     hmac_drbg_reseed_core(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 len, int use_nonce)
 {
@@ -288,7 +310,7 @@ CRYPTO_62_LOCAL int
 
     /* For initial seeding, allow adding of nonce generated
      * from the entropy source. See Sect 8.6.7 in SP800-90A. */
-    if (use_nonce) /* PRQA S 3344 */ /* VL_Crypto_62_General */
+    if (use_nonce) /* PRQA S 3344 */ /* VL_QAC_Crypto */
     {
         /* Note: We don't merge the two calls to f_entropy() in order
          *       to avoid requesting too much entropy from f_entropy()
@@ -328,6 +350,8 @@ exit:
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -344,10 +368,14 @@ exit:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_hmac_drbg_reseed(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 len)
 {
     return hmac_drbg_reseed_core(ctx, additional, len, 0);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -372,6 +400,8 @@ CRYPTO_62_LOCAL int Crypto_hmac_drbg_reseed(Crypto_hmac_drbg_context* ctx, const
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
     Crypto_hmac_drbg_context* ctx,
     const Crypto_Md_Info_t*   md_info,
@@ -382,7 +412,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
 {
     int    ret = E_NOT_OK;
     uint32 md_size;
-    ret = Crypto_md_setup(&ctx->md_ctx, md_info);
+    ret = Crypto_md_setup(&ctx->md_ctx, md_info, 1);
     if (ret != E_OK)
     {
         return ret;
@@ -414,7 +444,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
          *
          * (This also matches the sizes used in the NIST test vectors.)
          */
-        /* PRQA S 1824,3391 ++ */                                         /* VL_Crypto_62_General */
+        /* PRQA S 1824,3391 ++ */                                         /* VL_QAC_Crypto */
         ctx->entropy_len = md_size <= CRYPTO_CONST_20 ? CRYPTO_CONST_16 : /* 160-bits hash -> 128 bits */
                                md_size <= CRYPTO_CONST_28 ? CRYPTO_CONST_24
                                                           : /* 224-bits hash -> 192 bits */
@@ -429,6 +459,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -443,10 +475,15 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
  * Return              None
  */
 /******************************************************************************/
+#if 0
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_prediction_resistance(Crypto_hmac_drbg_context* ctx, int resistance)
 {
     ctx->prediction_resistance = resistance;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -459,10 +496,14 @@ CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_prediction_resistance(Crypto_hmac_drbg
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_entropy_len(Crypto_hmac_drbg_context* ctx, uint32 len)
 {
     ctx->entropy_len = len;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -474,11 +515,15 @@ CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_entropy_len(Crypto_hmac_drbg_context* 
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_reseed_interval(Crypto_hmac_drbg_context* ctx, int interval)
 {
     ctx->reseed_interval = interval;
 }
-
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 /******************************************************************************/
 /*
  * Brief               This function updates an HMAC_DRBG instance with additional
@@ -498,6 +543,8 @@ CRYPTO_62_LOCAL void Crypto_hmac_drbg_set_reseed_interval(Crypto_hmac_drbg_conte
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL int Crypto_hmac_drbg_random_with_add(
     void*                p_rng,
     unsigned char*       output,
@@ -581,6 +628,8 @@ exit:
     /* 8. Done */
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -594,7 +643,9 @@ exit:
  *                          E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL int Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, uint32 out_len)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, uint32 out_len)
 {
     int                       ret = E_NOT_OK;
     Crypto_hmac_drbg_context* ctx = (Crypto_hmac_drbg_context*)p_rng;
@@ -603,6 +654,8 @@ CRYPTO_62_LOCAL int Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, 
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -615,7 +668,9 @@ CRYPTO_62_LOCAL int Crypto_hmac_drbg_random(void* p_rng, unsigned char* output, 
  * Return              None
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL void Crypto_hmac_drbg_free(Crypto_hmac_drbg_context* ctx)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_hmac_drbg_free(Crypto_hmac_drbg_context* ctx)
 {
     if (ctx == NULL_PTR)
     {
@@ -624,8 +679,12 @@ CRYPTO_62_LOCAL void Crypto_hmac_drbg_free(Crypto_hmac_drbg_context* ctx)
 
     ctx->reseed_interval = CRYPTO_HMAC_DRBG_RESEED_INTERVAL;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_HmacDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType           ret = E_NOT_OK;
@@ -668,11 +727,31 @@ Std_ReturnType Crypto_HmacDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyTyp
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.md_ctx.hmac_ctx);
     return ret;
 }
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
-#endif
-#endif
+
+/******************************************************************************/
+/*
+ * Brief               HMAC_DRBG context initialization.
+ *
+ * Param-Name[in]      ctx: HMAC_DRBG context to be initialized.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     None
+ * Return              None
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_hmac_drbg_init(Crypto_hmac_drbg_context* ctx)
+{
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_hmac_drbg_context));
+
+    ctx->reseed_interval = CRYPTO_HMAC_DRBG_RESEED_INTERVAL;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif /* CRYPTO_ALGORITHMMODE_HMAC == STD_ON */
+#endif /* CRYPTO_SERVICE_RANDOM == STD_ON */
 
 /* PRQA S 0488,0316,0772,1253,1258,1291,1290,1331,1336,1823,1840,1842,1843 -- */
 /* PRQA S 2001,2015,4434,1252,3219,3396,3397,3672,3715,4443 -- */

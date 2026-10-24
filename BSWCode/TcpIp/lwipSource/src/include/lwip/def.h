@@ -93,12 +93,20 @@ extern "C" {
 #define PP_NTOHL(x)   ((u32_t)(x))
 #else /* BYTE_ORDER != BIG_ENDIAN */
 #ifndef lwip_htons
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t lwip_htons(u16_t x);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #define lwip_ntohs(x) lwip_htons(x)
 
 #ifndef lwip_htonl
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u32_t lwip_htonl(u32_t x);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #define lwip_ntohl(x) lwip_htonl(x)
 
@@ -130,23 +138,43 @@ u32_t lwip_htonl(u32_t x);
 
 #ifndef lwip_itoa
 /* This can be #defined to itoa() or snprintf(result, bufsize, "%d", number) depending on your platform */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  lwip_itoa(char* result, size_t bufsize, int number);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef lwip_strnicmp
 /* This can be #defined to strnicmp() or strncasecmp() depending on your platform */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int   lwip_strnicmp(const char* str1, const char* str2, size_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef lwip_stricmp
 /* This can be #defined to stricmp() or strcasecmp() depending on your platform */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int   lwip_stricmp(const char* str1, const char* str2);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef lwip_strnstr
 /* This can be #defined to strnstr() depending on your platform */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 char* lwip_strnstr(const char* buffer, const char* token, size_t n);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef lwip_strnistr
 /* This can be #defined to strnistr() depending on your platform */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 char* lwip_strnistr(const char* buffer, const char* token, size_t n);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

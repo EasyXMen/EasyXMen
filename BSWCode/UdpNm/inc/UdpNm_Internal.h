@@ -73,16 +73,24 @@ typedef void (*UdpNm_TimerTimoutHandleType)(UdpNm_ChannelIndexType chIndex);
 
 /* =========================================== external data declarations =========================================== */
 #if UDPNM_MULTIPLE_PARTITION_USED == STD_ON
+#define UDPNM_START_SEC_CONFIG_DATA_32
+#include "UdpNm_MemMap.h"
 /**
  * @brief An array of partitions involved by the CanNm module.
  */
 extern const ApplicationType UdpNm_OsApplicationList[UDPNM_NUMBER_OF_PARTITION]; /**< @range NA */
+#define UDPNM_STOP_SEC_CONFIG_DATA_32
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "UdpNm_MemMap.h"
 /**
  * @brief The channel configuration structure of the CanNm module.
  */
 extern const UdpNm_ChannelLConfigType UdpNm_ChannelLCfgData[UDPNM_NUMBER_OF_CHANNEL]; /**< @range NA */
+#define UDPNM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "UdpNm_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 

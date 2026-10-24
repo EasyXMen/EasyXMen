@@ -59,6 +59,8 @@
 /** @} */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         For aging events, reset in the UDS status the relevant bits and perform or start healing.
  * @param[in]     EventId: Event ID
@@ -70,6 +72,10 @@
  */
 DEM_LOCAL Dem_UdsStatusByteType
     Dem_EventInitStatusAgingEvent(Dem_EventIdType EventId, Dem_UdsStatusByteType EventStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the event status of a given event
@@ -79,6 +85,10 @@ DEM_LOCAL Dem_UdsStatusByteType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_InitEventStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Event Status Changed notification
@@ -93,6 +103,10 @@ DEM_LOCAL void Dem_NotiEventStatusChanged(
     Dem_EventIdType       EventId,
     Dem_UdsStatusByteType EventUdsStatusOld,
     Dem_UdsStatusByteType EventUdsStatusNew);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Tests whether an event may age
@@ -105,8 +119,12 @@ DEM_LOCAL void Dem_NotiEventStatusChanged(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_CheckEventMayAge(Dem_UdsStatusByteType UdsStatus);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Updates an event due to aging
  * @param[in]     EventId: Event ID
@@ -116,7 +134,11 @@ DEM_LOCAL boolean Dem_CheckEventMayAge(Dem_UdsStatusByteType UdsStatus);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventAged(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Soft filter when pass,if TF/TNCLSC or TNCTOC is flaged then no deal with uds status
@@ -129,8 +151,12 @@ DEM_LOCAL void Dem_EventAged(Dem_EventIdType EventId, const Dem_CombinedArgPtrTy
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_EventNeedPassedCheck(const Dem_EventContextType* const EventContext);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_INDICATOR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Process event healing for events with healing target 0.
  * @param[in]     EventContext: The event context
@@ -139,7 +165,11 @@ DEM_LOCAL boolean Dem_EventNeedPassedCheck(const Dem_EventContextType* const Eve
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventPassedProcessHealing(Dem_EventContextType* EventContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculate storage depending event triggers on 'Failed' status report.
@@ -149,6 +179,10 @@ DEM_LOCAL void Dem_EventPassedProcessHealing(Dem_EventContextType* EventContext)
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventCalculateFailedEffectsOnStorage(Dem_EventContextType* EventContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update of event's storage dependent UDS status bits on 'Failed' status report
@@ -158,6 +192,10 @@ DEM_LOCAL void Dem_EventCalculateFailedEffectsOnStorage(Dem_EventContextType* Ev
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventCalculateStatusOnFailedOnStorage(Dem_EventContextType* EventContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process DTC triggers on 'Failed' status report.
@@ -167,8 +205,12 @@ DEM_LOCAL void Dem_EventCalculateStatusOnFailedOnStorage(Dem_EventContextType* E
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCProcessFailedEffects(const Dem_DTCContextType* DTCContext);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         If Dem_SetEventConfirmationThresholdCounter is called and the corresponding event is already stored in
  * event memory and the new failure threshold is less or equal to the current failure counter, then  the event will get
@@ -179,11 +221,15 @@ DEM_LOCAL void Dem_DTCProcessFailedEffects(const Dem_DTCContextType* DTCContext)
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         For Stored DTCs having a combined group, test if another event is available beside the event to set
  * unavailable.
@@ -196,8 +242,12 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_TestRemainingEventforDtc(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Marks an event available
@@ -207,6 +257,10 @@ DEM_LOCAL boolean Dem_TestRemainingEventforDtc(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventEnable(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Marks an event unavailable
@@ -219,6 +273,10 @@ DEM_LOCAL void Dem_EventEnable(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_EventDisable(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process event availability changes
@@ -228,7 +286,11 @@ DEM_LOCAL Std_ReturnType Dem_EventDisable(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessEventAvailable(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes an event's healing conditions
@@ -240,6 +302,10 @@ DEM_LOCAL void Dem_ProcessEventAvailable(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_UdsStatusByteType Dem_EventProcessHealing(Dem_EventIdType EventId, Dem_UdsStatusByteType EventStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes healing at the end of the event's operation cycle
@@ -253,6 +319,8 @@ DEM_LOCAL Dem_UdsStatusByteType Dem_EventProcessHealing(Dem_EventIdType EventId,
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_EventOperationCyclEndHealing(Dem_EventIdType EventId, Dem_UdsStatusByteType EventStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes the start of the event's operation cycle
@@ -271,11 +339,13 @@ DEM_LOCAL_INLINE void Dem_EventOperationCyclStart(Dem_EventIdType EventId);
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
-DEM_LOCAL void Dem_EventOperationCycle(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr);
-
-/* ========================================== internal function definitions ========================================= */
 #define DEM_START_SEC_CODE
 #include "Dem_MemMap.h"
+DEM_LOCAL void Dem_EventOperationCycle(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+
+/* ========================================== internal function definitions ========================================= */
 /**
  * @brief         Get the number of all events, including invalid events #0
  * @return        Dem_EventIdType
@@ -334,7 +404,6 @@ DEM_LOCAL_INLINE boolean Dem_GetAvailableByEvent(Dem_EventIdType EventId)
 {
     return Dem_GlobalConfigPtr->PBEvent[EventId].EventAvailable;
 }
-
 #if (defined(DEM_EVENT_ASSOCIATED_IDENTIFICATION))
 /**
  * @brief         Get DemEventAssociatedIdentification information based on event ID
@@ -349,7 +418,6 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_GetAssociatedIdByEvent(Dem_EventIdType Even
     return Dem_GlobalConfigPtr->PBEvent[EventId].EventAssociatedIdentification;
 }
 #endif
-
 /**
  * @brief         Get DemEventConfirmationThreshold information based on event ID
  * @param[in]     EventId: Event ID
@@ -379,7 +447,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetEventConfirmationThreshold(Dem_EventIdType EventId
     return Dem_GetConfirmationThresholdByEvent(EventId);
 #endif
 }
-
 #if (DEM_AGING_ENABLE == STD_ON)
 /**
  * @brief         Get Event Aging Cycle
@@ -406,7 +473,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetEventAgingThreshold(Dem_EventIdType EventId)
 {
     return Dem_GetAgeThrOfDTCAttr(Dem_GetAttrRefOfEvent(EventId));
 }
-
 #if (DEM_STATUS_BIT_HANDLING_TEST_FAILED_SINCE_LAST_CLEAR == STD_ON)
 /**
  * @brief         Get Event Aging Threshold TFSLC
@@ -422,7 +488,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetEventAgingThresholdTFSLC(Dem_EventIdType EventId)
 }
 #endif
 #endif
-
 #if (DEM_AGING_ENABLE == STD_ON)
 /**
  * @brief         Get Event max Aging Threshold
@@ -443,7 +508,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetEventMaxAgingThreshold(Dem_EventIdType EventId)
 #endif
 }
 #endif
-
 #if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
 /**
  * @brief         Set Event Confirmation Threshold
@@ -458,7 +522,6 @@ DEM_LOCAL_INLINE void Dem_SetEventConfirmationThreshold(Dem_EventIdType EventId,
     Dem_EventConfirmationThreshold[EventId] = ConfirmationThreshold;
 }
 #endif
-
 /* PRQA S 4404 ++ */ /* VL_Dem_4404 */
 /**
  * @brief         check if DemEventRecoverableInSameOperationCycle is enable and FTOC is set based on event ID
@@ -509,7 +572,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckEventThrAdapt(Dem_EventIdType EventId)
 {
     return DEM_FLAG_ISSET(Dem_GetCfgFlagOfEvent(EventId), Dem_EventCDThrCounterAdaptPos);
 }
-
 #if (DEM_INDICATOR_NUMBER > 0u)
 /**
  * @brief         check if all DemIndicatorHealingCycleCounterThreshold are equal to 0 based on event ID
@@ -526,7 +588,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckEventAllHealingequal0(Dem_EventIdType EventId)
     return DEM_FLAG_ISSET(Dem_GetCfgFlagOfEvent(EventId), Dem_EventAllHealingEqual0);
 }
 #endif
-
 /**
  * @brief         check if  Event have Special Indicator based on event ID
  */
@@ -674,7 +735,6 @@ DEM_LOCAL_INLINE boolean Dem_GetDebounceBehaviorByEvent(Dem_EventIdType EventId)
 {
     return (boolean)Dem_GetBehaviorResetOfDB(Dem_GetDebounceRefOfEvent(EventId));
 }
-
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 /**
  * @brief         Set event available change internal status
@@ -721,7 +781,6 @@ DEM_LOCAL_INLINE boolean Dem_GetEventAvailableChangedStatus(Dem_EventInternalSta
     return DEM_FLAG_ISSET(Status, DEM_INTERNAL_STATUS_AVAILABLE_CHANGED); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
 #endif
-
 #if (                                                                                                     \
     (DEM_ENTRY_TRIGGER_ON_FDC_THRESHOLD == STD_ON) || (DEM_GENERAL_ED_TRIGGER_ON_FDC_THRESHOLD == STD_ON) \
     || (DEM_GENERAL_FF_TRIGGER_ON_FDC_THRESHOLD == STD_ON))
@@ -770,7 +829,6 @@ DEM_LOCAL_INLINE boolean Dem_GetEventFdcTocStatus(Dem_EventInternalStatusType St
     return DEM_FLAG_ISSET(Status, DEM_INTERNAL_STATUS_FDCTOC); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
 #endif
-
 /**
  * @brief         Get event available internal status based on event ID
  * @param[in]     EventId: Event ID
@@ -785,7 +843,6 @@ DEM_LOCAL_INLINE boolean Dem_GetEventAvailableStatusByEventId(Dem_EventIdType Ev
 {
     return Dem_GetEventAvailableStatus(Dem_GetEventInternalStatusByEvent(EventId));
 }
-
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
 /**
  * @brief         Set event Suppressed status
@@ -832,7 +889,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckEventSuppressed(Dem_EventInternalStatusType St
     return DEM_FLAG_ISSET(Status, DEM_INTERNAL_STATUS_SUPPRESSED); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
 #endif
-
 #if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         Set Combined event Variant status
@@ -864,7 +920,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckCombinedEventVariant(Dem_EventInternalStatusTy
     return DEM_FLAG_ISSET(Status, DEM_INTERNAL_STATUS_AVAILVARIANT);
 }
 #endif
-
 /**
  * @brief         Set event user controlled warning indicator request internal status based on event ID
  * @param[in]     Status: Event status
@@ -910,7 +965,6 @@ DEM_LOCAL_INLINE boolean Dem_GetEventWirActiveStatus(Dem_EventIdType EventId)
     Dem_EventInternalStatusType lStatus = Dem_GetEventInternalStatusByEvent(EventId);
     return DEM_FLAG_ISSET(lStatus, DEM_INTERNAL_STATUS_WIRCONTROLL); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
 #if (defined(DEM_EVENT_MONOTOR_DEBOUNCCE))
 /**
  * @brief         Get event Get Fault Detection Counter fnc based on event ID
@@ -931,7 +985,6 @@ DEM_LOCAL_INLINE DemGetFaultDetectionCounterType Dem_GetDebounceGetFDC(Dem_Event
     return fnc;
 }
 #endif
-
 /**
  * @brief         Pre-initialization event state
  * @reentrant     FALSE
@@ -999,7 +1052,8 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_EventInitStatusResetStoredBits(Dem_Ud
 #endif
     return newStatus;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief For aging events, reset in the UDS status the relevant bits and perform or start healing.
  */
@@ -1032,9 +1086,15 @@ DEM_LOCAL Dem_UdsStatusByteType
     }
 #endif
 #endif
+#if (DEM_INDICATOR_NUMBER == 0u)
+    DEM_PARAM_UNUSED(EventId);
+#endif
     return newStatus;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the event status of a given event
  */
@@ -1098,6 +1158,8 @@ DEM_LOCAL void Dem_InitEventStatus(Dem_EventIdType EventId)
     }
 #endif
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -1484,7 +1546,6 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_UDSStatusResetWIR(Dem_UdsStatusByteTy
     DEM_FLAG_RESET(lStatus, DEM_UDS_STATUS_WIR);
     return lStatus;
 }
-
 #if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
 /**
  * @brief         check Event Status Block need to store
@@ -1595,7 +1656,6 @@ DEM_LOCAL_INLINE void Dem_SetEventUDSStatus(Dem_EventIdType EventId, Dem_UdsStat
 {
     Dem_GetEventStatusData().EventStatus[EventId] = Status;
 }
-
 #if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         Get Combined Event UDS Status
@@ -1623,7 +1683,6 @@ DEM_LOCAL_INLINE void Dem_SetCombinedEventUDSStatus(Dem_CombinationNumType Group
     Dem_GetEventStatusData().CombinedEventStatus[GroupId] = Status;
 }
 #endif
-
 #if (DEM_EVENT_HEALING_COUNTER == STD_ON)
 /**
  * @brief         Get Event Healing Counter
@@ -1651,7 +1710,6 @@ DEM_LOCAL_INLINE void Dem_SetEventHealingCounter(Dem_EventIdType EventId, uint8 
     Dem_GetEventStatusData().HealingCounter[EventId] = HealingCounter;
 }
 #endif
-
 #if (DEM_EVENT_FAILURE_COUNTER == STD_ON)
 /**
  * @brief         Get Event Failure Counter
@@ -1679,10 +1737,8 @@ DEM_LOCAL_INLINE void Dem_SetEventFailureCounter(Dem_EventIdType EventId, uint8 
     Dem_GetEventStatusData().FailureCounter[EventId] = FailureCounter;
 }
 #endif
-
 /******************Combined event*******************/
 #if (DEM_COMBINATION_NUMBER > 0u)
-
 /**
  * @brief         Get Combined event internal status based on Group ID
  */
@@ -1704,7 +1760,8 @@ DEM_LOCAL_INLINE void
 {
     Dem_CombinedEventStatus[GroupId] = Status;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Pre-initialization Combined event
  */
@@ -1730,7 +1787,10 @@ DEM_LOCAL void Dem_CombinedEventPreInit(void)
         Dem_SetCombinedEventStatusByGroupId(groupId, internalStatus);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief initialization Combined event
  */
@@ -1756,8 +1816,9 @@ DEM_LOCAL void Dem_CombinedEventInit(void)
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         initialization event context
  * @param[in]     EventId: Event ID
@@ -1774,7 +1835,8 @@ DEM_LOCAL_INLINE void Dem_InitEventContext(Dem_EventIdType EventId, Dem_EventCon
     EventContext->DataModified   = FALSE;
     EventContext->Eventtriggers  = DEM_TRIGGER_NONE;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Event Status Changed notification
  * @param[in]     EventId: Event ID
@@ -1821,7 +1883,10 @@ DEM_LOCAL void Dem_NotiEventStatusChanged(
 #endif
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Event Data Changed notification
  */
@@ -1850,7 +1915,10 @@ DEM_LOCAL void Dem_NotiEventDataChanged(Dem_EventIdType EventId)
     DEM_PARAM_UNUSED(EventId);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief  Calls all configured 'init monitor for event' callbacks.
  */
@@ -1871,7 +1939,10 @@ DEM_LOCAL void Dem_NotiInitMonitorForEvent(Dem_EventIdType EventId, Dem_InitMoni
     DEM_PARAM_UNUSED(InitReason);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Tests whether an event may age
  */
@@ -1909,7 +1980,10 @@ DEM_LOCAL boolean Dem_CheckEventMayAge(Dem_UdsStatusByteType UdsStatus)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reset the Uds Status bit of the event
  */
@@ -1938,9 +2012,13 @@ DEM_LOCAL void Dem_EventResetUdsStatus(Dem_EventIdType EventId, Dem_UdsStatusByt
         lDTCContext.OldDtcStatus,
         Dem_DTCApplyExternalStatus(EventId, lDTCContext.NewDtcStatus));
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3473, 4399, 4461 -- */
 /* PRQA S 6070 -- */
 #if (DEM_EVENT_CALLBACK_CLEAR_ALLOWED > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief If the out-parameter Allowed of the callback DemClearEventAllowed returns false and the configuration
  * parameter DemClearEventAllowedBehavior is set to DEM_ONLY_THIS_CYCLE_AND_READINESS, the related UDS status bits 1
@@ -1973,8 +2051,11 @@ DEM_LOCAL void Dem_EventClearReset(Dem_EventIdType EventId)
         lDTCContext.OldDtcStatus,
         Dem_DTCApplyExternalStatus(EventId, lDTCContext.NewDtcStatus));
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief processes the stored triggers from debounce values passing the FDC trip threshold.
  */
@@ -2026,8 +2107,11 @@ DEM_LOCAL void Dem_EventProcessFdc(Dem_EventIdType EventId, boolean FdcThrExceed
     DEM_PARAM_UNUSED(FdcMaximumExceeded);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_GENERAL_DISPLACEMENT_NONE == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates an event's status due to displacement.Do not call this function directly, it is part of
  * Dem_DTCDisplaced
@@ -2074,8 +2158,11 @@ DEM_LOCAL void Dem_EventDisplaced(Dem_EventIdType EventId, const Dem_CombinedArg
 #endif
     DEM_PARAM_UNUSED(ArgPtr);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Clears an event's state in volatile RAM
  */
@@ -2135,8 +2222,11 @@ DEM_LOCAL void Dem_EventCleared(Dem_EventIdType EventId, const Dem_CombinedArgPt
     Dem_NotiEventStatusChanged(EventId, oldEventStatus, DEM_UDS_STATUS_INITIALIZE);
     DEM_PARAM_UNUSED(ArgPtr);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates an event due to aging
  */
@@ -2180,8 +2270,11 @@ DEM_LOCAL void Dem_EventAged(Dem_EventIdType EventId, const Dem_CombinedArgPtrTy
     }
     DEM_PARAM_UNUSED(ArgPtr);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Soft filter when pass,if TF/TNCLSC or TNCTOC is flaged then no deal with uds status
  */
@@ -2196,7 +2289,8 @@ DEM_LOCAL boolean Dem_EventNeedPassedCheck(const Dem_EventContextType* const Eve
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Update of event's UDS status bits on 'Passed' status report
  * @param[in]     EventContext: The event context
@@ -2226,7 +2320,6 @@ DEM_LOCAL_INLINE void Dem_EventPassedCalcEventtriggers(Dem_EventContextType* Eve
         DEM_FLAG_SET(EventContext->Eventtriggers, DEM_TRIGGER_TESTPASSED);
     }
 }
-
 #if (DEM_INDICATOR_NUMBER > 0u)
 /**
  * @brief         Resets all warning indicator requests from the given event. This can modify the global indicator state
@@ -2248,7 +2341,8 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_EventHealed(Dem_EventIdType EventId, 
     }
     return newEventStatus;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process event healing for events with healing target 0.
  */
@@ -2278,8 +2372,9 @@ DEM_LOCAL void Dem_EventPassedProcessHealing(Dem_EventContextType* EventContext)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Process event triggers on 'Passed' status report.
  * @param[in]     EventContext: The event context
@@ -2291,13 +2386,16 @@ DEM_LOCAL_INLINE void Dem_EventProcessPassedEffects(Dem_EventContextType* EventC
 {
 #if (DEM_INDICATOR_NUMBER > 0u)
     Dem_EventPassedProcessHealing(EventContext);
+#else
+    DEM_PARAM_UNUSED(EventContext);
 #endif
 
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
     Dem_SetPrestoreStateDiscard();
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process the event's queued qualified passed result
  */
@@ -2335,6 +2433,8 @@ DEM_LOCAL void Dem_EventPassed(Dem_EventIdType EventId)
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2396,13 +2496,16 @@ DEM_LOCAL_INLINE boolean Dem_EventCheckConfirmedFulfilled(const Dem_EventContext
     Dem_EventIdType eventId = EventContext->EventId;
     ret                     = FALSE;
     if ((Dem_GetEventFailureCounter(eventId) + 1u) >= Dem_GetEventConfirmationThreshold(eventId))
+#else
+    DEM_PARAM_UNUSED(EventContext);
 #endif
     {
         ret = TRUE;
     }
     return ret;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculate storage depending event triggers on 'Failed' status report.
  */
@@ -2440,7 +2543,10 @@ DEM_LOCAL void Dem_EventCalculateFailedEffectsOnStorage(Dem_EventContextType* Ev
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update of event's storage dependent UDS status bits on 'Failed' status report
  */
@@ -2461,7 +2567,10 @@ DEM_LOCAL void Dem_EventCalculateStatusOnFailedOnStorage(Dem_EventContextType* E
     }
     Dem_SetEventUDSStatus(EventContext->EventId, EventContext->NewEventStatus);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process DTC triggers on 'Failed' status report.
  */
@@ -2479,7 +2588,10 @@ DEM_LOCAL void Dem_DTCProcessFailedEffects(const Dem_DTCContextType* DTCContext)
     Dem_LeaveCritical_DiagMonitor();
     /** Leave Critical Section: DiagMonitor */
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process the event's queued qualified failed result
  */
@@ -2550,9 +2662,13 @@ DEM_LOCAL void Dem_EventFailed(Dem_EventIdType EventId)
         lDTCContext.OldDtcStatus,
         Dem_DTCApplyExternalStatus(EventId, lDTCContext.NewDtcStatus));
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 #if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief If Dem_SetEventConfirmationThresholdCounter is called and the corresponding event is already stored in
  * event memory and the new failure threshold is less or equal to the current failure counter, then  the event will get
@@ -2593,6 +2709,8 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId)
         lDTCContext.OldDtcStatus,
         Dem_DTCApplyExternalStatus(EventId, lDTCContext.NewDtcStatus));
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 3473 -- */
 
@@ -2600,6 +2718,8 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId)
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief For Stored DTCs having a combined group, test if another event is available beside the event to set
  * unavailable.
@@ -2625,9 +2745,12 @@ DEM_LOCAL boolean Dem_TestRemainingEventforDtc(Dem_EventIdType EventId)
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check precondition for event unavailable
  */
@@ -2657,7 +2780,10 @@ DEM_LOCAL boolean Dem_EventMayDisable(Dem_EventIdType EventId)
 
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Marks an event available
  */
@@ -2681,7 +2807,10 @@ DEM_LOCAL void Dem_EventEnable(Dem_EventIdType EventId)
         Dem_EnableTaskOnce(Dem_Task_Event);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Marks an event unavailable
  */
@@ -2718,8 +2847,9 @@ DEM_LOCAL Std_ReturnType Dem_EventDisable(Dem_EventIdType EventId)
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
-
 /**
  * @brief         Marks a normal event unavailable
  * @param[in]     EventId: Event ID
@@ -2763,7 +2893,8 @@ DEM_LOCAL_INLINE void Dem_EventEnableNormal(Dem_EventIdType EventId)
     Dem_SetEventUDSStatus(EventId, DEM_UDS_STATUS_INITIALIZE);
     Dem_NotiEventStatusChanged(EventId, oldEventStatus, DEM_UDS_STATUS_INITIALIZE);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process event availability changes
  */
@@ -2804,6 +2935,10 @@ DEM_LOCAL void Dem_ProcessEventAvailable(Dem_EventIdType EventId)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -2816,8 +2951,11 @@ DEM_LOCAL void Dem_EventTask(void)
         Dem_ProcessEventAvailable(eventId);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes an event's healing conditions
  */
@@ -2854,10 +2992,15 @@ DEM_LOCAL Dem_UdsStatusByteType Dem_EventProcessHealing(Dem_EventIdType EventId,
         newEventStatus = Dem_EventHealed(EventId, newEventStatus);
     }
 #endif
+#else
+    DEM_PARAM_UNUSED(EventId);
 #endif
     return newEventStatus;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes healing at the end of the event's operation cycle
  */
@@ -2912,8 +3055,9 @@ DEM_LOCAL boolean Dem_EventOperationCyclEndHealing(Dem_EventIdType EventId, Dem_
     }
     return eventMayAge;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
-
 /**
  * @brief         Processes the end of the event's operation cycle
  * @param[in]     EventId: Event ID
@@ -2930,7 +3074,6 @@ DEM_LOCAL_INLINE void Dem_EventOperationCyclEnd(Dem_EventIdType EventId)
 #endif
     }
 }
-
 /**
  * @brief         Processes the start of the event's operation cycle
  * @param[in]     EventId: Event ID
@@ -2963,7 +3106,8 @@ DEM_LOCAL_INLINE void Dem_EventOperationCyclStart(Dem_EventIdType EventId)
     }
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates an event's state due to operation cycle change
  */
@@ -2988,7 +3132,8 @@ DEM_LOCAL void Dem_EventOperationCycle(Dem_EventIdType EventId, const Dem_Combin
     /** Call Init Monitor Callbacks */
     Dem_NotiInitMonitorForEvent(EventId, DEM_INIT_MONITOR_RESTART);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes the event status
  * @param[in]     EventId: Event ID
@@ -3030,6 +3175,4 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_EventGetUDSStatus(Dem_EventIdType EventId, D
     return ret;
 }
 
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

@@ -84,11 +84,25 @@
  *                                               which some are configured with USE_BLOCK_ID, the total length of the
  *                                               response is incorrect.
  *            2026-02-12  li.feng      CPTASK-462.Fix: Optimize the execution time of Dcm_SatelliteMainFunction.
+ *            2026-04-02  li.feng      CPT-18335.36 service data length vs maxBlockLength mismatch: return 0x31 not
+ *                                               0x71.
  *  V03.00.03 2026-04-04  tao.yu       CPT-18414,fix CommunicationMode calculate error in 04 and 05 subfunction of 0x28
  *                                     CPT-18344, fix NRC 33 in the 0x22 service
  *                                     CPT-18415, fix NRC 10 in the 0x22 service
  *            2026-04-05  tao.yu       CPT-18416, Fix the abnormal session state when the repair agreement is preempted.
  *                                     CPT-18417, fix error process in the 0x04 service
+ *            2026-04-08  li.feng      CPT-18375, Optimization for Reading Duplicate NvM-based DIDs in Service 22.
+ *            2026-04-08  li.feng      CPT-18432, Periodic PID transmission does not stop in unsupported sessions.
+ *            2026-04-15  li.feng      CPT-18560, After switching the security level, service 2F is not handled
+ *                                     properly.
+ *  V03.00.04 2026-05-06  li.feng      CPT-18846, Fix Diagnostic 19 02 00 reply error.
+ *            2026-05-08  li.feng      CPT-18862, Fix Array out-of-bounds caused by the 31 service.
+ *            2026-05-18  li.feng      CPT-18862, UDS 36 service: data offset error causing write data abnormality.
+ *            2026-05-22  li.feng      CPT-19021, Fix 0x11 abnormal response after 'Res After Reset' config.
+ *            2026-05-27  li.feng      CPT-19061, Fix the recognition of 3E 80 in Dcm_StartOfReception.
+ *  V03.00.05 2026-06-04  tao.yu       add arti
+ *            2026-06-16  li.feng      CPT-19235, UDS and OBD diagnostic request interaction during a trip.
+ *            2026-07-28  li.feng      CPT-19359, Request 86 04 service with incorrect response data.
  *
  *====================================================================================================================
  */
@@ -104,142 +118,159 @@
     \li VL_Dcm_3672
       Reason: function pointer needs to be assigned depends on configuration
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3218
       Reason: file scoped variables only used in one function are necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3446
       Reason: side effects are expected and will not affect the functionality
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3315
       Reason: switch cases depend on configuration
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2841
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2991
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2994
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2995
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2996
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2880
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2983
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4342
       Reason: enum conversion is necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_0624
-      Reason: function parameter can be considered as the same via typedef
+      Reason: Dcm_SetActiveDiagnostic is defined in Dcm.c with boolean and declared in Rte_Dcm.h with Boolean.Underlying
+  types are identical; depending on service component configuration.Confirmed safe by review.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2120
       Reason: unsigned bit-field is required
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1252
       Reason: suffixed constant comparison is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_0380
       Reason: Macro definitions are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1257
       Reason: pduLength type will variy depnding on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4461
       Reason: Datatype conversion is necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_5004
       Reason: pointer type definition is essential
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_Dcm_3451
+      Reason: The function is declared in both Dcm.h (BSW) and Rte_Dcm.h (RTE‑generated) to expose an encapsulated
+  interface to SW‑Cs without pulling in BWS module headers. Multiple declarations across files are by design; signatures
+  are identical and verified. Confirmed safe by review.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Dcm_3449
+      Reason: Multiple extern declarations of the same function appear in the same translation unit because both Dcm.h
+  (BSW) and Rte_Dcm.h (RTE‑generated) are included. This is an architectural requirement to keep RTE independent of BSW
+  internal headers; all declarations have identical signatures. Confirmed safe by review.
+      Risk: No risk.
+      Prevention: None.
 
     \li VL_Dcm_3472
       Reason: function-like macros are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3414
       Reason: specific keyword macro is necessary for unit testing
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4152
       Reason: number and 'l' in callout function is possible
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2784
       Reason: pointer param match with array param is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4604
-      Reason: param signal is necessary for IoHwAb operation
+      Reason: The parameter name signal in the function pointer typedef coincides with a standard library function name,
+  but <signal.h> is not included, so no actual conflict occurs.Usage is local to the type definition and confirmed safe
+  by design review.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_0288
       Reason: special characters in comments are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3678
       Reason: non-const type declaration is necessary depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2986
       Reason: Allow some conditional statements to always equal the result on the left or right.
@@ -249,27 +280,27 @@
     \li VL_Dcm_3494
       Reason: There may be a default value when judging
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3208
       Reason: External variables and functions declaration
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1037
       Reason: Array length may be zero
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1441
       Reason: Passed as argument to a function parameter of enum type.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4442
       Reason: Conversion to an enum type.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Dcm_STECT
       Reason: This is violated under extreme conditions due to the total number of variables such as different services
@@ -293,7 +324,7 @@
     \li VL_MTR_Dcm_CONF
       Reason: The format file of dcm needs to be processed for the interface of parameter/data type conversion, allowing
   for the reduction of useless comments
-      Risk: None
+      Risk: No risk.
       Prevention: None
 
     \li VL_MTR_Dcm_STPTH
@@ -317,27 +348,27 @@
     \li VL_Dcm_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3213
       Reason: The tag '%1s' is declared but not used within this project.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1504
       Reason: Multi-partition variable design requires.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3200
       Reason: '${name}' returns a value which is not being used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_3677
       Reason: The elements of the array parameter '${name}' are not modified and so they could be qualified as 'const'.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_5017
       Reason: High cyclomatic complexity is reserved for better readability.
@@ -347,50 +378,62 @@
     \li VL_Dcm_1503
       Reason: external interface
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1512
       Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_Dcm_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+  location.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Dcm_1508
+      Reason: The typedef '${name}' with external linkage has separate non-defining declarations in more than one
+  location.
+      Risk: No risk.
+      Prevention: None.
 
     \li VL_Dcm_1712
       Reason: xternal identifiers have the same first '${n}' characters '${name}'.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_1533
       Reason: Configuration variables design needs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_5209
       Reason: The module ensures the correctness that unsigned long is used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4443
       Reason: A non-constant expression of 'essentially unsigned' type (%1s).
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2985
       Reason: This operation is redundant. The value of the result is always that of the left-hand operand.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_2982
       Reason: The operation is not redundant, because it must be emptied.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Dcm_4391
       Reason: In the code, it is necessary to convert a small range of unsigned integers into a larger range of
     unsigned integers.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 */
-/* PRQA S 1271, 3451, 3449 EOF */ /* VL_Dcm_1271, VL_QAC_MultiDeclaration, VL_QAC_MultiDeclaration */
+/* PRQA S 1271,3451,3449,1512,1513,1508 EOF */ /* VL_Dcm_1271,VL_Dcm_3451,VL_Dcm_3449,VL_Dcm_1512,VL_Dcm_1513,VL_Dcm_1508*/
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Cfg.h"
 #include "ComStack_Types.h"
@@ -418,7 +461,7 @@ extern "C" {
 #define DCM_AR_RELEASE_REVISION_VERSION (0u) /**< Dcm AR Release Patch Version */
 #define DCM_SW_MAJOR_VERSION            3U   /**<Software major version */
 #define DCM_SW_MINOR_VERSION            0U   /**<Software minor version */
-#define DCM_SW_PATCH_VERSION            3U   /**<Software patch version*/
+#define DCM_SW_PATCH_VERSION            5U   /**<Software patch version*/
 #define DCM_VENDOR_ID                   62U  /**<AUTOSAR vendor ID (assigned by AUTOSAR) */
 #define DCM_MODULE_ID                   53U  /**<Module ID for Diagnostic */
 #define DCM_INSTANCE_ID                 0u   /**<Instance ID */
@@ -470,25 +513,26 @@ extern "C" {
 /**
  * @brief API Service Id
  */
-#define DCM_INIT_ID                   0x01u /**<Dcm_Init ID */
-#define DCM_GETVERSIONINFO_ID         0x24u /**<Dcm_GetVersionInfo ID */
-#define DCM_DEMTRIGGERONDTCSTATUS_ID  0x2Bu /**<Dcm_DemTriggerOnDTCStatus ID */
-#define DCM_GETVIN_ID                 0x07u /**<Dcm_GetVin ID */
-#define DCM_SETDEAUTHENTICATEDROLE_ID 0x79u /**<Dcm_SetDeauthenticatedRole ID */
-#define DCM_GETSECURITYLEVEL_ID       0x0Du /**<Dcm_GetSecurityLevel ID */
-#define DCM_GETSESCTRLTYPE_ID         0x06u /**<Dcm_GetSesCtrlType ID */
-#define DCM_RESETTODEFAULTSESSION_ID  0x2Au /**<Dcm_ResetToDefaultSession ID */
-#define DCM_SETACTIVEDIAGNOSTIC_ID    0x56u /**<Dcm_SetActiveDiagnostic ID */
-#define DCM_STARTOFRECEPTION_ID       0x46u /**<Dcm_StartOfReception ID */
-#define DCM_COPYRXDATA_ID             0x44u /**<Dcm_CopyRxData ID */
-#define DCM_TPRXINDICATION_ID         0x45u /**<Dcm_TpRxIndication ID */
-#define DCM_COPYTXDATA_ID             0x43u /**<DslInternal_CopyTxDataCheckParam ID */
-#define DCM_TPTXCONFIRMATION_ID       0x48u /**<Dcm_TpTxConfirmation ID */
-#define DCM_TXCONFIRMATION_ID         0x40u /**<Dcm_TxConfirmation ID */
-#define DCM_COMM_NOCOMMODEENTERED     0x21u /**<Dcm_ComM_NoComModeEntered ID */
-#define DCM_COMM_SILENTCOMMODEENTERED 0x22u /**<Dcm_ComM_SilentComModeEntered ID */
-#define DCM_COMM_FULLCOMMODEENTERED   0x23u /**<Dcm_ComM_FullComModeEntered ID */
-#define DCM_MAIN_FUNCTION_ID          0x25u /**<Dcm_MainFunction ID */
+#define DCM_INIT_ID                    0x01u /**<Dcm_Init ID */
+#define DCM_GETVERSIONINFO_ID          0x24u /**<Dcm_GetVersionInfo ID */
+#define DCM_DEMTRIGGERONDTCSTATUS_ID   0x2Bu /**<Dcm_DemTriggerOnDTCStatus ID */
+#define DCM_GETVIN_ID                  0x07u /**<Dcm_GetVin ID */
+#define DCM_SETDEAUTHENTICATEDROLE_ID  0x79u /**<Dcm_SetDeauthenticatedRole ID */
+#define DCM_GETSECURITYLEVEL_ID        0x0Du /**<Dcm_GetSecurityLevel ID */
+#define DCM_GETSESCTRLTYPE_ID          0x06u /**<Dcm_GetSesCtrlType ID */
+#define DCM_RESETTODEFAULTSESSION_ID   0x2Au /**<Dcm_ResetToDefaultSession ID */
+#define DCM_SETACTIVEDIAGNOSTIC_ID     0x56u /**<Dcm_SetActiveDiagnostic ID */
+#define DCM_STARTOFRECEPTION_ID        0x46u /**<Dcm_StartOfReception ID */
+#define DCM_COPYRXDATA_ID              0x44u /**<Dcm_CopyRxData ID */
+#define DCM_TPRXINDICATION_ID          0x45u /**<Dcm_TpRxIndication ID */
+#define DCM_COPYTXDATA_ID              0x43u /**<DslInternal_CopyTxDataCheckParam ID */
+#define DCM_TPTXCONFIRMATION_ID        0x48u /**<Dcm_TpTxConfirmation ID */
+#define DCM_TXCONFIRMATION_ID          0x40u /**<Dcm_TxConfirmation ID */
+#define DCM_COMM_NOCOMMODEENTERED      0x21u /**<Dcm_ComM_NoComModeEntered ID */
+#define DCM_COMM_SILENTCOMMODEENTERED  0x22u /**<Dcm_ComM_SilentComModeEntered ID */
+#define DCM_COMM_FULLCOMMODEENTERED    0x23u /**<Dcm_ComM_FullComModeEntered ID */
+#define DCM_MAIN_FUNCTION_ID           0x25u /**<Dcm_MainFunction ID */
+#define DCM_SATELLITE_MAIN_FUNCTION_ID 0x26u /**<Dcm_SatelliteMainFunction ID */
 /* ================================================ type definitions ================================================ */
 /**
  * @brief Base item type to transport status information.
@@ -676,6 +720,8 @@ typedef struct
  */
 typedef uint8 Dcm_ExtendedOpStatusType;
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Service for basic initialization of DCM module.
  * @param[in]     ConfigPtr : Pointer to configuration set in Variant Post-Build.
@@ -685,6 +731,10 @@ typedef uint8 Dcm_ExtendedOpStatusType;
  * @trace         CPD-60693
  */
 void Dcm_Init(const Dcm_ConfigType* ConfigPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Returns the version information of this module
@@ -695,6 +745,10 @@ void Dcm_Init(const Dcm_ConfigType* ConfigPtr);
  * @trace         CPD-60694
  */
 void Dcm_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Function to get the VIN (as defined in SAE J1979-DA)
@@ -707,8 +761,12 @@ void Dcm_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @trace         CPD-60696
  */
 Std_ReturnType Dcm_GetVin(uint8* Data);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_USE_BNDM)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by BndM to indicate that a block write operation has finished.
  * @param[in]     BlockId : the requested blockId
@@ -719,9 +777,13 @@ Std_ReturnType Dcm_GetVin(uint8* Data);
  * @trace         CPD-60697
  */
 void Dcm_BndMWriteBlockFinish(BndM_BlockIdType BlockId, BndM_ResultType result);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X29)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Sets a new role used in deauthenticated state for that connection. The set role is valid until the
  *                connection switches into authenticated state or the ECU is reset.
@@ -735,9 +797,13 @@ void Dcm_BndMWriteBlockFinish(BndM_BlockIdType BlockId, BndM_ResultType result);
  * @trace         CPD-60701
  */
 Std_ReturnType Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_AuthenticationRoleType deauthenticatedRole);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
-/* PRQA S 1512,1513 ++ */ /* VL_Dcm_1512,VL_QAC_MultiDeclaration */
+/* PRQA S 1512,1513 ++ */ /* VL_Dcm_1512,VL_Dcm_1513 */
 /**
  * @brief         This function provides the active security level value.
  * @param[out]    SecLevel : Active Security Level value Conversion formula to calculate SecurityLevel out of tester
@@ -751,6 +817,10 @@ Std_ReturnType Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_Authent
  * @trace         CPD-60702
  */
 Std_ReturnType Dcm_GetSecurityLevel(Dcm_SecLevelType* SecLevel);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function provides the active session control type value.
@@ -763,6 +833,10 @@ Std_ReturnType Dcm_GetSecurityLevel(Dcm_SecLevelType* SecLevel);
  * @trace         CPD-60703
  */
 Std_ReturnType Dcm_GetSesCtrlType(Dcm_SesCtrlType* SesCtrlType);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         The call to this function allows the application to reset the current session to Default session.
@@ -774,6 +848,10 @@ Std_ReturnType Dcm_GetSesCtrlType(Dcm_SesCtrlType* SesCtrlType);
  * @trace         CPD-60705
  */
 Std_ReturnType Dcm_ResetToDefaultSession(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Allows to activate and deactivate the call of ComM_DCM_ActiveDiagnostic() function.
@@ -786,6 +864,10 @@ Std_ReturnType Dcm_ResetToDefaultSession(void);
  * @trace         CPD-60706
  */
 Std_ReturnType Dcm_SetActiveDiagnostic(boolean active); /* PRQA S 0624 */ /* VL_Dcm_0624 */
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function is called at the start of receiving an N-SDU. The N-SDU might be fragmented into
@@ -816,6 +898,10 @@ BufReq_ReturnType Dcm_StartOfReception(
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper layer.
@@ -835,6 +921,10 @@ BufReq_ReturnType Dcm_StartOfReception(
  * @trace         CPD-60710
  */
 BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called after an I-PDU has been received via the TP API, the result indicates whether the transmission
@@ -847,6 +937,10 @@ BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
  * @trace         CPD-60711
  */
 void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function is called to acquire the transmit data of an I-PDU segment (N-PDU). Each call to this
@@ -875,6 +969,10 @@ void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result);
  */
 BufReq_ReturnType
     Dcm_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr);
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function is called after the I-PDU has been transmitted on its network, the result indicates
@@ -887,6 +985,10 @@ BufReq_ReturnType
  * @trace         CPD-60713
  */
 void Dcm_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         The lower layer communication interface module confirms the transmission of a PDU, or the failure to
@@ -899,8 +1001,12 @@ void Dcm_TpTxConfirmation(PduIdType id, Std_ReturnType result);
  * @trace         CPD-60714
  */
 void Dcm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
-
+#define DCM_STOP_SEC_CODE_FAST
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X29)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Can be called from Csm upon finishing an asynchronous job processing. The integrator will configure
  *                this name as callback function within the Csm ECUC configuration for asynchronous jobs. Only one such
@@ -913,6 +1019,10 @@ void Dcm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace         CPD-60721
  */
 Std_ReturnType Dcm_CsmAsyncJobFinished(uint32 jobId, Crypto_ResultType result);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Can be called from Key upon finishing an asynchronous certificate verification. The integrator will
@@ -928,9 +1038,13 @@ Std_ReturnType Dcm_CsmAsyncJobFinished(uint32 jobId, Crypto_ResultType result);
  * @trace         CPD-60722
  */
 Std_ReturnType Dcm_KeyMAsyncCertificateVerifyFinished(KeyM_CertificateIdType CertID, KeyM_CertificateStatusType Result);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_MULTICORE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Scheduled by SchM, running on different cores to deal with transmission for different controller
  * @return        void
@@ -939,6 +1053,8 @@ Std_ReturnType Dcm_KeyMAsyncCertificateVerifyFinished(KeyM_CertificateIdType Cer
  * @trace         CPD-68736
  */
 void Dcm_SatelliteMainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* PRQA S 1512,1513 -- */
 

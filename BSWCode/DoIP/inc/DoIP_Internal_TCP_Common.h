@@ -49,7 +49,8 @@ extern "C" {
 /* ========================================= external function declarations ========================================= */
 
 /* cfg */
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Gets the PB configuration for the specified connection.
  * @param[in]   id: Traverse index.
@@ -61,6 +62,10 @@ extern "C" {
 /* PRQA S 5016 ++ */ /* VL_DoIP_5016 */
 const DoIP_PBConnectionCfgType* DOIP_TCP_PBCON_CFG(uint8 id);
 /* PRQA S 5016 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get target address.
@@ -74,6 +79,10 @@ const DoIP_PBConnectionCfgType* DOIP_TCP_PBCON_CFG(uint8 id);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTaFromChannel(uint16 sa, uint16* ta);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get PduRRxPdu.
@@ -88,6 +97,10 @@ Std_ReturnType DoIP_GetTaFromChannel(uint16 sa, uint16* ta);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetPduRRxPdu(uint16 sa, uint16 ta, const DoIP_PBPduRRxPduType** pdurRxPdu);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* connect's status */
 
@@ -103,6 +116,27 @@ Std_ReturnType DoIP_GetPduRRxPdu(uint16 sa, uint16 ta, const DoIP_PBPduRRxPduTyp
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_GetTcpConnStatusIdxBySoConId(SoAd_SoConIdType soConId, uint8* index);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
+
+/**
+ * @brief       Get index of channel.
+ * @param[in]   sa: SA of channel.
+ * @param[in]   ta: TA of channel.
+ * @param[out]  channelIdx: Index of channel.
+ * @return      Std_ReturnType
+ * @retval      E_OK: Find success.
+ * @retval      E_NOT_OK: Find fail.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-PLACEHOLDER
+ */
+Std_ReturnType DoIP_GetChannelIdxBySaTa(uint16 sa, uint16 ta, uint16* channelIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 #ifdef __cplusplus
 }

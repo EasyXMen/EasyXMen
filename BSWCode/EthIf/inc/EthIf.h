@@ -60,6 +60,7 @@
  *  V02.01.02 2026-04-05  jianyu.yang       In EthIf_SetControllerMode make transceiver version to switch conditional
  *                                          compilation.
  *  V02.01.03 2026-04-10  tong.zhao         Add first time to init condication in EthIf_Init.
+ *  V02.01.04 2026-07-21  tong.zhao         Refactoring of MemMap.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -118,6 +119,11 @@
       Risk:  Not easy to maintain
       Prevention: Design and code review, and have a clear structure and annotated code.
 
+    \li VL_MTR_EthIf_QacSTLIN
+      Reason: Too complicated function implementation.
+      Risk:  Not easy to maintain
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
     \li VL_MTR_EthIf_QacSTCONF
       Reason: To trace AUTOSAR SWS requirements.
       Risk:  Not easy to maintain
@@ -164,10 +170,15 @@
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 
-      \li VL_EthIf_1758
+    \li VL_EthIf_1758
       Reason: External type '${name}' shall be unique.
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
+
+    \li PRQA S 6540 VL_MTR_EthIf_STTPP .<br>
+      Reason: A large number of memmap entries increase total lines, functional code does not exceed 5999 lines.
+      Risk: Poor code maintainability.
+      Prevention: Design and code review, clear structure and sufficient comments.
 */
 #ifndef ETHIF_H
 #define ETHIF_H
@@ -199,7 +210,7 @@ extern "C" {
 
 #define ETHIF_SW_MAJOR_VERSION (2u)
 #define ETHIF_SW_MINOR_VERSION (1u)
-#define ETHIF_SW_PATCH_VERSION (3u)
+#define ETHIF_SW_PATCH_VERSION (4u)
 
 #define ETHIF_MODULE_ID   (65u)
 #define ETHIF_INSTANCE_ID (0u)
@@ -327,7 +338,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
-
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Initializes the Ethernet Interface.
  * @param[in]       CfgPtr :Points to the implementation specific structure.
@@ -337,7 +349,11 @@ extern "C" {
  * @trace           CPD-63576
  */
 void EthIf_Init(const EthIf_ConfigType* CfgPtr); /** Init function for ETHIF */
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Enables / disables the indexed controller.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -350,7 +366,11 @@ void EthIf_Init(const EthIf_ConfigType* CfgPtr); /** Init function for ETHIF */
  * @trace           CPD-63577
  */
 Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Enables / disables the indexed controller.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -363,7 +383,11 @@ Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode);
  * @trace           CPD-63578
  */
 Std_ReturnType EthIf_GetControllerMode(uint8 CtrlIdx, Eth_ModeType* CtrlModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtain state of the indexed transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Transceiver Driver.
@@ -376,7 +400,11 @@ Std_ReturnType EthIf_GetControllerMode(uint8 CtrlIdx, Eth_ModeType* CtrlModePtr)
  * @trace           CPD-63629
  */
 Std_ReturnType EthIf_GetTransceiverMode(uint8 TrcvIdx, Eth_ModeType* TrcvModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         This API request the affected Ethernet hardware to check for a signaled wake-up.
  * @param[in]     WakeupSource : Source device which initiated the wake up event.
@@ -385,7 +413,11 @@ Std_ReturnType EthIf_GetTransceiverMode(uint8 TrcvIdx, Eth_ModeType* TrcvModePtr
  * @trace         CPD-63579
  */
 Std_ReturnType EthIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         obtains the wake up reasons of the indexed Ethernet Transceiver (PHY).
  * @param[in]     TrcvIdx : Index of the transceiver.
@@ -396,7 +428,11 @@ Std_ReturnType EthIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
  * @trace         CPD-63580
  */
 Std_ReturnType EthIf_GetPhyWakeupReason(uint8 TrcvIdx, EthTrcv_WakeupReasonType* WakeupReasonPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         This function obtains the wake up reasons of the indexed Ethernet switch port.
  * @param[in]     SwitchIdx : Index of the Ethernet switch.
@@ -409,7 +445,11 @@ Std_ReturnType EthIf_GetPhyWakeupReason(uint8 TrcvIdx, EthTrcv_WakeupReasonType*
  */
 Std_ReturnType
     EthIf_GetSwitchPortWakeupReason(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_WakeupReasonType* WakeupReasonPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Obtains the physical source address used by the indexed controller.
  * @param[in]     CtrlIdx : Index of the Ethernet controller.
@@ -419,7 +459,11 @@ Std_ReturnType
  * @trace         CPD-63582
  */
 void EthIf_GetPhysAddr(uint8 CtrlIdx, uint8* PhysAddrPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Sets the physical source address used by the indexed controller.
  * @param[in]     CtrlIdx : Index of the Ethernet controller.
@@ -430,7 +474,11 @@ void EthIf_GetPhysAddr(uint8 CtrlIdx, uint8* PhysAddrPtr);
  * @trace         CPD-63583
  */
 void EthIf_SetPhysAddr(uint8 CtrlIdx, const uint8* PhysAddrPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Update the physical source address to/from the indexed controller filter.
  * @param[in]     CtrlIdx : Index of the Ethernet controller.
@@ -442,10 +490,18 @@ void EthIf_SetPhysAddr(uint8 CtrlIdx, const uint8* PhysAddrPtr);
  * @trace         CPD-63584
  */
 Std_ReturnType EthIf_UpdatePhysAddrFilter(uint8 CtrlIdx, const uint8* PhysAddrPtr, Eth_FilterActionType Action);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @req SWS_EthIf_00154 */
 Std_ReturnType EthIf_GetCurrentTime(uint8 CtrlIdx, Eth_TimeStampQualType* timeQualPtr, Eth_TimeStampType* timeStampPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Reads the current time of the timestamp clock and the current time of the PHC in an atomic
  * operation.
@@ -461,7 +517,11 @@ Std_ReturnType EthIf_GetCurrentTime(uint8 CtrlIdx, Eth_TimeStampQualType* timeQu
  * @trace           CPD-63593
  */
 Std_ReturnType EthIf_GetCurrentTimeTuple(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeTupleType* currentTimeTuplePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Sets the absolute time of the PHC.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -475,7 +535,11 @@ Std_ReturnType EthIf_GetCurrentTimeTuple(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeTu
  * @trace           CPD-63594
  */
 Std_ReturnType EthIf_SetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, const TimeStampType* timeStampPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Sets the absolute time of the PHC.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -490,7 +554,11 @@ Std_ReturnType EthIf_SetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, const TimeStamp
  * @trace           CPD-63595
  */
 Std_ReturnType EthIf_SetPhcCorrection(uint8 CtrlIdx, uint8 ClkUnitIdx, sint32 rateDeviation, sint32 offset);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Returns the current time value out of the HW registers of the PHC.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -506,7 +574,11 @@ Std_ReturnType EthIf_SetPhcCorrection(uint8 CtrlIdx, uint8 ClkUnitIdx, sint32 ra
  */
 Std_ReturnType
     EthIf_GetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeStampQualType* timeQualPtr, TimeStampType* timeStampPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Enables/disables the generation of a PPS signal.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -520,7 +592,11 @@ Std_ReturnType
  * @trace           CPD-63597
  */
 Std_ReturnType EthIf_SetPpsSignalMode(uint8 CtrlIdx, uint8 ClkUnitIdx, boolean signalMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates egress time stamping on a dedicated message object.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -531,7 +607,11 @@ Std_ReturnType EthIf_SetPpsSignalMode(uint8 CtrlIdx, uint8 ClkUnitIdx, boolean s
  * @trace           CPD-63598
  */
 void EthIf_EnableEgressTimeStamp(uint8 CtrlIdx, Eth_BufIdxType BufIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Reads back the egress time stamp on a dedicated message object.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -550,7 +630,11 @@ Std_ReturnType EthIf_GetEgressTimeStamp(
     Eth_BufIdxType         BufIdx,
     Eth_TimeStampQualType* timeQualPtr,
     Eth_TimeStampType*     timeStampPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Reads back the ingress time stamp on a dedicated message object.
  * @param[in]       CtrlIdx :Index of Ethernet Controller.
@@ -569,7 +653,11 @@ Std_ReturnType EthIf_GetIngressTimeStamp(
     const Eth_DataType*    DataPtr,
     Eth_TimeStampQualType* timeQualPtr,
     Eth_TimeStampType*     timeStampPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Provides access to a transmit buffer of the specified Ethernet controller.
  * @param[in]       CtrlIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -594,7 +682,11 @@ BufReq_ReturnType EthIf_ProvideTxBuffer(
     Eth_BufIdxType* BufIdxPtr,
     uint8**         BufPtr,
     uint16*         LenBytePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Triggers transmission of a previously filled transmit buffer.
  * @param[in]       CtrlIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -617,8 +709,12 @@ Std_ReturnType EthIf_Transmit(
     boolean        TxConfirmation,
     uint16         LenByte,
     const uint8*   PhysAddrPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_VERSION_INFO_API == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Returns the version information of this module.
  * @param[out]      VersionInfoPtr :Version information of this module.
@@ -628,9 +724,13 @@ Std_ReturnType EthIf_Transmit(
  * @trace           CPD-63627
  */
 void EthIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_GET_CTRL_IDX_LIST)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Returns the number and index of all active Ethernet controllers..
  * @param[inout] NumberOfCtrlIdx :in: maximum number of controllers in CtrlIdxListPtr, 0 to return
@@ -645,8 +745,12 @@ void EthIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr);
  * @trace         CPD-63587
  */
 Std_ReturnType EthIf_GetCtrlIdxList(uint8* NumberOfCtrlIdx, uint8* CtrlIdxListPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 #if (ETHIF_ENABLE_RX_INTERRUPT == STD_OFF)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief     The function checks for new received frames and issues reception indications in polling mode..
  * @param[in]     ethIfPartition :Index of the Ethernet partition.
@@ -656,9 +760,13 @@ Std_ReturnType EthIf_GetCtrlIdxList(uint8* NumberOfCtrlIdx, uint8* CtrlIdxListPt
  * @trace         CPD-63707
  */
 void EthIf_MainFunctionRx(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ENABLE_TX_INTERRUPT == STD_OFF)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief     The function issues transmission confirmations in polling mode. It checks also for transceiver state
  * changes.
@@ -669,9 +777,13 @@ void EthIf_MainFunctionRx(uint8 ethIfPartition);
  * @trace         CPD-63710
  */
 void EthIf_MainFunctionTx(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_MAIN_FUNCTION_STATE_PERIOD > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief     The function is polling different communication hardware (Ethernet transceiver, Ethernet switch ports)
  *            related information, e.g. link state,signal quality.
@@ -682,8 +794,12 @@ void EthIf_MainFunctionTx(uint8 ethIfPartition);
  * @trace         CPD-63711
  */
 void EthIf_MainFunctionState(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Returns the VLAN identifier of the requested Ethernet controller..
  * @param[in]     CtrlIdx :Index of the Ethernet controller.
@@ -696,7 +812,11 @@ void EthIf_MainFunctionState(uint8 ethIfPartition);
  * @trace         CPD-63588
  */
 Std_ReturnType EthIf_GetVlanId(uint8 CtrlIdx, uint16* VlanIdPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Returns the VLAN identifier of the requested Ethernet controller..
  * @param[in]     MeasurementIdx :Data index of measurement data.
@@ -713,7 +833,11 @@ Std_ReturnType EthIf_GetAndResetMeasurementData(
     EthIf_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
     uint32*                  MeasurementDataPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Obtains the port over which this MAC-address can be reached.
  * @param[in]     MacAddrPtr    : ID of the SDU that is requested to be transmitted.
@@ -727,7 +851,11 @@ Std_ReturnType EthIf_GetAndResetMeasurementData(
  * @trace         CPD-63585
  */
 Std_ReturnType EthIf_GetPortMacAddr(const uint8* MacAddrPtr, uint8* SwtichIdxPtr, uint8* PortIdxPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Obtains the address resolution table of a switch and copies the list into a user provided buffer.
  * @param[in]     switchIdx : Index of the switch.
@@ -743,8 +871,12 @@ Std_ReturnType EthIf_GetPortMacAddr(const uint8* MacAddrPtr, uint8* SwtichIdxPtr
  * @trace         CPD-63586
  */
 Std_ReturnType EthIf_GetArlTable(uint8 switchIdx, uint16* numberOfElements, Eth_MacVlanType* arlTableListPointer);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (STD_ON == ETHIF_STORE_CONFIGURATION_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Trigger the storage/reset of the configuration of the learned MAC/Port tables of a switch in a
  * persistent manner and will be used by e.g. CDD.
@@ -757,9 +889,13 @@ Std_ReturnType EthIf_GetArlTable(uint8 switchIdx, uint16* numberOfElements, Eth_
  * @trace         CPD-63590
  */
 Std_ReturnType EthIf_StoreConfiguration(uint8 SwitchIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_RESET_CONFIGURATION_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief        The function shall request to reset the configuration of the learned MAC/Port tables of a Ethernet
  * switch in a persistent manner.
@@ -772,8 +908,12 @@ Std_ReturnType EthIf_StoreConfiguration(uint8 SwitchIdx);
  * @trace         CPD-63591
  */
 Std_ReturnType EthIf_ResetConfiguration(uint8 SwitchIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Request a mode for the EthIfSwtPortGroup.
  * @param[in]     PortGroupIdx :Index of the switch.
@@ -786,7 +926,11 @@ Std_ReturnType EthIf_ResetConfiguration(uint8 SwitchIdx);
  * @trace         CPD-63601
  */
 Std_ReturnType EthIf_SwitchPortGroupRequestMode(EthIf_SwitchPortGroupIdxType PortGroupIdx, Eth_ModeType PortMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Request to set all configured and affected EthSwtPorts to ETH_MODE_ACTIVE.
  * @param[in]     SwitchIdx :Index of the switch.
@@ -798,8 +942,12 @@ Std_ReturnType EthIf_SwitchPortGroupRequestMode(EthIf_SwitchPortGroupIdxType Por
  * @trace         CPD-63602
  */
 Std_ReturnType EthIf_StartAllPorts(void);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (STD_ON == ETHIF_SWITCH_MANAGEMENT_SUPPORT)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Provides additional management information along to an Ethernet frame that requires special treatment
  * within the Switch.
@@ -814,8 +962,12 @@ Std_ReturnType EthIf_StartAllPorts(void);
  * @trace         CPD-63603
  */
 Std_ReturnType EthIf_SetSwitchMgmtInfo(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSwt_MgmtInfoType* MgmtInfoPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Request the MgmtObject of the (in this context) unique DataPtr.
  * @param[in]     CtrlIdx :Index of an Ethernet Interface controller.
@@ -829,7 +981,11 @@ Std_ReturnType EthIf_SetSwitchMgmtInfo(uint8 CtrlIdx, Eth_BufIdxType BufIdx, Eth
  * @trace         CPD-63604
  */
 Std_ReturnType EthIf_GetRxMgmtObject(uint8 CtrlIdx, Eth_DataType* DataPtr, EthSwt_MgmtObjectType** MgmtObjectPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Request the MgmtObject of the (in this context) unique BufIdx.
  * @param[in]     CtrlIdx :Index of an Ethernet Interface controller.
@@ -843,8 +999,12 @@ Std_ReturnType EthIf_GetRxMgmtObject(uint8 CtrlIdx, Eth_DataType* DataPtr, EthSw
  * @trace         CPD-63605
  */
 Std_ReturnType EthIf_GetTxMgmtObject(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSwt_MgmtObjectType** MgmtObjectPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (STD_ON == ETHIF_GLOBAL_TIME_SUPPORT)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief         Activates egress time stamping on a dedicated message object, addressed by CtrlIdx and BufIdx.
  * @param[in]     CtrlIdx :Index of an Ethernet Interface controller.
@@ -858,9 +1018,13 @@ Std_ReturnType EthIf_GetTxMgmtObject(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSw
  * @trace         CPD-63606
  */
 Std_ReturnType EthIf_SwitchEnableTimeStamping(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSwt_MgmtInfoType* MgmtInfo);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_VERIFY_CONFIG_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Forwarded to EthSwt_VerifyConfig. EthSwt_VerifyConfig verifies the Switch Configuration
                     depending on the HW-Architecture, HW-capability and the intended accuracy of this verification.
@@ -875,9 +1039,13 @@ Std_ReturnType EthIf_SwitchEnableTimeStamping(uint8 CtrlIdx, Eth_BufIdxType BufI
  * @trace           CPD-63607
  */
 Std_ReturnType EthIf_VerifyConfig(uint8 SwitchIdx, boolean* Result);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_SET_FORWARDING_MODE_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Control of switch frame forwarding.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Interface.
@@ -890,9 +1058,13 @@ Std_ReturnType EthIf_VerifyConfig(uint8 SwitchIdx, boolean* Result);
  * @trace           CPD-63608
  */
 Std_ReturnType EthIf_SetForwardingMode(uint8 SwitchIdx, boolean mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the signal quality of the link of the given Ethernet transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -905,8 +1077,12 @@ Std_ReturnType EthIf_SetForwardingMode(uint8 SwitchIdx, boolean mode);
  * @trace           CPD-63609
  */
 Std_ReturnType EthIf_GetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResultType* ResultPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the signal quality of the link of the given Ethernet switch port.
  * @param[in]       SwitchIdx :Index of the Ethernet switch within the context of the Ethernet Interface.
@@ -921,7 +1097,11 @@ Std_ReturnType EthIf_GetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResu
  */
 Std_ReturnType
     EthIf_GetSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchPortIdx, EthIf_SignalQualityResultType* ResultPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Clear the stored signal quality of the link of the given Ethernet transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -933,7 +1113,11 @@ Std_ReturnType
  * @trace           CPD-63611
  */
 Std_ReturnType EthIf_ClearTrcvSignalQuality(uint8 TrcvIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Clear the stored signal quality of the link of the given Ethernet switch port.
  * @param[in]       SwitchIdx :Index of the Ethernet switch within the context of the Ethernet Interface.
@@ -947,7 +1131,11 @@ Std_ReturnType EthIf_ClearTrcvSignalQuality(uint8 TrcvIdx);
  * @trace           CPD-63612
  */
 Std_ReturnType EthIf_ClearSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchPortIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given test mode.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -960,7 +1148,11 @@ Std_ReturnType EthIf_ClearSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchP
  * @trace           CPD-63613
  */
 Std_ReturnType EthIf_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given loopback mode.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -973,7 +1165,11 @@ Std_ReturnType EthIf_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode)
  * @trace           CPD-63614
  */
 Std_ReturnType EthIf_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given transmission mode.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -986,7 +1182,11 @@ Std_ReturnType EthIf_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeTy
  * @trace           CPD-63615
  */
 Std_ReturnType EthIf_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_PhyTxModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the cable diagnostics result of a given transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -999,7 +1199,11 @@ Std_ReturnType EthIf_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_PhyTxModeType Mode);
  * @trace           CPD-63616
  */
 Std_ReturnType EthIf_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* ResultPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the PHY identifier of the Ethernet Interface according to IEEE 802.3-2015.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Interface.
@@ -1014,7 +1218,11 @@ Std_ReturnType EthIf_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagR
  * @trace           CPD-63617
  */
 Std_ReturnType EthIf_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPtr, uint8* RevisionNrPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the mode of the indexed switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1030,7 +1238,11 @@ Std_ReturnType EthIf_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uin
  * @trace           CPD-63628
  */
 Std_ReturnType EthIf_GetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType* PortModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the link state of the indexed switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1046,7 +1258,11 @@ Std_ReturnType EthIf_GetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth
  * @trace           CPD-63630
  */
 Std_ReturnType EthIf_SwitchPortGetLinkState(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_LinkStateType* LinkStatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the link state of the indexed transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Transceiver Driver.
@@ -1060,7 +1276,11 @@ Std_ReturnType EthIf_SwitchPortGetLinkState(uint8 SwitchIdx, uint8 SwitchPortIdx
  * @trace           CPD-63631
  */
 Std_ReturnType EthIf_TransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the baud rate of the indexed switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1078,7 +1298,11 @@ Std_ReturnType EthIf_TransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateTyp
  * @trace           CPD-63632
  */
 Std_ReturnType EthIf_SwitchPortGetBaudRate(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_BaudRateType* BaudRatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the baud rate of the indexed transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Transceiver Driver.
@@ -1094,7 +1318,11 @@ Std_ReturnType EthIf_SwitchPortGetBaudRate(uint8 SwitchIdx, uint8 SwitchPortIdx,
  * @trace           CPD-63633
  */
 Std_ReturnType EthIf_TransceiverGetBaudRate(uint8 TrcvIdx, EthTrcv_BaudRateType* BaudRatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the duplex mode of the indexed switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1111,7 +1339,11 @@ Std_ReturnType EthIf_TransceiverGetBaudRate(uint8 TrcvIdx, EthTrcv_BaudRateType*
  */
 Std_ReturnType
     EthIf_SwitchPortGetDuplexMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_DuplexModeType* DuplexModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the duplex mode of the indexed transceiver.
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Transceiver Driver.
@@ -1125,7 +1357,11 @@ Std_ReturnType
  * @trace           CPD-63635
  */
 Std_ReturnType EthIf_TransceiverGetDuplexMode(uint8 TrcvIdx, EthTrcv_DuplexModeType* DuplexModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Reads a list with drop counter values of the corresponding port of the switch.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1139,7 +1375,11 @@ Std_ReturnType EthIf_TransceiverGetDuplexMode(uint8 TrcvIdx, EthTrcv_DuplexModeT
  * @trace           CPD-63636
  */
 Std_ReturnType EthIf_SwitchPortGetCounterValues(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_CounterType* CounterPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Returns a list of statistic counters defined with Eth_RxTatsType. The majority of these Counters are
  * derived from the IETF RFC2819.
@@ -1155,7 +1395,11 @@ Std_ReturnType EthIf_SwitchPortGetCounterValues(uint8 SwitchIdx, uint8 SwitchPor
  * @trace           CPD-63637
  */
 Std_ReturnType EthIf_SwitchPortGetRxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_RxStatsType* RxStatsPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           List of values to read statistic values for transmission.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1169,7 +1413,11 @@ Std_ReturnType EthIf_SwitchPortGetRxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, 
  * @trace           CPD-63638
  */
 Std_ReturnType EthIf_SwitchPortGetTxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_TxStatsType* TxStatsPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           List of values to read statistic error counter values for transmission from.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1186,7 +1434,11 @@ Std_ReturnType EthIf_SwitchPortGetTxErrorCounterValues(
     uint8                         SwitchIdx,
     uint8                         SwitchPortIdx,
     Eth_TxErrorCounterValuesType* TxStatsPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Returns the MAC learning mode.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1204,7 +1456,11 @@ Std_ReturnType EthIf_SwitchPortGetMacLearningMode(
     uint8                   SwitchIdx,
     uint8                   SwitchPortIdx,
     EthSwt_MacLearningType* MacLearningModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Returns the MAC learning mode.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1227,7 +1483,11 @@ Std_ReturnType EthIf_GetSwitchPortIdentifier(
     uint32* OrgUniqueIdPtr,
     uint8*  ModelNrPtr,
     uint8*  RevisionNrPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief            Obtain the Organizationally Unique Identifier that is given by the IEEE of the indexed Ethernet
  * switch.
@@ -1243,7 +1503,11 @@ Std_ReturnType EthIf_GetSwitchPortIdentifier(
  * @trace           CPD-63642
  */
 Std_ReturnType EthIf_GetSwitchIdentifier(uint8 SwitchIdx, uint32* OrgUniqueIdPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Store the given port mirror configuration in a shadow buffer in the Ethernet switch driver for the
  * given MirroredSwitchIdx.
@@ -1261,7 +1525,11 @@ Std_ReturnType EthIf_GetSwitchIdentifier(uint8 SwitchIdx, uint32* OrgUniqueIdPtr
 Std_ReturnType EthIf_WritePortMirrorConfiguration(
     uint8                           MirroredSwitchIdx,
     const EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtain the port mirror configuration of the given Ethernet switch.
  * @param[in]       MirroredSwitchIdx :Index of the switch within the context of the Ethernet Switch Driver, where the
@@ -1277,7 +1545,11 @@ Std_ReturnType EthIf_WritePortMirrorConfiguration(
  */
 Std_ReturnType
     EthIf_ReadPortMirrorConfiguration(uint8 MirroredSwitchIdx, EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Delete the stored port mirror configuration of the given MirroredSwitchIdx.
  * @param[in]       MirroredSwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1290,7 +1562,11 @@ Std_ReturnType
  * @trace           CPD-63645
  */
 Std_ReturnType EthIf_DeletePortMirrorConfiguration(uint8 MirroredSwitchIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtain the current status of the port mirroring for the indexed Ethernet switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1306,7 +1582,11 @@ Std_ReturnType EthIf_DeletePortMirrorConfiguration(uint8 MirroredSwitchIdx);
  * @trace           CPD-63646
  */
 Std_ReturnType EthIf_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_PortMirrorStateType* PortMirrorStatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Request to set the given port mirroring state of the port mirror configuration for the given
  * Ethernet switch.
@@ -1325,7 +1605,11 @@ Std_ReturnType EthIf_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_P
  */
 Std_ReturnType
     EthIf_SetPortMirrorState(uint8 MirroredSwitchIdx, uint8 PortIdx, EthSwt_PortMirrorStateType PortMirrorState);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given test mode of the indexed Ethernet switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1339,7 +1623,11 @@ Std_ReturnType
  * @trace           CPD-63648
  */
 Std_ReturnType EthIf_SetPortTestMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTestModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given test loop-back mode of the indexed Ethernet switch port..
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1355,7 +1643,11 @@ Std_ReturnType EthIf_SetPortTestMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_Phy
  * @trace           CPD-63649
  */
 Std_ReturnType EthIf_SetPortLoopbackMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyLoopbackModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Activates a given transmission mode of the indexed Ethernet switch port.
  * @param[in]       SwitchIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1369,7 +1661,11 @@ Std_ReturnType EthIf_SetPortLoopbackMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv
  * @trace           CPD-63650
  */
 Std_ReturnType EthIf_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTxModeType Mode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief            Retrieves the cable diagnostics result of the indexed Ethernet switch port respectively the
  *                   referenced Ethernet Transceiver Driver.
@@ -1387,7 +1683,11 @@ Std_ReturnType EthIf_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTx
  */
 Std_ReturnType
     EthIf_GetPortCableDiagnosticsResult(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_CableDiagResultType* ResultPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief            Trigger the cable diagnostics of the given Ethernet Switch port (PortIdx) by calling EthTrcv_Run
  *                    CableDiagnostic of the referenced Ethernet transceiver.
@@ -1402,7 +1702,11 @@ Std_ReturnType
  * @trace           CPD-63652
  */
 Std_ReturnType EthIf_RunPortCableDiagnostic(uint8 SwitchIdx, uint8 PortIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Trigger the cable diagnostics for the given Ethernet transceiver..
  * @param[in]       TrcvIdx :Index of the switch within the context of the Ethernet Switch Driver.
@@ -1414,7 +1718,11 @@ Std_ReturnType EthIf_RunPortCableDiagnostic(uint8 SwitchIdx, uint8 PortIdx);
  * @trace           CPD-63653
  */
 Std_ReturnType EthIf_RunCableDiagnostic(uint8 TrcvIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the data in memory of the indexed Ethernet switch in variable length.
  * @param[in]       SwitchIdx :Index of the Ethernet switch within the context of the Ethernet Switch Driver.
@@ -1429,7 +1737,11 @@ Std_ReturnType EthIf_RunCableDiagnostic(uint8 TrcvIdx);
  * @trace           CPD-63654
  */
 Std_ReturnType EthIf_SwitchGetCfgDataRaw(uint8 SwitchIdx, uint32 Offset, uint16 Length, uint8* BufferPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the data in memory of the indexed Ethernet switch in variable length.
  * @param[in]       SwitchIdx :Index of the Ethernet switch within the context of the Ethernet Switch Driver.
@@ -1444,7 +1756,11 @@ Std_ReturnType EthIf_SwitchGetCfgDataRaw(uint8 SwitchIdx, uint32 Offset, uint16 
  * @trace           CPD-63655
  */
 Std_ReturnType EthIf_SwitchGetCfgDataInfo(uint8 SwitchIdx, uint32* DataSizePtr, uint32* DataAdressPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           The function retrieves the maximum amount of allocated FIFO buffer of the indexed Ethernet switch
  *                    egress port. If the Ethernet switch hardware does not support Ethernet switch port based maximal
@@ -1469,8 +1785,12 @@ Std_ReturnType EthIf_SwitchPortGetMaxFIFOBufferFillLevel(
     uint8   PortIdx,
     uint8   SwitchPortEgressFifoIdx,
     uint32* SwitchPortEgressFifoBufferLevelPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R20_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Obtains the media access mode of the transceiver..
  * @param[in]       TrcvIdx :Index of the transceiver within the context of the Ethernet Transceiver Driver.
@@ -1483,11 +1803,14 @@ Std_ReturnType EthIf_SwitchPortGetMaxFIFOBufferFillLevel(
  * @synchronous     TRUE
  * @trace           CPD-63657
  */
-
 Std_ReturnType EthIf_TransceiverGetMacMethod(uint8 TrcvIdx, EthTrcv_MacMethodType* MacModePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           When MACPHY controller are used, obtains the SPI interface status..
  * @param[in]       CtrlIdx :Index of the controller within the context of the Ethernet controller Driver.
@@ -1500,6 +1823,8 @@ Std_ReturnType EthIf_TransceiverGetMacMethod(uint8 TrcvIdx, EthTrcv_MacMethodTyp
  * @trace           CPD-63658
  */
 Std_ReturnType EthIf_EthGetSpiStatus(uint8 CtrlIdx, Eth_SpiStatusType* SpiStatusPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #ifdef __cplusplus

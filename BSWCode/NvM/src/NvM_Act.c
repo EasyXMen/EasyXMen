@@ -38,9 +38,9 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
+#if ((NVM_API_CONFIG_CLASS_1 == NVM_API_CONFIG_CLASS) || (STD_OFF == NVM_JOB_PRIORITIZATION))
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
-#if ((NVM_API_CONFIG_CLASS_1 == NVM_API_CONFIG_CLASS) || (STD_OFF == NVM_JOB_PRIORITIZATION))
 /**
  * @brief       Multi-job scheduling of NvM
  * @return      Std_ReturnType
@@ -51,7 +51,11 @@
  * @trace       CPD-76694
  */
 NVM_LOCAL Std_ReturnType NvM_MultiJobDispatch(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Requests sent by nvm to memif
@@ -61,6 +65,10 @@ NVM_LOCAL Std_ReturnType NvM_MultiJobDispatch(void);
  * @trace       CPD-76681
  */
 NVM_LOCAL void NvM_MemIfReqSubDeal(NvM_MemIfReqType NvM_MemIfRequest);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif read request job is ok
@@ -69,6 +77,10 @@ NVM_LOCAL void NvM_MemIfReqSubDeal(NvM_MemIfReqType NvM_MemIfRequest);
  * @trace       CPD-76682
  */
 NVM_LOCAL void NvM_MemIfReadOk(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif read request job is fail
@@ -77,6 +89,10 @@ NVM_LOCAL void NvM_MemIfReadOk(void);
  * @trace       CPD-76683
  */
 NVM_LOCAL void NvM_MemIfReadFailed(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif request job is pending
@@ -85,6 +101,10 @@ NVM_LOCAL void NvM_MemIfReadFailed(void);
  * @trace       CPD-76684
  */
 NVM_LOCAL void NvM_MemIfPending(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif request job is canceled
@@ -93,6 +113,10 @@ NVM_LOCAL void NvM_MemIfPending(void);
  * @trace       CPD-76685
  */
 NVM_LOCAL void NvM_MemIfCancelled(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif request data is inconsistent
@@ -101,6 +125,10 @@ NVM_LOCAL void NvM_MemIfCancelled(void);
  * @trace       CPD-76686
  */
 NVM_LOCAL void NvM_MemIfInconsistent(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif request block is invalid
@@ -109,6 +137,10 @@ NVM_LOCAL void NvM_MemIfInconsistent(void);
  * @trace       CPD-76687
  */
 NVM_LOCAL void NvM_MemIfInvalid(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif write request job is ok
@@ -117,6 +149,10 @@ NVM_LOCAL void NvM_MemIfInvalid(void);
  * @trace       CPD-76688
  */
 NVM_LOCAL void NvM_MemIfWriteOk(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif write request job is fail
@@ -125,9 +161,13 @@ NVM_LOCAL void NvM_MemIfWriteOk(void);
  * @trace       CPD-76689
  */
 NVM_LOCAL void NvM_MemIfWriteFailed(void);
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
 /**
  * @brief       Memif erase request job is ok
  * @reentrant   Non Reentrant
@@ -135,6 +175,10 @@ NVM_LOCAL void NvM_MemIfWriteFailed(void);
  * @trace       CPD-76690
  */
 NVM_LOCAL void NvM_MemIfEraseOk(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif erase request job is fail
@@ -143,7 +187,11 @@ NVM_LOCAL void NvM_MemIfEraseOk(void);
  * @trace       CPD-76691
  */
 NVM_LOCAL void NvM_MemIfEraseFailed(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif invalid request job is ok
@@ -152,6 +200,10 @@ NVM_LOCAL void NvM_MemIfEraseFailed(void);
  * @trace       CPD-76692
  */
 NVM_LOCAL void NvM_MemIfInvalidOk(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Memif invalid request job is fail
@@ -160,7 +212,11 @@ NVM_LOCAL void NvM_MemIfInvalidOk(void);
  * @trace       CPD-76693
  */
 NVM_LOCAL void NvM_MemIfInvalidFailed(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Gets the ram address of the requested job in the queue
@@ -170,6 +226,10 @@ NVM_LOCAL void NvM_MemIfInvalidFailed(void);
  * @trace       CPD-76695
  */
 NVM_LOCAL void NvM_GetRamAddress(uint8 QueueIndex);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Copy the block information
@@ -178,9 +238,13 @@ NVM_LOCAL void NvM_GetRamAddress(uint8 QueueIndex);
  * @trace       CPD-76696
  */
 NVM_LOCAL void NvM_CopyCurBlockInfo(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief       The result is ok when the job is dequeue
  * @param[in]   jobQueueIndex: The index value of the queue
@@ -189,6 +253,10 @@ NVM_LOCAL void NvM_CopyCurBlockInfo(void);
  * @trace       CPD-76697
  */
 NVM_LOCAL void NvM_JobDequeueSubDealOk(uint8 jobQueueIndex);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction that exits the queue
@@ -200,6 +268,10 @@ NVM_LOCAL void NvM_JobDequeueSubDealOk(uint8 jobQueueIndex);
  * @trace       CPD-76698
  */
 NVM_LOCAL Std_ReturnType NvM_JobDequeueSub(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction that exits the queue
@@ -213,6 +285,10 @@ NVM_LOCAL Std_ReturnType NvM_JobDequeueSub(void);
  * @trace       CPD-76699
  */
 NVM_LOCAL Std_ReturnType NvM_Get16Bits1stSettedBit(uint16 Number, uint8* SettedBitPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Get the hightest priority job
@@ -225,6 +301,10 @@ NVM_LOCAL Std_ReturnType NvM_Get16Bits1stSettedBit(uint16 Number, uint8* SettedB
  * @trace       CPD-76700
  */
 NVM_LOCAL Std_ReturnType NvM_GetHighestPriJob(uint8* JobQueueIndexPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Gets the queue index of the immediate priority of a single task
@@ -237,6 +317,10 @@ NVM_LOCAL Std_ReturnType NvM_GetHighestPriJob(uint8* JobQueueIndexPtr);
  * @trace       CPD-76701
  */
 NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSingleImmed(uint8* JobQueueIndexPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of getting the queue space
@@ -250,6 +334,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSingleImmed(uint8* JobQueueIndexPtr);
  * @trace       CPD-76702
  */
 NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSub(uint8 jobQueueGroup, uint8* JobQueueIndexPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Get the queue space
@@ -263,6 +351,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSub(uint8 jobQueueGroup, uint8* JobQue
  * @trace       CPD-76703
  */
 NVM_LOCAL Std_ReturnType NvM_GetQueueSpace(NvM_JobTypeType JobType, uint8* JobQueueIndexPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Release the queue space
@@ -273,6 +365,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpace(NvM_JobTypeType JobType, uint8* JobQu
  * @trace       CPD-76704
  */
 NVM_LOCAL void NvM_RelQueueSpace(NvM_JobTypeType JobType, uint8 JobQueueIndex);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Single job enqueue
@@ -288,6 +384,10 @@ NVM_LOCAL void NvM_RelQueueSpace(NvM_JobTypeType JobType, uint8 JobQueueIndex);
  */
 NVM_LOCAL Std_ReturnType
     NvM_JobEnqueueSingleJob(NvM_BlockIdType BlockId, NvM_ServiceIdType ServiceId, uint8* DestSrcPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Multi-job enqueue
@@ -297,6 +397,10 @@ NVM_LOCAL Std_ReturnType
  * @trace       CPD-76706
  */
 NVM_LOCAL void NvM_JobEnqueueMultiJob(NvM_ServiceIdType ServiceId);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Assign write job when multi-job is requested
@@ -309,6 +413,10 @@ NVM_LOCAL void NvM_JobEnqueueMultiJob(NvM_ServiceIdType ServiceId);
  * @trace       CPD-76707
  */
 NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWrite(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Subfunction of getting hightest priority job
@@ -323,6 +431,10 @@ NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWrite(void);
  * @trace       CPD-76708
  */
 NVM_LOCAL Std_ReturnType NvM_GetHighestPriJobSub(uint8 curActPriTable, uint8 priGroup, uint8* JobQueueIndexPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Place the requested task in the queue with priority
@@ -337,6 +449,10 @@ NVM_LOCAL Std_ReturnType NvM_GetHighestPriJobSub(uint8 curActPriTable, uint8 pri
  * @trace       CPD-78584
  */
 NVM_LOCAL Std_ReturnType NvM_JobEnqueueWithPri(NvM_BlockIdType BlockId, NvM_ServiceIdType ServiceId, uint8* DestSrcPtr);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Remove a task from the queue for processing with priority
@@ -348,6 +464,10 @@ NVM_LOCAL Std_ReturnType NvM_JobEnqueueWithPri(NvM_BlockIdType BlockId, NvM_Serv
  * @trace       CPD-78585
  */
 NVM_LOCAL Std_ReturnType NvM_JobDequeueWithPri(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 
 /**
  * @brief       Multi-job scheduling of NvM with priority
@@ -359,8 +479,42 @@ NVM_LOCAL Std_ReturnType NvM_JobDequeueWithPri(void);
  * @trace       CPD-78586
  */
 NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWithPri(void);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
+/**
+ * @brief       Check skip during write all
+ * @param[in]   intBlockId: The internal block id
+ * @param[out]  loopDone: The loop done flag
+ * @return      Std_ReturnType
+ * @retval      E_OK: Processing success
+ * @retval      E_NOT_OK: Processing Failure
+ * @reentrant   Non Reentrant
+ * @synchronous TRUE
+ * @trace       -
+ */
+NVM_LOCAL Std_ReturnType NvM_CheckSkipDuringWriteAll(const NvM_BlockIdType intBlockId, boolean* loopDone);
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+
+/**
+ * @brief       Check skip during read all
+ * @param[in]   intBlockId: The internal block id
+ * @param[out]  loopDone: The loop done flag
+ * @return      Std_ReturnType
+ * @retval      E_OK: Processing success
+ * @retval      E_NOT_OK: Processing Failure
+ * @reentrant   Non Reentrant
+ * @synchronous TRUE
+ * @trace       -
+ */
+NVM_LOCAL Std_ReturnType NvM_CheckSkipDuringReadAll(const NvM_BlockIdType intBlockId, boolean* loopDone);
 #define NVM_STOP_SEC_CODE
 #include "NvM_MemMap.h"
 
@@ -476,17 +630,6 @@ const NvM_VoidFuncVoidPtr NvM_MemIfAsyncFuncTable[NVM_MEMIF_JOB_MAX_NUM][NVM_MEM
 #define NVM_STOP_SEC_CONST_PTR
 #include "NvM_MemMap.h"
 
-#if (NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR > 0)
-#define NVM_START_SEC_VAR_CLEARED_8
-#include "NvM_MemMap.h"
-/**
- * @brief Mirror buffer for synchronization mechanism
- */
-uint8 NVM_RamMirror[NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR]; /* PRQA S 1514 */ /* VL_NvM_1514 */
-#define NVM_STOP_SEC_VAR_CLEARED_8
-#include "NvM_MemMap.h"
-#endif
-
 /* ========================================== external function definition ========================================== */
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
@@ -581,7 +724,10 @@ Std_ReturnType NvM_JobEnqueue(NvM_BlockIdType BlockId, NvM_ServiceIdType Service
 #endif
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the api class is not class 1, determine whether it is a multi job type and schedule it. Otherwise. If the
  * api class is class 1, if the queue is not empty, block information is obtained based on the requested service
@@ -744,8 +890,11 @@ Std_ReturnType NvM_JobDequeue(void)
 #endif
     return retVal;
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 /* PRQA S 6070,6020 -- */
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the memif job status is ready, and according to the current underlying state obtained, decide whether
  * to send the request or set the job result to not ok; If the current job step is Cancel, set the job result to cancel
@@ -786,10 +935,14 @@ void NvM_MemIfReq(NvM_MemIfReqType NvM_MemIfRequest) /* PRQA S 1532 */ /* VL_QAC
     }
 #endif
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 /* PRQA S 1532 -- */
 
 /* ========================================== internal function definition ========================================== */
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief The processing is performed depending on whether the requested service is multi job or single job
  */
@@ -818,7 +971,10 @@ NVM_LOCAL Std_ReturnType NvM_JobEnqueueWithPri(NvM_BlockIdType BlockId, NvM_Serv
 
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief If the current job is an immediate job, obtain the information based on the job type and set the flag.
  * Otherwise, determine whether it is a multi job type and schedule it. Otherwise, the processing is based on the
@@ -862,8 +1018,11 @@ NVM_LOCAL Std_ReturnType NvM_JobDequeueWithPri(void) /* PRQA S 1532 */ /* VL_QAC
     }
     return retVal;
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Different memif interfaces are invoked based on different incoming memif requests
  */
@@ -882,7 +1041,7 @@ NVM_LOCAL void NvM_MemIfReqSubDeal(NvM_MemIfReqType NvM_MemIfRequest)
         NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
         const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 #endif
-        /* PRQA S 2814, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844 */
+        /* PRQA S 2814, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2844 */
         uint16 reqLength =
 #if (STD_ON == NVM_CIPHERING_ENABLE)
             (NULL_PTR != BlockDescriptorPtr->NvMBlockCipheringRef)
@@ -903,6 +1062,9 @@ NVM_LOCAL void NvM_MemIfReqSubDeal(NvM_MemIfReqType NvM_MemIfRequest)
                         : reqLength;
 #endif
         /* PRQA S 3120 -- */
+#if (NVM_BUFFER_ALIGN_VALUE > 1u)
+        reqLength = ((reqLength + (NVM_BUFFER_ALIGN_VALUE - 1u)) / NVM_BUFFER_ALIGN_VALUE) * NVM_BUFFER_ALIGN_VALUE;
+#endif
         retVal    = MemIf_Read(CurRunningPtr->DeviceId, blockNum, 0u, NvM_NvDataBuffer, reqLength);
         processOn = TRUE;
         break;
@@ -941,7 +1103,10 @@ NVM_LOCAL void NvM_MemIfReqSubDeal(NvM_MemIfReqType NvM_MemIfRequest)
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Determine whether data is lost and needs to be recovered. It then checks the static ID, gets information
  * about the crc, and sends the request calculated by the crc
@@ -961,7 +1126,10 @@ NVM_LOCAL void NvM_MemIfReadOk(void)
         NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
         /** success read the 1st NV,Clear the repair flag */
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-        Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_PASSED);
+        if (CurRunningPtr->ManagementType == NVM_BLOCK_REDUNDANT)
+        {
+            Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_PASSED);
+        }
 #endif
     }
 
@@ -987,6 +1155,7 @@ NVM_LOCAL void NvM_MemIfReadOk(void)
             ModulePtr->JobStep = NVM_JOB_STEP_CALC_CRC_READ_2ND_NV;
         }
         NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
     }
 #if (STD_ON == NVM_STATIC_BLOCKID_CHK)
     else if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
@@ -1005,7 +1174,10 @@ NVM_LOCAL void NvM_MemIfReadOk(void)
     Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_PASSED);
 #endif
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If it is a block of dataset, the result is directly set to not ok. If it is a native or redundant block,
  * the rom area is read. If the rom area also fails to be read, the result is set to not ok
@@ -1042,7 +1214,6 @@ NVM_LOCAL void NvM_MemIfReadFailed(void)
         {
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
             CurRunningPtr->ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
-#if ((STD_ON == NVM_DEM_E_REQ_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE) || (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY))
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
             Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
@@ -1050,16 +1221,15 @@ NVM_LOCAL void NvM_MemIfReadFailed(void)
             Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-            /** Recovery fails if the result is fail */
-            if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+            if (CurRunningPtr->ManagementType == NVM_BLOCK_REDUNDANT)
             {
-                Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
             }
-#endif
 #endif
             NVM_GetRepeatMirrorOperation();
             ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else if (
             (NVM_BLOCK_REDUNDANT == CurRunningPtr->ManagementType) && (NVM_JOB_STEP_READ_1ST_NV == ModulePtr->JobStep))
@@ -1072,18 +1242,19 @@ NVM_LOCAL void NvM_MemIfReadFailed(void)
         else
         {
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-#if ((STD_ON == NVM_DEM_E_REQ_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE))
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
             Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_HARDWARE)
             Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
-#endif
             NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
         }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     The low layer is processing
  */
@@ -1092,7 +1263,10 @@ NVM_LOCAL void NvM_MemIfPending(void)
     /** do nothing, just waiting */
     /** do not remove the function */
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     The low layer job is cancelled
  */
@@ -1102,7 +1276,10 @@ NVM_LOCAL void NvM_MemIfCancelled(void)
     NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
     NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If it is a block of dataset, the result is directly set to INTEGRITY_FAILED. If it is a native or
  * redundant block, the rom area is read. If the rom area also fails to be read, the result is set to INTEGRITY_FAILED
@@ -1119,13 +1296,14 @@ NVM_LOCAL void NvM_MemIfInconsistent(void)
     if (NVM_BLOCK_DATASET == CurRunningPtr->ManagementType)
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-#if ((STD_ON == NVM_DEM_E_INTEGRITY_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE))
 #if (STD_ON == NVM_DEM_E_INTEGRITY_FAILED)
         Dem_SetEventStatus(NVM_E_INTEGRITY_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_HARDWARE)
         Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
         NvM_JobOverSetFlag(NVM_REQ_INTEGRITY_FAILED, NVM_CRC_DELETE);
     }
@@ -1144,9 +1322,6 @@ NVM_LOCAL void NvM_MemIfInconsistent(void)
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
         CurRunningPtr->ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
-#if (                                                                        \
-    (STD_ON == NVM_DEM_E_INTEGRITY_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE) \
-    || (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY))
 #if (STD_ON == NVM_DEM_E_INTEGRITY_FAILED)
         Dem_SetEventStatus(NVM_E_INTEGRITY_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
@@ -1154,16 +1329,18 @@ NVM_LOCAL void NvM_MemIfInconsistent(void)
         Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-        /** Recovery fails then this shall be reported to the DEM */
-        if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+        if (CurRunningPtr->ManagementType == NVM_BLOCK_REDUNDANT)
         {
-            Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
+            NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
         }
 #endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
         NVM_GetRepeatMirrorOperation();
         ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
         NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
     }
     else if ((NVM_BLOCK_REDUNDANT == CurRunningPtr->ManagementType) && (NVM_JOB_STEP_READ_1ST_NV == ModulePtr->JobStep))
     {
@@ -1174,18 +1351,22 @@ NVM_LOCAL void NvM_MemIfInconsistent(void)
     else
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-#if ((STD_ON == NVM_DEM_E_INTEGRITY_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE))
 #if (STD_ON == NVM_DEM_E_INTEGRITY_FAILED)
         Dem_SetEventStatus(NVM_E_INTEGRITY_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
 #if (STD_ON == NVM_DEM_E_HARDWARE)
         Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
         NvM_JobOverSetFlag(NVM_REQ_INTEGRITY_FAILED, NVM_CRC_DELETE);
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     The low layer block is invalid
  */
@@ -1202,6 +1383,12 @@ NVM_LOCAL void NvM_MemIfInvalid(void)
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
         NvM_JobOverSetFlag(NVM_REQ_NV_INVALIDATED, NVM_CRC_DELETE);
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+        Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
+#endif
     }
     else
 #endif
@@ -1212,6 +1399,19 @@ NVM_LOCAL void NvM_MemIfInvalid(void)
         CurRunningPtr->ESingleReqResult = NVM_REQ_NV_INVALIDATED;
         ModulePtr->JobStep              = NVM_JOB_STEP_READ_ROM;
         NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+        (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+        Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
+#endif
+#if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
+        if (CurRunningPtr->ManagementType == NVM_BLOCK_REDUNDANT)
+        {
+            NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
+        }
+#endif
     }
     else if ((NVM_BLOCK_REDUNDANT == CurRunningPtr->ManagementType) && (NVM_JOB_STEP_READ_1ST_NV == ModulePtr->JobStep))
     {
@@ -1223,9 +1423,18 @@ NVM_LOCAL void NvM_MemIfInvalid(void)
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
         NvM_JobOverSetFlag(NVM_REQ_NV_INVALIDATED, NVM_CRC_DELETE);
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+        Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
+#if (STD_ON == NVM_DEM_E_REQ_FAILED)
+        Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
+#endif
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If redundant block, and the job step is to read the second nv block, set the result to ok, and the job
  * step is to read the first nv block, etc. Otherwise, if write check is configured, the write check request is switched
@@ -1257,6 +1466,7 @@ NVM_LOCAL void NvM_MemIfWriteOk(void)
             ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
             ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
             NvM_AtomJobReq(NVM_ATOMJOB_WRITEVERIFICATION);
+            (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
         }
         else
 #endif
@@ -1276,7 +1486,10 @@ NVM_LOCAL void NvM_MemIfWriteOk(void)
     Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_PASSED);
 #endif
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the number of write retries is not 0, set the memif job status to ready. If the second nv block is read
  * for redundant block, reset the number of write retries and update the corresponding status and result; If the second
@@ -1308,6 +1521,9 @@ NVM_LOCAL void NvM_MemIfWriteFailed(void)
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
         Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+        Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
     }
     else
     {
@@ -1320,6 +1536,7 @@ NVM_LOCAL void NvM_MemIfWriteFailed(void)
                 CurRunningPtr->Index     = 1u;
                 ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
                 NvM_AtomJobReq(NVM_ATOMJOB_WRITEVERIFICATION);
+                (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
             }
             else
 #endif
@@ -1335,12 +1552,18 @@ NVM_LOCAL void NvM_MemIfWriteFailed(void)
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
             Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+            Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
         }
     }
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the block is not redundant, set the result to ok. Otherwise, if the current erasing is the first nv
  * block, set erasing the second nv block; otherwise, set the result to ok.
@@ -1382,7 +1605,10 @@ NVM_LOCAL void NvM_MemIfEraseOk(void)
     Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_PASSED);
 #endif
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     The low layer processing the erase job failed
  */
@@ -1394,9 +1620,15 @@ NVM_LOCAL void NvM_MemIfEraseFailed(void)
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
     Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
-}
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+    Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
 #endif
-
+}
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Invalidate the first nv block and the second NV block in turn. If it is not the firstinitall service,
  * otherwise, set the result to ok. If it is not a redundant block and not a firstinitall service, set the result to ok.
@@ -1485,7 +1717,10 @@ NVM_LOCAL void NvM_MemIfInvalidOk(void)
 #endif
 }
 /* PRQA S 6030 -- */
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the service is not firstinitall, set the result to not ok. Otherwise set the corresponding state for
  * the redundant block, or sent an invalid request
@@ -1530,136 +1765,242 @@ NVM_LOCAL void NvM_MemIfInvalidFailed(void)
 #endif
     {
         NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_DELETE);
+#if (STD_ON == NVM_DEM_E_HARDWARE)
+        Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_FAILED);
+#endif
     }
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
     Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+/**
+ * @brief     Only when the condition is met will the data be written; otherwise, it will be skipped directly.
+ */
+NVM_LOCAL Std_ReturnType NvM_CheckSkipDuringWriteAll(const NvM_BlockIdType intBlockId, boolean* loopDone)
+{
+    Std_ReturnType                 retVal;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
+#if (STD_OFF == NVM_SET_RAM_BLOCK_STATUS_API)
+    /** treat the current block as valid and changed */
+    NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
+#else
+#if (STD_ON == NVM_BLOCK_USE_SET_RAMBLOCK_STATUS)
+    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
+    if (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SETRAMSTATUS))
+    /* PRQA S 2844 -- */
+    {
+        /*treat the current block as valid and changed.*/
+        NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
+    }
+#endif
+#endif
+    if ((TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR))
+        || ((TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID))
+            && (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
+            && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_WRPRO))
+            && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+            && (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORWRITEALL))))
+    {
+        NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
+        retVal    = E_OK;
+        *loopDone = TRUE;
+    }
+    else
+    {
+        if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID_CHANGE_STATUS_USED))
+        {
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
+        }
+        NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
+        retVal    = E_NOT_OK;
+        *loopDone = FALSE;
+    }
+    return retVal;
+}
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
+/**
+ * @brief     Only when the condition is met will the data be read; otherwise, it will be skipped directly.
+ */
+NVM_LOCAL Std_ReturnType NvM_CheckSkipDuringReadAll(const NvM_BlockIdType intBlockId, boolean* loopDone)
+{
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    const NvM_CurRunningType*      CurRunningPtr      = &NvM_CurRunning;
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+    if (CurRunningPtr->ServiceId == NVM_READ_ALL_SERV_ID)
+    {
+        if ((TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SELECTBLOCKFORREADALL))
+            && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
+#if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+            && (NVM_BLOCK_DATASET != CurRunningPtr->ManagementType)
+#endif
+        )
+        {
+            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
+            retVal    = E_OK;
+            *loopDone = TRUE;
+        }
+        else
+        {
+            NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
+        }
+    }
+    else
+    {
+        NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
+        retVal    = E_OK;
+        *loopDone = TRUE;
+    }
+    return retVal;
+}
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((NVM_API_CONFIG_CLASS_1 == NVM_API_CONFIG_CLASS) || (STD_OFF == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     When dispatching writeall job, we need to determine whether it is firstall, whether it is the first block,
  * whether all blocks have been written, and update the corresponding status, the result, and obtain the ram address.
  * Otherwise, determine whether blockid is greater than the total number of blocks, and set the corresponding job,
  * result, etc
  */
-NVM_LOCAL Std_ReturnType NvM_MultiJobDispatch(void) /* PRQA S 6050 */ /* VL_MTR_NvM_STST3 */
+/* PRQA S 6050,6070 ++ */ /* VL_MTR_NvM_STST3,VL_MTR_NvM_STCAL */
+NVM_LOCAL Std_ReturnType NvM_MultiJobDispatch(void)
 {
     Std_ReturnType      retVal        = E_NOT_OK;
     NvM_ModuleType*     ModulePtr     = &NvM_Module;
     NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
     NvM_MultiJobType*   MultiJobPtr   = &NvM_MultiJob;
     NvM_AdminBlockType* AdminBlockPtr = NULL_PTR;
+    boolean             loopDone      = FALSE;
 
-    ++CurRunningPtr->BlockId;
-
-    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
-
-    if (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId)
+    while (FALSE == loopDone)
     {
-        if (NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId)
+        ++CurRunningPtr->BlockId;
+
+        NvM_BlockIdType intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+
+        if (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId)
         {
-            SchM_Enter_NvM_Queue();
-            MultiJobPtr->Enqueue = FALSE;
-            SchM_Exit_NvM_Queue();
-            if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+            if (NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId)
             {
-                NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_NOT_OK);
+                SchM_Enter_NvM_Queue();
+                MultiJobPtr->Enqueue = FALSE;
+                SchM_Exit_NvM_Queue();
+                if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+                {
+                    NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_NOT_OK);
+                }
+                else
+                {
+                    NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_OK);
+                }
+                SchM_Enter_NvM_Queue();
+                CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
+                ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
+                SchM_Exit_NvM_Queue();
+                loopDone = TRUE;
             }
             else
             {
-                NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_OK);
+                AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+                SchM_Enter_NvM_Queue();
+                AdminBlockPtr->ServiceID = CurRunningPtr->ServiceId;
+                NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
+                AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
+                NvM_CopyCurBlockInfo();
+                SchM_Exit_NvM_Queue();
+                retVal = NvM_CheckSkipDuringReadAll(intBlockId, &loopDone);
             }
-            SchM_Enter_NvM_Queue();
-            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
-            ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
-            SchM_Exit_NvM_Queue();
         }
         else
-        {
-            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-
-            SchM_Enter_NvM_Queue();
-            AdminBlockPtr->ServiceID = CurRunningPtr->ServiceId;
-            NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
-            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
-            NvM_CopyCurBlockInfo();
-            SchM_Exit_NvM_Queue();
-            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-            retVal = E_OK;
-        }
-    }
-    else
-    { /* PRQA S 1881 ++ */ /*VL_NvM_1881 */
-        if ((NVM_WRITEALL_FIRST_BLOCKID == CurRunningPtr->BlockId)
-            || (NVM_SET_RAM_BLOCK_STATUS_SERV_ID == CurRunningPtr->ServiceId)
-            || ((NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId) && (STD_OFF == MultiJobPtr->ID1WriteMark)))
-        {
-            /* PRQA S 1881 -- */
-            SchM_Enter_NvM_Queue();
-            MultiJobPtr->Enqueue = FALSE;
-            SchM_Exit_NvM_Queue();
-            if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+        { /* PRQA S 1881 ++ */ /*VL_NvM_1881 */
+            if ((NVM_WRITEALL_FIRST_BLOCKID == CurRunningPtr->BlockId)
+                || (NVM_SET_RAM_BLOCK_STATUS_SERV_ID == CurRunningPtr->ServiceId)
+                || ((NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId) && (STD_OFF == MultiJobPtr->ID1WriteMark)))
             {
-                NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_NOT_OK);
+                /* PRQA S 1881 -- */
+                SchM_Enter_NvM_Queue();
+                MultiJobPtr->Enqueue = FALSE;
+                SchM_Exit_NvM_Queue();
+                if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+                {
+                    NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_NOT_OK);
+                }
+                else
+                {
+                    NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_OK);
+                }
+                SchM_Enter_NvM_Queue();
+                CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
+                ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
+                SchM_Exit_NvM_Queue();
+                loopDone = TRUE;
+            } /* PRQA S 2995 ++ */ /*VL_NvM_2995 */
+            else if ((NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId) && (TRUE == MultiJobPtr->ID1WriteMark))
+            {
+                /* PRQA S 2995 -- */
+                /** pending the job and clear the write flag */
+                SchM_Enter_NvM_Queue();
+                CurRunningPtr->BlockId    = 1u;
+                intBlockId                = 0u;
+                MultiJobPtr->ID1WriteMark = FALSE;
+
+                AdminBlockPtr                                     = &(NvM_AdminBlock[intBlockId]);
+                const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+                CurRunningPtr->ServiceId = NVM_WRITE_ALL_SERV_ID;
+                AdminBlockPtr->ServiceID = NVM_WRITE_ALL_SERV_ID;
+
+                NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
+                /* PRQA S 3120,0489 ++ */ /* VL_QAC_MagicNum,VL_NvM_0489 */
+                *(BlockDescriptorPtr->NvmRamBlockDataAddress) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) & 0x00ffU);
+                *((BlockDescriptorPtr->NvmRamBlockDataAddress) + 1U) =
+                    (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) >> 8U);
+                /* PRQA S 3120,0489 -- */
+                AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
+                NvM_CopyCurBlockInfo();
+                SchM_Exit_NvM_Queue();
+                NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
+                retVal   = E_OK;
+                loopDone = TRUE;
             }
             else
             {
-                NvM_MultiJobResultFeedBack(CurRunningPtr->ServiceId, NVM_REQ_OK);
+                AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+                /** pending the job */
+                SchM_Enter_NvM_Queue();
+                CurRunningPtr->ServiceId = NVM_WRITE_ALL_SERV_ID;
+                AdminBlockPtr->ServiceID = NVM_WRITE_ALL_SERV_ID;
+                NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
+                AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
+                NvM_CopyCurBlockInfo();
+                SchM_Exit_NvM_Queue();
+                retVal = NvM_CheckSkipDuringWriteAll(intBlockId, &loopDone);
             }
-            SchM_Enter_NvM_Queue();
-            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
-            ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
-            SchM_Exit_NvM_Queue();
-        } /* PRQA S 2995 ++ */ /*VL_NvM_2995 */
-        else if ((NVM_BLOCK_NUM_ALL < CurRunningPtr->BlockId) && (TRUE == MultiJobPtr->ID1WriteMark))
-        {
-            /* PRQA S 2995 -- */
-            /** pending the job and clear the write flag */
-            SchM_Enter_NvM_Queue();
-            CurRunningPtr->BlockId    = 1u;
-            intBlockId                = 0u;
-            MultiJobPtr->ID1WriteMark = FALSE;
-
-            AdminBlockPtr                                     = &(NvM_AdminBlock[intBlockId]);
-            const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
-
-            CurRunningPtr->ServiceId = NVM_WRITE_ALL_SERV_ID;
-            AdminBlockPtr->ServiceID = NVM_WRITE_ALL_SERV_ID;
-
-            NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
-            /* PRQA S 3120,0489 ++ */ /* VL_QAC_MagicNum,VL_NvM_0489 */
-            *(BlockDescriptorPtr->NvmRamBlockDataAddress) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) & 0x00ffU);
-            *((BlockDescriptorPtr->NvmRamBlockDataAddress) + 1U) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) >> 8U);
-            /* PRQA S 3120,0489 -- */
-            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
-            NvM_CopyCurBlockInfo();
-            SchM_Exit_NvM_Queue();
-            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-            retVal = E_OK;
-        }
-        else
-        {
-            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-
-            /** pending the job */
-            SchM_Enter_NvM_Queue();
-            CurRunningPtr->ServiceId = NVM_WRITE_ALL_SERV_ID;
-            AdminBlockPtr->ServiceID = NVM_WRITE_ALL_SERV_ID;
-            NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
-            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
-            NvM_CopyCurBlockInfo();
-            SchM_Exit_NvM_Queue();
-            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-            retVal = E_OK;
         }
     }
     return retVal;
 }
+/* PRQA S 6050,6070 -- */
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the multijob is writeall, the corresponding interface is called.
  */
@@ -1684,7 +2025,10 @@ NVM_LOCAL void NvM_JobDequeueSubDealOk(uint8 jobQueueIndex)
     /* PRQA S 2844 -- */
     SchM_Exit_NvM_Queue();
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the multijob is writeall, the corresponding interface is called.
  */
@@ -1701,8 +2045,13 @@ NVM_LOCAL Std_ReturnType NvM_JobDequeueSub(void)
         if (NVM_JOB_TYPE_MULTI_GAP_SINGLE_IMMED == ModulePtr->CurrentJobType)
         {
             ModulePtr->CurrentJobType = NVM_JOB_TYPE_MULTI;
-            CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
-            CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
+            if ((NVM_WRITE_ALL_SERV_ID == MultiJobPtr->ServiceId)
+                && (MultiJobPtr->BlockId > NVM_WRITEALL_FIRST_BLOCKID))
+            {
+                MultiJobPtr->BlockId--;
+            }
+            CurRunningPtr->BlockId   = MultiJobPtr->BlockId;
+            CurRunningPtr->ServiceId = MultiJobPtr->ServiceId;
         }
         /** switch low layer mode to slow mode after multiple type job is processed over */
         retVal = NvM_MultiJobDispatchWithPri();
@@ -1744,7 +2093,10 @@ NVM_LOCAL Std_ReturnType NvM_JobDequeueSub(void)
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the multijob is writeall, the corresponding interface is called. Otherwise, get the multi-job blockid
  * value, if blockid is invalid, can not join the team and set the status, the result is not ok, otherwise get the
@@ -1756,6 +2108,7 @@ NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWithPri(void)
     NvM_ModuleType*     ModulePtr     = &NvM_Module;
     NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
     NvM_MultiJobType*   MultiJobPtr   = &NvM_MultiJob;
+    boolean             loopDone      = FALSE;
 
     if (NVM_WRITE_ALL_SERV_ID == MultiJobPtr->ServiceId)
     {
@@ -1764,51 +2117,57 @@ NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWithPri(void)
     }
     else
     {
-        if ((NVM_JOB_TYPE_MULTI_GAP_SINGLE_IMMED != ModulePtr->CurrentJobType) || (1u != MultiJobPtr->BlockId))
+        while (FALSE == loopDone)
         {
-            ++MultiJobPtr->BlockId;
-        }
-
-        if (NVM_BLOCK_NUM_ALL < MultiJobPtr->BlockId)
-        {
-            if (0u != NvM_PriorityTable[1u - ModulePtr->CurActPriTable][NVM_TABLE_SIZE_PRIORITY - 1U])
+            if ((NVM_JOB_TYPE_MULTI_GAP_SINGLE_IMMED != ModulePtr->CurrentJobType) || (1u != MultiJobPtr->BlockId))
             {
-                /** switch the current active priority table */
-                ModulePtr->CurActPriTable = 1u - ModulePtr->CurActPriTable;
+                ++MultiJobPtr->BlockId;
             }
-            MultiJobPtr->Enqueue = FALSE;
-            if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+
+            if (NVM_BLOCK_NUM_ALL < MultiJobPtr->BlockId)
             {
-                NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_NOT_OK);
+                if (0u != NvM_PriorityTable[1u - ModulePtr->CurActPriTable][NVM_TABLE_SIZE_PRIORITY - 1U])
+                {
+                    /** switch the current active priority table */
+                    ModulePtr->CurActPriTable = 1u - ModulePtr->CurActPriTable;
+                }
+                MultiJobPtr->Enqueue = FALSE;
+                if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+                {
+                    NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_NOT_OK);
+                }
+                else
+                {
+                    NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_OK);
+                }
+                CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
+                ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE; /** Current job been finished */
+                loopDone                       = TRUE;
             }
             else
             {
-                NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_OK);
+                /** handle the next blockID for MultiJob */
+                ModulePtr->CurrentJobType = NVM_JOB_TYPE_MULTI;
+                CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
+                CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
+
+                NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+                NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+                AdminBlockPtr->ServiceID = MultiJobPtr->ServiceId;
+                NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
+                AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
+                NvM_CopyCurBlockInfo();
+                retVal = NvM_CheckSkipDuringReadAll(intBlockId, &loopDone);
             }
-            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
-            ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE; /** Current job been finished */
-        }
-        else
-        {
-            /** handle the next blockID for MultiJob */
-            ModulePtr->CurrentJobType = NVM_JOB_TYPE_MULTI;
-            CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
-            CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
-
-            NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
-            NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-
-            AdminBlockPtr->ServiceID = MultiJobPtr->ServiceId;
-            NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
-            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
-            NvM_CopyCurBlockInfo();
-            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-            retVal = E_OK;
         }
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the current block is out of the block range and the first block cannot be written, set the queuing flag
  * to off and invoke the notification interface. Otherwise, obtain the information of each block successively to perform
@@ -1823,86 +2182,94 @@ NVM_LOCAL Std_ReturnType NvM_MultiJobDispatchWrite(void)
     NvM_MultiJobType*   MultiJobPtr   = &NvM_MultiJob;
     NvM_AdminBlockType* AdminBlockPtr = NULL_PTR;
     NvM_BlockIdType     intBlockId;
+    boolean             loopDone = FALSE;
 
-    ++MultiJobPtr->BlockId;
-    /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-    if ((2U == MultiJobPtr->BlockId)
-        || ((NVM_BLOCK_NUM_ALL < MultiJobPtr->BlockId) && (FALSE == MultiJobPtr->ID1WriteMark)))
-    /* PRQA S 3120 -- */
+    while (FALSE == loopDone)
     {
-        if (0U != NvM_PriorityTable[1U - ModulePtr->CurActPriTable][NVM_TABLE_SIZE_PRIORITY - 1U])
+        ++MultiJobPtr->BlockId;
+        /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
+        if ((2U == MultiJobPtr->BlockId)
+            || ((NVM_BLOCK_NUM_ALL < MultiJobPtr->BlockId) && (FALSE == MultiJobPtr->ID1WriteMark)))
+        /* PRQA S 3120 -- */
         {
-            /** switch the current active priority table */
-            ModulePtr->CurActPriTable = 1U - ModulePtr->CurActPriTable;
-        }
-        MultiJobPtr->Enqueue = FALSE;
+            if (0U != NvM_PriorityTable[1U - ModulePtr->CurActPriTable][NVM_TABLE_SIZE_PRIORITY - 1U])
+            {
+                /** switch the current active priority table */
+                ModulePtr->CurActPriTable = 1U - ModulePtr->CurActPriTable;
+            }
+            MultiJobPtr->Enqueue = FALSE;
 
-        if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+            if (NVM_REQ_NOT_OK == CurRunningPtr->EMultiReqResult)
+            {
+                NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_NOT_OK);
+            }
+            else
+            {
+                NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_OK);
+            }
+            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
+            ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
+            loopDone                       = TRUE;
+        }
+        else if (NVM_BLOCK_NUM_ALL >= MultiJobPtr->BlockId)
         {
-            NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_NOT_OK);
+            /** copy the current job information to global variant to process */
+            ModulePtr->CurrentJobType = NVM_JOB_TYPE_MULTI;
+            CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
+            CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
+
+            NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
+
+            intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+
+            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING; /* PRQA S 2844 */ /* VL_NvM_2844 */
+            NvM_CopyCurBlockInfo();
+            retVal = NvM_CheckSkipDuringWriteAll(intBlockId, &loopDone);
+        }
+        /** If Block1 should write, then Block1 should the last block to handle */
+        else if (TRUE == MultiJobPtr->ID1WriteMark) /* PRQA S 2991,2995 */ /* VL_QAC_2991,VL_NvM_2995 */
+        {
+            /** copy the current job information to global variant to process */
+            MultiJobPtr->BlockId      = 1u;
+            MultiJobPtr->ID1WriteMark = FALSE;
+            CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
+            CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
+
+            intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+
+            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+            AdminBlockPtr->ServiceID = MultiJobPtr->ServiceId;
+
+            const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+            /* PRQA S 2814, 3120 ++ */ /* VL_NvM_2814,VL_QAC_MagicNum */
+            *(BlockDescriptorPtr->NvmRamBlockDataAddress) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) & 0x00ffU);
+            /* PRQA S 2814, 3120 -- */
+            /* PRQA S 2824, 0489, 3120 ++ */ /* VL_NvM_2824,VL_NvM_0489,VL_QAC_MagicNum */
+            *(BlockDescriptorPtr->NvmRamBlockDataAddress + 1U) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) >> 8U);
+            /* PRQA S 2824, 0489, 3120 -- */
+            CurRunningPtr->RamAddr         = BlockDescriptorPtr->NvmRamBlockDataAddress;
+            AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
+            NvM_CopyCurBlockInfo();
+            NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
+            retVal   = E_OK;
+            loopDone = TRUE;
         }
         else
         {
-            NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_OK);
+            /** idle */
         }
-        CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
-        ModulePtr->CurrentJobType      = NVM_JOB_TYPE_NONE;
-    }
-    else if (NVM_BLOCK_NUM_ALL >= MultiJobPtr->BlockId)
-    {
-        /** copy the current job information to global variant to process */
-        ModulePtr->CurrentJobType = NVM_JOB_TYPE_MULTI;
-        CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
-        CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
-
-        NvM_GetRamAddress(USELESS_FOR_MULTIJOB);
-
-        intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
-
-        AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-
-        AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING; /* PRQA S 2844 */ /* VL_NvM_2844 */
-        NvM_CopyCurBlockInfo();
-        NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-        retVal = E_OK;
-    }
-    /** If Block1 should write, then Block1 should the last block to handle */
-    else if (TRUE == MultiJobPtr->ID1WriteMark) /* PRQA S 2991,2995 */ /* VL_QAC_2991,VL_NvM_2995 */
-    {
-        /** copy the current job information to global variant to process */
-        MultiJobPtr->BlockId      = 1u;
-        MultiJobPtr->ID1WriteMark = FALSE;
-        CurRunningPtr->BlockId    = MultiJobPtr->BlockId;
-        CurRunningPtr->ServiceId  = MultiJobPtr->ServiceId;
-
-        intBlockId = NvM_GetIntBlockId(CurRunningPtr->BlockId);
-
-        AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
-
-        AdminBlockPtr->ServiceID = MultiJobPtr->ServiceId;
-
-        const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
-
-        /* PRQA S 2814, 3120 ++ */ /* VL_QAC_DerefNullPtr,VL_QAC_MagicNum */
-        *(BlockDescriptorPtr->NvmRamBlockDataAddress) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) & 0x00ffU);
-        /* PRQA S 2814, 3120 -- */
-        /* PRQA S 2824, 0489, 3120 ++ */ /* VL_NvM_2824,VL_NvM_0489,VL_QAC_MagicNum */
-        *(BlockDescriptorPtr->NvmRamBlockDataAddress + 1U) = (uint8)(((uint16)(NVM_COMPILED_CONFIG_ID)) >> 8U);
-        /* PRQA S 2824, 0489, 3120 -- */
-        CurRunningPtr->RamAddr         = BlockDescriptorPtr->NvmRamBlockDataAddress;
-        AdminBlockPtr->SingleReqResult = NVM_REQ_PENDING;
-        NvM_CopyCurBlockInfo();
-        NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, NVM_REQ_PENDING);
-        retVal = E_OK;
-    }
-    else
-    {
-        /** idle */
     }
     return retVal;
 }
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #endif
-
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     According to whether the current job is immediate data, multi-job, single job, etc., the ram address
  * corresponding to each block is obtained
@@ -2011,9 +2378,22 @@ NVM_LOCAL void NvM_GetRamAddress(uint8 QueueIndex)
     {
         /** idle */
     }
-}
-/* PRQA S 6030 -- */
 
+#if (NVM_BUFFER_ALIGN_VALUE > 0)
+    /** The module shall use the internal mirror as a buffer for all operations if the RAM (start) is not aligned to the
+     * NvMBufferAlignmentValue. */
+    if (0U != ((uint32)CurRunningPtr->RamAddr % NVM_BUFFER_ALIGN_VALUE))
+    {
+        NvM_InterMemCpy((uint8*)NvM_RamMirrorBuffer, CurRunningPtr->RamAddr, BlockDescriptorPtr->NvmNvBlockLength);
+        CurRunningPtr->RamAddr = NvM_RamMirrorBuffer;
+    }
+#endif
+}
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+/* PRQA S 6030 -- */
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Copy current block infomation to global variant
  */
@@ -2097,8 +2477,11 @@ NVM_LOCAL void NvM_CopyCurBlockInfo(void)
 #endif
     CurRunningPtr->SingleCallback = BlockDescriptorPtr->NvmSingleBlockCallback;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Find the first setted bit of a given 16 bits source number
  */
@@ -2120,7 +2503,7 @@ NVM_LOCAL Std_ReturnType NvM_Get16Bits1stSettedBit(uint16 Number, uint8* SettedB
         {
             if (0u != (baseNum & Number))
             {
-                *SettedBitPtr = bitsLoop; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+                *SettedBitPtr = bitsLoop; /* PRQA S 2814 */ /* VL_NvM_2814 */
                 break;
             }
             baseNum = (uint16)(baseNum << 1u);
@@ -2129,7 +2512,10 @@ NVM_LOCAL Std_ReturnType NvM_Get16Bits1stSettedBit(uint16 Number, uint8* SettedB
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Determine whether the immediate queue overflows and set the header and tail indexes
  */
@@ -2146,7 +2532,7 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSingleImmed(uint8* JobQueueIndexPtr)
     else
     {
         SchM_Enter_NvM_Queue();
-        *JobQueueIndexPtr = ImmedQueueManagePtr->TailIndex; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+        *JobQueueIndexPtr = ImmedQueueManagePtr->TailIndex; /* PRQA S 2814 */ /* VL_NvM_2814 */
         ++ImmedQueueManagePtr->TailIndex;
         if (NVM_SIZE_IMMEDIATE_JOB_QUEUE <= ImmedQueueManagePtr->TailIndex)
         {
@@ -2158,7 +2544,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSingleImmed(uint8* JobQueueIndexPtr)
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Obtain the queue information based on the index value in the queue where the task resides
  */
@@ -2185,7 +2574,7 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSub(uint8 jobQueueGroup, uint8* JobQue
     else
     {
         SchM_Enter_NvM_Queue();
-        *JobQueueIndexPtr = jobQueueIndex; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+        *JobQueueIndexPtr = jobQueueIndex; /* PRQA S 2814 */ /* VL_NvM_2814 */
         /** clear the job queue space table, mark it as not available */
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
         NvM_QueueSpaceTalbe[jobQueueGroup] &= (uint16)(~(0x01u << jobQueueBit));
@@ -2201,7 +2590,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpaceSub(uint8 jobQueueGroup, uint8* JobQue
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Based on the incoming job type, determine whether the corresponding queue overflows and obtain the queue
  * space
@@ -2244,7 +2636,10 @@ NVM_LOCAL Std_ReturnType NvM_GetQueueSpace(NvM_JobTypeType JobType, uint8* JobQu
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Release the queue space based on the incoming job type and based on the incoming queue index
  */
@@ -2282,7 +2677,10 @@ NVM_LOCAL void NvM_RelQueueSpace(NvM_JobTypeType JobType, uint8 JobQueueIndex)
     }
     SchM_Exit_NvM_Queue();
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the value of the high priority is within the valid range, the corresponding priority queue information
  * is obtained
@@ -2320,7 +2718,7 @@ NVM_LOCAL Std_ReturnType NvM_GetHighestPriJobSub(uint8 curActPriTable, uint8 pri
             uint8 samePriHeadIndex = PriTable2QueuePtr->HeadIndex;
 
             /* PRQA S 2844 -- */
-            *JobQueueIndexPtr = samePriHeadIndex; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+            *JobQueueIndexPtr = samePriHeadIndex; /* PRQA S 2814 */ /* VL_NvM_2814 */
             if (PriTable2QueuePtr->HeadIndex == PriTable2QueuePtr->TailIndex)
             {
                 /** This is the last element, clear priority table flag */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
@@ -2345,7 +2743,10 @@ NVM_LOCAL Std_ReturnType NvM_GetHighestPriJobSub(uint8 curActPriTable, uint8 pri
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the number of priority groups is greater than the number of priorities, it is considered an error.
  * Otherwise, the value of the high priority is obtained
@@ -2377,7 +2778,10 @@ NVM_LOCAL Std_ReturnType NvM_GetHighestPriJob(uint8* JobQueueIndexPtr)
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     If the multijob is writeall,
  */
@@ -2492,7 +2896,10 @@ NVM_LOCAL Std_ReturnType
     }
     return retVal;
 }
-
+#define NVM_STOP_SEC_CODE
+#include "NvM_MemMap.h"
+#define NVM_START_SEC_CODE
+#include "NvM_MemMap.h"
 /**
  * @brief     Invoke the callback interface of the task result and record the corresponding flag and information
  */
@@ -2506,7 +2913,6 @@ NVM_LOCAL void NvM_JobEnqueueMultiJob(NvM_ServiceIdType ServiceId)
     SchM_Exit_NvM_Queue();
     NvM_MultiJobResultFeedBack(MultiJobPtr->ServiceId, NVM_REQ_PENDING);
 }
-#endif
-
 #define NVM_STOP_SEC_CODE
 #include "NvM_MemMap.h"
+#endif

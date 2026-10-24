@@ -41,6 +41,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         Requests transmission of a signal.
  * @param[in]     id               : Identification of the transmitted I-PDU..
@@ -65,7 +67,11 @@ BufReq_ReturnType LdCom_CopyTxData(
     const PduInfoType*   info,
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 /**
  * @brief         This function is called after the I-PDU has been transmitted on its network, the result
  *                indicates whether the transmission was successful or not.
@@ -76,7 +82,11 @@ BufReq_ReturnType LdCom_CopyTxData(
  * @trace         CPD-56836
  */
 void LdCom_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define LDCOM_STOP_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         This function is called at the start of receiving an N-SDU..
  * @param[in]     id            : Identification of the I-PDU.
@@ -106,7 +116,11 @@ BufReq_ReturnType LdCom_StartOfReception(
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         This function is called to provide the received data of an I-PDU segment (N-PDU) to the
  *                upper layer. Each call to this function provides the next part of the I-PDU data. The
@@ -125,7 +139,11 @@ BufReq_ReturnType LdCom_StartOfReception(
  * @trace         CPD-56841
  */
 BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 /**
  * @brief         Called after an I-PDU has been received via the TP API, the result indicates whether the
  *                transmission was successful or not.
@@ -136,7 +154,11 @@ BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
  * @trace         CPD-56842
  */
 void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define LDCOM_STOP_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 /**
  * @brief         Indication of a received PDU from a lower layer communication interface module.
  * @param[in]     RxPduId    : ID of the received PDU.
@@ -147,7 +169,11 @@ void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result);
  * @trace         CPD-56843
  */
 void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define LDCOM_STOP_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 /**
  * @brief         The lower layer communication interface module confirms the transmission of an IPDU, or
  *                the failure to transmit a PDU.
@@ -158,13 +184,17 @@ void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @trace         CPD-56844
  */
 void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define LDCOM_STOP_SEC_CODE_FAST
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         Copy the upper layer module(called module) data to be used the lower layer module
  *                transmission.
  * @param[in]     TxPduId    : ID of the SDU that is requested to be transmitted.
  * @param[inout]  PduInfoPtr : Contains a pointer to a buffer (SduDataPtr) to where the SDU data shall be
- *                             copied, and the available buffer size in SduLengh.On return, the service
+ *                             copied, and the available buffer size in SduLength.On return, the service
  *                             will indicate the length of the copied SDU data in SduLength.
  * @return        Std_ReturnType
  * @retval        E_OK     : SDU has been copied and SduLength indicates the number of copied bytes.
@@ -175,6 +205,8 @@ void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace         CPD-56845
  */
 Std_ReturnType LdCom_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
 #ifdef __cplusplus
 }

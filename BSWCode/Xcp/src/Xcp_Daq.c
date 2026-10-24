@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -25,7 +25,7 @@
 #include "Xcp_Internal.h"
 #include "SchM_Xcp.h"
 #if (XCP_SET_REQUEST == STD_ON)
-#include "Nvm.h"
+#include "NvM.h"
 #endif
 
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
@@ -62,55 +62,140 @@
 #define XCP_RESUME_SIZE_OFFSET 0X3U
 #define XCP_RESUME_DATA_OFFSET 0X5uL
 
-/* ========================================== internal function declarations ======================================== */
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
+/* ========================================== internal function declarations ======================================== */
+
 XCP_LOCAL void Xcp_ClearAllDaq(void);
-XCP_LOCAL void Xcp_ClearDaq(Xcp_DaqNumType daqNum);
-XCP_LOCAL void Xcp_ClearDaqOdt(Xcp_DaqNumType daqNum);
-
-XCP_LOCAL void Xcp_FillEventBuffer(Xcp_DaqType* daqPtr);
-
-XCP_LOCAL void           Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_DaqNumType daqNum);
-XCP_LOCAL Std_ReturnType Xcp_PreSendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType daqNum);
-XCP_LOCAL Std_ReturnType Xcp_SendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType daqNum, boolean overLoad);
-XCP_LOCAL Std_ReturnType Xcp_StartDaq(Xcp_DaqNumType daqNum);
-XCP_LOCAL void           Xcp_StopDaq(Xcp_DaqNumType daqNum);
-XCP_LOCAL void           Xcp_WriteDaqHal(void);
-XCP_LOCAL void           Xcp_SetDaqListModeHal(void);
-XCP_LOCAL void           Xcp_StartStopDaqListHal(void);
-XCP_LOCAL void           Xcp_StartStopSynchHal(void);
-
-#if (XCP_DAQ_CONFIG_TYPE == XCP_DAQ_DYNAMIC)
-XCP_LOCAL void Xcp_AllocDaqHal(void);
-XCP_LOCAL void Xcp_AllocOdtHal(void);
-XCP_LOCAL void Xcp_AllocOdtEntryHal(void);
-#endif
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
-/* ============================================ internal data definitions =========================================== */
-#define XCP_START_SEC_VAR_CLEARED_8
+#define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_ClearDaq(Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_ClearDaqOdt(Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_FillEventBuffer(Xcp_DaqType* daqPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL Std_ReturnType Xcp_PreSendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL Std_ReturnType Xcp_SendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType daqNum, boolean overLoad);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL Std_ReturnType Xcp_StartDaq(Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_StopDaq(Xcp_DaqNumType daqNum);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_WriteDaqHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_SetDaqListModeHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_StartStopDaqListHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_StartStopSynchHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#if (XCP_DAQ_CONFIG_TYPE == XCP_DAQ_DYNAMIC)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_AllocDaqHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_AllocOdtHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_AllocOdtEntryHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+#endif
+
+/* ============================================ internal data definitions =========================================== */
 /* PRQA S 3218 ++ */ /* VL_Xcp_3218 */
 #if (XCP_DAQ_DYNAMIC == XCP_DAQ_CONFIG_TYPE)
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 XCP_LOCAL uint8 Xcp_DynDaqBuffer[XCP_DYNAMIC_DAQ_BUFFER_SIZE];
-#endif
-XCP_LOCAL uint8 Xcp_DaqBuffer[XCP_MAX_DTO];
-/* PRQA S 3218 -- */
-
-#if (XCP_RESUME_SUPPORT == STD_ON)
-/* PRQA S 3218,3678,3233 ++ */ /* VL_Xcp_3218, VL_Xcp_3678, VL_Xcp_3233 */
-XCP_LOCAL uint8 Xcp_ResumeData[XCP_CFG_RESUME_BUFSIZE];
-/* PRQA S 3218,3678,3233 -- */
-#endif
 #define XCP_STOP_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
+#endif
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+XCP_LOCAL uint8 Xcp_DaqBuffer[XCP_MAX_DTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#if (XCP_RESUME_SUPPORT == STD_ON)
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+XCP_LOCAL uint8 Xcp_ResumeData[XCP_CFG_RESUME_BUFSIZE]; /* PRQA S 3678,3233 */ /* VL_Xcp_3678,VL_Xcp_3678 */
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+#endif
+/* PRQA S 3218 -- */
 
 /* ============================================ external data definitions =========================================== */
 #define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
-Xcp_ChannelDaqType  Xcp_ChannelDaqData;
+Xcp_ChannelDaqType Xcp_ChannelDaqData;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 Xcp_ChannelEvChType Xcp_ChannelEvChData;
 #define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
@@ -194,8 +279,12 @@ void Xcp_DAQInit(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_SET_REQUEST == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `SET_REQUEST` command for storing or clearing DAQ configurations.
  * This function checks the session status and performs the appropriate action:
@@ -270,8 +359,12 @@ void Xcp_SetRequestHandler(void)
         /*Do nothing*/
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Reinitializes the XCP Data Acquisition (DAQ) system. This function clears
  * event usage counters, initializes DAQ list information, sets the dynamic buffer
@@ -321,8 +414,12 @@ void Xcp_DAQReinit(void)
     Xcp_ClearAllDaq();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears all DAQ configurations. This function invalidates the DAQ pointers,
  * clears each DAQ list, and resets the session status to ensure no resume state
@@ -351,7 +448,11 @@ XCP_LOCAL void Xcp_ClearAllDaq(void)
     Xcp_ChannelDaqData.DynDaqBufPos = 0u; /* Record the location where the array is used */
 #endif
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears a specific DAQ list. This function resets the send state machine, mode,
  * current PID, prescaler, event channel number, and event buffer. For dynamic
@@ -400,7 +501,11 @@ XCP_LOCAL void Xcp_ClearDaq(Xcp_DaqNumType daqNum)
 #endif /*0u != XCP_MIN_DAQ*/
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears the ODT (Object Descriptor Table) entries for a specific DAQ list.
  * This function iterates through each ODT and its entries, setting the entry
@@ -448,7 +553,11 @@ XCP_LOCAL void Xcp_ClearDaqOdt(Xcp_DaqNumType daqNum)
 #endif
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Fills the event buffer with data from the DAQ list entries. This function
  * iterates through each ODT and its entries, copying the data to the event
@@ -497,7 +606,11 @@ XCP_LOCAL void Xcp_FillEventBuffer(Xcp_DaqType* daqPtr)
 #endif
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sends a DAQ frame for a specific DAQ list. This function checks if the DAQ
  * list is running, sets the PID number, and fills the DAQ buffer with data
@@ -634,7 +747,11 @@ XCP_LOCAL Std_ReturnType Xcp_SendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType da
     }
     return ret;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Prepares and sends a DAQ frame, handling overload conditions. This function
  * checks if an overload condition is active and adjusts the current PID if
@@ -673,7 +790,11 @@ XCP_LOCAL Std_ReturnType Xcp_PreSendDaqFrame(Xcp_DaqType* daqPtr, Xcp_DaqNumType
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sends a DAQ frame for a specific event channel. This function checks if the
  * request is enabled and marks the event channel as active. It then retrieves
@@ -733,7 +854,12 @@ void Xcp_SendDaq(uint16 evChNum, boolean rqstEnable)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 #if (XCP_PL_STIM == (XCP_PL_STIM & XCP_RESOURCE))
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Processes incoming STIM (Stimulation) data. This function checks if the STIM
  * protection is locked and finds the corresponding DAQ list based on the PID.
@@ -778,13 +904,11 @@ void Xcp_RxStimHal(const uint8* dataPtr)
 #elif (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_RELATIVE_BYTE)
     daqNum = dataPtr[XCP_DAQ_NUM_OFFSET];
     pos    = XCP_DATA_OFFSET;
-#else                    /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
+#else  /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
     Xcp_CopyU1BufferToU2(&(dataPtr[XCP_DAQ_NUM_OFFSET]), &daqNum, (uint8)CPU_BYTE_ORDER);
     pos = XCP_DATA_OFFSET;
-#endif                   /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
-    /* PRQA S 2995 ++ */ /* VL_Xcp_2995 */
-    if ((daqNum < XCP_MAX_DAQ) && (NULL_PTR != daqPtr))
-    /* PRQA S 2995 -- */
+#endif /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
+    if ((daqNum < XCP_MAX_DAQ))
     {
         evchCfgPtr = &(Xcp_PConfig.XcpEvCh[daqPtr->eventChannelNum]);
         if ((XCP_DAQ_MOD_DIR_STIM != (daqPtr->mode & XCP_DAQ_MOD_DIR_STIM)) || (DAQ == evchCfgPtr->XcpEvChType))
@@ -832,7 +956,12 @@ XCP_PROCESS_STIM_EXIT:
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 #endif /*XCP_PL_STIM == XCP_PL_STIM & XCP_RESOURCE*/
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the event channel for a specific DAQ list. This function checks if
  * the DAQ list is currently sending or queued. If so, it marks the DAQ list as
@@ -867,7 +996,11 @@ XCP_LOCAL void Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_DaqNumType daqN
     Xcp_ChannelEvChData.DaqListQueueLength[eventNum]++;
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles an event indication for a specific event channel. This function
  * clears the queue position and length, then iterates through the DAQ lists
@@ -880,6 +1013,8 @@ XCP_LOCAL void Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_DaqNumType daqN
 void Xcp_EventIndication(uint16 eventNum)
 /* PRQA S 2889, 6060 -- */
 {
+    Xcp_ArtiApiStart(2, XCP_SERVICE_ID_EVENTINDICATION, eventNum);
+
     uint16         daqCnt;
     Xcp_DaqNumType cnt; /* loop counter */
     Xcp_DaqNumType daqNum;
@@ -939,8 +1074,16 @@ void Xcp_EventIndication(uint16 eventNum)
     {
         Xcp_SendDaq(eventNum, TRUE);
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_EVENTINDICATION);
+
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts a specific DAQ list. This function initializes the DAQ list if it is
  * not already running and checks if the event channel is valid and has space
@@ -1019,7 +1162,11 @@ XCP_LOCAL Std_ReturnType Xcp_StartDaq(Xcp_DaqNumType daqNum)
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Stops a specific DAQ list. This function checks if the DAQ list is running
  * and, if so, clears the running status and send status flags. It decrements
@@ -1045,7 +1192,11 @@ XCP_LOCAL void Xcp_StopDaq(Xcp_DaqNumType daqNum)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the DAQ pointer to a specified DAQ list, ODT, and ODT entry. This function
  * checks the command length, program status, and protection status. It retrieves
@@ -1122,7 +1273,11 @@ void Xcp_SetDaqPtr(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Writes data to a specified DAQ entry. This function checks the command length,
  * program status, and protection status. It verifies that the DAQ list number
@@ -1172,7 +1327,11 @@ void Xcp_WriteDaq(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Writes data to a specified DAQ entry. This function retrieves the size of
  * the DAQ element, address extension, and address of the DAQ element from the
@@ -1271,7 +1430,11 @@ XCP_LOCAL void Xcp_WriteDaqHal(void)
         }
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the mode of a DAQ list. This function checks the command length, program
  * status, and protection status. If any checks fail, it sets an appropriate error
@@ -1309,7 +1472,11 @@ void Xcp_SetDaqListMode(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the mode of a DAQ list. This function retrieves the mode, DAQ list number,
  * event channel number, and transmission rate prescaler from the command buffer.
@@ -1423,7 +1590,11 @@ XCP_LOCAL void Xcp_SetDaqListModeHal(void)
 #endif
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts or stops a DAQ list. This function checks the command length, program
  * status, and protection status. If any checks fail, it sets an appropriate error
@@ -1460,7 +1631,11 @@ void Xcp_StartStopDaqList(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts, stops, or selects a DAQ list. This function retrieves the mode and
  * DAQ list number from the command buffer. It checks if the DAQ list number
@@ -1533,7 +1708,11 @@ XCP_LOCAL void Xcp_StartStopDaqListHal(void)
         }
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts or stops synchronization. This function checks the command length, program
  * status, and protection status. If any checks fail, it sets an appropriate error
@@ -1570,7 +1749,11 @@ void Xcp_StartStopSynch(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts or stops synchronization for all or selected DAQ lists. This function
  * retrieves the mode from the command buffer. If the mode is to stop all DAQ
@@ -1584,8 +1767,9 @@ void Xcp_StartStopSynch(void)
 XCP_LOCAL void Xcp_StartStopSynchHal(void)
 /* PRQA S 6030 -- */
 {
-    uint16 cnt;
-    uint8  tMode = Xcp_CmdBuffer[1u];
+    uint16  cnt;
+    uint8   tMode           = Xcp_CmdBuffer[1u];
+    boolean findSeleDaqFlag = FALSE;
 
     if (tMode == XCP_START_STOP_MOD_STOP_ALL)
     {
@@ -1606,6 +1790,7 @@ XCP_LOCAL void Xcp_StartStopSynchHal(void)
         {
             if (XCP_DAQ_MOD_SELE == (XCP_DAQ_MOD_SELE & (Xcp_ChannelDaqData.DaqInfo)[cnt].mode))
             {
+                findSeleDaqFlag = TRUE;
                 if (tMode == XCP_START_STOP_MOD_START_SELECT)
                 {
                     (void)Xcp_StartDaq((Xcp_DaqNumType)cnt);
@@ -1617,16 +1802,24 @@ XCP_LOCAL void Xcp_StartStopSynchHal(void)
                 (Xcp_ChannelDaqData.DaqInfo)[cnt].mode &= (uint8)(~XCP_DAQ_MOD_SELE);
             }
         }
+        if ((boolean)FALSE == findSeleDaqFlag)
+        {
+            Xcp_SetErrorCode(XCP_ERR_DAQ_CONFIG);
+        }
     }
     else
     {
         Xcp_SetErrorCode(XCP_ERR_MODE_NOT_VALID);
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /* CMD:WRITE_DAQ_MULTIPLE:now don't support */
 
 #if (STD_ON == XCP_READ_DAQ)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Reads data from a specified DAQ entry. This function checks the command length,
  * program status, and protection status. It verifies that the DAQ list, ODT, and
@@ -1703,6 +1896,8 @@ void Xcp_ReadDaq(void)
 
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_READ_DAQ*/
 
 /**
@@ -1712,6 +1907,8 @@ void Xcp_ReadDaq(void)
  * buffer. Finally, it sends the response.
  */
 #if ((STD_ON == XCP_GET_DAQ_CLOCK) && (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TIME_STAMP))
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 void Xcp_GetDaqClock(void)
 {
 #if ((STD_OFF == XCP_CAN_MAX_DLC_REQUIRED) && (STD_ON == XCP_ON_CAN_ENABLE))
@@ -1744,9 +1941,13 @@ void Xcp_GetDaqClock(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (STD_ON == XCP_GET_DAQ_PROCESSOR_INFO)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves DAQ processor information. This function checks the command length,
  * program status, and protection status. If any checks fail, it sets an appropriate
@@ -1816,9 +2017,13 @@ void Xcp_GetDaqProcessorInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_GET_DAQ_PROCESSOR_INFO*/
 
 #if (STD_ON == XCP_GET_DAQ_RESOLUTION_INFO)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves DAQ resolution information. This function checks the command length,
  * program status, and protection status. If any checks fail, it sets an appropriate
@@ -1869,9 +2074,13 @@ void Xcp_GetDaqResolutionInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_GET_DAQ_RESOLUTION_INFO*/
 
 #if (STD_ON == XCP_GET_DAQ_LIST_MODE)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves the mode of a specified DAQ list. This function checks the command length,
  * program status, and protection status. If any checks fail, it sets an appropriate
@@ -1933,9 +2142,13 @@ void Xcp_GetDaqListMode(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_ON == XCP_GET_DAQ_LIST_MODE*/
 
 #if (STD_ON == XCP_GET_DAQ_EVENT_INFO)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves information about a specified event channel. This function checks the
  * command length, program status, and protection status. If any checks fail, it
@@ -2000,9 +2213,13 @@ void Xcp_GetDaqEventInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_GET_DAQ_EVENT_INFO == STD_ON*/
 
 #if (XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears a specified DAQ list. This function checks the command length, program
  * status, and protection status. If any checks fail, it sets an appropriate error
@@ -2062,8 +2279,12 @@ void Xcp_ClearDaqList(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_GET_DAQ_LIST_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves information about a specified DAQ list. This function checks the command
  * length, program status, and protection status. If any checks fail, it sets an
@@ -2173,11 +2394,16 @@ void Xcp_GetDaqListInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_GET_DAQ_LIST_INFO == STD_ON*/
+
 /*
  * DYNAMIC CONFIG COMMAND
  */
 #else
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Frees all DAQ lists. This function checks the command length, program status,
  * and protection status. If any checks fail, it sets an appropriate error code.
@@ -2232,7 +2458,11 @@ void Xcp_FreeDaq(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates DAQ resources. This function checks the command length, program status,
  * protection status, and DAQ configuration sequence. If any checks fail, it sets an
@@ -2277,7 +2507,11 @@ void Xcp_AllocDaq(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates DAQ resources at the hardware level. This function checks the requested
  * DAQ count. If the count is out of range, it sets an appropriate error code.
@@ -2320,7 +2554,11 @@ XCP_LOCAL void Xcp_AllocDaqHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates ODT (Object Descriptor Table) entries. This function checks the command
  * length, program status, protection status, and DAQ configuration sequence. If any
@@ -2366,7 +2604,11 @@ void Xcp_AllocOdt(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates ODT (Object Descriptor Table) entries at the hardware level. This function
  * checks the DAQ list number and ODT count for validity, ensures the correct DAQ
@@ -2440,7 +2682,11 @@ XCP_LOCAL void Xcp_AllocOdtHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates ODT entry resources. This function checks the command length, program
  * status, protection status, and DAQ configuration sequence. If any checks fail, it
@@ -2485,7 +2731,11 @@ void Xcp_AllocOdtEntry(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Allocates ODT entry resources at the hardware level. This function checks the
  * DAQ list number, ODT number, and entry count for validity, ensures the correct
@@ -2575,10 +2825,10 @@ XCP_LOCAL void Xcp_AllocOdtEntryHal(void)
     }
     return;
 }
-/* PRQA S 1532 -- */
-
-#endif /*XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE*/
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
+/* PRQA S 1532 -- */
+
+#endif /*XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE*/
 #endif /*XCP_PL_DAQ == XCP_PL_DAQ&XCP_RESOURCE*/

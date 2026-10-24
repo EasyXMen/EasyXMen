@@ -32,6 +32,8 @@
  */
 #define DCM_UDS24_MINREQLEN 2u
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function handles getScailingInfo callout
  * @param[in]     didIndex    : the index of did
@@ -56,6 +58,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x24_GetScalingInfo(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

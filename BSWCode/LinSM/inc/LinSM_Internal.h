@@ -107,12 +107,22 @@ typedef enum
     LINSM_SLAVE
 } LinSM_NodeType;
 
-#if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#if (LINSM_MASTER_NODE_SUPPORT == STD_ON) && (LINSM_DEV_ERROR_DETECT == STD_ON)
 /** ECUC_LinSM_00146 */
 /**
  * @brief     Record the schedule table configuration of a channel
  */
+
 typedef uint8 LinSM_ScheduleType;
+
+/**
+ * @brief     Record the index and number of schedule tables for each channel
+ */
+typedef struct
+{
+    uint8 LinSMScheduleIndex;
+    uint8 LinSMScheduleNum;
+} LinSM_ScheduleIndexType;
 #endif
 
 /** ECUC_LinSM_00142 */
@@ -154,11 +164,7 @@ typedef struct
     /** ECUC_LinSM_00145 */
     NetworkHandleType ComMNetworkHandleRef;
 
-#if LINSM_DEV_ERROR_DETECT == STD_ON
-    uint8 ScheduleIndex;
-    uint8 ScheduleNum;
-#endif
-
+    /** Pointer to the runtime variable of this channel */
     LinSM_RunTimeType* RuntimePtr;
 } LinSM_ChannelType;
 
@@ -178,18 +184,22 @@ typedef struct
     /** Describes each LIN channel the LinSM is connected to. */
     /** ECUC_LinSM_00142 */
     const LinSM_ChannelType* ChannelPtr;
-
-#if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#if (LINSM_MASTER_NODE_SUPPORT == STD_ON) && (LINSM_DEV_ERROR_DETECT == STD_ON)
     /** Record all schedule table configurations for a variant. */
     const LinSM_ScheduleType* SchedulePtr;
+    /** Record the index and number of schedule tables for each channel in a variant. */
+    const LinSM_ScheduleIndexType* ScheduleIndexPtr;
 #endif
 } LinSM_ConfigType;
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
 #if LINSM_MULTIPLE_PARTITION_USED == STD_ON
+#define LINSM_START_SEC_CONFIG_DATA_32
+#include "LinSM_MemMap.h"
 extern const ApplicationType LinSM_OsApplicationList[LINSM_PARTITION_NUM];
-
+#define LINSM_STOP_SEC_CONFIG_DATA_32
+#include "LinSM_MemMap.h"
 #endif
 /* ========================================= external function declarations ========================================= */
 

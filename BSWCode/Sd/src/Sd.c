@@ -21,10 +21,16 @@
  **  @description        : Implementation Of Sd
  **
  ***********************************************************************************************************************/
-/* PRQA S 6540,6520,6510,3415 EOF */ /* VL_MTR_Sd_STTPP, VL_MTR_Sd_STVAR, VL_MTR_Sd_CONF,VL_Sd_3415 */
+/* PRQA S 6540 EOF */ /* VL_MTR_Sd_STTPP */
+/* PRQA S 6520 EOF */ /* VL_MTR_Sd_STVAR */
+/* PRQA S 6510 EOF */ /* VL_MTR_Sd_CONF */
+/* PRQA S 3415 EOF */ /* VL_Sd_3415 */
+/* PRQA S 2889 EOF */ /* VL_QAC_MultiReturn */
+/* PRQA S 6030 EOF */ /* VL_MTR_Sd_STMIF */
 /* =================================================== inclusions =================================================== */
 
 #include "Sd.h"
+#include "Sd_Arti.h"
 #if SD_MODULE_ENABLE == STD_ON
 #if (SD_BSWM_USED == STD_ON)
 #include "BswM_Sd.h"
@@ -44,8 +50,6 @@
 #endif
 
 /* ========================================= internal function declarations ========================================= */
-#define SD_START_SEC_CODE
-#include "Sd_MemMap.h"
 
 #if (SD_DEV_ERROR_DETECT == STD_ON)
 SD_LOCAL_INLINE boolean Sd_ValidateInitStatus(uint8 apiId, ApplicationType applicationId);
@@ -81,45 +85,92 @@ SD_LOCAL_INLINE boolean Sd_ValidatePartitionRxPdu(uint8 apiId, ApplicationType a
 SD_LOCAL_INLINE
 boolean Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHandlerId, uint16* outputHandlerId);
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL ApplicationType Sd_GetApplicationId(void);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_EntryRefOptionFormatCheck(
     const Sd_InstanceType* instancePtr,
     const uint8*           sdMsg,
     uint16                 sdMsgOffset,
     uint16                 optionArrayLen,
     const uint16           optStartPosMap[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ParseRxMessage(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_RemoteRebootHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
     boolean                isRxUseMulticast,
     ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_OptionsSecurityCheck(
     const Sd_InstanceType* instancePtr,
     const uint8*           sdMsg,
     uint16                 entryPos,
     const uint16           optStartPosMap[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-SD_LOCAL Std_ReturnType
-    Sd_IsIpAddrInSameSubset(const uint8* ipAddr1, const uint8* ipAddr2, uint8 netmask, uint8 addrLen);
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL
+Std_ReturnType Sd_IsIpAddrInSameSubset(const uint8* ipAddr1, const uint8* ipAddr2, uint8 netmask, uint8 addrLen);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_OptionsConflictCheck(const uint8* sdMsg, uint16 entryPos, const uint16 optStartPosMap[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType
     Sd_OptionsExistCheck(const Sd_InstanceType* instancePtr, const uint8* sdMsg, uint16 entryArrayLen, uint8 optNum);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL const Sd_InstanceType*
+    Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_RxMessageOptionCheck(
+    const Sd_InstanceType* instancePtr,
+    const uint8*           sdMsg,
+    uint16                 optStartPos[],
+    uint16                 entryArrayLen,
+    uint16                 optionArrayLen);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_SERVER_SERVICE_NUM > 0 || SD_CLIENT_SERVICE_NUM > 0 */
 
-SD_LOCAL void Sd_DisableAllConsumedEventRouting(
-    const Sd_ConsumedEventGroupType*   eventGroupPtr,
-    const Sd_ClientServiceRTType*      cRtDataPtr,
-    const Sd_ConsumedEventGroupRTType* cEgRTPtr);
-
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxFindServiceHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -127,30 +178,66 @@ SD_LOCAL void Sd_RxFindServiceHandle(
     boolean                isRxUseMulticast,
     const uint16           optStartPosMap[],
     ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint32 Sd_CalcServerServiceDelayTime(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
     boolean                     isRxUseMulticast);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxOfferServiceHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
     uint16                 entryPos,
     const uint16           optStartPosMap[],
     ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
-#if (SD_CLIENT_SERVICE_NUM > 0)
+#if (SD_CLIENT_SERVICE_NUM > 0 && SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
     const Sd_ClientServiceRTType* cRtDataPtr,
     const Sd_ClientServiceType*   clientServicePtr,
     const Sd_RxQueueType*         rxQueueItem);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL Std_ReturnType Sd_BuildSubscribeAckOption(
+    const Sd_InstanceType*      instancePtr,
+    const Sd_ServerServiceType* serverServicePtr,
+    const Sd_EventHandlerType*  eventHandlerPtr,
+    uint8*                      optNum,
+    uint8*                      optionPtr,
+    uint16                      optStartPos[],
+    uint16                      cfgOptLen,
+    uint16                      multiOptlen);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ResponseSubscribeEntry(
     const Sd_EventHandlerType*  eventHandlerPtr,
     const Sd_InstanceType*      instancePtr,
@@ -163,7 +250,11 @@ SD_LOCAL void Sd_ResponseSubscribeEntry(
     uint16                      entryPos,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -171,26 +262,47 @@ SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
     const uint16           optStartPosMap[],
     boolean                isReplyNAck,
     ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxSubscribeEventgroupAckHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
     uint16                 entryPos,
     const uint16           optStartPosMap[],
     ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_DisableAllConsumedEventRouting(
+    const Sd_ConsumedEventGroupType*   eventGroupPtr,
+    const Sd_ClientServiceRTType*      cRtDataPtr,
+    const Sd_ConsumedEventGroupRTType* cEgRTPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (SD_CONSUMED_EVENT_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_GetInfoFromMulticastOption(
     const Sd_InstanceType* instancePtr,
     const uint8*           sdMsg,
     uint16                 entryPos,
     const uint16           optStartPosMap[],
     TcpIp_SockAddrType*    ipAddrPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_DEM_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_TCP == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsHaveEventGroupAckInSameMessage(
     const uint8* sdMsg,
     uint16       serviceID,
@@ -198,36 +310,54 @@ SD_LOCAL boolean Sd_IsHaveEventGroupAckInSameMessage(
     uint16       eventgroupID,
     uint8        majorVersion,
     uint8        counter);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientStopSubscribeEventHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     Sd_ClientServiceRTType*     cRtDataPtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_SubscribeSockIsConnection(
+    const Sd_InstanceType*         instancePtr,
+    SoAd_SoConIdType               soConId,
+    const Sd_SoAdRoutingGroupType* activationRef);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSubscribeEventHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     Sd_ClientServiceRTType*     cRtDataPtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
-SD_LOCAL boolean Sd_RxMessageOptionCheck(
-    const Sd_InstanceType* instancePtr,
-    const uint8*           sdMsg,
-    uint16                 optStartPos[],
-    uint16                 entryArrayLen,
-    uint16                 optionArrayLen);
-
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -236,7 +366,11 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
     boolean                          isRxUseMulticast,
     uint32*                          sendTime,
     ApplicationType                  applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -245,12 +379,20 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
     Sd_ClientServiceRTType*          cRtDataPtr,
     boolean                          isRxUseMulticast,
     ApplicationType                  applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-SD_LOCAL uint32
-    Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast);
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL
+uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -259,37 +401,72 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
     uint32                      ttl,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupNAckEntry(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_RxQueueType*       rxQueueItem,
     uint16                      entryPos,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_SERVER_CAPABILITY_CFG_USED == STD_ON) || (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_GetType1ConfigurationOptionLength(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_ClientServiceType* clientServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildType1ConfigurationOption(
     uint8*                      optAddrPtr,
     uint16                      cfgOptLen,
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_ClientServiceType* clientServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_ProcessRxEnrty(
+    const Sd_InstanceType* instancePtr,
+    const Sd_RxQueueType*  rxQueueItem,
+    const uint8*           sdMsg,
+    const uint16           optStartPos[],
+    uint16                 entryArrayLen,
+    uint16                 optionArrayLen,
+    ApplicationType        applicationId,
+    boolean                isRxUseMulticast,
+    boolean                bRxOptionCheck);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0) || (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_GetType2ConfigurationOptionLength(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ServerServiceType*      serverServicePtr,
     const Sd_EventHandlerType*       eventHandlerPtr,
     const Sd_ClientServiceType*      clientServicePtr,
     const Sd_ConsumedEventGroupType* eventGroupPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildType2ConfigurationOption(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -297,123 +474,236 @@ SD_LOCAL void Sd_BuildType2ConfigurationOption(
     const Sd_ClientServiceType* clientServicePtr,
     uint8*                      optAddrPtr,
     uint16                      cfgOptLen);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0) || (SD_EVENT_HANDLER_NUM > 0 */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_SetHeader(uint8* headerPtr, uint16 instanceId, const TcpIp_SockAddrType* remoteAddr, boolean isMulticastTx);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_SetIPv4EndpointOption(uint8* ipv4OptionPtr, const uint8* ipv4Address, uint8 L4Proto, uint16 portNumber);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (STD_ON == SD_IPV6_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_SetIPv6EndpointOption(uint8* ipv6OptionPtr, const uint8* ipv6Address, uint8 L4Proto, uint16 portNumber);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* STD_ON == SD_IPV6_ENABLE */
 
 SD_LOCAL_INLINE void Sd_SetTTL(Sd_TTLType* ttlPtr, uint32 ttl);
 #endif
 
 #if ((SD_EVENT_HANDLER_MULICAST_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetIPv4MulticastOption(uint8* ipv4OptionPtr, const uint8* ipv4Address, uint16 portNumber);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_EVENT_HANDLER_MULICAST_USED == STD_ON) && (STD_ON == SD_IPV6_ENABLE))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetIPv6MulticastOption(uint8* ipv6OptionPtr, const uint8* ipv6Address, uint16 portNumber);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceInitialWaitPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceRepetitionPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     ApplicationType             applicationId);
-
-SD_LOCAL void Sd_ProcessRxEnrty(
-    const Sd_InstanceType* instancePtr,
-    const Sd_RxQueueType*  rxQueueItem,
-    uint16                 index,
-    const uint16           optStartPos[],
-    uint8                  entryType,
-    boolean                isRxUseMulticast,
-    boolean                isReplyNAck,
-    ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (                                                                              \
     (SD_CLIENT_SERVICE_USE_TCP == STD_ON) || (SD_CLIENT_SERVICE_USE_UDP == STD_ON) \
     || (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSoConModeChgHandler(
     const Sd_ClientServiceType*  clientServicePtr,
     const Sd_SoAdSoConGroupType* socketGroupRef,
     SoAd_SoConIdType             SoConId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientEnableAllMethodRoutingGroup(
     const Sd_ClientServiceType*   clientServicePtr,
     const Sd_ClientServiceRTType* cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceMainPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ClientServiceInitialWaitEnter(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if ((SD_SERVER_SERVICE_NUM > 0) && (SD_SERVER_SERVICE_USE_TCP == STD_ON))
-SD_LOCAL void Sd_ServerSoConModeChgHandle(
-    const Sd_InstanceType* instancePtr,
-    SoAd_SoConIdType       SoConId,
-    ApplicationType        applicationId);
-#endif
-
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnter(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
     Sd_ClientServiceRTType*     cRtDataPtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDisableAllRoutingOfClient(
     const Sd_ClientServiceType*   clientServicePtr,
     const Sd_ClientServiceRTType* cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_ClientIsLeastOneSocketVaild(const Sd_ClientServiceType* clientPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDisableAllConsumedEventgroupRouting(
     const Sd_ConsumedEventGroupType* cEgPtr,
     const Sd_ClientServiceRTType*    cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ClientServiceCloseAllSoCon(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceCloseSoCon(Sd_SoConManageType* soConPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void
+    Sd_ClientTimerExpireHandler(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
 SD_LOCAL_INLINE void Sd_EndianSwap(uint8* dataPtr, uint8 size);
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint32 Sd_GetRandomValue(uint32 min, uint32 max);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint32 Sd_NtoHl(uint32 net32);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint32 Sd_NPtrtoHl(const uint8* net32DataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint32 Sd_HtoNl(uint32 host32);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_NtoHs(uint16 net16);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_NPtrtoHs(const uint8* net16DataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_HtoNs(uint16 host16);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_SetEndpointOption(
+    const Sd_InstanceType* sdInstancePtr,
+    uint8                  sdL4ProtoType,
+    SoAd_SoConIdType       soConId,
+    uint8*                 bufPtr,
+    uint16                 bufRunIdx);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 SD_LOCAL_INLINE uint8 Sd_InitMemoryPool(uint32 memPoolSize, void* memPool);
 
@@ -424,6 +714,8 @@ SD_LOCAL_INLINE void* Sd_MallocEx(uint32 size, void* memPool);
 SD_LOCAL_INLINE void Sd_FreeEx(const void* ptr, void* memPool);
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildSubscribeOption(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -435,56 +727,83 @@ SD_LOCAL void Sd_BuildSubscribeOption(
     uint16                           bufOffset,
     uint16                           cfgOptLen,
     boolean                          isStopSubscribe);
-#endif
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if (SD_INSTANCE_NUM == STD_ON)
-SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationType applicationId);
-#endif
-
-SD_LOCAL void
-    Sd_ClientTimerExpireHandler(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr);
-
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ConsumedEventGroupTimerHandler(
     const Sd_ConsumedEventGroupType* eventGroupPtr,
     const Sd_ClientServiceRTType*    cRtDataPtr);
-
-#if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
-SD_LOCAL void Sd_ConsumedEventGroupRetryStatusHandler(const Sd_ConsumedEventGroupType* eventGroupPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
-SD_LOCAL boolean Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId);
+#if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_ConsumedEventGroupRetryStatusHandler(const Sd_ConsumedEventGroupType* eventGroupPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 static void Sd_AddClientToTriggerTransmitList(
     Sd_TriggerTransmitManagerType** head,
     SoAd_RoutingGroupIdType         routingGroupId,
     SoAd_SoConIdType                soConId,
     ApplicationType                 applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 static void Sd_DelClientFromTriggerTransmitListBySoConId(
     Sd_TriggerTransmitManagerType** head,
     SoAd_SoConIdType                soConId,
     ApplicationType                 applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 static Sd_TriggerTransmitManagerType* Sd_PopFirstClientFromTriggerTransmitList(Sd_TriggerTransmitManagerType** head);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_Sd_ReturnValue */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
     Sd_SubscribeManageType* header,
     TcpIp_SockAddrType      sockRemoteAddr,
     TcpIp_SockAddrType      clientIpAddr,
     uint8                   counter);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 /* PRQA S 5016 -- */
 
 #if (SD_EVENT_HANDLER_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_EnableUnicastForSubscribedClient(const Sd_SubscribeManageType* header, SoAd_RoutingGroupIdType routingGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_DisableUnicastForSubscribedClient(const Sd_SubscribeManageType* header, SoAd_RoutingGroupIdType routingGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_AddClientToSubscribeList(
     Sd_SubscribeManageType** headerPtr,
     SoAd_SoConIdType         soConId,
@@ -493,7 +812,11 @@ SD_LOCAL Std_ReturnType Sd_AddClientToSubscribeList(
     uint32                   ttl,
     uint8                    counter,
     ApplicationType          applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -502,14 +825,30 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     SoAd_SoConIdType            soConId,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RemoveAllClientFromSubscribeList(Sd_SubscribeManageType** headerPtr, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_UpdateSubscribeClientTTL(Sd_SubscribeManageType* subscribePtr, uint32 ttl);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SubscribeClientTTLManage(const Sd_ServerServiceType* serverServicePtr, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -519,9 +858,13 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
     uint16                      entryPos,
     const uint16                optStartPosMap[],
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -531,9 +874,13 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
     uint16                      entryPos,
     const uint16                optStartPosMap[],
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -543,9 +890,13 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
     uint32                      ttl,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -556,63 +907,107 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
     uint32                      ttl,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableUdp(
     const Sd_ClientServiceType*   clientServicePtr,
     Sd_ClientServiceRTType*       cRtDataPtr,
     const Sd_ConsumedMethodsType* consumedMethodsPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableTcp(
     const Sd_ClientServiceType*   clientServicePtr,
     Sd_ClientServiceRTType*       cRtDataPtr,
     const Sd_ConsumedMethodsType* consumedMethodsPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableMulitcast(
     const Sd_ClientServiceType* clientServicePtr,
     Sd_ClientServiceRTType*     cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_UpdateSubscribeSoConId(
     Sd_SubscribeManageType* headerPtr,
     SoAd_SoConIdType        soConId,
     SoAd_SoConIdType        assignSoConId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
     const Sd_EventHandlerType* eventHandlerPtr,
     Sd_EventHandlerRTType*     ehRTDataPtr,
     SoAd_SoConIdType           assignedSoConId,
     ApplicationType            applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlDelClient(
     const Sd_EventHandlerType*   eventHandlerPtr,
     const Sd_EventHandlerRTType* ehRTDataPtr,
     SoAd_SoConIdType             soConId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean
+    Sd_ClientCheckSoConOnline(const Sd_SoAdSoConGroupType* socketRef, SoAd_SoConIdType soconId, boolean endpointFlag);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSaveSoConId(
     const Sd_ClientServiceType* clientServicePtr,
     const TcpIp_SockAddrType*   remoteAddrPtr,
     boolean                     isUseTcp,
     Sd_SoConManageType*         soConPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if ((SD_CONSUMED_EVENTGROUP_NUM > 0) && (SD_CONSUMED_EVENT_MULICAST_USED == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSaveMulticastSoConId(
     const Sd_InstanceType*           instancePtr,
     const Sd_ConsumedEventGroupType* consumedEventGroupPtr,
     const TcpIp_SockAddrType*        multicastAddrPtr,
     const TcpIp_SockAddrType*        serverAddrPtr,
     Sd_SoConManageType*              soConPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientHandleSoConBasedOptionInfo(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -620,38 +1015,55 @@ SD_LOCAL void Sd_ClientHandleSoConBasedOptionInfo(
     uint16                      entryPos,
     const uint16                optStartPosMap[],
     Sd_ClientServiceRTType*     cRtDataPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientTimerHandle(const Sd_ClientServiceType* clientServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #endif
 
-SD_LOCAL void Sd_SetEndpointOption(
-    const Sd_InstanceType* sdInstancePtr,
-    uint8                  sdL4ProtoType,
-    SoAd_SoConIdType       soConId,
-    uint8*                 bufPtr,
-    uint16                 bufRunIdx);
-
 #if (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetMulicastEndpointOption(
     const Sd_InstanceType* sdInstancePtr,
     SoAd_SoConIdType       soConId,
     uint8*                 bufPtr,
     uint16                 bufRunIdx);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_AppendToSendQueueTail(Sd_SendQueueType** head, Sd_SendQueueType* sendQueueItem);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClearSendQueue(Sd_SendQueueType** head, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_CalcTcpUdpEndpointOptionNum(
     const uint8* sdMsg,
     uint16       entryPos,
     const uint16 optStartPosMap[],
     uint8*       tcpEndpointNum,
     uint8*       udpEndpointNum);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_NecessaryOptionsExistCheck(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -660,7 +1072,11 @@ SD_LOCAL Std_ReturnType Sd_NecessaryOptionsExistCheck(
     uint16                      entryPos,
     const uint16                optStartPosMap[],
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_PackageMessage(
     Sd_SendQueueType* const sendQueue[],
     uint8                   sendQueCnt,
@@ -668,37 +1084,69 @@ SD_LOCAL Std_ReturnType Sd_PackageMessage(
     uint16                  instanceId,
     boolean                 isMulticastTx,
     ApplicationType         applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_TransmitMulticastMessage(
     const Sd_InstanceType*  instancePtr,
     Sd_SendQueueType* const multiSendQue[],
     uint8                   multiSendCnt,
     ApplicationType         applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_TransmitUnicastMessage(
     const Sd_InstanceType*  instancePtr,
     Sd_SendQueueType* const uniSendQue[],
     uint8                   uniSendCnt,
     ApplicationType         applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FindMulticastMsgToSendFromSendQueue(
     Sd_SendQueueType** queueHeaderPtr,
     Sd_SendQueueType*  multiSendQue[],
     uint8*             multiSendCntPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FindUnicastMsgToSendFromSendQueue(
     Sd_SendQueueType** queueHeaderPtr,
     Sd_SendQueueType*  uniSendQue[],
     uint8*             uniSendCntPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint8 Sd_FindoutMulticastMessage(const Sd_InstanceType* instancePtr, Sd_SendQueueType* multiSendQue[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint8 Sd_FindoutUnicastMessage(const Sd_InstanceType* instancePtr, Sd_SendQueueType* uniSendQue[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_TransmitMessage(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CAPABILITY_RECORD_MATCH_CALLOUT_NUM > 0u)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -707,101 +1155,183 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
     uint16                      entryPos,
     const uint16*               optStartPosMap,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveRemoteSessionId(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, boolean isRxUseMulticast);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_NUM > 0)
+#if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_ServerSoConModeChgHandle(
+    const Sd_InstanceType* instancePtr,
+    SoAd_SoConIdType       SoConId,
+    ApplicationType        applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveServerServiceHandleIdToSessionCtrlList(
-    uint16                    instanceId,
-    const TcpIp_SockAddrType* remoteAddrPtr,
-    uint16                    serverServiceHandleId,
-    ApplicationType           applicationId);
+    uint16                instanceId,
+    const Sd_RxQueueType* rxQueueItem,
+    uint16                serverServiceHandleId,
+    ApplicationType       applicationId,
+    boolean               isMulticast);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveClientServiceHandleIdToSessionCtrlList(
     uint16                    instanceId,
     const TcpIp_SockAddrType* remoteAddrPtr,
     uint16                    clientServiceHandleId,
     ApplicationType           applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
 /* PRQA S 5016 ++ */ /* VL_Sd_ReturnValue */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_SessionIdCtrlType*
     Sd_FindRemoteAddrSessionIdCtrl(uint16 instanceId, const TcpIp_SockAddrType* remoteAddrPtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
     uint16                instanceId,
     const Sd_RxQueueType* rxQueueItem,
     boolean               isRxUseMulticast,
     ApplicationType       applicationId);
-#endif
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 /* PRQA S 5016 -- */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_FindHandlerIdInList(uint16 handlerId, const Sd_ServiceHandleIdListType* serviceList);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsNewRemoteAddr(uint16 instanceId, const TcpIp_SockAddrType* remoteAddrPtr);
-#endif
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_RemoteRebootDetecte(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, boolean isRxUseMulticast);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_FreeServiceListInSesIdCtrlList(const Sd_ServiceHandleIdListType* serviceList, ApplicationType applicationId);
-#endif
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_DeleteSessionIdNode(
     Sd_SessionIdCtrlType**      head,
     const Sd_SessionIdCtrlType* objNode,
     ApplicationType             applicationId);
-
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
-SD_LOCAL void
-    Sd_RemoteRebootDetectedHandle(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
-SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServicePtr);
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void
+    Sd_RemoteRebootDetectedHandle(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr);
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL Std_ReturnType Sd_OptionFormatCheck(const uint8 sdMsg[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
     uint16                serverServiceHandleId,
     const Sd_RxQueueType* rxQueueItem,
     ApplicationType       applicationId);
-#endif /* SD_EVENT_HANDLER_NUM > 0 */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-SD_LOCAL Std_ReturnType Sd_OptionFormatCheck(const uint8 sdMsg[]);
-
-SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[]);
-
-SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId);
-
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint8 Sd_GetClientNumFromSubscribeList(
     const Sd_SubscribeManageType* headerPtr,
     const TcpIp_SockAddrType*     clientIpAddr,
     SoAd_SoConIdType              soConId,
     uint8                         counter);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif /* SD_EVENT_HANDLER_NUM > 0 */
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
+
+#if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ResetSoConToWildcard(const Sd_ServerServiceType* serverServicePtr, SoAd_SoConIdType soConId, boolean isTcpSoCon);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_EVENT_HANDLER_NUM > 0 */
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 #if ((SD_DEM_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_TCP == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxSubscribeEventgroupNAckHandle(
     const Sd_InstanceType*        instancePtr,
     const Sd_ClientServiceRTType* cRtDataPtr,
     const Sd_ClientServiceType*   clientServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CONSUMED_EVENT_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SubscribeAckOptionHandle(
     const Sd_InstanceType*           instancePtr,
     const Sd_ConsumedEventGroupType* consumedEventGroupPtr,
@@ -810,19 +1340,31 @@ SD_LOCAL void Sd_SubscribeAckOptionHandle(
     const uint8*                     sdMsg,
     uint16                           entryPos,
     const uint16                     optStartPosMap[]);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceResetAllCEgSubsEntrySendFlag(
     const Sd_ClientServiceType* clientServicePtr,
     boolean                     tcpFlag,
     boolean                     udpFlag);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceResetAllCEgSubsEntrySubsRetryCnt(const Sd_ClientServiceType* clientServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE */
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
 
-#if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#if (SD_EVENT_HANDLER_NUM > 0) && (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_UpdateUdpSubscribeList(
     const Sd_EventHandlerType*  eventHandlerPtr,
     Sd_SubscribeManageType*     subscribeManagePtr,
@@ -834,9 +1376,13 @@ SD_LOCAL void Sd_UpdateUdpSubscribeList(
     boolean                     isMulticastSocket,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
     const Sd_EventHandlerType* eventHandlerPtr,
     SoAd_SoConIdType           soConId,
@@ -846,14 +1392,22 @@ SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
     uint32                     ttl,
     uint8                      counter,
     ApplicationType            applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanoutTcpUpdateSubscriber(
     const Sd_EventHandlerType* eventHandlerPtr,
     SoAd_SoConIdType           soConId,
     Sd_SubscribeManageType*    subscribeManagePtr,
     Sd_EventHandlerRTType*     ehRTDataPtr,
     uint32                     ttl);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanoutTcpDeleteSubscriber(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -861,13 +1415,25 @@ SD_LOCAL void Sd_FanoutTcpDeleteSubscriber(
     TcpIp_SockAddrType          clientIpAddr,
     uint8                       counter,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceInit(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerMainFunction(const Sd_InstanceType* instancePtr, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildOfferServiceEntry(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -876,77 +1442,151 @@ SD_LOCAL void Sd_BuildOfferServiceEntry(
     boolean                     isUnicastSend,
     boolean                     isStopOfferService,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_Sd_ReturnValue */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_Type1EntryType* Sd_CreateOfferServiceEntry(
     const Sd_ServerServiceType* serverServicePtr,
     boolean                     isStopOfferService,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint8* Sd_CreateOfferServiceOptions(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     Sd_SendQueueType*           sendQueueObjPtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 /* PRQA S 5016 -- */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceDownPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceInitialWaitPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceRepetitionPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceMainPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceTimerHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceInit(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientMainFunction(const Sd_InstanceType* instancePtr, ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxStopOfferServiceHandle(uint16 clientServiceHandleId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSoConModeChg(const Sd_InstanceType* instancePtr, SoAd_SoConIdType SoConId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_INSTANCE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_InstanceInit(ApplicationType applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #if (SD_SERVER_SERVICE_GROUP_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServiceGroupStopServer(Sd_ServiceGroupIdType serviceGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #if (SD_CLIENT_SERVICE_GROUP_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServiceGroupStopClient(Sd_ServiceGroupIdType serviceGroupId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #if (SD_DEM_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxIndicationReportDem(PduIdType RxPduId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 SD_LOCAL_INLINE uint32 Sd_InitialWaitTimeAdjust(uint32 waitTime);
 
 #if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 static void Sd_ClientSubscribeRetryHandler(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -954,6 +1594,8 @@ static void Sd_ClientSubscribeRetryHandler(
     Sd_ConsumedEventGroupRTType*     consumedEgRTPtr,
     Sd_ClientServiceRTType*          cRtDataPtr,
     ApplicationType                  applicationId);
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
@@ -986,33 +1628,32 @@ SD_LOCAL_INLINE void Sd_ReportRuntimeError(uint8 apiId, uint8 errorId)
 }
 #endif
 
-#define SD_STOP_SEC_CODE
-#include "Sd_MemMap.h"
-
 /* ========================================== internal function definition ========================================== */
-#define SD_START_SEC_VAR_CLEARED_UNSPECIFIED
+#define SD_START_SEC_VAR_CLEARED_32
 #include "Sd_MemMap.h"
 /** Random seed */
 SD_LOCAL uint32 Sd_RandomSeed;
-#define SD_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#define SD_STOP_SEC_VAR_CLEARED_32
 #include "Sd_MemMap.h"
 
-#define SD_START_SEC_VAR_INIT_PTR
+#define SD_START_SEC_VAR_CLEARED_PTR
 #include "Sd_MemMap.h"
 /** Pointer to the configuration */
-SD_LOCAL const Sd_ConfigType* Sd_CfgPtr = NULL_PTR;
-#define SD_STOP_SEC_VAR_INIT_PTR
+SD_LOCAL const Sd_ConfigType* Sd_CfgPtr;
+#define SD_STOP_SEC_VAR_CLEARED_PTR
 #include "Sd_MemMap.h"
 
 /* ========================================== external function definition ========================================== */
+/* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef,VL_QAC_NoUsedApi */
 #define SD_START_SEC_CODE
 #include "Sd_MemMap.h"
-/* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef,VL_QAC_NoUsedApi */
 /**
  * Initializes the Service Discovery.
  */
 void Sd_Init(const Sd_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 2, 0x01, ConfigPtr);
+
     ApplicationType applicationId = Sd_GetApplicationId();
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
@@ -1065,16 +1706,22 @@ void Sd_Init(const Sd_ConfigType* ConfigPtr)
         *Sd_Status[applicationId] = SD_INIT;
     }
 
-    return;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x01);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * Returns the version information of this module.
  */
 /*@req <SWS_SD_00126> */
 #if (SD_VERSION_INFO_API == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 void Sd_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 2, 0x02, versioninfo);
+
 #if (STD_ON == SD_DEV_ERROR_DETECT)
     if (Sd_ValidatePointer(SD_GET_VERSION_INFO_ID, versioninfo))
 #endif
@@ -1087,26 +1734,31 @@ void Sd_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_patch_version = SD_SW_PATCH_VERSION;
     }
 
-    return;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x02);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
  * This API function is used by the BswM to set the Server Service Instance state.
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 Std_ReturnType Sd_ServerServiceSetState(uint16 SdServerServiceHandleId, Sd_ServerServiceSetStateType ServerServiceState)
 /* PRQA S 6070 -- */
 {
-    Std_ReturnType  ret           = E_NOT_OK;
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x07, SdServerServiceHandleId, ServerServiceState);
 
+    Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_SERVER_SERVICE_SET_STATE_ID, applicationId)
-        && Sd_ValidateInitResult(SD_SERVER_SERVICE_SET_STATE_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_SERVER_SERVICE_SET_STATE_ID, appId)
+        && Sd_ValidateInitResult(SD_SERVER_SERVICE_SET_STATE_ID, appId)
         && Sd_ValidateServerHandleId(SD_SERVER_SERVICE_SET_STATE_ID, SdServerServiceHandleId)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-        && Sd_ValidatePartitionServerService(SD_SERVER_SERVICE_SET_STATE_ID, applicationId, SdServerServiceHandleId)
+        && Sd_ValidatePartitionServerService(SD_SERVER_SERVICE_SET_STATE_ID, appId, SdServerServiceHandleId)
 #endif
         && Sd_ValidateServerServiceState(SD_SERVER_SERVICE_SET_STATE_ID, ServerServiceState))
 #endif
@@ -1158,26 +1810,34 @@ Std_ReturnType Sd_ServerServiceSetState(uint16 SdServerServiceHandleId, Sd_Serve
 #endif
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 2, 0x07, ret);
+
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * This API function is used by the BswM to set the Client Service Instance state.
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientServiceSetStateType ClientServiceState)
 /* PRQA S 6070 -- */
 {
-    Std_ReturnType  ret           = E_NOT_OK;
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x08, ClientServiceHandleId, ClientServiceState);
+
+    Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_CLIENT_SERVICE_SET_STATE_ID, applicationId)
-        && Sd_ValidateInitResult(SD_CLIENT_SERVICE_SET_STATE_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_CLIENT_SERVICE_SET_STATE_ID, appId)
+        && Sd_ValidateInitResult(SD_CLIENT_SERVICE_SET_STATE_ID, appId)
         && Sd_ValidateClientHandleId(SD_CLIENT_SERVICE_SET_STATE_ID, ClientServiceHandleId)
         && Sd_ValidateClientServiceState(SD_CLIENT_SERVICE_SET_STATE_ID, ClientServiceState)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-        && Sd_ValidatePartitionClientService(SD_CLIENT_SERVICE_SET_STATE_ID, applicationId, ClientServiceHandleId)
+        && Sd_ValidatePartitionClientService(SD_CLIENT_SERVICE_SET_STATE_ID, appId, ClientServiceHandleId)
 #endif
     )
 #endif
@@ -1191,12 +1851,13 @@ Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientS
 
         if (bConvertResult)
         {
-            const Sd_ClientServiceType*      clientService         = &Sd_CfgPtr->GlbClientService[actualHandlerId];
-            const Sd_ConsumedEventGroupType* consumedEventGroupPtr = clientService->SdConsumedEventGroup;
+            const Sd_ClientServiceType* clientService = &Sd_CfgPtr->GlbClientService[actualHandlerId];
 
             /*@req <SWS_Sd_00443> */
+#if (SD_CONSUMED_EVENTGROUP_NUM > 0u)
             if (ClientServiceState != SD_CLIENT_SERVICE_REQUESTED)
             {
+                const Sd_ConsumedEventGroupType* consumedEventGroupPtr = clientService->SdConsumedEventGroup;
                 SchM_Enter_Sd_ExclusiveArea();
                 for (uint16 index = 0u; index < clientService->ConsumedEventGroupNum; index++)
                 {
@@ -1206,6 +1867,7 @@ Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientS
                 }
                 SchM_Exit_Sd_ExclusiveArea();
             }
+#endif
 
             if (clientService->ServiceGroupRefNum == 0u)
             {
@@ -1220,23 +1882,30 @@ Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientS
 #endif
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 2, 0x08, ret);
+
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * Starts a preconfigured SdServiceGroup.
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId)
 /* PRQA S 6030 -- */
 {
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 2, 0x44, ServiceGroupId);
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_SERVICE_GROUP_START_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_SERVICE_GROUP_START_ID, appId)
         && Sd_ValidateServiceGroupId(SD_SERVICE_GROUP_START_ID, ServiceGroupId)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-        && Sd_ValidatePartitionServiceGroup(SD_SERVICE_GROUP_START_ID, applicationId, ServiceGroupId)
+        && Sd_ValidatePartitionServiceGroup(SD_SERVICE_GROUP_START_ID, appId, ServiceGroupId)
 #endif
     )
 #endif
@@ -1254,6 +1923,7 @@ void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId)
                 if (Sd_CfgPtr->GlbServiceGroup[index].SdServiceGroupHandleId == actualServiceGroupId)
                 {
                     SchM_Enter_Sd_ExclusiveArea();
+#if (SD_SERVER_SERVICE_GROUP_USED == STD_ON)
                     uint16 serverServiceNum = Sd_CfgPtr->GlbServiceGroup[index].ServerServiceNum;
                     for (uint16 serviceIndex = 0u; serviceIndex < serverServiceNum; serviceIndex++)
                     {
@@ -1262,7 +1932,9 @@ void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId)
                         Sd_ServerRTData[serverHandleId]->SetState = SD_SERVER_SERVICE_AVAILABLE;
                         Sd_ServerRTData[serverHandleId]->ServiceGroupRequestCounter++;
                     }
+#endif
 
+#if (SD_CLIENT_SERVICE_GROUP_USED == STD_ON)
                     uint16 clientServiceNum = Sd_CfgPtr->GlbServiceGroup[index].ClientServiceNum;
                     for (uint16 serviceIndex = 0u; serviceIndex < clientServiceNum; serviceIndex++)
                     {
@@ -1271,6 +1943,7 @@ void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId)
                         Sd_ClientRTData[clientHandleId]->SetState = SD_CLIENT_SERVICE_REQUESTED;
                         Sd_ClientRTData[clientHandleId]->ServiceGroupRequestCounter++;
                     }
+#endif
                     SchM_Exit_Sd_ExclusiveArea();
 
                     break;
@@ -1278,21 +1951,27 @@ void Sd_ServiceGroupStart(Sd_ServiceGroupIdType ServiceGroupId)
             }
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x44);
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * Stops a preconfigured SdServiceGroup.
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 void Sd_ServiceGroupStop(Sd_ServiceGroupIdType ServiceGroupId)
 {
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 2, 0x45, ServiceGroupId);
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_SERVICE_GROUP_STOP_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_SERVICE_GROUP_STOP_ID, appId)
         && Sd_ValidateServiceGroupId(SD_SERVICE_GROUP_STOP_ID, ServiceGroupId)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-        && Sd_ValidatePartitionServiceGroup(SD_SERVICE_GROUP_STOP_ID, applicationId, ServiceGroupId)
+        && Sd_ValidatePartitionServiceGroup(SD_SERVICE_GROUP_STOP_ID, appId, ServiceGroupId)
 #endif
     )
 #endif
@@ -1307,6 +1986,8 @@ void Sd_ServiceGroupStop(Sd_ServiceGroupIdType ServiceGroupId)
         {
             if (Sd_CfgPtr->ServiceGroupNum <= actualServiceGroupId)
             {
+                ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x45);
+
                 return;
             }
 #if (SD_SERVER_SERVICE_GROUP_USED == STD_ON)
@@ -1318,29 +1999,36 @@ void Sd_ServiceGroupStop(Sd_ServiceGroupIdType ServiceGroupId)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x45);
 }
-/* PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * This API function is used by the BswM to set the requested state of the EventGroupStatus.
  */
 /* PRQA S 6030,6070 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 Std_ReturnType Sd_ConsumedEventGroupSetState(
     uint16                            SdConsumedEventGroupHandleId,
     Sd_ConsumedEventGroupSetStateType ConsumedEventGroupState)
 /* PRQA S 6030,6070 -- */
 {
-    Std_ReturnType  ret           = E_NOT_OK;
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x09, SdConsumedEventGroupHandleId, ConsumedEventGroupState);
+
+    Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_CLIENT_SERVICE_SET_STATE_ID, applicationId)
-        && Sd_ValidateInitResult(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_CLIENT_SERVICE_SET_STATE_ID, appId)
+        && Sd_ValidateInitResult(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, appId)
         && Sd_ValidateConsumedEventGroupHandleId(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, SdConsumedEventGroupHandleId)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
         && Sd_ValidatePartitionConsumedEventGroup(
             SD_CONSUMED_EVENT_GROUP_SET_STATE_ID,
-            applicationId,
+            appId,
             SdConsumedEventGroupHandleId)
 #endif
         && Sd_ValidateConsumedEventGroupState(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, ConsumedEventGroupState))
@@ -1355,16 +2043,11 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
 
         if (bConvertResult)
         {
-            const Sd_ClientServiceType*      cServicePtr;
-            const Sd_ConsumedEventGroupType* consumedEgPtr;
-            Sd_ConsumedEventGroupRTType*     consumedEgRTPtr;
-            uint16                           i, j;
-
-            cServicePtr = Sd_CfgPtr->GlbClientService;
-            for (i = 0u; i < SD_CLIENT_SERVICE_NUM; i++)
+            const Sd_ClientServiceType* cServicePtr = Sd_CfgPtr->GlbClientService;
+            for (uint16 i = 0u; i < SD_CLIENT_SERVICE_NUM; i++)
             {
-                consumedEgPtr = cServicePtr->SdConsumedEventGroup;
-                for (j = 0u; j < cServicePtr->ConsumedEventGroupNum; j++)
+                const Sd_ConsumedEventGroupType* consumedEgPtr = cServicePtr->SdConsumedEventGroup;
+                for (uint16 j = 0u; j < cServicePtr->ConsumedEventGroupNum; j++)
                 {
                     if (actualHandlerId == consumedEgPtr->SdConsumedEventGroupHandleId)
                     {
@@ -1387,8 +2070,8 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
                 if (SD_CLIENT_SERVICE_RELEASED != cRtDataPtr->SetState)
                 {
                     SchM_Enter_Sd_ExclusiveArea();
-                    consumedEgRTPtr           = Sd_ConsumedEventGroupRTData[actualHandlerId];
-                    consumedEgRTPtr->SetState = ConsumedEventGroupState;
+                    Sd_ConsumedEventGroupRTType* consumedEgRTPtr = Sd_ConsumedEventGroupRTData[actualHandlerId];
+                    consumedEgRTPtr->SetState                    = ConsumedEventGroupState;
                     if (SD_CONSUMED_EVENTGROUP_REQUESTED == ConsumedEventGroupState)
                     {
                         consumedEgRTPtr->IsSendSubEvtAfterRequest = FALSE;
@@ -1405,14 +2088,15 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
 #endif
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 2, 0x09, ret);
+
     return ret;
 }
 #define SD_STOP_SEC_CODE
 #include "Sd_MemMap.h"
 
-#define SD_START_SEC_CODE_FAST
+#define SD_START_SEC_CODE
 #include "Sd_MemMap.h"
-
 /**
  * This function gets called by the SoAd if an IP address
  * assignment related to a socket connection changes (i.e.
@@ -1420,25 +2104,23 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
  */
 void Sd_LocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType State)
 {
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x05, SoConId, State);
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, applicationId)
+    ApplicationType appId = Sd_GetApplicationId();
+    if (Sd_ValidateInitStatus(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, appId)
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-        && Sd_ValidatePartitionTxSoConId(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, applicationId, SoConId)
+        && Sd_ValidatePartitionTxSoConId(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, appId, SoConId)
 #endif
-        && Sd_ValidateInitResult(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, applicationId)
+        && Sd_ValidateInitResult(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, appId)
         && Sd_ValidateSocketConnectId(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, SoConId)
         && Sd_ValidateIpAddrState(SD_LOCAL_IP_ADDR_ASSIGMENT_CHG_ID, State))
 #endif
     {
-#if (SD_INSTANCE_NUM == STD_ON)
-        SoAd_SoConIdType txPduSoConId;
-        uint16           idx;
-
-        for (idx = 0u; idx < SD_INSTANCE_NUM; idx++)
+#if (SD_INSTANCE_NUM > 0)
+        for (uint16 idx = 0u; idx < SD_INSTANCE_NUM; idx++)
         {
-            txPduSoConId = Sd_CfgPtr->Instance[idx].SdInstanceTxPduSoConId;
+            SoAd_SoConIdType txPduSoConId = Sd_CfgPtr->Instance[idx].SdInstanceTxPduSoConId;
             if (txPduSoConId == SoConId)
             {
                 Sd_InstanceRTData[idx]->IpAddrState = State;
@@ -1446,38 +2128,43 @@ void Sd_LocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType
         }
 #endif
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x05);
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * Notification about a SoAd socket connection state change, e.g. socket connection gets online.
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode)
 {
-    ApplicationType applicationId = Sd_GetApplicationId();
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x43, SoConId, Mode);
 
+    ApplicationType appId = Sd_GetApplicationId();
 #if (STD_ON == SD_DEV_ERROR_DETECT)
-    if (Sd_ValidateInitStatus(SD_SOCON_MODE_CHG_ID, applicationId)
-        && Sd_ValidateInitResult(SD_SOCON_MODE_CHG_ID, applicationId)
+    if (Sd_ValidateInitStatus(SD_SOCON_MODE_CHG_ID, appId) && Sd_ValidateInitResult(SD_SOCON_MODE_CHG_ID, appId)
         && Sd_ValidateSocketConnectId(SD_SOCON_MODE_CHG_ID, SoConId)
         && Sd_ValidateSoConMode(SD_SOCON_MODE_CHG_ID, Mode))
 #endif
     {
-#if (SD_INSTANCE_NUM == STD_ON)
+#if (SD_INSTANCE_NUM > 0)
         if (SOAD_SOCON_ONLINE != Mode)
         {
             const Sd_InstanceType* instancePtr = Sd_CfgPtr->Instance;
             for (uint16 index = 0u; index < SD_INSTANCE_NUM; index++)
             {
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-                if (instancePtr->InstanceApplicationId != applicationId)
+                if (instancePtr->InstanceApplicationId != appId)
                 {
                     continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
                 }
 #endif
 
 #if ((SD_SERVER_SERVICE_NUM > 0) && (SD_SERVER_SERVICE_USE_TCP == STD_ON))
-                Sd_ServerSoConModeChgHandle(instancePtr, SoConId, applicationId);
+                Sd_ServerSoConModeChgHandle(instancePtr, SoConId, appId);
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
@@ -1488,8 +2175,15 @@ void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode)
         }
 #endif
     }
-}
+    SD_UNUSED(appId);
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x43);
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * Indication of a received I-PDU from a lower layer communication interface module.
  */
@@ -1497,6 +2191,8 @@ void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode)
 void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 6030,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
+
     ApplicationType applicationId = Sd_GetApplicationId();
 
 #if (STD_ON == SD_DEV_ERROR_DETECT)
@@ -1508,7 +2204,7 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
         && Sd_ValidatePointer(SD_RX_INDICATION_ID, PduInfoPtr) && Sd_ValidateRxPduId(SD_RX_INDICATION_ID, RxPduId))
 #endif
     {
-#if (SD_INSTANCE_NUM == STD_ON)
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
         Sd_HeaderType header;
         const uint8*  sdMsgPtr = PduInfoPtr->SduDataPtr;
 
@@ -1522,6 +2218,9 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 #if (SD_DEM_USED == STD_ON)
             Sd_RxIndicationReportDem(RxPduId);
 #endif
+
+            ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x42);
+
             return;
         }
 
@@ -1531,7 +2230,7 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
         /*@req <SWS_SD_00708> */
         PduLengthType minSduLen = (PduLengthType)(SD_HEADER_LEN + SD_MESSAGE_ENTRYLEN_FILED_LEN + entryArrayLen
                                                   + optionArrayLen + SD_MESSAGE_OPTIONLEN_FILED_LEN);
-        if (PduInfoPtr->SduLength >= minSduLen)
+        if ((PduInfoPtr->SduLength >= minSduLen) && (entryArrayLen >= SD_ENTRY_HEADER_MIN_LEN))
         {
             /* @req SWS_SD_00482 */
             /* Received message check pass,continue process */
@@ -1589,12 +2288,10 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 #endif
 #endif
     }
-}
-/* PRQA S 2889 -- */
-#define SD_STOP_SEC_CODE_FAST
-#include "Sd_MemMap.h"
 
-#define SD_START_SEC_CODE
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x42);
+}
+#define SD_STOP_SEC_CODE
 #include "Sd_MemMap.h"
 
 /**
@@ -1608,6 +2305,8 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
 #if ((SD_SERVER_SERVICE_NUM > 0) && (SD_SERVER_SERVICE_USE_TCP == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerSoConModeChgHandle(
     const Sd_InstanceType* instancePtr,
     SoAd_SoConIdType       SoConId,
@@ -1632,6 +2331,7 @@ SD_LOCAL void Sd_ServerSoConModeChgHandle(
                 const Sd_ServerServiceRTType* sRtDataPtr = Sd_ServerRTData[serverServicePtr->SdServerServiceHandleId];
                 if ((SD_SERVER_PHASE_MAIN == sRtDataPtr->Phase) || (SD_SERVER_PHASE_REPETITION == sRtDataPtr->Phase))
                 {
+#if (SD_EVENT_HANDLER_NUM > 0)
                     /* @req SWS_SD_00732,SWS_SD_00733 */
                     const Sd_EventHandlerType* eventHandlerPtr = serverServicePtr->SdEventHandler;
                     for (uint16 eventIndex = 0u; eventIndex < serverServicePtr->EventHandlerNum; eventIndex++)
@@ -1664,6 +2364,7 @@ SD_LOCAL void Sd_ServerSoConModeChgHandle(
                         }
                         eventHandlerPtr++;
                     }
+#endif
 
                     (void)SoAd_CloseSoCon(SoConId, TRUE);
                     (void)SoAd_OpenSoCon(SoConId);
@@ -1674,12 +2375,16 @@ SD_LOCAL void Sd_ServerSoConModeChgHandle(
         serverServicePtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
 #if (                                                                              \
     (SD_CLIENT_SERVICE_USE_TCP == STD_ON) || (SD_CLIENT_SERVICE_USE_UDP == STD_ON) \
     || (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSoConModeChgHandler(
     const Sd_ClientServiceType*  clientServicePtr,
     const Sd_SoAdSoConGroupType* socketGroupRef,
@@ -1717,6 +2422,8 @@ SD_LOCAL void Sd_ClientSoConModeChgHandler(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -1728,6 +2435,8 @@ SD_LOCAL void Sd_ClientSoConModeChgHandler(
  * @trace              CPD-74557
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSoConModeChg(const Sd_InstanceType* instancePtr, SoAd_SoConIdType SoConId)
 {
     const Sd_ClientServiceType* clientServicePtr = instancePtr->SdClientService;
@@ -1757,7 +2466,11 @@ SD_LOCAL void Sd_ClientSoConModeChg(const Sd_InstanceType* instancePtr, SoAd_SoC
         clientServicePtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Main function for client services.
  * @param[in]          instancePtr: Pointer to the specified instance.
@@ -1801,6 +2514,8 @@ SD_LOCAL void Sd_ClientMainFunction(const Sd_InstanceType* instancePtr, Applicat
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -1812,6 +2527,8 @@ SD_LOCAL void Sd_ClientMainFunction(const Sd_InstanceType* instancePtr, Applicat
  * @trace              CPD-74555
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerMainFunction(const Sd_InstanceType* instancePtr, ApplicationType applicationId)
 {
     const Sd_ServerServiceType* serverServicePtr = instancePtr->SdServerService;
@@ -1847,8 +2564,12 @@ SD_LOCAL void Sd_ServerMainFunction(const Sd_InstanceType* instancePtr, Applicat
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              SD module main funtion
  * @reentrant          Reentrant for different partition.
@@ -1857,6 +2578,8 @@ SD_LOCAL void Sd_ServerMainFunction(const Sd_InstanceType* instancePtr, Applicat
  */
 void Sd_MainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Start, 1, 0x06);
+
     ApplicationType applicationId = Sd_GetApplicationId();
 
 #if (SD_INSTANCE_NUM > 0)
@@ -1891,13 +2614,19 @@ void Sd_MainFunction(void)
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
         Sd_TransmitMessage(applicationId);
+#endif
 
+#if (SD_EVENT_HANDLER_NUM > 0)
         /* PATCH for TC8 */
         Sd_IfSpecificRoutingGroupTransmit(applicationId);
 #endif
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Sd, 0, Bsw_Return, 1, 0x06);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 /* PRQA S 1532,1503 -- */
 /* ========================================== internal function definition ========================================== */
 
@@ -2365,6 +3094,9 @@ boolean Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHand
     return bRet;
 }
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Checks if the given handlerId exists in the service handle ID list.
  * @param[in]          handlerId: The service handle ID to find.
@@ -2387,7 +3119,12 @@ SD_LOCAL boolean Sd_FindHandlerIdInList(uint16 handlerId, const Sd_ServiceHandle
     }
     return findFlag;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief Retrieves the application ID.
  * @return Application ID.
@@ -2403,6 +3140,8 @@ SD_LOCAL ApplicationType Sd_GetApplicationId(void)
 #endif
     return applicationId;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 SD_LOCAL_INLINE uint16 Sd_Strlen(const Sd_CharType* str)
 {
@@ -2419,6 +3158,19 @@ SD_LOCAL_INLINE uint16 Sd_Strlen(const Sd_CharType* str)
     return length;
 }
 
+/* PRQA S 6060 ++ */ /* VL_MTR_Sd_STM19 */
+SD_LOCAL_INLINE boolean
+    Sd_EndpointCompare(const TcpIp_SockAddrType* firstEndpoint, const TcpIp_SockAddrType* secondEndpoint)
+{
+    if (0u == IStdLib_MemCmp(firstEndpoint, secondEndpoint, sizeof(TcpIp_SockAddrType)))
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+/* PRQA S 6060 -- */
+
 /**
  * @brief              Init sd server service runtime data
  * @param[in]          applicationId: Partition id
@@ -2427,6 +3179,8 @@ SD_LOCAL_INLINE uint16 Sd_Strlen(const Sd_CharType* str)
  * @trace              CPD-74569
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceInit(ApplicationType applicationId)
 {
     for (uint16 index = 0u; index < SD_SERVER_SERVICE_NUM; index++)
@@ -2481,6 +3235,8 @@ SD_LOCAL void Sd_ServerServiceInit(ApplicationType applicationId)
     }
     SD_UNUSED(applicationId);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -2491,6 +3247,8 @@ SD_LOCAL void Sd_ServerServiceInit(ApplicationType applicationId)
  * @trace              CPD-74570
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceInit(ApplicationType applicationId)
 {
     for (uint16 index = 0u; index < SD_CLIENT_SERVICE_NUM; index++)
@@ -2576,9 +3334,11 @@ SD_LOCAL void Sd_ClientServiceInit(ApplicationType applicationId)
         }
 #endif
     }
-#endif
     SD_UNUSED(applicationId);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 /**
  * @brief              Init sd instance runtime data
@@ -2588,6 +3348,8 @@ SD_LOCAL void Sd_ClientServiceInit(ApplicationType applicationId)
  * @trace              CPD-74571
  */
 #if (SD_INSTANCE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_InstanceInit(ApplicationType applicationId)
 {
     for (uint16 index = 0u; index < SD_INSTANCE_NUM; index++)
@@ -2621,6 +3383,8 @@ SD_LOCAL void Sd_InstanceInit(ApplicationType applicationId)
     }
     SD_UNUSED(applicationId);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -2631,6 +3395,8 @@ SD_LOCAL void Sd_InstanceInit(ApplicationType applicationId)
  * @trace              CPD-74572
  */
 #if (SD_SERVER_SERVICE_GROUP_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServiceGroupStopServer(Sd_ServiceGroupIdType serviceGroupId)
 {
     uint16 serverServiceNum = Sd_CfgPtr->GlbServiceGroup[serviceGroupId].ServerServiceNum;
@@ -2654,6 +3420,8 @@ SD_LOCAL void Sd_ServiceGroupStopServer(Sd_ServiceGroupIdType serviceGroupId)
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -2664,6 +3432,8 @@ SD_LOCAL void Sd_ServiceGroupStopServer(Sd_ServiceGroupIdType serviceGroupId)
  * @trace              CPD-74573
  */
 #if (SD_CLIENT_SERVICE_GROUP_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServiceGroupStopClient(Sd_ServiceGroupIdType serviceGroupId)
 {
     uint16 clientServiceNum = Sd_CfgPtr->GlbServiceGroup[serviceGroupId].ClientServiceNum;
@@ -2704,6 +3474,8 @@ SD_LOCAL void Sd_ServiceGroupStopClient(Sd_ServiceGroupIdType serviceGroupId)
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -2714,6 +3486,8 @@ SD_LOCAL void Sd_ServiceGroupStopClient(Sd_ServiceGroupIdType serviceGroupId)
  * @trace              CPD-74574
  */
 #if (SD_DEM_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxIndicationReportDem(PduIdType RxPduId)
 {
     /* In case a malformed message has been received, the extended production error
@@ -2735,8 +3509,13 @@ SD_LOCAL void Sd_RxIndicationReportDem(PduIdType RxPduId)
     }
     SD_UNUSED(instancePtr);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check option is valid or not that referenced by entry.
  * @param[in]          instancePtr: Pointer for specified instance
@@ -2790,6 +3569,8 @@ SD_LOCAL Std_ReturnType Sd_EntryRefOptionFormatCheck(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Processes a received entry in the Service Discovery message.
@@ -2805,51 +3586,86 @@ SD_LOCAL Std_ReturnType Sd_EntryRefOptionFormatCheck(
  * @synchronous        TRUE
  * @trace              CPD-74556
  */
-/* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+/* PRQA S 6040,6060 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STM19 */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ProcessRxEnrty(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
-    uint16                 index,
+    const uint8*           sdMsg,
     const uint16           optStartPos[],
-    uint8                  entryType,
+    uint16                 entryArrayLen,
+    uint16                 optionArrayLen,
+    ApplicationType        applicationId,
     boolean                isRxUseMulticast,
-    boolean                isReplyNAck,
-    ApplicationType        applicationId)
-/* PRQA S 6040 -- */
+    boolean                bRxOptionCheck)
+/* PRQA S 6040,6060 -- */
 {
-    if (SD_ENTRY_TYPE_FIND_SERVICE == entryType)
+    /* Parse Entries */
+    uint16 loopEndPos = entryArrayLen + SD_FIRST_ENTRY_INDEX;
+    for (uint16 index = SD_FIRST_ENTRY_INDEX; index < loopEndPos; index += SD_ENTRY_SIZE)
     {
+        uint8   entryType   = sdMsg[index];
+        boolean isReplyNAck = FALSE;
+
+        Std_ReturnType entryRefOptCheckRet = E_NOT_OK;
+        if (bRxOptionCheck)
+        {
+            entryRefOptCheckRet = Sd_EntryRefOptionFormatCheck(instancePtr, sdMsg, index, optionArrayLen, optStartPos);
+        }
+
+        if ((E_NOT_OK == entryRefOptCheckRet))
+        {
+            if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP != entryType)
+            {
+                /* Security check not pass,ignore the entry */
+                /* An entry references two or more options that are in conflict,Ignored the entry*/
+                continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
+            }
+            else
+            {
+                /* SubscribeEventgroup Message Option check not pass,Send SubscribeEventgroupNAck*/
+                isReplyNAck = TRUE;
+            }
+        }
+
+        if (SD_ENTRY_TYPE_FIND_SERVICE == entryType)
+        {
 #if (SD_SERVER_SERVICE_NUM > 0)
-        Sd_RxFindServiceHandle(instancePtr, rxQueueItem, index, isRxUseMulticast, optStartPos, applicationId);
+            Sd_RxFindServiceHandle(instancePtr, rxQueueItem, index, isRxUseMulticast, optStartPos, applicationId);
 #endif /* SD_SERVER_SERVICE_NUM > 0 */
-    }
-    else if (SD_ENTRY_TYPE_OFFER_SERVICE == entryType)
-    {
+        }
+        else if (SD_ENTRY_TYPE_OFFER_SERVICE == entryType)
+        {
 #if (SD_CLIENT_SERVICE_NUM > 0)
-        Sd_RxOfferServiceHandle(instancePtr, rxQueueItem, index, optStartPos, applicationId);
+            Sd_RxOfferServiceHandle(instancePtr, rxQueueItem, index, optStartPos, applicationId);
 #endif /* SD_CLIENT_SERVICE_NUM > 0 */
-    }
-    else if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP == entryType)
-    {
+        }
+        else if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP == entryType)
+        {
 #if (SD_EVENT_HANDLER_NUM > 0)
-        Sd_RxSubscribeEventgroupHandle(instancePtr, rxQueueItem, index, optStartPos, isReplyNAck, applicationId);
+            Sd_RxSubscribeEventgroupHandle(instancePtr, rxQueueItem, index, optStartPos, isReplyNAck, applicationId);
 #endif /* SD_EVENT_HANDLER_NUM > 0 */
-    }
-    else if (SD_ENTRY_TYPE_SUBSCRIBE_EVENTGROUP_ACK == entryType)
-    {
+        }
+        else if (SD_ENTRY_TYPE_SUBSCRIBE_EVENTGROUP_ACK == entryType)
+        {
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
-        Sd_RxSubscribeEventgroupAckHandle(instancePtr, rxQueueItem, index, optStartPos, applicationId);
+            Sd_RxSubscribeEventgroupAckHandle(instancePtr, rxQueueItem, index, optStartPos, applicationId);
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
-    }
-    else
-    {
-        /*@req <SWS_SD_00483> */
-        /* When receiving Service Discovery messages, the receiver shall
-         * ignore Entries of unknown type.*/
+        }
+        else
+        {
+            /*@req <SWS_SD_00483> */
+            /* When receiving Service Discovery messages, the receiver shall
+             * ignore Entries of unknown type.*/
+        }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Handles remote reboot detection and management.
  * @param[in]          instancePtr: Pointer to the specified instance.
@@ -2895,11 +3711,16 @@ SD_LOCAL boolean Sd_RemoteRebootHandle(
 
     return isRebootDetected;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-SD_LOCAL boolean Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL const Sd_InstanceType*
+    Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId)
 {
-    const Sd_InstanceType* instancePtr = Sd_CfgPtr->Instance;
-    boolean                isMatch     = FALSE;
+    const Sd_InstanceType* instancePtr    = Sd_CfgPtr->Instance;
+    const Sd_InstanceType* retInstancePtr = NULL_PTR;
     for (uint16 instanceIdx = 0u; instanceIdx < SD_INSTANCE_NUM; instanceIdx++)
     {
         if (
@@ -2909,16 +3730,20 @@ SD_LOCAL boolean Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, Ap
             ((rxQueueItem->RxPduId == instancePtr->SdInstanceMulticastRxPdu)
              || (rxQueueItem->RxPduId == instancePtr->SdInstanceUnicastRxPdu)))
         {
-            isMatch = TRUE;
+            retInstancePtr = instancePtr;
             break;
         }
         instancePtr++; /* PRQA S 2983 */ /* VL_Sd_PointerCalu */
     }
 
     SD_UNUSED(applicationId);
-    return isMatch;
+    return retInstancePtr;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_RxMessageOptionCheck(
     const Sd_InstanceType* instancePtr,
     const uint8*           sdMsg,
@@ -2954,101 +3779,67 @@ SD_LOCAL boolean Sd_RxMessageOptionCheck(
 
     return result;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Parse received message
  * @reentrant          Reentrant for different partition.
  * @synchronous        TRUE
  * @trace              CPD-74062
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 SD_LOCAL void Sd_ParseRxMessage(ApplicationType applicationId)
 {
     uint16 optStartPos[SD_ARRAY_LEN_70] = {0}; /* Max Option Num: ((1400-12-4-4)/(16+12*2))*2 */
 
-    while (NULL_PTR != Sd_RxQueueHead[applicationId])
+    while (NULL_PTR != *Sd_RxQueueHead[applicationId])
     {
-        const Sd_RxQueueType* rxQueueItem   = Sd_RxQueueHead[applicationId];
+        const Sd_RxQueueType* rxQueueItem   = *Sd_RxQueueHead[applicationId];
         const uint8*          sdMsg         = rxQueueItem->BufPtr;
         uint16                entryArrayLen = (uint16)Sd_NPtrtoHl(&sdMsg[SD_ENTRIES_ARRAY_LENGTH_INDEX]);
         uint16                optionArrayLen =
             (uint16)Sd_NPtrtoHl(&sdMsg[SD_ENTRIES_ARRAY_LENGTH_INDEX + SD_MESSAGE_ENTRYLEN_FILED_LEN + entryArrayLen]);
 
-        boolean isMatchInstance = Sd_RxMessageMatchInstance(rxQueueItem, applicationId);
-        if (!isMatchInstance)
+        /* Find instance use rxPduId */
+        const Sd_InstanceType* instancePtr = Sd_RxMessageMatchInstance(rxQueueItem, applicationId);
+        if (NULL_PTR != instancePtr)
         {
-            continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
-        }
-
-        for (uint16 instanceIdx = 0u; instanceIdx < SD_INSTANCE_NUM; instanceIdx++)
-        {
-            const Sd_InstanceType* instancePtr = &Sd_CfgPtr->Instance[instanceIdx];
-
             boolean bRxOptionCheck =
                 Sd_RxMessageOptionCheck(instancePtr, sdMsg, optStartPos, entryArrayLen, optionArrayLen);
 
-            boolean isRxUseMulticast;
+            boolean isRxUseMulticast = FALSE;
             if (rxQueueItem->RxPduId == instancePtr->SdInstanceMulticastRxPdu)
             {
                 isRxUseMulticast = TRUE;
             }
-            else
-            {
-                isRxUseMulticast = FALSE;
-            }
-
             (void)Sd_RemoteRebootHandle(instancePtr, rxQueueItem, isRxUseMulticast, applicationId);
 
-            /* Parse Entries */
-            uint16 loopEndPos = entryArrayLen + SD_FIRST_ENTRY_INDEX;
-            for (uint16 index = SD_FIRST_ENTRY_INDEX; index < loopEndPos; index += SD_ENTRY_SIZE)
-            {
-                uint8   entryType   = sdMsg[index];
-                boolean isReplyNAck = FALSE;
-
-                Std_ReturnType entryRefOptCheckRet = E_NOT_OK;
-                if (bRxOptionCheck)
-                {
-                    entryRefOptCheckRet =
-                        Sd_EntryRefOptionFormatCheck(instancePtr, sdMsg, index, optionArrayLen, optStartPos);
-                }
-
-                if ((E_NOT_OK == entryRefOptCheckRet))
-                {
-                    if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP != entryType)
-                    {
-                        /* Security check not pass,ignore the entry */
-                        /* An entry references two or more options that are in conflict,Ignored the entry*/
-                        continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
-                    }
-                    else
-                    {
-                        /* SubscribeEventgroup Message Option check not pass,Send SubscribeEventgroupNAck*/
-                        isReplyNAck = TRUE;
-                    }
-                }
-
-                Sd_ProcessRxEnrty(
-                    instancePtr,
-                    rxQueueItem,
-                    index,
-                    optStartPos,
-                    entryType,
-                    isRxUseMulticast,
-                    isReplyNAck,
-                    applicationId);
-            }
+            Sd_ProcessRxEnrty(
+                instancePtr,
+                rxQueueItem,
+                sdMsg,
+                optStartPos,
+                entryArrayLen,
+                optionArrayLen,
+                applicationId,
+                isRxUseMulticast,
+                bRxOptionCheck);
         }
 
-        Sd_RxQueueHead[applicationId] = rxQueueItem->Next;
+        *Sd_RxQueueHead[applicationId] = rxQueueItem->Next;
         /* Free saved sdu data buffer */
         Sd_FreeEx(rxQueueItem->BufPtr, Sd_RxMemPool[applicationId]);
         /* Free queue buffer */
         Sd_FreeEx(rxQueueItem, Sd_RxMemPool[applicationId]);
     }
 }
-/* PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Security check for options(Check if Clients and Servers in the same subset)
  * @param[in]          instancePtr: Pointer for specified instance
@@ -3151,7 +3942,11 @@ SD_LOCAL Std_ReturnType Sd_OptionsSecurityCheck(
 
     return checkPass;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check whether IP address is in same subset
  * @param[in]          ipAddr1: Ip address.
@@ -3206,6 +4001,8 @@ SD_LOCAL Std_ReturnType
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Check if have conflict options
@@ -3219,6 +4016,8 @@ SD_LOCAL Std_ReturnType
  * @trace              CPD-74065
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_OptionsConflictCheck(const uint8* sdMsg, uint16 entryPos, const uint16 optStartPosMap[])
 /* PRQA S 6030 -- */
 {
@@ -3322,7 +4121,11 @@ SD_LOCAL Std_ReturnType Sd_OptionsConflictCheck(const uint8* sdMsg, uint16 entry
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check whether the number of options is sufficient
  *                     (Check entries reference existing options)
@@ -3384,6 +4187,8 @@ SD_LOCAL Std_ReturnType
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -3400,6 +4205,8 @@ SD_LOCAL Std_ReturnType
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
 /* PRQA S 6030,6040 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxFindServiceHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -3449,9 +4256,10 @@ SD_LOCAL void Sd_RxFindServiceHandle(
         {
             Sd_SaveServerServiceHandleIdToSessionCtrlList(
                 instancePtr->SdInstanceHandleId,
-                &rxQueueItem->RemoteAddr,
+                rxQueueItem,
                 serverServicePtr->SdServerServiceHandleId,
-                applicationId);
+                applicationId,
+                isRxUseMulticast);
 
             Sd_ServerServicePhaseType serverPhase = Sd_ServerRTData[serverServicePtr->SdServerServiceHandleId]->Phase;
             if ((SD_SERVER_PHASE_REPETITION == serverPhase) || (SD_SERVER_PHASE_MAIN == serverPhase))
@@ -3515,25 +4323,11 @@ SD_LOCAL void Sd_RxFindServiceHandle(
         serverServicePtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
-/**
- * @brief              Get a random value in range min and max.
- * @param[in]          min: Minimum Value of the Random Number.
- * @param[in]          max: Max Value of the Random Number.
- * @return             Value of the Random Number.
- * @reentrant          TRUE
- * @synchronous        TRUE
- * @trace              CPD-74111
- */
-SD_LOCAL uint32 Sd_GetRandomValue(uint32 min, uint32 max)
-{
-    /* Calculate random value use LCG algorithm whih parameter from Numerical Recipe */
-    uint32 randVal = (Sd_RandomSeed * SD_RANDOM_MULTIPLIER) + SD_RANDOM_INCREMENT;
-
-    /* Result in range min and max */
-    return (min + (randVal % (max - min + 1UL))); /* PRQA S 2834 */ /* VL_Sd_Division */
-}
-
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Calculate server service delay time
  *                     If serverServicePtr not equal NULL_PTR,calc time for server service
@@ -3583,6 +4377,8 @@ SD_LOCAL uint32 Sd_CalcServerServiceDelayTime(
 
     return tRandom;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #endif
 
@@ -3599,6 +4395,8 @@ SD_LOCAL uint32 Sd_CalcServerServiceDelayTime(
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
 /* PRQA S 6020,6030,6070 ++ */ /* VL_MTR_Sd_STLIN,VL_MTR_Sd_STMIF,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxOfferServiceHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -3667,7 +4465,10 @@ SD_LOCAL void Sd_RxOfferServiceHandle(
                         && (minorVersion != clientServicePtr->SdClientServiceMinorVersion)))
                 || ((SD_MINIMUM_MINOR_VERSION == clientServicePtr->SdVersionDrivenFindBehavior)
                     && ((minorVersion < clientServicePtr->SdClientServiceMinorVersion)
-                        || Sd_IsOfferServiceBeIgnore(cRtDataPtr, clientServicePtr, rxQueueItem))))
+#if (SD_CLIENT_SERVICE_NUM > 0 && SD_CONSUMED_EVENTGROUP_NUM > 0)
+                        || Sd_IsOfferServiceBeIgnore(cRtDataPtr, clientServicePtr, rxQueueItem)
+#endif
+                            )))
             {
                 continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
             }
@@ -3702,8 +4503,8 @@ SD_LOCAL void Sd_RxOfferServiceHandle(
                     if (SD_CLIENT_PHASE_DOWN == cRtDataPtr->Phase)
                     {
                         /*@req <SWS_SD_00514> */
-                        /* If TTL is set to 0xFFFFFF, the OfferService entry shall be considered valid until the next
-                         * reboot.*/
+                        /* If TTL is set to 0xFFFFFF, the OfferService entry shall be considered valid until the
+                         * next reboot.*/
                         Sd_SetTTL(&cRtDataPtr->Ttl, ttl);
 
                         Sd_ClientHandleSoConBasedOptionInfo(
@@ -3765,6 +4566,8 @@ SD_LOCAL void Sd_RxOfferServiceHandle(
         clientServicePtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CLIENT_SERVICE_NUM > 0 */
 
 /**
@@ -3786,6 +4589,8 @@ SD_LOCAL void Sd_RxOfferServiceHandle(
  */
 /* PRQA S 6030,6040 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STPAR */
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ResponseSubscribeEntry(
     const Sd_EventHandlerType*  eventHandlerPtr,
     const Sd_InstanceType*      instancePtr,
@@ -3851,6 +4656,8 @@ SD_LOCAL void Sd_ResponseSubscribeEntry(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -3867,6 +4674,8 @@ SD_LOCAL void Sd_ResponseSubscribeEntry(
  */
 #if (SD_EVENT_HANDLER_NUM > 0)
 /* PRQA S 6020,6030,6040,6070 ++ */ /* VL_MTR_Sd_STLIN,VL_MTR_Sd_STMIF,VL_MTR_Sd_STPAR,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -3908,9 +4717,10 @@ SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
         {
             Sd_SaveServerServiceHandleIdToSessionCtrlList(
                 instancePtr->SdInstanceHandleId,
-                &rxQueueItem->RemoteAddr,
+                rxQueueItem,
                 serverServicePtr->SdServerServiceHandleId,
-                applicationId);
+                applicationId,
+                FALSE);
 
             boolean cfgOptMatchCheckRet = TRUE;
 #if (SD_CAPABILITY_RECORD_MATCH_CALLOUT_NUM > 0u)
@@ -4055,10 +4865,14 @@ SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
         counter,
         applicationId);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_EVENT_HANDLER_NUM > 0 */
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 #if ((SD_DEM_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_TCP == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Handles the reception of a SubscribeEventgroupNAck message.
  * @param[in]          instancePtr: Pointer to the specified instance.
@@ -4095,6 +4909,8 @@ SD_LOCAL void Sd_RxSubscribeEventgroupNAckHandle(
     }
 #endif
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -4112,6 +4928,8 @@ SD_LOCAL void Sd_RxSubscribeEventgroupNAckHandle(
  */
 #if (SD_CONSUMED_EVENT_MULICAST_USED == STD_ON)
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SubscribeAckOptionHandle(
     const Sd_InstanceType*           instancePtr,
     const Sd_ConsumedEventGroupType* consumedEventGroupPtr,
@@ -4139,6 +4957,8 @@ SD_LOCAL void Sd_SubscribeAckOptionHandle(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -4153,6 +4973,8 @@ SD_LOCAL void Sd_SubscribeAckOptionHandle(
  * @trace               CPD-74072
  */
 /* PRQA S 6030,6070 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_RxSubscribeEventgroupAckHandle(
     const Sd_InstanceType* instancePtr,
     const Sd_RxQueueType*  rxQueueItem,
@@ -4288,6 +5110,8 @@ SD_LOCAL void Sd_RxSubscribeEventgroupAckHandle(
     }
     SD_UNUSED(optStartPosMap);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Get addr and port information from Multicast option
@@ -4303,6 +5127,8 @@ SD_LOCAL void Sd_RxSubscribeEventgroupAckHandle(
  * @trace              CPD-74073
  */
 #if (SD_CONSUMED_EVENT_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_GetInfoFromMulticastOption(
     const Sd_InstanceType* instancePtr,
     const uint8*           sdMsg,
@@ -4365,6 +5191,8 @@ SD_LOCAL Std_ReturnType Sd_GetInfoFromMulticastOption(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if ((SD_DEM_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_TCP == STD_ON))
@@ -4382,6 +5210,8 @@ SD_LOCAL Std_ReturnType Sd_GetInfoFromMulticastOption(
  * @trace              CPD-74074
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsHaveEventGroupAckInSameMessage(
     const uint8* sdMsg,
     uint16       serviceID,
@@ -4424,6 +5254,8 @@ SD_LOCAL boolean Sd_IsHaveEventGroupAckInSameMessage(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #endif
 
@@ -4439,6 +5271,8 @@ SD_LOCAL boolean Sd_IsHaveEventGroupAckInSameMessage(
  * @trace               CPD-74075
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -4459,7 +5293,9 @@ SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
     uint8* optionPtr  = NULL_PTR;
     if (optionsLen > 0u)
     {
-        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]); /* PRQA S 0316 */ /* VL_QAC_0316 */
+        /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
+        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]);
+        /* PRQA S 0316 -- */
     }
 #endif
 
@@ -4547,6 +5383,8 @@ SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -4564,6 +5402,8 @@ SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildOfferServiceEntry(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -4577,15 +5417,18 @@ SD_LOCAL void Sd_BuildOfferServiceEntry(
     /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
     Sd_SendQueueType* sendQueueObjPtr =
         (Sd_SendQueueType*)Sd_MallocEx(sizeof(Sd_SendQueueType), Sd_TxMemPool[applicationId]);
-    /* PRQA S 0316 -- */
-    if (NULL_PTR != sendQueueObjPtr)
+    if (sendQueueObjPtr == NULL_PTR)
     {
-        /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+        return;
     }
+    /* PRQA S 0316 -- */
+
+    /* Clear new allocated memory */
+    (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
     Sd_Type1EntryType* offerServerEntryPtr =
         Sd_CreateOfferServiceEntry(serverServicePtr, isStopOfferService, applicationId);
     uint8* optionsPtr = Sd_CreateOfferServiceOptions(instancePtr, serverServicePtr, sendQueueObjPtr, applicationId);
+    /* PRQA S 2996 ++ */ /* VL_Sd_2996 */
     if ((NULL_PTR == sendQueueObjPtr) || (NULL_PTR == offerServerEntryPtr) || (NULL_PTR == optionsPtr))
     {
         /* Any buffer allocate fail,free all allocated buffer */
@@ -4607,11 +5450,16 @@ SD_LOCAL void Sd_BuildOfferServiceEntry(
         sendQueueObjPtr->Next          = NULL_PTR;
         Sd_AppendToSendQueueTail(&Sd_ServerRTData[serverServicePtr->SdServerServiceHandleId]->Head, sendQueueObjPtr);
     }
+    /* PRQA S 2996 -- */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_SERVER_SERVICE_NUM > 0 */
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 /* PRQA S 6040,6080 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STPTH */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildSubscribeOption(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -4712,6 +5560,77 @@ SD_LOCAL void Sd_BuildSubscribeOption(
 
     *optCnt += tempOptCnt;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
+
+#if (SD_EVENT_HANDLER_NUM > 0)
+/* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL Std_ReturnType Sd_BuildSubscribeAckOption(
+    const Sd_InstanceType*      instancePtr,
+    const Sd_ServerServiceType* serverServicePtr,
+    const Sd_EventHandlerType*  eventHandlerPtr,
+    uint8*                      optNum,
+    uint8*                      optionPtr,
+    uint16                      optStartPos[],
+    uint16                      cfgOptLen,
+    uint16                      multiOptlen)
+{
+    Std_ReturnType ret          = E_OK;
+    uint16         cfgOptOffset = 0u;
+    uint8          tmpOptNum    = *optNum;
+#if (SD_EVENT_HANDLER_MULICAST_USED == STD_ON)
+    if (multiOptlen > 0u)
+    {
+        optStartPos[tmpOptNum] = cfgOptOffset;
+        tmpOptNum++;
+
+        TcpIp_SockAddrType ipAddr;
+        ipAddr.domain = instancePtr->SdAddrFamily;
+        ret = SoAd_GetRemoteAddr(eventHandlerPtr->SdEventHandlerMulticast->SdMulticastEventSoConRef->SoConId, &ipAddr);
+        if (E_OK == ret)
+        {
+            if (TCPIP_AF_INET == instancePtr->SdAddrFamily)
+            {
+                Sd_SetIPv4MulticastOption(optionPtr, (uint8*)ipAddr.addr, ipAddr.port);
+                cfgOptOffset = SD_MESSAGE_IPV4_OPTION_LEN;
+            }
+#if (STD_ON == SD_IPV6_ENABLE)
+            else
+            {
+                Sd_SetIPv6MulticastOption(optionPtr, (uint8*)ipAddr.addr, ipAddr.port);
+                cfgOptOffset = SD_MESSAGE_IPV6_OPTION_LEN;
+            }
+#endif /* STD_ON == SD_IPV6_ENABLE */
+        }
+    }
+#endif
+
+    /* Build Configuration option */
+    if (cfgOptLen > 0u)
+    {
+        optStartPos[tmpOptNum] = cfgOptOffset;
+        (tmpOptNum)++;
+
+        Sd_BuildType2ConfigurationOption(
+            instancePtr,
+            serverServicePtr,
+            eventHandlerPtr,
+            NULL_PTR,
+            &optionPtr[cfgOptOffset],
+            cfgOptLen);
+    }
+
+    *optNum = tmpOptNum;
+    SD_UNUSED(multiOptlen);
+
+    return ret;
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+/* PRQA S 6040 -- */
 #endif
 
 /**
@@ -4732,6 +5651,8 @@ SD_LOCAL void Sd_BuildSubscribeOption(
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 /* PRQA S 6040,6070 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -4773,7 +5694,9 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
     uint8* optionPtr = NULL_PTR;
     if (optionsLen > 0u)
     {
-        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]); /* PRQA S 0316 */ /* VL_QAC_0316 */
+        /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
+        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]);
+        /* PRQA S 0316 -- */
     }
     if ((NULL_PTR == sendQueueObjPtr) || (NULL_PTR == entryPtr) || ((optionsLen > 0u) && (NULL_PTR == optionPtr)))
     {
@@ -4850,6 +5773,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -4862,6 +5787,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
  * @trace              CPD-74551
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_DisableAllConsumedEventRouting(
     const Sd_ConsumedEventGroupType*   eventGroupPtr,
     const Sd_ClientServiceRTType*      cRtDataPtr,
@@ -4902,6 +5829,8 @@ SD_LOCAL void Sd_DisableAllConsumedEventRouting(
 
     SD_UNUSED(cEgRTPtr);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -4922,6 +5851,8 @@ SD_LOCAL void Sd_DisableAllConsumedEventRouting(
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 /* PRQA S 6040,6070 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -4963,7 +5894,9 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
 
     if (optionsLen > 0u)
     {
-        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]); /* PRQA S 0316 */ /* VL_QAC_0316 */
+        /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
+        optionPtr = (uint8*)Sd_MallocEx(optionsLen, Sd_TxMemPool[applicationId]);
+        /* PRQA S 0316 -- */
     }
     if ((NULL_PTR == sendQueueObjPtr) || (NULL_PTR == entryPtr) || ((optionsLen > 0u) && (NULL_PTR == optionPtr)))
     {
@@ -5043,6 +5976,8 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5055,6 +5990,8 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
  * @trace              CPD-74079
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL
 uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast)
 {
@@ -5081,6 +6018,8 @@ uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandl
 
     return tRandom;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5100,6 +6039,8 @@ uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandl
  */
 #if (SD_EVENT_HANDLER_NUM > 0)
 /* PRQA S 6030,6040,6050,6070 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STPAR,VL_MTR_Sd_STST3,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -5172,54 +6113,19 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
             egAckPtr->Counter      = counter;
             egAckPtr->EventGroupID = Sd_HtoNs(eventHandlerPtr->SdEventHandlerEventGroupId);
 
-            /* Build IPv4/IPv6 Multicast Option */
+            /* Build IPv4/IPv6/Cfg Multicast Option */
             uint16 optStartPos[SD_ARRAY_LEN_3] = {0};
-            uint16 cfgOptOffset                = 0u;
             uint8  optNum                      = 0u;
 
-#if (SD_EVENT_HANDLER_MULICAST_USED == STD_ON)
-            if (multiOptlen > 0u)
-            {
-                optStartPos[optNum] = cfgOptOffset;
-                optNum++;
-
-                TcpIp_SockAddrType ipAddr;
-                ipAddr.domain = instancePtr->SdAddrFamily;
-                ret           = SoAd_GetRemoteAddr(
-                    eventHandlerPtr->SdEventHandlerMulticast->SdMulticastEventSoConRef->SoConId,
-                    &ipAddr);
-                if (E_OK == ret)
-                {
-                    if (TCPIP_AF_INET == instancePtr->SdAddrFamily)
-                    {
-                        Sd_SetIPv4MulticastOption(optionPtr, (uint8*)ipAddr.addr, ipAddr.port);
-                        cfgOptOffset = SD_MESSAGE_IPV4_OPTION_LEN;
-                    }
-#if (STD_ON == SD_IPV6_ENABLE)
-                    else
-                    {
-                        Sd_SetIPv6MulticastOption(optionPtr, (uint8*)ipAddr.addr, ipAddr.port);
-                        cfgOptOffset = SD_MESSAGE_IPV6_OPTION_LEN;
-                    }
-#endif /* STD_ON == SD_IPV6_ENABLE */
-                }
-            }
-#endif
-
-            /* Build Configuration option */
-            if (cfgOptLen > 0u)
-            {
-                optStartPos[optNum] = cfgOptOffset;
-                optNum++;
-
-                Sd_BuildType2ConfigurationOption(
-                    instancePtr,
-                    serverServicePtr,
-                    eventHandlerPtr,
-                    NULL_PTR,
-                    &optionPtr[cfgOptOffset],
-                    cfgOptLen);
-            }
+            ret = Sd_BuildSubscribeAckOption(
+                instancePtr,
+                serverServicePtr,
+                eventHandlerPtr,
+                &optNum,
+                optionPtr,
+                optStartPos,
+                cfgOptLen,
+                multiOptlen);
 
             /* Save information to sendQueueObj */
             (void)IStdLib_MemCpy(&sendQueueObjPtr->DestAddr, remoteAddr, sizeof(TcpIp_SockAddrType));
@@ -5241,6 +6147,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5257,6 +6165,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
  * @trace              CPD-74081
  */
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupNAckEntry(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_RxQueueType*       rxQueueItem,
@@ -5320,6 +6230,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupNAckEntry(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5334,6 +6246,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupNAckEntry(
  * @trace              CPD-74082
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_Type1EntryType* Sd_CreateOfferServiceEntry(
     const Sd_ServerServiceType* serverServicePtr,
     boolean                     isStopOfferService,
@@ -5369,8 +6283,13 @@ SD_LOCAL Sd_Type1EntryType* Sd_CreateOfferServiceEntry(
 
     return ofSevsPtr;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Sets the endpoint option in the buffer.
  * @param[in]          sdInstancePtr: Pointer to the Service Discovery instance.
@@ -5409,8 +6328,13 @@ SD_LOCAL void Sd_SetEndpointOption(
     }
 #endif /* STD_ON == SD_IPV6_ENABLE */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 #if (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetMulicastEndpointOption(
     const Sd_InstanceType* sdInstancePtr,
     SoAd_SoConIdType       soConId,
@@ -5429,6 +6353,8 @@ SD_LOCAL void Sd_SetMulicastEndpointOption(
         Sd_SetIPv4MulticastOption(ipv4OptPtr, (uint8*)localAddr.addr, localAddr.port);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5443,19 +6369,15 @@ SD_LOCAL void Sd_SetMulicastEndpointOption(
  * @trace              CPD-74083
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
-/* PRQA S 2889,6060,6070,6080 ++ */ /* VL_QAC_MultiReturn,VL_MTR_Sd_STM19,VL_MTR_Sd_STCAL,VL_MTR_Sd_STPTH */
+/* PRQA S 6060,6070,6080 ++ */ /* VL_MTR_Sd_STM19,VL_MTR_Sd_STCAL,VL_MTR_Sd_STPTH */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint8* Sd_CreateOfferServiceOptions(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     Sd_SendQueueType*           sendQueueObjPtr,
     ApplicationType             applicationId)
 {
-    if (NULL_PTR == sendQueueObjPtr)
-    {
-        /* Memory allocate for sendQueueObj fail */
-        return NULL_PTR;
-    }
-
     /* Calculate config option length */
     uint16 cfgOptlen = 0u;
 #if (SD_SERVER_CAPABILITY_CFG_USED == STD_ON)
@@ -5563,7 +6485,9 @@ SD_LOCAL uint8* Sd_CreateOfferServiceOptions(
 
     return bufPtr;
 }
-/* PRQA S 2889,6060,6070,6080 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+/* PRQA S 6060,6070,6080 -- */
 #endif
 
 /**
@@ -5581,6 +6505,8 @@ SD_LOCAL uint8* Sd_CreateOfferServiceOptions(
  * @trace              CPD-74084
  */
 #if ((SD_SERVER_CAPABILITY_CFG_USED == STD_ON) || (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_GetType1ConfigurationOptionLength(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -5636,6 +6562,8 @@ SD_LOCAL uint16 Sd_GetType1ConfigurationOptionLength(
 
     return cfgOptlen;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5654,6 +6582,8 @@ SD_LOCAL uint16 Sd_GetType1ConfigurationOptionLength(
  * @trace              CPD-74085
  */
 #if ((SD_SERVER_CAPABILITY_CFG_USED == STD_ON) || (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildType1ConfigurationOption(
     uint8*                      optAddrPtr,
     uint16                      cfgOptLen,
@@ -5734,6 +6664,8 @@ SD_LOCAL void Sd_BuildType1ConfigurationOption(
 
     *optAddr = 0u; /* end with [0] */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5751,6 +6683,8 @@ SD_LOCAL void Sd_BuildType1ConfigurationOption(
  * @trace              CPD-74086
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0) || (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL uint16 Sd_GetType2ConfigurationOptionLength(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ServerServiceType*      serverServicePtr,
@@ -5807,6 +6741,8 @@ SD_LOCAL uint16 Sd_GetType2ConfigurationOptionLength(
 
     return cfgOptlen;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5827,6 +6763,8 @@ SD_LOCAL uint16 Sd_GetType2ConfigurationOptionLength(
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0) || (SD_EVENT_HANDLER_NUM > 0)
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_BuildType2ConfigurationOption(
     const Sd_InstanceType*      sdInstancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -5912,6 +6850,8 @@ SD_LOCAL void Sd_BuildType2ConfigurationOption(
 
     *optAddr = 0u; /* end with [0] */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -5925,6 +6865,8 @@ SD_LOCAL void Sd_BuildType2ConfigurationOption(
  * @trace              CPD-74088
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_SetHeader(uint8* headerPtr, uint16 instanceId, const TcpIp_SockAddrType* remoteAddr, boolean isMulticastTx)
 {
@@ -5974,8 +6916,11 @@ SD_LOCAL void
 
     (void)IStdLib_MemCpy(headerPtr, (uint8*)&header, sizeof(Sd_HeaderType));
 }
-#endif
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Set the IPv4 Endpoint Option.
  * @param[in]          ipv4OptionPtr: Pointer for ipv4 option.
@@ -5986,7 +6931,6 @@ SD_LOCAL void
  * @synchronous        TRUE
  * @trace              CPD-74089
  */
-#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
 SD_LOCAL void Sd_SetIPv4EndpointOption(uint8* ipv4OptionPtr, const uint8* ipv4Address, uint8 L4Proto, uint16 portNumber)
 {
     Sd_IPv4OptionsType ipv4Option;
@@ -6000,6 +6944,8 @@ SD_LOCAL void Sd_SetIPv4EndpointOption(uint8* ipv4OptionPtr, const uint8* ipv4Ad
 
     (void)IStdLib_MemCpy(ipv4OptionPtr, (uint8*)&ipv4Option, sizeof(Sd_IPv4OptionsType));
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6013,6 +6959,8 @@ SD_LOCAL void Sd_SetIPv4EndpointOption(uint8* ipv4OptionPtr, const uint8* ipv4Ad
  * @trace              CPD-74090
  */
 #if (STD_ON == SD_IPV6_ENABLE && ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0)))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetIPv6EndpointOption(uint8* ipv6OptionPtr, const uint8* ipv6Address, uint8 L4Proto, uint16 portNumber)
 {
     Sd_IPv6OptionsType ipv6Option;
@@ -6026,6 +6974,8 @@ SD_LOCAL void Sd_SetIPv6EndpointOption(uint8* ipv6OptionPtr, const uint8* ipv6Ad
 
     (void)IStdLib_MemCpy(ipv6OptionPtr, (uint8*)&ipv6Option, sizeof(Sd_IPv6OptionsType));
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6038,6 +6988,8 @@ SD_LOCAL void Sd_SetIPv6EndpointOption(uint8* ipv6OptionPtr, const uint8* ipv6Ad
  * @trace              CPD-74092
  */
 #if ((SD_EVENT_HANDLER_MULICAST_USED == STD_ON) && (STD_ON == SD_IPV6_ENABLE))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetIPv6MulticastOption(uint8* ipv6OptionPtr, const uint8* ipv6Address, uint16 portNumber)
 {
     Sd_IPv6OptionsType ipv6Option;
@@ -6051,6 +7003,8 @@ SD_LOCAL void Sd_SetIPv6MulticastOption(uint8* ipv6OptionPtr, const uint8* ipv6A
 
     (void)IStdLib_MemCpy(ipv6OptionPtr, (uint8*)&ipv6Option, sizeof(Sd_IPv6OptionsType));
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6063,6 +7017,8 @@ SD_LOCAL void Sd_SetIPv6MulticastOption(uint8* ipv6OptionPtr, const uint8* ipv6A
  * @trace              CPD-74091
  */
 #if ((SD_EVENT_HANDLER_MULICAST_USED == STD_ON) || (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SetIPv4MulticastOption(uint8* ipv4OptionPtr, const uint8* ipv4Address, uint16 portNumber)
 {
     Sd_IPv4OptionsType ipv4Option;
@@ -6076,6 +7032,8 @@ SD_LOCAL void Sd_SetIPv4MulticastOption(uint8* ipv4OptionPtr, const uint8* ipv4A
 
     (void)IStdLib_MemCpy(ipv4OptionPtr, (uint8*)&ipv4Option, sizeof(Sd_IPv4OptionsType));
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6114,6 +7072,8 @@ SD_LOCAL_INLINE void Sd_SetTTL(Sd_TTLType* ttlPtr, uint32 ttl)
  * @trace              CPD-74094
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceDownPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -6189,6 +7149,8 @@ SD_LOCAL void Sd_ServerServiceDownPhaseHandle(
 #endif
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6200,6 +7162,8 @@ SD_LOCAL void Sd_ServerServiceDownPhaseHandle(
  * @trace              CPD-74561
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServicePtr)
 {
     boolean leastOneSoConValid = FALSE;
@@ -6244,6 +7208,8 @@ SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServi
 
     return leastOneSoConValid;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6256,7 +7222,8 @@ SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServi
  * @trace              CPD-74095
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceInitialWaitPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -6352,7 +7319,8 @@ SD_LOCAL void Sd_ServerServiceInitialWaitPhaseHandle(
         }
     }
 }
-/* PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6366,6 +7334,8 @@ SD_LOCAL void Sd_ServerServiceInitialWaitPhaseHandle(
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceRepetitionPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -6435,6 +7405,8 @@ SD_LOCAL void Sd_ServerServiceRepetitionPhaseHandle(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6447,6 +7419,8 @@ SD_LOCAL void Sd_ServerServiceRepetitionPhaseHandle(
  * @trace              CPD-74097
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceMainPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -6482,6 +7456,8 @@ SD_LOCAL void Sd_ServerServiceMainPhaseHandle(
         Sd_ServerServiceDownPhaseEnter(instancePtr, serverServicePtr, applicationId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6492,6 +7468,8 @@ SD_LOCAL void Sd_ServerServiceMainPhaseHandle(
  * @trace              CPD-74562
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr)
 {
     const Sd_SoAdSoConGroupType* soadSoConGroupPtr = NULL_PTR;
@@ -6521,6 +7499,8 @@ SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr)
     }
 #endif
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6533,15 +7513,16 @@ SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr)
  * @trace              CPD-74098
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
     ApplicationType             applicationId)
 {
-    uint16                     serverHandleId  = serverServicePtr->SdServerServiceHandleId;
-    Sd_ServerServiceRTType*    sRtDataPtr      = Sd_ServerRTData[serverHandleId];
-    TcpIp_IpAddrStateType      ipAddrState     = Sd_InstanceRTData[instancePtr->SdInstanceHandleId]->IpAddrState;
-    const Sd_EventHandlerType* eventHandlerPtr = NULL_PTR;
+    uint16                  serverHandleId = serverServicePtr->SdServerServiceHandleId;
+    Sd_ServerServiceRTType* sRtDataPtr     = Sd_ServerRTData[serverHandleId];
+    TcpIp_IpAddrStateType   ipAddrState    = Sd_InstanceRTData[instancePtr->SdInstanceHandleId]->IpAddrState;
 
     /*@req <SWS_SD_00323>,<SWS_SD_00338>,<SWS_SD_00348> */
     /* If the API Server Sd_ServerServiceSetState() is called with state SD_SERVER_SERVICE_DOWN
@@ -6561,7 +7542,7 @@ SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
         /* all subscriptions of the eventgroup(s) of this service instance shall be
          * deleted and SD_EVENT_HANDLER_RELEASED and reported to BswM using the API
          * BswM_Sd_EventHandlerCurrentState */
-        eventHandlerPtr = serverServicePtr->SdEventHandler;
+        const Sd_EventHandlerType* eventHandlerPtr = serverServicePtr->SdEventHandler;
         for (uint16 handlerIdx = 0u; handlerIdx < serverServicePtr->EventHandlerNum; handlerIdx++)
         {
             uint16                 eventHandlerId = eventHandlerPtr->SdEventHandlerHandleId;
@@ -6583,7 +7564,7 @@ SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
     /* all associated EventHandler which state is not SD_EVENT_HANDLER_RELEASED
      * shall be changed to SD_EVENT_HANDLER_RELEASED and indicated to the BswM by
      * calling the API BswM_Sd_EventHandlerCurrentState().*/
-    eventHandlerPtr = serverServicePtr->SdEventHandler;
+    const Sd_EventHandlerType* eventHandlerPtr = serverServicePtr->SdEventHandler;
     for (uint16 handlerIdx = 0u; handlerIdx < serverServicePtr->EventHandlerNum; handlerIdx++)
     {
         uint16 eventHandlerId = eventHandlerPtr->SdEventHandlerHandleId;
@@ -6632,6 +7613,8 @@ SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
     Sd_ServerRTData[serverHandleId]->RepetitionCount  = 0u;
     Sd_ServerRTData[serverHandleId]->MainTimer        = 0u;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6644,6 +7627,8 @@ SD_LOCAL void Sd_ServerServiceDownPhaseEnter(
  * @trace              CPD-74099
  */
 #if (SD_SERVER_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ServerServiceTimerHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -6656,9 +7641,13 @@ SD_LOCAL void Sd_ServerServiceTimerHandle(
 
     SD_UNUSED(instancePtr);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableTcp(
     const Sd_ClientServiceType*   clientServicePtr,
     Sd_ClientServiceRTType*       cRtDataPtr,
@@ -6684,9 +7673,13 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnableTcp(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableUdp(
     const Sd_ClientServiceType*   clientServicePtr,
     Sd_ClientServiceRTType*       cRtDataPtr,
@@ -6712,9 +7705,13 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnableUdp(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnableMulitcast(
     const Sd_ClientServiceType* clientServicePtr,
     Sd_ClientServiceRTType*     cRtDataPtr)
@@ -6732,6 +7729,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnableMulitcast(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6744,6 +7743,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnableMulitcast(
  * @trace              CPD-74100
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -6785,6 +7786,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseHandle(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6797,6 +7800,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseHandle(
  * @trace              CPD-74101
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceInitialWaitPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -6848,6 +7853,8 @@ SD_LOCAL void Sd_ClientServiceInitialWaitPhaseHandle(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -6861,6 +7868,8 @@ SD_LOCAL void Sd_ClientServiceInitialWaitPhaseHandle(
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceRepetitionPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -6899,7 +7908,8 @@ SD_LOCAL void Sd_ClientServiceRepetitionPhaseHandle(
                 {
                     /*@req <SWS_SD_00369> */
                     /* After sending the maximum repetitions (defined by SdClientTimerInitialFindRepetitionsMax)
-                     * of FindService entries,the Repetition Phase shall be left and the Main Phase shall be entered. */
+                     * of FindService entries,the Repetition Phase shall be left and the Main Phase shall be
+                     * entered. */
                     cRtDataPtr->Phase = SD_CLIENT_PHASE_MAIN;
                 }
                 else
@@ -6910,9 +7920,13 @@ SD_LOCAL void Sd_ClientServiceRepetitionPhaseHandle(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 static void Sd_ClientSubscribeRetryHandler(
     const Sd_InstanceType*           sdInstancePtr,
     const Sd_ClientServiceType*      clientServicePtr,
@@ -6948,16 +7962,49 @@ static void Sd_ClientSubscribeRetryHandler(
             &sendTime,
             applicationId);
 
-        if (consumedEgTimerPtr->SdSubscribeEventgroupRetryMax > 0u)
-        {
-            consumedEgRTPtr->SubsRetryTimer =
-                sendTime + (consumedEgTimerPtr->SdSubscribeEventgroupRetryDelay / SD_MAIN_FUNCTION_CYCLE_TIME);
-            consumedEgRTPtr->SubsRetryEnable = TRUE;
-        }
+        consumedEgRTPtr->SubsRetryTimer =
+            sendTime + (consumedEgTimerPtr->SdSubscribeEventgroupRetryDelay / SD_MAIN_FUNCTION_CYCLE_TIME);
+        consumedEgRTPtr->SubsRetryEnable = TRUE;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_SubscribeSockIsConnection(
+    const Sd_InstanceType*         instancePtr,
+    SoAd_SoConIdType               soConId,
+    const Sd_SoAdRoutingGroupType* activationRef)
+{
+    boolean            ret = FALSE;
+    TcpIp_SockAddrType sockAddr;
+    if (instancePtr->SdAddrFamily == TCPIP_AF_INET)
+    {
+        sockAddr.domain = TCPIP_AF_INET;
+    }
+#if (STD_ON == SD_IPV6_ENABLE)
+    else
+    {
+        sockAddr.domain = TCPIP_AF_INET6;
+    }
+#endif
+
+    (void)SoAd_GetRemoteAddr(soConId, &sockAddr);
+    if ((NULL_PTR != activationRef) && (TCPIP_E_OK == SoAd_IsConnectionReady(soConId, &sockAddr)))
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Handles the subscription to an event for a client service.
  * @param[in]          instancePtr: Pointer to the specified instance.
@@ -6968,7 +8015,6 @@ static void Sd_ClientSubscribeRetryHandler(
  * @synchronous        TRUE
  * @trace              CPD-74554
  */
-#if (SD_CONSUMED_EVENTGROUP_NUM > 0)
 SD_LOCAL void Sd_ClientSubscribeEventHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -6993,20 +8039,20 @@ SD_LOCAL void Sd_ClientSubscribeEventHandle(
         Sd_ConsumedEventGroupRTType* consumedEgRTPtr =
             Sd_ConsumedEventGroupRTData[eventGroupPtr->SdConsumedEventGroupHandleId];
 
-        TcpIp_SockAddrType tcpIpSockAddr;
-        tcpIpSockAddr.domain = instancePtr->SdAddrFamily;
-        (void)SoAd_GetRemoteAddr(cRtDataPtr->TcpSoCon.SoConId, &tcpIpSockAddr);
-
         /*@req <SWS_Sd_00761> */
         if ((SD_CONSUMED_EVENTGROUP_REQUESTED == consumedEgRTPtr->SetState)
-            && (((NULL_PTR != eventGroupPtr->SdConsumedEventGroupTcpActivationRef)
-                 && (TCPIP_E_OK == SoAd_IsConnectionReady(cRtDataPtr->TcpSoCon.SoConId, &tcpIpSockAddr))
-                 && (!consumedEgRTPtr->IsTcpSubsSend))
-                || ((NULL_PTR != eventGroupPtr->SdConsumedEventGroupUdpActivationRef)
-                    && (((TCPIP_E_OK == SoAd_IsConnectionReady(cRtDataPtr->UdpSoCon.SoConId, &tcpIpSockAddr))
-                         && (!consumedEgRTPtr->IsUdpSubsSend))
-                        || ((TCPIP_E_OK == SoAd_IsConnectionReady(cRtDataPtr->MulitcastSoCon.SoConId, &tcpIpSockAddr))
-                            && (!consumedEgRTPtr->IsMulitcastSubsSend)))))
+            && ((Sd_SubscribeSockIsConnection(
+                    instancePtr,
+                    cRtDataPtr->TcpSoCon.SoConId,
+                    eventGroupPtr->SdConsumedEventGroupTcpActivationRef))
+                || Sd_SubscribeSockIsConnection(
+                    instancePtr,
+                    cRtDataPtr->UdpSoCon.SoConId,
+                    eventGroupPtr->SdConsumedEventGroupUdpActivationRef)
+                || Sd_SubscribeSockIsConnection(
+                    instancePtr,
+                    cRtDataPtr->MulitcastSoCon.SoConId,
+                    eventGroupPtr->SdConsumedEventGroupUdpActivationRef))
             && ((cRtDataPtr->OfferServiceRxFlag) || (!consumedEgRTPtr->IsSendSubEvtAfterRequest)))
         {
             /*@req <SWS_SD_00721>,<SWS_SD_00695> */
@@ -7078,6 +8124,8 @@ SD_LOCAL void Sd_ClientSubscribeEventHandle(
         eventGroupPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7091,6 +8139,8 @@ SD_LOCAL void Sd_ClientSubscribeEventHandle(
  * @trace              CPD-74553
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientStopSubscribeEventHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -7132,9 +8182,13 @@ SD_LOCAL void Sd_ClientStopSubscribeEventHandle(
         cEgPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientEnableAllMethodRoutingGroup(
     const Sd_ClientServiceType*   clientServicePtr,
     const Sd_ClientServiceRTType* cRtDataPtr)
@@ -7158,6 +8212,8 @@ SD_LOCAL void Sd_ClientEnableAllMethodRoutingGroup(
 #endif
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7170,7 +8226,8 @@ SD_LOCAL void Sd_ClientEnableAllMethodRoutingGroup(
  * @trace              CPD-74103
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
-/*PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceMainPhaseHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -7190,50 +8247,8 @@ SD_LOCAL void Sd_ClientServiceMainPhaseHandle(
     /* An OfferService entry was received and its TTL timer did not expire yet */
     if (cRtDataPtr->Ttl.IsValidForever || (cRtDataPtr->Ttl.ttlms > 0ULL))
     {
-        boolean bSoConOnline = FALSE;
-#if (SD_CLIENT_SERVICE_USE_TCP == STD_ON)
-        if ((NULL_PTR != clientServicePtr->SdClientServiceTcpRef) && cRtDataPtr->RxTcpEndpointFlag)
-        {
-            SoAd_SoConModeType tcpSoConMode = SOAD_SOCON_OFFLINE;
-            SoAd_GetSoConMode(cRtDataPtr->TcpSoCon.SoConId, &tcpSoConMode);
-            if (tcpSoConMode == SOAD_SOCON_ONLINE)
-            {
-                bSoConOnline = TRUE;
-            }
-        }
-#endif
-
-#if (SD_CLIENT_SERVICE_USE_UDP == STD_ON)
-        /* PRQA S 2995 ++ */ /* VL_Sd_LoopLogical */
-        if (!bSoConOnline && (NULL_PTR != clientServicePtr->SdClientServiceUdpRef) && cRtDataPtr->RxUdpEndpointFlag)
-        {
-            SoAd_SoConModeType udpSoConMode = SOAD_SOCON_OFFLINE;
-            SoAd_GetSoConMode(cRtDataPtr->UdpSoCon.SoConId, &udpSoConMode);
-            if (udpSoConMode == SOAD_SOCON_ONLINE)
-            {
-                bSoConOnline = TRUE;
-            }
-        }
-        /* PRQA S 2995 -- */ /* VL_Sd_LoopLogical */
-#endif
-
-#if (SD_CLIENT_SERVICE_USE_MULITICAST == STD_ON)
-        /* PRQA S 2995 ++ */ /* VL_Sd_LoopLogical */
-        if (!bSoConOnline && (NULL_PTR != clientServicePtr->SdClientServiceMulticastRef)
-            && cRtDataPtr->RxMulitcastEndpointFlag)
-        {
-            SoAd_SoConModeType mulitcastSoConMode = SOAD_SOCON_OFFLINE;
-            SoAd_GetSoConMode(cRtDataPtr->MulitcastSoCon.SoConId, &mulitcastSoConMode);
-            if (mulitcastSoConMode == SOAD_SOCON_ONLINE)
-            {
-                bSoConOnline = TRUE;
-            }
-        }
-        /* PRQA S 2995 -- */ /* VL_Sd_LoopLogical */
-#endif
-
         /* Socket Connections are in state SOAD_SOCON_ONLINE */
-        if (bSoConOnline)
+        if (Sd_ClientIsLeastOneSocketVaild(clientServicePtr))
         {
             if (cRtDataPtr->OfferServiceRxFlag && (SD_CLIENT_SERVICE_AVAILABLE != cRtDataPtr->CurState))
             {
@@ -7272,7 +8287,8 @@ SD_LOCAL void Sd_ClientServiceMainPhaseHandle(
     Sd_ClientStopSubscribeEventHandle(instancePtr, clientServicePtr, cRtDataPtr, applicationId);
 #endif
 }
-/*PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7284,6 +8300,8 @@ SD_LOCAL void Sd_ClientServiceMainPhaseHandle(
  * @trace              CPD-74104
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ClientServiceInitialWaitEnter(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr)
 {
@@ -7299,6 +8317,8 @@ SD_LOCAL void
     /* When entering the Initial Wait Phase, a random timer shall be started */
     cRtDataPtr->InitialWaitTimer = Sd_InitialWaitTimeAdjust(tRandom / SD_MAIN_FUNCTION_CYCLE_TIME);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7312,6 +8332,8 @@ SD_LOCAL void
  * @trace              CPD-74105
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDownPhaseEnter(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -7391,6 +8413,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnter(
     /* Down phase enter */
     cRtDataPtr->Phase = SD_CLIENT_PHASE_DOWN;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7402,6 +8426,8 @@ SD_LOCAL void Sd_ClientServiceDownPhaseEnter(
  * @trace              CPD-74106
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceDisableAllRoutingOfClient(
     const Sd_ClientServiceType*   clientServicePtr,
     const Sd_ClientServiceRTType* cRtDataPtr)
@@ -7439,9 +8465,59 @@ SD_LOCAL void Sd_ClientServiceDisableAllRoutingOfClient(
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean Sd_ClientIsLeastOneSocketVaild(const Sd_ClientServiceType* clientPtr)
+{
+    boolean                       bSoConOnline = FALSE;
+    const Sd_ClientServiceRTType* cRtDataPtr   = Sd_ClientRTData[clientPtr->SdClientServiceHandleId];
+
+#if (STD_ON == SD_CLIENT_SERVICE_USE_TCP)
+    if (Sd_ClientCheckSoConOnline(
+            clientPtr->SdClientServiceTcpRef,
+            cRtDataPtr->TcpSoCon.SoConId,
+            cRtDataPtr->RxTcpEndpointFlag))
+    {
+        bSoConOnline = TRUE;
+    }
+    else
+#endif
+#if (STD_ON == SD_CLIENT_SERVICE_USE_UDP)
+        if (Sd_ClientCheckSoConOnline(
+                clientPtr->SdClientServiceUdpRef,
+                cRtDataPtr->UdpSoCon.SoConId,
+                cRtDataPtr->RxUdpEndpointFlag))
+    {
+        bSoConOnline = TRUE;
+    }
+    else
+#endif
+#if (STD_ON == SD_CLIENT_SERVICE_USE_MULITICAST)
+        if (Sd_ClientCheckSoConOnline(
+                clientPtr->SdClientServiceMulticastRef,
+                cRtDataPtr->MulitcastSoCon.SoConId,
+                cRtDataPtr->RxMulitcastEndpointFlag))
+    {
+        bSoConOnline = TRUE;
+    }
+    else
+#endif
+    {
+        /* Do nothing */
+    }
+
+    return bSoConOnline;
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Disable all Routing associated with this Client Service
  * @param[in]          cEgPtr: Pointer for consumed event group.
@@ -7493,6 +8569,8 @@ SD_LOCAL void Sd_ClientServiceDisableAllConsumedEventgroupRouting(
     }
 #endif
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
 
 /**
@@ -7505,6 +8583,8 @@ SD_LOCAL void Sd_ClientServiceDisableAllConsumedEventgroupRouting(
  * @trace              CPD-74108
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ClientServiceCloseAllSoCon(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr)
 {
@@ -7534,6 +8614,8 @@ SD_LOCAL void
     }
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7544,6 +8626,8 @@ SD_LOCAL void
  * @trace              CPD-74109
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientServiceCloseSoCon(Sd_SoConManageType* soConPtr)
 {
     /*@req <SWS_SD_00603> */
@@ -7560,6 +8644,8 @@ SD_LOCAL void Sd_ClientServiceCloseSoCon(Sd_SoConManageType* soConPtr)
         SoAd_ReleaseRemoteAddr(soConPtr->SoConId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CLIENT_SERVICE_NUM > 0 */
 
 /**
@@ -7586,6 +8672,32 @@ SD_LOCAL_INLINE void Sd_EndianSwap(uint8* dataPtr, uint8 size)
 }
 #endif
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+/**
+ * @brief              Get a random value in range min and max.
+ * @param[in]          min: Minimum Value of the Random Number.
+ * @param[in]          max: Max Value of the Random Number.
+ * @return             Value of the Random Number.
+ * @reentrant          TRUE
+ * @synchronous        TRUE
+ * @trace              CPD-74111
+ */
+SD_LOCAL uint32 Sd_GetRandomValue(uint32 min, uint32 max)
+{
+    /* Calculate random value use LCG algorithm whih parameter from Numerical Recipe */
+    uint32 randVal = (Sd_RandomSeed * SD_RANDOM_MULTIPLIER) + SD_RANDOM_INCREMENT;
+
+    /* Result in range min and max */
+    return (min + (randVal % (max - min + 1UL))); /* PRQA S 2834 */ /* VL_Sd_Division */
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 32bit Network byte order to Host Byte Order
  * @param[in]          net32: 32bit network buffer
@@ -7604,7 +8716,11 @@ SD_LOCAL uint32 Sd_NtoHl(uint32 net32)
 
     return data;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 32bit Network byte order to Host Byte Order(In parameter is a pointer)
  * @param[in]          net32DataPtr: 32bit network buffer
@@ -7625,7 +8741,11 @@ SD_LOCAL uint32 Sd_NPtrtoHl(const uint8* net32DataPtr)
 
     return net32;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 32bit Host byte order to Network Byte Order
  * @param[in]          host32: 32bit host network buffer
@@ -7644,7 +8764,11 @@ SD_LOCAL uint32 Sd_HtoNl(uint32 host32)
 
     return data;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 16bit Network byte order to Host Byte Order
  * @param[in]          net16: 16bit network buffer
@@ -7663,7 +8787,11 @@ SD_LOCAL uint16 Sd_NtoHs(uint16 net16)
 
     return data;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 16bit Network byte order to Host Byte Order(In parameter is a pointer)
  * @param[in]          net16DataPtr: 16bit network buffer
@@ -7684,7 +8812,11 @@ SD_LOCAL uint16 Sd_NPtrtoHs(const uint8* net16DataPtr)
 
     return net16;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Switch 16bit Host byte order to Network Byte Order
  * @param[inout]       host16: 16bit host network buffer
@@ -7703,6 +8835,9 @@ SD_LOCAL uint16 Sd_HtoNs(uint16 host16)
 
     return data;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 /**
  * @brief              Init memory pool
@@ -7718,6 +8853,8 @@ SD_LOCAL_INLINE uint8 Sd_InitMemoryPool(uint32 memPoolSize, void* memPool)
     return IStdLib_MemHeapInit(memPool, memPoolSize);
 }
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              require buffer from memory pool
  * @param[in]          size: Expected number of bytes to be allocated.
@@ -7740,7 +8877,11 @@ SD_LOCAL void* Sd_MallocEx(uint32 size, void* memPool)
 #endif
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Free memory from a memory pool
  * @param[in]          ptr: Buffer pointer to be free
@@ -7755,6 +8896,8 @@ SD_LOCAL void Sd_FreeEx(const void* ptr, void* memPool)
     (void)IStdLib_MemHeapFree(memPool, ptr);
     SchM_Exit_Sd_ExclusiveArea();
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Append RxBuff item to RxBuffList tail
@@ -7764,13 +8907,15 @@ SD_LOCAL void Sd_FreeEx(const void* ptr, void* memPool)
  * @synchronous        TRUE
  * @trace              CPD-74121
  */
-#if (SD_INSTANCE_NUM == STD_ON)
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationType applicationId)
 {
     SchM_Enter_Sd_ExclusiveArea();
-    if (NULL_PTR != Sd_RxQueueHead[applicationId])
+    if (NULL_PTR != *Sd_RxQueueHead[applicationId])
     {
-        Sd_RxQueueType* tail = Sd_RxQueueHead[applicationId];
+        Sd_RxQueueType* tail = *Sd_RxQueueHead[applicationId];
         while (NULL_PTR != tail->Next)
         {
             tail = tail->Next;
@@ -7779,14 +8924,41 @@ SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationT
     }
     else
     {
-        Sd_RxQueueHead[applicationId] = rxQueueItemPtr;
+        *Sd_RxQueueHead[applicationId] = rxQueueItemPtr;
     }
     SchM_Exit_Sd_ExclusiveArea();
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
+
+#if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
+SD_LOCAL boolean
+    Sd_ClientCheckSoConOnline(const Sd_SoAdSoConGroupType* socketRef, SoAd_SoConIdType soconId, boolean endpointFlag)
+{
+    boolean bResult = FALSE;
+    if ((NULL_PTR != socketRef) && endpointFlag)
+    {
+        SoAd_SoConModeType soConMode = SOAD_SOCON_OFFLINE;
+        SoAd_GetSoConMode(soconId, &soConMode);
+        if (soConMode == SOAD_SOCON_ONLINE)
+        {
+            bResult = TRUE;
+        }
+    }
+
+    return bResult;
+}
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Add first subscriber to trigger transmit list
  * @param[inout]       head: Header of the UDP/TCP Trigger transmit list.
@@ -7797,7 +8969,6 @@ SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationT
  * @synchronous        TRUE
  * @trace
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_DerefNullPtr */
 static void Sd_AddClientToTriggerTransmitList(
     Sd_TriggerTransmitManagerType** head,
     SoAd_RoutingGroupIdType         routingGroupId,
@@ -7831,8 +9002,11 @@ static void Sd_AddClientToTriggerTransmitList(
         nextNodePtr->Next = tmpNode;
     }
 }
-/* PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Pop first subscriber from trigger transmit list
  * @param[in]          head: Header of the UDP/TCP Trigger transmit list.
@@ -7852,7 +9026,11 @@ static Sd_TriggerTransmitManagerType* Sd_PopFirstClientFromTriggerTransmitList(S
 
     return firstNode;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Delete subscriber from trigger transmit list by socinid
  * @param[in]          soConId: Socket connection id.
@@ -7861,7 +9039,6 @@ static Sd_TriggerTransmitManagerType* Sd_PopFirstClientFromTriggerTransmitList(S
  * @synchronous        TRUE
  * @trace
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 static void Sd_DelClientFromTriggerTransmitListBySoConId(
     Sd_TriggerTransmitManagerType** head,
     SoAd_SoConIdType                soConId,
@@ -7895,8 +9072,11 @@ static void Sd_DelClientFromTriggerTransmitListBySoConId(
         }
     }
 }
-/* PRQA S 2889 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Return a Sd_SubscribeManageType opinter that match soConId and counter
  * @param[in]          header: Header of the subscribe entry list.
@@ -7908,7 +9088,6 @@ static void Sd_DelClientFromTriggerTransmitListBySoConId(
  * @synchronous        TRUE
  * @trace              CPD-74122
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
     Sd_SubscribeManageType* header,
     TcpIp_SockAddrType      sockRemoteAddr,
@@ -7935,9 +9114,12 @@ SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
 
     return ptr;
 }
-/* PRQA S 2889 -- */ /* VL_QAC_MultiReturn */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (SD_EVENT_HANDLER_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Enable unicast for Subscribed Clients
  * @param[in]          header: Header of the subscribe entry list.
@@ -7957,7 +9139,11 @@ SD_LOCAL void
         ptr = ptr->Next;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Disable unicast for Subscribed Clients
  * @param[in]          header: Header of the subscribe entry list.
@@ -7977,6 +9163,8 @@ SD_LOCAL void
         ptr = ptr->Next;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -7995,6 +9183,8 @@ SD_LOCAL void
  * @trace              CPD-74125
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_AddClientToSubscribeList(
     Sd_SubscribeManageType** headerPtr,
     SoAd_SoConIdType         soConId,
@@ -8003,7 +9193,6 @@ SD_LOCAL Std_ReturnType Sd_AddClientToSubscribeList(
     uint32                   ttl,
     uint8                    counter,
     ApplicationType          applicationId)
-/* PRQA S 6040 -- */
 {
     Std_ReturnType ret = E_NOT_OK;
     /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
@@ -8038,7 +9227,12 @@ SD_LOCAL Std_ReturnType Sd_AddClientToSubscribeList(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+/* PRQA S 6040 -- */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Get the number of clients from the subscribeList.
  * @param[inout]       headerPtr: Header of the subscribe entry list.
@@ -8076,6 +9270,8 @@ SD_LOCAL uint8 Sd_GetClientNumFromSubscribeList(
 
     return clientNum;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Delete a client from subscribe list
@@ -8090,7 +9286,9 @@ SD_LOCAL uint8 Sd_GetClientNumFromSubscribeList(
  * @synchronous        TRUE
  * @trace              CPD-74126
  */
-/* PRQA S 6040,6080 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STPTH */
+/* PRQA S 6040,6080,6060 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STPTH,VL_MTR_Sd_STM19 */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -8099,10 +9297,14 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     SoAd_SoConIdType            soConId,
     uint8                       counter,
     ApplicationType             applicationId)
-/* PRQA S 6040,6080 -- */
+/* PRQA S 6040,6080,6060 -- */
 {
-    boolean isTcpSoCon;
+    if (NULL_PTR == *headerPtr)
+    {
+        return;
+    }
 
+    boolean                      isTcpSoCon;
     const Sd_EventHandlerRTType* ehRTDataPtr = Sd_EventHandlerRTData[eventHandlerPtr->SdEventHandlerHandleId];
     if (ehRTDataPtr->TcpSubscribeList == *headerPtr)
     {
@@ -8130,6 +9332,11 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
 
         lastPtr = ptr;
         ptr     = ptr->Next;
+    }
+
+    if (ptr == NULL_PTR)
+    {
+        return;
     }
 
     if (NULL_PTR == lastPtr)
@@ -8178,7 +9385,11 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
 
     Sd_FreeEx(ptr, Sd_TxMemPool[applicationId]);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Delete all clients from subscribe list
  * @param[inout]       headerPtr: Header of the subscribe entry list.
@@ -8202,7 +9413,11 @@ SD_LOCAL void Sd_RemoveAllClientFromSubscribeList(Sd_SubscribeManageType** heade
 
     *headerPtr = NULL_PTR;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Update subscribed client's TTL
  * @param[inout]       subscribePtr: Pointer for subscribe manager.
@@ -8215,6 +9430,8 @@ SD_LOCAL void Sd_UpdateSubscribeClientTTL(Sd_SubscribeManageType* subscribePtr, 
 {
     Sd_SetTTL(&subscribePtr->Ttl, ttl);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /*@req <SWS_Sd_00452> */
 /**
@@ -8226,6 +9443,8 @@ SD_LOCAL void Sd_UpdateSubscribeClientTTL(Sd_SubscribeManageType* subscribePtr, 
  * @trace              CPD-74129
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SubscribeClientTTLManage(const Sd_ServerServiceType* serverServicePtr, ApplicationType applicationId)
 /* PRQA S 6030 -- */
 {
@@ -8311,6 +9530,8 @@ SD_LOCAL void Sd_SubscribeClientTTLManage(const Sd_ServerServiceType* serverServ
         eventHandlerPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Fan out control TCP
@@ -8330,6 +9551,8 @@ SD_LOCAL void Sd_SubscribeClientTTLManage(const Sd_ServerServiceType* serverServ
  */
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -8378,7 +9601,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
         {
             Sd_IPv4OptionsType ipv4Opt;
             (void)IStdLib_MemCpy((uint8*)&ipv4Opt, &sdMsg[optStartPosMap[optIndex]], sizeof(Sd_IPv4OptionsType));
-            if ((SD_L4_PROTO_TCP == ipv4Opt.L4Proto) && (0UL == ipv4EndpTcpPos))
+            if (SD_L4_PROTO_TCP == ipv4Opt.L4Proto)
             {
                 /* Save endpoint option position */
                 ipv4EndpTcpPos = optStartPosMap[optIndex];
@@ -8389,7 +9612,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
         {
             Sd_IPv6OptionsType ipv6Opt;
             (void)IStdLib_MemCpy((uint8*)&ipv6Opt, &sdMsg[optStartPosMap[optIndex]], sizeof(Sd_IPv6OptionsType));
-            if ((SD_L4_PROTO_TCP == ipv6Opt.L4Proto) && (0UL == ipv6EndpTcpPos))
+            if (SD_L4_PROTO_TCP == ipv6Opt.L4Proto)
             {
                 /* Save endpoint option position */
                 ipv6EndpTcpPos = optStartPosMap[optIndex];
@@ -8445,6 +9668,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8465,6 +9690,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTCP(
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -8513,12 +9740,12 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
 
         uint8 optType = sdMsg[optStartPosMap[optIndex] + SD_OPTION_TYPE_FILED_OFFSET];
 
-        if (SD_IPV4_ENDPOINT_OPTION == optType)
+        if ((SD_IPV4_ENDPOINT_OPTION == optType) || (SD_IPV4_MULTICAST_OPTION == optType))
         {
             Sd_IPv4OptionsType ipv4Opt;
 
             (void)IStdLib_MemCpy((uint8*)&ipv4Opt, &sdMsg[optStartPosMap[optIndex]], sizeof(Sd_IPv4OptionsType));
-            if ((SD_L4_PROTO_UDP == ipv4Opt.L4Proto) && (0UL == ipv4EndpUdpPos))
+            if (SD_L4_PROTO_UDP == ipv4Opt.L4Proto)
             {
                 ipv4EndpUdpPos = optStartPosMap[optIndex];
             }
@@ -8529,7 +9756,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
             Sd_IPv6OptionsType ipv6Opt;
 
             (void)IStdLib_MemCpy((uint8*)&ipv6Opt, &sdMsg[optStartPosMap[optIndex]], sizeof(Sd_IPv6OptionsType));
-            if ((SD_L4_PROTO_UDP == ipv6Opt.L4Proto) && (0UL == ipv6EndpUdpPos))
+            if (SD_L4_PROTO_UDP == ipv6Opt.L4Proto)
             {
                 ipv6EndpUdpPos = optStartPosMap[optIndex];
             }
@@ -8589,6 +9816,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8605,6 +9834,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUDP(
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanoutTcpDeleteSubscriber(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -8641,6 +9872,8 @@ SD_LOCAL void Sd_FanoutTcpDeleteSubscriber(
             applicationId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8655,6 +9888,8 @@ SD_LOCAL void Sd_FanoutTcpDeleteSubscriber(
  * @trace              CPD-74567
  */
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanoutTcpUpdateSubscriber(
     const Sd_EventHandlerType* eventHandlerPtr,
     SoAd_SoConIdType           soConId,
@@ -8688,6 +9923,8 @@ SD_LOCAL void Sd_FanoutTcpUpdateSubscriber(
     /* Update TTL */
     Sd_UpdateSubscribeClientTTL(subscribeManagePtr, ttl);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8707,6 +9944,8 @@ SD_LOCAL void Sd_FanoutTcpUpdateSubscriber(
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
     const Sd_EventHandlerType* eventHandlerPtr,
     SoAd_SoConIdType           soConId,
@@ -8762,6 +10001,8 @@ SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8783,6 +10024,8 @@ SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
  */
 #if (SD_SERVER_SERVICE_USE_TCP == STD_ON)
 /* PRQA S 6040,6070 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
     const Sd_ServerServiceType* serverServicePtr,
     const Sd_EventHandlerType*  eventHandlerPtr,
@@ -8794,6 +10037,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
     ApplicationType             applicationId)
 /* PRQA S 6040,6070 -- */
 {
+    SD_UNUSED(ipv6OptPtr);
+
     TcpIp_SockAddrType sockAddr = {0};
     Std_ReturnType     ret      = E_NOT_OK;
 
@@ -8805,6 +10050,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
         SoAd_SoConIdType   soConId       = 0u;
         SoAd_SoConModeType soConMode     = SOAD_SOCON_OFFLINE;
         sint32             isSameIpAddr  = 1;
+        uint16             soConPort     = 0u;
 
         for (uint16 loop = 0u; loop < soConNum; loop++)
         {
@@ -8814,6 +10060,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
                 sockAddr.domain = TCPIP_AF_INET;
                 (void)SoAd_GetRemoteAddr(soConId, &sockAddr);
                 isSameIpAddr = IStdLib_MemCmp((uint8*)sockAddr.addr, ipv4OptPtr->IPv4Address, SD_IPV4_ADDRESS_LEN);
+                soConPort    = Sd_NtoHs(ipv4OptPtr->PortNumber);
             }
 #if (STD_ON == SD_IPV6_ENABLE)
             else if (NULL_PTR != ipv6OptPtr)
@@ -8821,20 +10068,16 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
                 sockAddr.domain = TCPIP_AF_INET6;
                 (void)SoAd_GetRemoteAddr(soConId, &sockAddr);
                 isSameIpAddr = IStdLib_MemCmp((uint8*)sockAddr.addr, ipv6OptPtr->IPv6Address, SD_IPV6_ADDRESS_LEN);
+                soConPort    = Sd_NtoHs(ipv6OptPtr->PortNumber);
             }
 #endif
             else
             {
                 /* Nothing to do here */
             }
-            if ((0L == isSameIpAddr)
-                && (((NULL_PTR != ipv4OptPtr) && (sockAddr.port == Sd_NtoHs(ipv4OptPtr->PortNumber)))
-#if (STD_ON == SD_IPV6_ENABLE)
-                    || ((NULL_PTR != ipv6OptPtr) && (sockAddr.port == Sd_NtoHs(ipv6OptPtr->PortNumber)))
-#endif
-                        ))
+
+            if ((0L == isSameIpAddr) && (soConPort == sockAddr.port))
             {
-                /* Find Relevant TCP Socket Connection*/
                 findSoConFlag = TRUE;
                 SoAd_GetSoConMode(soConId, &soConMode);
                 break;
@@ -8899,6 +10142,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -8919,6 +10164,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
 /* PRQA S 6040,6070 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_UpdateUdpSubscribeList(
     const Sd_EventHandlerType*  eventHandlerPtr,
     Sd_SubscribeManageType*     subscribeManagePtr,
@@ -9006,6 +10253,8 @@ SD_LOCAL void Sd_UpdateUdpSubscribeList(
             applicationId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -9027,7 +10276,9 @@ SD_LOCAL void Sd_UpdateUdpSubscribeList(
  * @trace              CPD-74133
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
-/* PRQA S 2889,6040,6060,6070 ++ */ /* VL_QAC_MultiReturn,VL_MTR_Sd_STPAR,VL_MTR_Sd_STM19,VL_MTR_Sd_STCAL */
+/* PRQA S 6040,6060,6070 ++ */ /* VL_MTR_Sd_STPAR,VL_MTR_Sd_STM19,VL_MTR_Sd_STCAL */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -9049,7 +10300,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
         sockAddr.domain = TCPIP_AF_INET;
         sockAddr.port   = Sd_NtoHs(ipv4OptPtr->PortNumber);
         (void)IStdLib_MemCpy((uint8*)sockAddr.addr, (const uint8*)ipv4OptPtr->IPv4Address, SD_IPV4_ADDRESS_LEN);
-        if (ipv4OptPtr->L4Proto == SD_IPV4_MULTICAST_OPTION)
+        if (ipv4OptPtr->Type == SD_IPV4_MULTICAST_OPTION)
         {
             isMulticastSocket = TRUE;
         }
@@ -9060,7 +10311,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
         sockAddr.domain = TCPIP_AF_INET6;
         sockAddr.port   = Sd_NtoHs(ipv6OptPtr->PortNumber);
         (void)IStdLib_MemCpy((uint8*)sockAddr.addr, (const uint8*)ipv6OptPtr->IPv6Address, SD_IPV6_ADDRESS_LEN);
-        if (ipv6OptPtr->L4Proto == SD_IPV6_MULTICAST_OPTION)
+        if (ipv6OptPtr->Type == SD_IPV6_MULTICAST_OPTION)
         {
             isMulticastSocket = TRUE;
         }
@@ -9072,80 +10323,89 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
     SoAd_SoConIdType assignedSoConId;
     Std_ReturnType   ret = SoAd_SetUniqueRemoteAddr(soConId, &sockAddr, &assignedSoConId);
 
-    /*@req <SWS_Sd_00760> */
-    if (SoAd_IsConnectionReady(assignedSoConId, &sockAddr) != TCPIP_E_OK)
+    if (E_OK == ret)
     {
-        Sd_ResetSoConToWildcard(serverServicePtr, assignedSoConId, FALSE);
+        /*@req <SWS_Sd_00760> */
+        if (!isMulticastSocket && (SoAd_IsConnectionReady(assignedSoConId, &sockAddr) != TCPIP_E_OK))
+        {
+            Sd_ResetSoConToWildcard(serverServicePtr, assignedSoConId, FALSE);
 
 #if (SD_DEM_USED == STD_ON)
-        /* If no Wildcard Socket Connection is left, SD_E_OUT_OF_RES shall be reported.*/
-        const Sd_DemEventParameterType* demEventPtr;
-        demEventPtr = instancePtr->SdInstanceDemEventParameterRefs->SD_E_OUT_OF_RES;
-        if (NULL_PTR != demEventPtr)
-        {
-            (void)Dem_ReportErrorStatus(demEventPtr->EventId, DEM_EVENT_STATUS_FAILED);
-        }
-#endif
-        return E_NOT_OK;
-    }
-
-    Sd_SubscribeManageType* subscribeManagePtr =
-        Sd_GetSubscribeManageObjAddr(ehRTDataPtr->UdpSubscribeList, sockAddr, clientIpAddr, counter);
-    if (NULL_PTR == subscribeManagePtr)
-    {
-        if ((ttl > 0UL) && (ehRTDataPtr->UdpSubsClientNum < SD_MAX_SUBSCRIBE_CLIENT_NUM))
-        {
-            /* Add client to subscribe list */
-            ret = Sd_AddClientToSubscribeList(
-                &ehRTDataPtr->UdpSubscribeList,
-                assignedSoConId,
-                sockAddr,
-                clientIpAddr,
-                ttl,
-                counter,
-                applicationId);
-
-            if (E_NOT_OK != ret)
+            /* If no Wildcard Socket Connection is left, SD_E_OUT_OF_RES shall be reported.*/
+            const Sd_DemEventParameterType* demEventPtr = instancePtr->SdInstanceDemEventParameterRefs->SD_E_OUT_OF_RES;
+            if (NULL_PTR != demEventPtr)
             {
-                ehRTDataPtr->UdpSubsClientNum++;
-                /*@req <SWS_SD_00455> */
-                uint8 clientNum = Sd_GetClientNumFromSubscribeList(
-                    ehRTDataPtr->UdpSubscribeList,
-                    NULL_PTR,
+                (void)Dem_ReportErrorStatus(demEventPtr->EventId, DEM_EVENT_STATUS_FAILED);
+            }
+#endif
+            return E_NOT_OK;
+        }
+
+        Sd_SubscribeManageType* subscribeManagePtr =
+            Sd_GetSubscribeManageObjAddr(ehRTDataPtr->UdpSubscribeList, sockAddr, clientIpAddr, counter);
+        if (NULL_PTR == subscribeManagePtr)
+        {
+            if ((ttl > 0UL) && (ehRTDataPtr->UdpSubsClientNum < SD_MAX_SUBSCRIBE_CLIENT_NUM))
+            {
+                /* Add client to subscribe list */
+                ret = Sd_AddClientToSubscribeList(
+                    &ehRTDataPtr->UdpSubscribeList,
                     assignedSoConId,
-                    SD_SUBSCRIBE_COUNTER_FIELD_RESERVED);
-                if (clientNum == 1u)
+                    sockAddr,
+                    clientIpAddr,
+                    ttl,
+                    counter,
+                    applicationId);
+
+                if (E_NOT_OK != ret)
                 {
-                    ehRTDataPtr->UdpSubsEndPointNum++;
+                    ehRTDataPtr->UdpSubsClientNum++;
+                    /*@req <SWS_SD_00455> */
+                    uint8 clientNum = Sd_GetClientNumFromSubscribeList(
+                        ehRTDataPtr->UdpSubscribeList,
+                        NULL_PTR,
+                        assignedSoConId,
+                        SD_SUBSCRIBE_COUNTER_FIELD_RESERVED);
+                    if (clientNum == 1u)
+                    {
+                        ehRTDataPtr->UdpSubsEndPointNum++;
+                    }
+                    Sd_FanOutMulticastUnicastCtrlAddClient(
+                        eventHandlerPtr,
+                        ehRTDataPtr,
+                        assignedSoConId,
+                        applicationId);
                 }
-                Sd_FanOutMulticastUnicastCtrlAddClient(eventHandlerPtr, ehRTDataPtr, assignedSoConId, applicationId);
+            }
+            else
+            {
+                /* StopSubscribeEventGroupEntry,not in SubscribeList,Ignore */
             }
         }
         else
         {
-            /* StopSubscribeEventGroupEntry,not in SubscribeList,Ignore */
+            Sd_UpdateUdpSubscribeList(
+                eventHandlerPtr,
+                subscribeManagePtr,
+                ehRTDataPtr,
+                serverServicePtr,
+                ttl,
+                assignedSoConId,
+                soConId,
+                isMulticastSocket,
+                counter,
+                applicationId);
         }
     }
-    else
-    {
-        Sd_UpdateUdpSubscribeList(
-            eventHandlerPtr,
-            subscribeManagePtr,
-            ehRTDataPtr,
-            serverServicePtr,
-            ttl,
-            assignedSoConId,
-            soConId,
-            isMulticastSocket,
-            counter,
-            applicationId);
-    }
+
     SD_UNUSED(instancePtr);
     SD_UNUSED(ipv6OptPtr);
 
     return E_OK;
 }
-/* PRQA S 2889,6040,6060,6070 -- */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+/* PRQA S 6040,6060,6070 -- */
 #endif
 
 /**
@@ -9158,6 +10418,8 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
  * @trace              CPD-74134
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_UpdateSubscribeSoConId(
     Sd_SubscribeManageType* headerPtr,
     SoAd_SoConIdType        soConId,
@@ -9175,6 +10437,8 @@ SD_LOCAL void Sd_UpdateSubscribeSoConId(
         ptr = ptr->Next;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -9187,6 +10451,8 @@ SD_LOCAL void Sd_UpdateSubscribeSoConId(
  * @trace              CPD-74135
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
     const Sd_EventHandlerType* eventHandlerPtr,
     Sd_EventHandlerRTType*     ehRTDataPtr,
@@ -9244,6 +10510,8 @@ SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
             applicationId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -9256,6 +10524,8 @@ SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
  * @trace              CPD-74136
  */
 #if (SD_SERVER_SERVICE_USE_UDP == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlDelClient(
     const Sd_EventHandlerType*   eventHandlerPtr,
     const Sd_EventHandlerRTType* ehRTDataPtr,
@@ -9305,6 +10575,8 @@ SD_LOCAL void Sd_FanOutMulticastUnicastCtrlDelClient(
     }
     SD_UNUSED(ehRTDataPtr);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #endif
 
@@ -9321,6 +10593,8 @@ SD_LOCAL void Sd_FanOutMulticastUnicastCtrlDelClient(
  * @trace              CPD-74137
  */
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSaveSoConId(
     const Sd_ClientServiceType* clientServicePtr,
     const TcpIp_SockAddrType*   remoteAddrPtr,
@@ -9385,6 +10659,8 @@ SD_LOCAL void Sd_ClientSaveSoConId(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Save SoConId that match [remoteAddrPtr]
@@ -9400,6 +10676,8 @@ SD_LOCAL void Sd_ClientSaveSoConId(
  * @trace              CPD-74138
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0 && SD_CONSUMED_EVENT_MULICAST_USED == STD_ON)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientSaveMulticastSoConId(
     const Sd_InstanceType*           instancePtr,
     const Sd_ConsumedEventGroupType* consumedEventGroupPtr,
@@ -9499,6 +10777,8 @@ SD_LOCAL void Sd_ClientSaveMulticastSoConId(
 #endif
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -9514,6 +10794,8 @@ SD_LOCAL void Sd_ClientSaveMulticastSoConId(
  * @trace              CPD-74139
  */
 /* PRQA S 6030,6040 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ClientHandleSoConBasedOptionInfo(
     const Sd_InstanceType*      instancePtr,
     const Sd_ClientServiceType* clientServicePtr,
@@ -9665,7 +10947,11 @@ SD_LOCAL void Sd_ClientHandleSoConBasedOptionInfo(
 #endif /* STD_ON == SD_IPV6_ENABLE */
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_ClientTimerExpireHandler(const Sd_ClientServiceType* clientServicePtr, Sd_ClientServiceRTType* cRtDataPtr)
 {
@@ -9706,7 +10992,12 @@ SD_LOCAL void
     Sd_ClientServiceDisableAllRoutingOfClient(clientServicePtr, cRtDataPtr);
     Sd_ClientServiceCloseAllSoCon(clientServicePtr, cRtDataPtr);
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ConsumedEventGroupTimerHandler(
     const Sd_ConsumedEventGroupType* eventGroupPtr,
     const Sd_ClientServiceRTType*    cRtDataPtr)
@@ -9727,12 +11018,19 @@ SD_LOCAL void Sd_ConsumedEventGroupTimerHandler(
             consumedEgRTPtr->CurState = SD_CONSUMED_EVENTGROUP_DOWN;
 
             /* Close Routing of this ConsumedEventgroup */
+#if (SD_CONSUMED_EVENTGROUP_NUM > 0)
             Sd_ClientServiceDisableAllConsumedEventgroupRouting(eventGroupPtr, cRtDataPtr);
+#endif
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 #if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_ConsumedEventGroupRetryStatusHandler(const Sd_ConsumedEventGroupType* eventGroupPtr)
 {
     Sd_ConsumedEventGroupRTType* consumedEgRTPtr =
@@ -9757,8 +11055,12 @@ SD_LOCAL void Sd_ConsumedEventGroupRetryStatusHandler(const Sd_ConsumedEventGrou
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Manage client Timer
  * @param[in]          clientServicePtr: Pointer to client service.
@@ -9794,9 +11096,13 @@ SD_LOCAL void Sd_ClientTimerHandle(const Sd_ClientServiceType* clientServicePtr)
     }
 #endif
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CLIENT_SERVICE_NUM > 0 */
 
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Append SendQueue item to SendQueue tail
  * @param[inout]       head: Head pointer of send queue.
@@ -9821,7 +11127,11 @@ SD_LOCAL void Sd_AppendToSendQueueTail(Sd_SendQueueType** head, Sd_SendQueueType
         *head = sendQueueItem;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Clear SendQueue
  * @param[inout]       head: Head pointer of send queue.
@@ -9844,7 +11154,11 @@ SD_LOCAL void Sd_ClearSendQueue(Sd_SendQueueType** head, ApplicationType applica
     }
     *head = NULL_PTR;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Calculate number of TCP/UDP Endpoint Option number
  * @param[in]          sdMsg: Received Sd Message
@@ -9944,6 +11258,8 @@ SD_LOCAL void Sd_CalcTcpUdpEndpointOptionNum(
     *udpEndpointNum = (ipv4EndpUdpNum + ipv6EndpUdpNum);
     /* PRQA S 2985 -- */
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Check if necessary option exist
@@ -9962,6 +11278,8 @@ SD_LOCAL void Sd_CalcTcpUdpEndpointOptionNum(
  * @trace              CPD-74145
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_NecessaryOptionsExistCheck(
     const Sd_InstanceType*      instancePtr,
     const Sd_ServerServiceType* serverServicePtr,
@@ -10037,6 +11355,8 @@ SD_LOCAL Std_ReturnType Sd_NecessaryOptionsExistCheck(
     SD_UNUSED(applicationId);
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 /**
  * @brief              Package entries and options to one message
@@ -10053,6 +11373,8 @@ SD_LOCAL Std_ReturnType Sd_NecessaryOptionsExistCheck(
  * @trace              CPD-74146
  */
 /* PRQA S 6040 ++ */ /* VL_MTR_Sd_STPAR */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Std_ReturnType Sd_PackageMessage(
     Sd_SendQueueType* const sendQueue[],
     uint8                   sendQueCnt,
@@ -10099,7 +11421,8 @@ SD_LOCAL Std_ReturnType Sd_PackageMessage(
         /* First entry offset: 16 = 12(HeaderLength) + 4(Length of Entries Array) */
         uint32 entryOffset = SD_HEADER_LEN + SD_MESSAGE_ENTRYLEN_FILED_LEN;
         uint8* entryRunPtr = &messagePtr[entryOffset];
-        /* First entry offset: header length(12) + entry length field(4) + entries length + option length field(4) */
+        /* First entry offset: header length(12) + entry length field(4) + entries length + option length field(4)
+         */
         headerLen           = SD_HEADER_LEN + SD_MESSAGE_ENTRYLEN_FILED_LEN + SD_MESSAGE_OPTIONLEN_FILED_LEN;
         uint8* optionRunPtr = &messagePtr[headerLen + entryTotalLen];
         uint8  optIdxCnt    = 0u;
@@ -10144,7 +11467,11 @@ SD_LOCAL Std_ReturnType Sd_PackageMessage(
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Transmit multicast message
  * @param[in]          instancePtr: Pointer for sd instance.
@@ -10197,7 +11524,11 @@ SD_LOCAL void Sd_TransmitMulticastMessage(
         Sd_FreeEx(pduInfo.SduDataPtr, Sd_TxMemPool[applicationId]);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Transmit unicast message
  * @param[in]          instancePtr: Pointer for sd instance.
@@ -10279,7 +11610,11 @@ SD_LOCAL void Sd_TransmitUnicastMessage(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Find out Multicast entry that ttl = 0 to send
  * @param[in]          queueHeaderPtr: Head pointer of send queue.
@@ -10335,7 +11670,11 @@ SD_LOCAL void Sd_FindMulticastMsgToSendFromSendQueue(
 
     *multiSendCntPtr = multiSendCnt;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Find out Unicast entry that ttl = 0 to send
  * @param[in]          queueHeaderPtr: Head pointer of send queue.
@@ -10391,7 +11730,11 @@ SD_LOCAL void Sd_FindUnicastMsgToSendFromSendQueue(
 
     *uniSendCntPtr = uniSendCnt;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Find out multicast message for transmit
  * @param[in]          instancePtr: Pointer to instance structure.
@@ -10437,7 +11780,11 @@ SD_LOCAL uint8 Sd_FindoutMulticastMessage(const Sd_InstanceType* instancePtr, Sd
 
     return multiSendCnt;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Build unicast message for transmit
  * @param[in]          instancePtr: Pointer for instance
@@ -10483,7 +11830,11 @@ SD_LOCAL uint8 Sd_FindoutUnicastMessage(const Sd_InstanceType* instancePtr, Sd_S
 
     return uniSendCnt;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Transmit message
  * @reentrant          TRUE
@@ -10512,9 +11863,13 @@ SD_LOCAL void Sd_TransmitMessage(ApplicationType applicationId)
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_SERVER_SERVICE_NUM > 0 || SD_CLIENT_SERVICE_NUM > 0 */
 
 #if (SD_CAPABILITY_RECORD_MATCH_CALLOUT_NUM > 0u)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check if received Configuration Option match with configured
  * @param[in]          instancePtr: Pointer for sd instance.
@@ -10553,6 +11908,8 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
         uint8 optNumSum     = numOpt1 + numOpt2;
         uint8 optIndex;
 
+#if ((SD_SERVER_CAPABILITY_CFG_USED == STD_ON) || (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON))
+        uint16 cfgOptLen = Sd_GetType1ConfigurationOptionLength(instancePtr, serverServicePtr, clientServicePtr);
         for (uint8 index = 0; index < optNumSum; index++)
         {
             if (index < numOpt1)
@@ -10567,42 +11924,34 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
             uint8  optType         = sdMsg[optStartPosMap[optIndex] + 2u];
             uint8* createCfgOptPtr = NULL_PTR;
 
-            if (SD_CONFIGURATION_OPTION == optType)
+            if (SD_CONFIGURATION_OPTION == optType && cfgOptLen > 0u)
             {
-                uint16 cfgOptLen = 0;
-#if ((SD_SERVER_CAPABILITY_CFG_USED == STD_ON) || (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON))
-                cfgOptLen = Sd_GetType1ConfigurationOptionLength(instancePtr, serverServicePtr, clientServicePtr);
-#endif
-
 #if (SD_SERVER_CAPABILITY_CFG_USED == STD_ON)
                 if (NULL_PTR != serverServicePtr)
                 {
-                    if (cfgOptLen > 0u)
+                    createCfgOptPtr = Sd_MallocEx(cfgOptLen, Sd_RxMemPool[applicationId]);
+                    if (NULL_PTR != createCfgOptPtr)
                     {
-                        createCfgOptPtr = Sd_MallocEx(cfgOptLen, Sd_RxMemPool[applicationId]);
-                        if (NULL_PTR != createCfgOptPtr)
-                        {
-                            Sd_BuildType1ConfigurationOption(
-                                createCfgOptPtr,
-                                cfgOptLen,
-                                instancePtr,
-                                serverServicePtr,
-                                clientServicePtr);
+                        Sd_BuildType1ConfigurationOption(
+                            createCfgOptPtr,
+                            cfgOptLen,
+                            instancePtr,
+                            serverServicePtr,
+                            clientServicePtr);
 
-                            /* @req SWS_SD_00716 */
-                            uint16 matchCalloutIdx = serverServicePtr->SdServerCapabilityRecordMatchCalloutRef;
-                            ret                    = Sd_CfgPtr->CapabilityRecordMatchCalloutRef[matchCalloutIdx](
-                                rxQueueItem->RxPduId,
-                                type1Entry.Type,
-                                type1Entry.ServiceID,
-                                type1Entry.InstanceID,
-                                type1Entry.MajorVersion,
-                                type1Entry.MinorVersion,
-                                (const Sd_ConfigOptionStringType*)&sdMsg[optStartPosMap[optIndex] + 4u],
-                                (const Sd_ConfigOptionStringType*)&createCfgOptPtr[4u]);
-                            Sd_FreeEx(createCfgOptPtr, Sd_RxMemPool[applicationId]);
-                            break;
-                        }
+                        /* @req SWS_SD_00716 */
+                        uint16 matchCalloutIdx = serverServicePtr->SdServerCapabilityRecordMatchCalloutRef;
+                        ret                    = Sd_CfgPtr->CapabilityRecordMatchCalloutRef[matchCalloutIdx](
+                            rxQueueItem->RxPduId,
+                            type1Entry.Type,
+                            type1Entry.ServiceID,
+                            type1Entry.InstanceID,
+                            type1Entry.MajorVersion,
+                            type1Entry.MinorVersion,
+                            (const Sd_ConfigOptionStringType*)&sdMsg[optStartPosMap[optIndex] + 4u],
+                            (const Sd_ConfigOptionStringType*)&createCfgOptPtr[4u]);
+                        Sd_FreeEx(createCfgOptPtr, Sd_RxMemPool[applicationId]);
+                        break;
                     }
                 }
                 else
@@ -10610,32 +11959,29 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
 #if (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON)
                     if (NULL_PTR != clientServicePtr)
                 {
-                    if (cfgOptLen > 0u)
+                    createCfgOptPtr = Sd_MallocEx(cfgOptLen, Sd_RxMemPool[applicationId]);
+                    if (NULL_PTR != createCfgOptPtr)
                     {
-                        createCfgOptPtr = Sd_MallocEx(cfgOptLen, Sd_RxMemPool[applicationId]);
-                        if (NULL_PTR != createCfgOptPtr)
-                        {
-                            Sd_BuildType1ConfigurationOption(
-                                createCfgOptPtr,
-                                cfgOptLen,
-                                instancePtr,
-                                serverServicePtr,
-                                clientServicePtr);
+                        Sd_BuildType1ConfigurationOption(
+                            createCfgOptPtr,
+                            cfgOptLen,
+                            instancePtr,
+                            serverServicePtr,
+                            clientServicePtr);
 
-                            /* @req SWS_SD_00716 */
-                            uint16 matchCalloutIdx = clientServicePtr->SdClientCapabilityRecordMatchCalloutRef;
-                            ret                    = Sd_CfgPtr->CapabilityRecordMatchCalloutRef[matchCalloutIdx](
-                                rxQueueItem->RxPduId,
-                                type1Entry.Type,
-                                type1Entry.ServiceID,
-                                type1Entry.InstanceID,
-                                type1Entry.MajorVersion,
-                                type1Entry.MinorVersion,
-                                (const Sd_ConfigOptionStringType*)&sdMsg[optStartPosMap[optIndex] + 4u],
-                                (const Sd_ConfigOptionStringType*)&createCfgOptPtr[4u]);
-                            Sd_FreeEx(createCfgOptPtr, Sd_RxMemPool[applicationId]);
-                            break;
-                        }
+                        /* @req SWS_SD_00716 */
+                        uint16 matchCalloutIdx = clientServicePtr->SdClientCapabilityRecordMatchCalloutRef;
+                        ret                    = Sd_CfgPtr->CapabilityRecordMatchCalloutRef[matchCalloutIdx](
+                            rxQueueItem->RxPduId,
+                            type1Entry.Type,
+                            type1Entry.ServiceID,
+                            type1Entry.InstanceID,
+                            type1Entry.MajorVersion,
+                            type1Entry.MinorVersion,
+                            (const Sd_ConfigOptionStringType*)&sdMsg[optStartPosMap[optIndex] + 4u],
+                            (const Sd_ConfigOptionStringType*)&createCfgOptPtr[4u]);
+                        Sd_FreeEx(createCfgOptPtr, Sd_RxMemPool[applicationId]);
+                        break;
                     }
                 }
                 else
@@ -10645,10 +11991,13 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
                 }
             }
         }
+#endif
     }
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_CAPABILITY_RECORD_MATCH_CALLOUT_NUM > 0u */
 
 /**
@@ -10661,6 +12010,8 @@ SD_LOCAL boolean Sd_RxConfigurationOptionMatchCheck(
  * @trace              CPD-74155
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveRemoteSessionId(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, boolean isRxUseMulticast)
 {
     Sd_HeaderType header;
@@ -10681,6 +12032,8 @@ SD_LOCAL void Sd_SaveRemoteSessionId(uint16 instanceId, const Sd_RxQueueType* rx
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_SERVER_SERVICE_NUM > 0)
@@ -10694,46 +12047,38 @@ SD_LOCAL void Sd_SaveRemoteSessionId(uint16 instanceId, const Sd_RxQueueType* rx
  * @synchronous        TRUE
  * @trace              CPD-74156
  */
-/* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+/* PRQA S 6030,6010 ++ */ /* VL_MTR_Sd_STMIF,VL_MTR_Sd_STCYC */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveServerServiceHandleIdToSessionCtrlList(
-    uint16                    instanceId,
-    const TcpIp_SockAddrType* remoteAddrPtr,
-    uint16                    serverServiceHandleId,
-    ApplicationType           applicationId)
-/* PRQA S 6030 -- */
+    uint16                instanceId,
+    const Sd_RxQueueType* rxQueueItem,
+    uint16                serverServiceHandleId,
+    ApplicationType       applicationId,
+    boolean               isMulticast)
+/* PRQA S 6030,6010 -- */
 {
+    const TcpIp_SockAddrType* remoteAddrPtr = &rxQueueItem->RemoteAddr;
     if (!TCPIP_IS_IPADDR_ANY(*remoteAddrPtr))
     {
         Sd_SessionIdCtrlType* sesIdCtrlPtr = Sd_FindRemoteAddrSessionIdCtrl(instanceId, remoteAddrPtr);
+        if (NULL_PTR == sesIdCtrlPtr)
+        {
+            sesIdCtrlPtr = Sd_AddRemoteAddrToSessionIdCtrlList(instanceId, rxQueueItem, isMulticast, applicationId);
+        }
+
         if (NULL_PTR != sesIdCtrlPtr)
         {
             Sd_ServiceHandleIdListType* serverServiceList = sesIdCtrlPtr->ServerServiceList;
             if (NULL_PTR != serverServiceList)
             {
-                boolean findFlag = FALSE;
-                while (NULL_PTR != serverServiceList)
-                {
-                    findFlag = Sd_FindHandlerIdInList(serverServiceHandleId, serverServiceList);
-                    if (findFlag)
-                    {
-                        break;
-                    }
-
-                    serverServiceList = serverServiceList->Next;
-                }
-
-                if (!findFlag)
+                if (!Sd_FindHandlerIdInList(serverServiceHandleId, serverServiceList))
                 {
                     serverServiceList = sesIdCtrlPtr->ServerServiceList;
-                    while (NULL_PTR != serverServiceList)
+                    if (serverServiceList->HandleIdNum < SD_MAX_REMOTE_SERVICE_NUM)
                     {
-                        if (serverServiceList->HandleIdNum < SD_MAX_REMOTE_SERVICE_NUM)
-                        {
-                            serverServiceList->ServiceHandleId[serverServiceList->HandleIdNum] = serverServiceHandleId;
-                            serverServiceList->HandleIdNum++;
-                            break;
-                        }
-                        serverServiceList = serverServiceList->Next;
+                        serverServiceList->ServiceHandleId[serverServiceList->HandleIdNum] = serverServiceHandleId;
+                        serverServiceList->HandleIdNum++;
                     }
                 }
             }
@@ -10755,6 +12100,8 @@ SD_LOCAL void Sd_SaveServerServiceHandleIdToSessionCtrlList(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_SERVER_SERVICE_NUM > 0 */
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
@@ -10768,7 +12115,9 @@ SD_LOCAL void Sd_SaveServerServiceHandleIdToSessionCtrlList(
  * @synchronous        TRUE
  * @trace              CPD-74157
  */
-/* PRQA S 2889,6030 ++ */ /* VL_QAC_MultiReturn,VL_MTR_Sd_STMIF */
+/* PRQA S 6030 ++ */ /* VL_MTR_Sd_STMIF */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_SaveClientServiceHandleIdToSessionCtrlList(
     uint16                    instanceId,
     const TcpIp_SockAddrType* remoteAddrPtr,
@@ -10824,8 +12173,10 @@ SD_LOCAL void Sd_SaveClientServiceHandleIdToSessionCtrlList(
         }
     }
 }
-/* PRQA S 2889,6030 -- */
-#endif /* SD_CLIENT_SERVICE_NUM > 0 */
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+/* PRQA S 6030 -- */
+#endif
 
 /**
  * @brief              Check if the remote address is in the Session ID control table.
@@ -10836,6 +12187,8 @@ SD_LOCAL void Sd_SaveClientServiceHandleIdToSessionCtrlList(
  * @trace              CPD-74158
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_SessionIdCtrlType*
     Sd_FindRemoteAddrSessionIdCtrl(uint16 instanceId, const TcpIp_SockAddrType* remoteAddrPtr)
 {
@@ -10862,6 +12215,8 @@ SD_LOCAL Sd_SessionIdCtrlType*
 
     return sesIdCtrlPtr;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -10874,6 +12229,8 @@ SD_LOCAL Sd_SessionIdCtrlType*
  * @trace              CPD-74159
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsNewRemoteAddr(uint16 instanceId, const TcpIp_SockAddrType* remoteAddrPtr)
 {
     boolean                     isNewRemoteAddr;
@@ -10890,6 +12247,8 @@ SD_LOCAL boolean Sd_IsNewRemoteAddr(uint16 instanceId, const TcpIp_SockAddrType*
 
     return isNewRemoteAddr;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -10902,7 +12261,9 @@ SD_LOCAL boolean Sd_IsNewRemoteAddr(uint16 instanceId, const TcpIp_SockAddrType*
  * @synchronous         TRUE
  * @trace              CPD-74070
  */
-#if (SD_CLIENT_SERVICE_NUM > 0)
+#if (SD_CLIENT_SERVICE_NUM > 0 && SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
     const Sd_ClientServiceRTType* cRtDataPtr,
     const Sd_ClientServiceType*   clientServicePtr,
@@ -10933,6 +12294,8 @@ SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
 
     return bRet;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -10947,6 +12310,8 @@ SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
  * @trace              CPD-74160
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
     uint16                instanceId,
     const Sd_RxQueueType* rxQueueItem,
@@ -11023,6 +12388,8 @@ SD_LOCAL Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
 
     return sesIdCtrlPtr;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -11036,6 +12403,8 @@ SD_LOCAL Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
  * @trace              CPD-74161
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL boolean Sd_RemoteRebootDetecte(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, boolean isRxUseMulticast)
 {
     uint16                      lastSessionId;
@@ -11069,6 +12438,8 @@ SD_LOCAL boolean Sd_RemoteRebootDetecte(uint16 instanceId, const Sd_RxQueueType*
 
     return isReboot;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -11080,6 +12451,8 @@ SD_LOCAL boolean Sd_RemoteRebootDetecte(uint16 instanceId, const Sd_RxQueueType*
  * @trace              CPD-74162
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_FreeServiceListInSesIdCtrlList(const Sd_ServiceHandleIdListType* serviceList, ApplicationType applicationId)
 {
@@ -11093,6 +12466,8 @@ SD_LOCAL void
         Sd_FreeEx(serviceListCur, Sd_RxMemPool[applicationId]);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -11105,6 +12480,8 @@ SD_LOCAL void
  * @trace              CPD-74163
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_DeleteSessionIdNode(
     Sd_SessionIdCtrlType**      head,
     const Sd_SessionIdCtrlType* objNode,
@@ -11138,6 +12515,8 @@ SD_LOCAL void Sd_DeleteSessionIdNode(
         }
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 /**
@@ -11150,6 +12529,8 @@ SD_LOCAL void Sd_DeleteSessionIdNode(
  * @trace              CPD-74164
  */
 #if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void
     Sd_RemoteRebootDetectedHandle(uint16 instanceId, const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId)
 {
@@ -11189,9 +12570,13 @@ SD_LOCAL void
         Sd_DeleteSessionIdNode(&instanceRtPtr->SessionIdHandle.SesIdCtrlList, sesIdCtrlPtr, applicationId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_CLIENT_SERVICE_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Remote device rebooted, execute stop offer service process.
  * @param[in]          clientServiceHandleId: Client service handle id.
@@ -11254,9 +12639,13 @@ SD_LOCAL void Sd_RxStopOfferServiceHandle(uint16 clientServiceHandleId)
         cRtDataPtr->RepetitionTimer  = 0u;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Remote device reboot, execute stop subscribe process.
  * @param[in]          serverServiceHandleId: Server service handle id.
@@ -11283,7 +12672,7 @@ SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
         subsMangPtr = ehRTDataPtr->TcpSubscribeList;
         while (NULL_PTR != subsMangPtr)
         {
-            if (subsMangPtr->SockRemoteAddr.addr[0] == rxQueueItem->RemoteAddr.addr[0])
+            if (Sd_EndpointCompare(&subsMangPtr->ClientIpAddr, &rxQueueItem->RemoteAddr))
             {
                 /* Disable Routing Path*/
                 const Sd_EventHandlerTcpType* eventHandlerTcpPtr = eventHandlerPtr->SdEventHandlerTcp;
@@ -11313,7 +12702,7 @@ SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
         subsMangPtr = ehRTDataPtr->UdpSubscribeList;
         while (NULL_PTR != subsMangPtr)
         {
-            if (subsMangPtr->SockRemoteAddr.addr[0] == rxQueueItem->RemoteAddr.addr[0])
+            if (Sd_EndpointCompare(&subsMangPtr->ClientIpAddr, &rxQueueItem->RemoteAddr))
             {
                 ehRTDataPtr->UdpSubsClientNum--;
                 uint8 clientNum = Sd_GetClientNumFromSubscribeList(
@@ -11345,8 +12734,13 @@ SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
         eventHandlerPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif /* SD_EVENT_HANDLER_NUM > 0 */
 
+#if ((SD_SERVER_SERVICE_NUM > 0) || (SD_CLIENT_SERVICE_NUM > 0))
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check received Option is valid or not
  * @param[in]          sdMsg: Sd message buffer.
@@ -11372,7 +12766,8 @@ SD_LOCAL Std_ReturnType Sd_OptionFormatCheck(const uint8 sdMsg[])
         uint32 optionArrayLen       = Sd_NPtrtoHl(&sdMsg[optionLenFieldOffset]);
         if (optionArrayLen > 0UL)
         {
-            /* 1st option index = SD_FIRST_ENTRY_INDEX(16) + entryArrayLen + SD_LENGTH_OF_OPTIONS_ARRAY_FIELD_LEN(4)*/
+            /* 1st option index = SD_FIRST_ENTRY_INDEX(16) + entryArrayLen +
+             * SD_LENGTH_OF_OPTIONS_ARRAY_FIELD_LEN(4)*/
             uint32 headerLen        = SD_HEADER_LEN + SD_MESSAGE_ENTRYLEN_FILED_LEN + SD_MESSAGE_OPTIONLEN_FILED_LEN;
             uint32 firstOptionIndex = headerLen + entryArrayLen;
             uint32 index            = firstOptionIndex;
@@ -11402,7 +12797,11 @@ SD_LOCAL Std_ReturnType Sd_OptionFormatCheck(const uint8 sdMsg[])
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Check each Option item is valid or not
  * @param[in]          optionArray: Option array.
@@ -11460,7 +12859,11 @@ SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[])
 
     return ret;
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
+#if (SD_EVENT_HANDLER_NUM > 0)
 /**
  * @brief              Call SoAd_IfSpecificRoutingGroupTransmit() in main function
  * @reentrant          TRUE
@@ -11468,6 +12871,8 @@ SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[])
  * @trace              CPD-74169
  */
 /* PRQA S 2812 ++ */ /* VL_Sd_PointerIsNull */
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId)
 {
     Sd_EventHandlerRTType* ehRTDataPtr = Sd_EventHandlerRTData[0u];
@@ -11493,8 +12898,12 @@ SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId)
         ehRTDataPtr++; /* PRQA S 2983 */ /* VL_Sd_PointerCalu */
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 /* PRQA S 2812 -- */
 
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              If SoCon not used by Service(Include EventHandler),Reset it to wildcard
  * @param[in]          serverServicePtr: Pointer for server service.
@@ -11544,8 +12953,13 @@ SD_LOCAL void
         SoAd_ReleaseRemoteAddr(soConId);
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
+#endif
 
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Reset all ConsumedEventgroup runtime data isTcpSubsSend/isUdpSubsSend
                        flag in Client Service
@@ -11578,8 +12992,12 @@ SD_LOCAL void Sd_ClientServiceResetAllCEgSubsEntrySendFlag(
         cEgPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 
 #if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
+#define SD_START_SEC_CODE
+#include "Sd_MemMap.h"
 /**
  * @brief              Reset all ConsumedEventgroup runtime data subsRetryCnt/subsRetryTimer/
                        subsRetryEnable in Client Service
@@ -11601,6 +13019,8 @@ SD_LOCAL void Sd_ClientServiceResetAllCEgSubsEntrySubsRetryCnt(const Sd_ClientSe
         cEgPtr++;
     }
 }
+#define SD_STOP_SEC_CODE
+#include "Sd_MemMap.h"
 #endif
 #endif
 
@@ -11616,8 +13036,5 @@ SD_LOCAL_INLINE uint32 Sd_InitialWaitTimeAdjust(uint32 waitTime)
 {
     return ((waitTime == 0u) ? 1u : waitTime);
 }
-
-#define SD_STOP_SEC_CODE
-#include "Sd_MemMap.h"
 
 #endif

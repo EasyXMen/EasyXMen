@@ -74,27 +74,75 @@ typedef void (*tcpip_callback_fn)(void *ctx);
 /* Forward declarations */
 struct tcpip_callback_msg;
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void   tcpip_init(tcpip_init_done_fn tcpip_init_done, void *arg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_inpkt(struct pbuf *p, struct netif *inp, netif_input_fn input_fn);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_input(struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_try_callback(tcpip_callback_fn function, void *ctx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_callback(tcpip_callback_fn function, void *ctx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_callback_wait(tcpip_callback_fn function, void *ctx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**  @ingroup lwip_os
  * @deprecated use tcpip_try_callback() or tcpip_callback() instead
  */
 #define tcpip_callback_with_block(function, ctx, block) ((block != 0)? tcpip_callback(function, ctx) : tcpip_try_callback(function, ctx))
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcpip_callback_msg* tcpip_callbackmsg_new(tcpip_callback_fn function, void *ctx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void   tcpip_callbackmsg_delete(struct tcpip_callback_msg* msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_callbackmsg_trycallback(struct tcpip_callback_msg* msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  tcpip_callbackmsg_trycallback_fromisr(struct tcpip_callback_msg* msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* free pbufs or heap memory from another context without blocking */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  pbuf_free_callback(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t  mem_free_callback(void *m);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCPIP_TIMEOUT && LWIP_TIMERS
 err_t  tcpip_timeout(u32_t msecs, sys_timeout_handler h, void *arg);

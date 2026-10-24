@@ -74,43 +74,119 @@ struct etharp_q_entry {
 #endif /* ARP_QUEUEING */
 
 #define etharp_init() /* Compatibility define, no init needed. */
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_tmr(void);
-ssize_t etharp_find_addr(struct netif *netif, const ip4_addr_t *ipaddr,
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+int etharp_find_addr(struct netif *netif, const ip4_addr_t *ipaddr,
          struct eth_addr **eth_ret, const ip4_addr_t **ip_ret);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int etharp_get_entry(size_t i, ip4_addr_t **ipaddr, struct netif **netif, struct eth_addr **eth_ret);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_output(struct netif *netif, struct pbuf *q, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_query(struct netif *netif, const ip4_addr_t *ipaddr, struct pbuf *q);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_request(struct netif *netif, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
 /** For Ethernet network interfaces, we might want to send "gratuitous ARP";
  *  this is an ARP packet sent by a node in order to spontaneously cause other
  *  nodes to update an entry in their ARP cache.
  *  From RFC 3220 "IP Mobility Support for IPv4" section 4.6. */
 #define etharp_gratuitous(netif) etharp_request((netif), netif_ip4_addr(netif))
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_cleanup_netif(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_ACD
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_acd_probe(struct netif *netif, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_acd_announce(struct netif *netif, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_ACD */
 
 #if ETHARP_SUPPORT_STATIC_ENTRIES
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_add_static_entry(const ip4_addr_t *ipaddr, struct eth_addr *ethaddr, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_remove_static_entry(const ip4_addr_t *ipaddr, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* ETHARP_SUPPORT_STATIC_ENTRIES */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_input(struct pbuf *p, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t
 etharp_raw(struct netif *netif, const struct eth_addr *ethsrc_addr,
            const struct eth_addr *ethdst_addr,
            const struct eth_addr *hwsrc_addr, const ip4_addr_t *ipsrc_addr,
            const struct eth_addr *hwdst_addr, const ip4_addr_t *ipdst_addr,
            const u16_t opcode);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCPIP_LWIP_ARP_DYNAMIC_TIMEOUT
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_clear_dynamic_entry(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_set_dynamic_timeout(u16_t time_vlu);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_clear_dynamic_timeout(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

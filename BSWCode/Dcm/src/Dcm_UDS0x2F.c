@@ -30,19 +30,19 @@
 /**
  * @brief The minimum request length of UDS 0x2F
  */
-#define DCM_UDS2F_MINREQLEN 3uL
+#define DCM_UDS2F_MINREQLEN           3uL
 /**
  * @brief The I/O Control Parameter ReturnControlToEcu
  */
-#define DCM_UDS2F_RETURNCONTROLTOECU 0u
+#define DCM_UDS2F_RETURNCONTROLTOECU  0u
 /**
  * @brief The I/O Control Parameter ResetToDefault
  */
-#define DCM_UDS2F_RESETTODEFAULT 1u
+#define DCM_UDS2F_RESETTODEFAULT      1u
 /**
  * @brief The I/O Control Parameter FreezeCurrentState
  */
-#define DCM_UDS2F_FREEZECURRENTSTATE 2u
+#define DCM_UDS2F_FREEZECURRENTSTATE  2u
 /**
  * @brief The I/O Control Parameter ShortTermAdjustment
  */
@@ -55,6 +55,10 @@
  * NA
  */
 DCM_LOCAL boolean Dcm_activeIoControl[DCM_DID_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief whether it is conctrolled currently @range NA
  */
@@ -70,6 +74,8 @@ DCM_LOCAL uint8 Dcm_activeIoControlCMER[DCM_DID_NUM][4];
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to check conditions for UDS 0x2F
  * @param[inout]  pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -91,6 +97,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ConditionCheck(
     Dcm_NegativeResponseCodeType* ErrorCode,
     uint16*                       didIndex,
     boolean*                      isDynamic);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         find did and did control configuration based on input did
@@ -112,6 +122,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_FindDidControl(
     const Dcm_DspDidControlType** didControlCfg,
     uint16*                       didIndex,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check to totalLength of request
@@ -134,6 +148,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_CheckTotalLength(
     const Dcm_MsgContextType*     pMsgContext,
     boolean*                      isDynamic,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         restore io control
@@ -145,6 +163,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_CheckTotalLength(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x2F_ControlRestore(uint16 didIndex, const Dcm_DspDidControlType* didControlCfg);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process io control including cmer and ioCtrlParam
@@ -170,6 +192,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ControlHandle(
     const Dcm_DspDidControlType*  didControlCfg,
     boolean                       isDynamic,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process CMER
@@ -196,6 +222,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleCMER(
     const Dcm_MsgContextType*    pMsgContext,
     Dcm_MsgLenType*              stateSize,
     uint16*                      maskOffset);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process ioCtrlParam
@@ -223,6 +253,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleIoControl(
     Dcm_MsgLenType                stateSize,
     const uint8*                  controlMaskPtr,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -289,8 +321,11 @@ Std_ReturnType Dcm_UDS0x2F(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_DID_NUM > 0)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with session/security change for 0x2F to return control
  */
@@ -330,6 +365,8 @@ void Dcm_UDS0x2F_StatusChangeHandle(Dcm_SesCtrlType newSession)
 /**
  * condition check including minimun length, session, security and didInfo/didControl, etc.
  */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ConditionCheck(
     const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode,
@@ -398,7 +435,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ConditionCheck(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* find did and didControl configuration based on input did */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_FindDidControl(
     uint16                        did,
@@ -425,7 +465,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_FindDidControl(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* check total request length based on ioCtrlParam */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_CheckTotalLength(
     const Dcm_DspDidType*         didCfg,
@@ -497,7 +540,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_CheckTotalLength(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* restore io control */
 DCM_LOCAL void Dcm_UDS0x2F_ControlRestore(uint16 didIndex, const Dcm_DspDidControlType* didControlCfg)
 {
@@ -534,7 +580,10 @@ DCM_LOCAL void Dcm_UDS0x2F_ControlRestore(uint16 didIndex, const Dcm_DspDidContr
     }
     Dcm_activeIoControl[didIndex] = FALSE;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle CMER and ioCtrlParam */
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ControlHandle(
@@ -627,7 +676,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_ControlHandle(
 
     return finalResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle CMER, decide whether to skip this signal */
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleCMER(
@@ -673,7 +725,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleCMER(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle ioCtrlParam */
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleIoControl(
@@ -730,4 +785,6 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2F_HandleIoControl(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif

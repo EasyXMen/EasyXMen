@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -44,8 +44,13 @@
  * @synchronous TRUE
  * @trace       CPD-64871
  */
-ECUM_LOCAL void EcuM_SetSdtg(EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType target, EcuM_ShutdownModeType mode);
+ECUM_LOCAL void EcuM_SetSdtg(const EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType target, EcuM_ShutdownModeType mode);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Retrieves the current shutdown target and mode.
  * @details This function reads the current shutdown target and mode from the runtime data structure and stores them in
@@ -61,6 +66,11 @@ ECUM_LOCAL void EcuM_SetSdtg(EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType ta
 ECUM_LOCAL void
     EcuM_GetSdtg(const EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType* pTarget, EcuM_ShutdownModeType* pMode);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Handles pending wakeup events.
  * @details This function checks for pending or validated wakeup events and, if any are found, selects a reset shutdown
@@ -72,8 +82,12 @@ ECUM_LOCAL void
  * @trace       CPD-69016
  */
 ECUM_LOCAL void EcuM_HandlePendingWakeupEvents(void);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Handles the master-slave shutdown process.
  * @details This function manages the shutdown sequence for both the master and slave cores. The master core sets a
@@ -86,9 +100,9 @@ ECUM_LOCAL void EcuM_HandlePendingWakeupEvents(void);
  * @trace       CPD-69309
  */
 ECUM_LOCAL void EcuM_HandleMasterSalveShutdown(CoreIdType coreId);
-#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
@@ -101,16 +115,16 @@ volatile boolean EcuM_ShutdownFlag;
 #define ECUM_STOP_SEC_VAR_FAST_CLEARED_BOOLEAN
 #include "EcuM_MemMap.h"
 
-#define ECUM_START_SEC_VAR_FAST_CLEARED_BOOLEAN
+#define ECUM_START_SEC_VAR_CLEARED_32
 #include "EcuM_MemMap.h"
 ECUM_LOCAL uint32 EcuM_SlaveShutdownEvent; /* PRQA S 3218 */ /* VL_EcuM_3218 */
-#define ECUM_STOP_SEC_VAR_FAST_CLEARED_BOOLEAN
+#define ECUM_STOP_SEC_VAR_CLEARED_32
 #include "EcuM_MemMap.h"
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 /* ========================================== external function definitions ========================================= */
+
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Perform the shutdown sequence based on the shutdown target.
@@ -120,6 +134,8 @@ ECUM_LOCAL uint32 EcuM_SlaveShutdownEvent; /* PRQA S 3218 */ /* VL_EcuM_3218 */
  */
 void EcuM_Shutdown(void)
 {
+    EcuM_ArtiApiStart(1, ECUM_SID_SHUTDOWN);
+
     EcuM_RunTimeLcType* pRt;
     if (EcuM_isInitState(&pRt))
     {
@@ -136,11 +152,11 @@ void EcuM_Shutdown(void)
         {
             /*Callout EcuM_AL_Reset or Callout EcuM_AL_SwitchOff, depends on the
              *selected shutdown target (RESET or OFF)*/
-            if (ECUM_SHUTDOWN_TARGET_RESET == (pRt)->SdtgNext.Target)
+            if (ECUM_SHUTDOWN_TARGET_RESET == (pRt->SdtgNext->Target))
             {
-                EcuM_AL_Reset((EcuM_ResetType)((pRt->SdtgNext.Mode) - ECUM_U8_MAX_VALUE));
+                EcuM_AL_Reset((EcuM_ResetType)((pRt->SdtgNext->Mode) - ECUM_U8_MAX_VALUE));
             }
-            else if (ECUM_SHUTDOWN_TARGET_OFF == (pRt->SdtgNext.Target))
+            else if (ECUM_SHUTDOWN_TARGET_OFF == (pRt->SdtgNext->Target))
             {
                 EcuM_AL_SwitchOff();
             }
@@ -156,9 +172,15 @@ void EcuM_Shutdown(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SHUTDOWN, ECUM_E_UNINIT);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
+
+    EcuM_ArtiApiStop(1, ECUM_SID_SHUTDOWN);
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Select the shutdown target for the ECU.
  * This function allows the ECU to select the target for shutdown, such as sleep, reset, or off state.
@@ -166,6 +188,8 @@ void EcuM_Shutdown(void)
  */
 Std_ReturnType EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget, EcuM_ShutdownModeType shutdownMode)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_SELECTSHUTDOWNTARGET, shutdownTarget, shutdownMode);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -222,9 +246,16 @@ Std_ReturnType EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget,
         EcuM_SetSdtg(pRt, shutdownTarget, shutdownMode);
         ret = E_OK;
     }
+
+    EcuM_ArtiApiStop(2, ECUM_SID_SELECTSHUTDOWNTARGET, ret);
+
     return ret;
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 /*
  * Get the shutdown target and mode for the ECU.
@@ -232,6 +263,8 @@ Std_ReturnType EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget,
  */
 Std_ReturnType EcuM_GetShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, EcuM_ShutdownModeType* shutdownMode)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_GETSHUTDOWNTARGET, shutdownTarget, shutdownMode);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -261,16 +294,25 @@ Std_ReturnType EcuM_GetShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, E
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETSHUTDOWNTARGET, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_GETSHUTDOWNTARGET, ret);
+
     return ret;
 }
 /* PRQA S 1503 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Retrieves the last shutdown target and mode.
  */
 Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarget, EcuM_ShutdownModeType* shutdownMode)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_GETLASTSHUTDOWNTARGET, shutdownTarget, shutdownMode);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -282,15 +324,15 @@ Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarge
     }
     else if ((NULL_PTR == shutdownTarget) || (NULL_PTR == shutdownMode))
     {
-        detErrorId = ECUM_E_NULL_POINTER;
+        detErrorId = ECUM_E_PARAM_POINTER;
     }
     else
 #else
     if (EcuM_isInitState(&pRt))
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
-        *(shutdownTarget) = pRt->SdtgLast.Target;
-        *(shutdownMode)   = pRt->SdtgLast.Mode;
+        *(shutdownTarget) = pRt->SdtgLast->Target;
+        *(shutdownMode)   = pRt->SdtgLast->Mode;
         ret               = E_OK;
     }
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -299,10 +341,17 @@ Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarge
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETLASTSHUTDOWNTARGET, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_GETLASTSHUTDOWNTARGET, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Selects the shutdown cause for the ECU module.
@@ -312,6 +361,8 @@ Std_ReturnType EcuM_GetLastShutdownTarget(EcuM_ShutdownTargetType* shutdownTarge
  */
 Std_ReturnType EcuM_SelectShutdownCause(EcuM_ShutdownCauseType cause)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_SELECTSHUTDOWNCAUSE, cause);
+
     EcuM_RunTimeLcType* pRt;
 
     Std_ReturnType ret = E_NOT_OK;
@@ -340,10 +391,17 @@ Std_ReturnType EcuM_SelectShutdownCause(EcuM_ShutdownCauseType cause)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SELECTSHUTDOWNCAUSE, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_SELECTSHUTDOWNCAUSE, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_MultiReturn */
 /**
  * Retrieves the current shutdown cause for the ECU module.
@@ -353,6 +411,8 @@ Std_ReturnType EcuM_SelectShutdownCause(EcuM_ShutdownCauseType cause)
  */
 Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GETSHUTDOWNCAUSE, shutdownCause);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -364,7 +424,7 @@ Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause)
     }
     else if (NULL_PTR == shutdownCause)
     {
-        detErrorId = ECUM_E_NULL_POINTER;
+        detErrorId = ECUM_E_PARAM_POINTER;
     }
     else
 #else
@@ -381,10 +441,16 @@ Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause)
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
 
+    EcuM_ArtiApiStop(2, ECUM_SID_GETSHUTDOWNCAUSE, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,1532,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_QAC_OneFunRef,VL_EcuM_DerefInvalidPtr */
 /**
  * Executes the shutdown phase for the specified ECU user.
@@ -394,6 +460,8 @@ Std_ReturnType EcuM_GetShutdownCause(EcuM_ShutdownCauseType* shutdownCause)
  */
 Std_ReturnType EcuM_DoShutDownPhase(EcuM_UserType caller)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GODOWNHALTPOLL, caller);
+
     Std_ReturnType ret;
     uint8          userIndex;
 
@@ -412,10 +480,17 @@ Std_ReturnType EcuM_DoShutDownPhase(EcuM_UserType caller)
         ret = E_NOT_OK;
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
+
+    EcuM_ArtiApiStop(2, ECUM_SID_GODOWNHALTPOLL, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,1532,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 1505, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_EcuM_1505, VL_QAC_MultiReturn */
 /**
  * Prepares the system for shutdown before the OS is turned off.
@@ -477,16 +552,18 @@ void EcuM_OffPreOS(void)
  *
  * This function updates the current shutdown target and mode, and stores the previous values.
  */
-ECUM_LOCAL void EcuM_SetSdtg(EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType target, EcuM_ShutdownModeType mode)
+ECUM_LOCAL void EcuM_SetSdtg(const EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType target, EcuM_ShutdownModeType mode)
 {
-    (pRt)->SdtgLast.Target = ((pRt)->SdtgNext.Target);
-    (pRt)->SdtgLast.Mode   = ((pRt)->SdtgNext.Mode);
-    (pRt)->SdtgNext.Target = (target);
-    (pRt)->SdtgNext.Mode   = (mode);
+    (pRt)->SdtgNext->Target = (target);
+    (pRt)->SdtgNext->Mode   = (mode);
     return;
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Retrieves the current shutdown target and mode for the ECU module.
@@ -497,12 +574,16 @@ ECUM_LOCAL void EcuM_SetSdtg(EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType ta
 ECUM_LOCAL void
     EcuM_GetSdtg(const EcuM_RunTimeLcType* pRt, EcuM_ShutdownTargetType* pTarget, EcuM_ShutdownModeType* pMode)
 {
-    *(pTarget) = (pRt)->SdtgNext.Target;
-    *(pMode)   = (pRt)->SdtgNext.Mode;
+    *(pTarget) = (pRt)->SdtgNext->Target;
+    *(pMode)   = (pRt)->SdtgNext->Mode;
     return;
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Handles pending wakeup events during the shutdown process.
@@ -530,12 +611,16 @@ ECUM_LOCAL void EcuM_HandlePendingWakeupEvents(void)
     }
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief Handling the shutdown process for master and slave cores
  *
  */
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Manages the shutdown process for both master and slave cores.
  *
@@ -611,7 +696,6 @@ ECUM_LOCAL void EcuM_HandleMasterSalveShutdown(CoreIdType coreId)
         EcuM_ErrorHook(ECUM_E_CALL_OS_FAILED);
     }
 }
-#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
-
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/

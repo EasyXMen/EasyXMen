@@ -40,7 +40,6 @@
 
 /* =========================================== inline function definitions ===========================================
  */
-
 LINTP_LOCAL_INLINE LinTp_MasterRuntimeType* LinTp_MasterRtDataPtr(uint8 ch)
 {
     return LinTp_ConfigPtr->RtDataVariantMapPtr->MasterRtDataPtr[ch];
@@ -144,7 +143,11 @@ LINTP_LOCAL_INLINE void LinTp_ConstructCF(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterInit(void);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinTp master node channel runtime data init
@@ -152,7 +155,11 @@ void LinTp_MasterInit(void);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterChannelInit(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests the transfer of segmented data.
@@ -164,7 +171,11 @@ void LinTp_MasterChannelInit(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInfoType* LinTpTxInfoPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Shutdowns the LIN TP
@@ -172,7 +183,11 @@ Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInf
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterShutdown(void);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Tx success process in master node.
@@ -181,7 +196,11 @@ void LinTp_MasterShutdown(void);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterTxSuccessHandle(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Tx error process in master node.
@@ -191,7 +210,11 @@ void LinTp_MasterTxSuccessHandle(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterTxErrorHandle(NetworkHandleType LinIfChannelId, Lin_StatusType st);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Parses a event of the receiving
@@ -201,7 +224,11 @@ void LinTp_MasterTxErrorHandle(NetworkHandleType LinIfChannelId, Lin_StatusType 
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinIf get MRF response from LinTp
@@ -211,7 +238,11 @@ void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_MasterGetMRFResponse(NetworkHandleType LinIfChannelId, uint8* sduBufPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get whether LINTP_EVENT_WAIT flag is set
@@ -222,7 +253,11 @@ Std_ReturnType LinTp_MasterGetMRFResponse(NetworkHandleType LinIfChannelId, uint
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsWaitEventSet(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get whether LINTP_EVENT_TX or LINTP_EVENT_STOP_SRF flag is set
@@ -233,7 +268,11 @@ boolean LinTp_IsWaitEventSet(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsStopSRFSendEventSet(uint8 LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get if LINTP_EVENT_STOP_SRF or LINTP_EVENT_STOP_MRF_SRF flag is set
@@ -244,7 +283,11 @@ boolean LinTp_IsStopSRFSendEventSet(uint8 LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsStopMRFOrSRFSendEventSet(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
 /**
@@ -256,7 +299,11 @@ boolean LinTp_IsStopMRFOrSRFSendEventSet(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinTp master main function
@@ -265,7 +312,11 @@ boolean LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterMainFunction(uint8 LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -276,7 +327,11 @@ void LinTp_MasterMainFunction(uint8 LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Receiving process
@@ -285,7 +340,11 @@ void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Load transmit request information
@@ -295,7 +354,11 @@ void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Handle the timer for specific channel.
@@ -305,7 +368,11 @@ void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get the LinIf channel corresponding LinTp channel
@@ -315,7 +382,11 @@ void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandl
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 #endif

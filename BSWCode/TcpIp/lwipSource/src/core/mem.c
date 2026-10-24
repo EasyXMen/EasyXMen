@@ -346,17 +346,9 @@ mem_free(void *rmem)
  * If so, make sure the memory at that location is big enough (see below on
  * how that space is calculated). */
 #ifndef LWIP_RAM_HEAP_POINTER
-#if AUTOSAR_MEMMAP_SUPPORT
-#define LWIP_HEAP_START_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "arch/Lwip_MemMap.h"
-#endif/* AUTOSAR_MEMMAP_SUPPORT */
 /** the heap. we need one struct mem at the end and some room for alignment */
 /* LWIP_DECLARE_MEMORY_ALIGNED(ram_heap[TCPIP_MULTICORE_NUMBER], MEM_SIZE_ALIGNED + (2U * SIZEOF_STRUCT_MEM)); */
 #define LWIP_RAM_HEAP_POINTER TcpIp_LwipRuntime[TcpIp_MulticoreIndex].RamHeap
-#if AUTOSAR_MEMMAP_SUPPORT
-#define LWIP_HEAP_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "arch/Lwip_MemMap.h"
-#endif/* AUTOSAR_MEMMAP_SUPPORT */
 #endif /* LWIP_RAM_HEAP_POINTER */
 
 #define TCPIP_VAR_RAM(coreIndex)        g_ram[(coreIndex)]
@@ -364,9 +356,18 @@ mem_free(void *rmem)
 #define TCPIP_VAR_LFREE(coreIndex)      g_lfree[(coreIndex)]
 
 /** pointer to the heap (ram_heap): for alignment, ram is now a pointer instead of an array */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t *g_ram[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
 /** the last entry, always unused! */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct mem *g_ram_end[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /** concurrent access protection */
 #if !NO_SYS
@@ -401,7 +402,11 @@ static volatile u8_t mem_free_count;
 #endif /* LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT */
 
 /** pointer to the lowest free block, this is used for faster search */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct mem * LWIP_MEM_LFREE_VOLATILE g_lfree[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if MEM_SANITY_CHECK
 static void mem_sanity(void);
@@ -430,18 +435,28 @@ mem_overflow_check_element(struct mem *mem)
 #define mem_overflow_check_element(mem)
 #endif /* MEM_OVERFLOW_CHECK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static struct mem *
 ptr_to_mem(mem_size_t ptr)
 {
   return (struct mem *)(void *)&TCPIP_VAR_RAM(TcpIp_MulticoreIndex)[ptr];
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static mem_size_t
 mem_to_ptr(void *mem)
 {
   return (mem_size_t)((u8_t *)mem - TCPIP_VAR_RAM(TcpIp_MulticoreIndex));
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * "Plug holes" by combining adjacent empty struct mems.
  * After this function is through, there should not exist
@@ -491,7 +506,11 @@ plug_holes(struct mem *mem)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Zero the heap and initialize start, end and lowest-free
  */
@@ -526,10 +545,14 @@ mem_init(void)
     LWIP_ASSERT("failed to create mem_mutex", 0);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Check if a struct mem is correctly linked.
  * If not, double-free is a possible reason.
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int
 mem_link_valid(struct mem *mem)
 {
@@ -545,6 +568,8 @@ mem_link_valid(struct mem *mem)
   }
   return 1;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if MEM_SANITY_CHECK
 static void
@@ -590,6 +615,8 @@ mem_sanity(void)
 }
 #endif /* MEM_SANITY_CHECK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Put a struct mem back on the heap
  *
@@ -667,7 +694,11 @@ mem_free(void *rmem)
 #endif /* LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT */
   LWIP_MEM_FREE_UNPROTECT();
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Shrink memory returned by mem_malloc().
  *
@@ -801,7 +832,11 @@ mem_trim(void *rmem, mem_size_t new_size)
   LWIP_MEM_FREE_UNPROTECT();
   return rmem;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Allocate a block of memory with a minimum of 'size' bytes.
  *
@@ -958,6 +993,8 @@ mem_malloc_adjust_lfree:
   LWIP_DEBUGF(MEM_DEBUG | LWIP_DBG_LEVEL_SERIOUS, ("mem_malloc: could not allocate %"S16_F" bytes\n", (s16_t)size));
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* MEM_USE_POOLS */
 
@@ -969,6 +1006,8 @@ mem_calloc(mem_size_t count, mem_size_t size)
 }
 
 #else /* MEM_LIBC_MALLOC && (!LWIP_STATS || !MEM_STATS) */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Contiguously allocates enough space for count objects that are size bytes
  * of memory each and returns a pointer to the allocated memory.
@@ -998,4 +1037,6 @@ mem_calloc(mem_size_t count, mem_size_t size)
   }
   return p;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* MEM_LIBC_MALLOC && (!LWIP_STATS || !MEM_STATS) */

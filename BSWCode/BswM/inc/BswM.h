@@ -63,79 +63,65 @@
     \li VL_BswM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_0380
       Reason: Macro definitions are necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_Action
       Reason: Generate code some return values not used
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_5004
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_1317_1297
       Reason: Definitions from other modules are used
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_BswM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_BswM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_0793
       Reason: Dependent on configuration.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_2743
       Reason: Use do while to control program execution.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_3415
-      Reason: BswM_LCfg may generate complex logical expressions that include the symbols && or ||, and the result of
-  the logical expression is determined by the configuration, so there may be a short circuit.Logic short circuit is
-    designed to be a consideration for operational efficiency and is expected behavior.
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_BswM_1501
-      Reason: Whether a function is used or not depends on the generated macro definition.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_BswM_1712
-      Reason: The identifier of the module is generated dynamically by the configuration, and the first 64 characters of
-        different identifiers may be the same, because the first 64 characters have some representative meaning.
+      Reason: External identifiers have the same first '${n}' characters '${name}'.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_BswM_1753
-      Reason: The definition of the function is generated in the configuration file, and when a module uses the
-        function, the definition is generated.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
  */
 
@@ -148,19 +134,19 @@
 extern "C" {
 #endif
 /* =============================================== version information ============================================== */
-#define BSWM_MODULE_ID 42u
 #if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
 #define BSWM_INSTANCE_ID ((uint8)GetApplicationID())
 #else
 #define BSWM_INSTANCE_ID 0u
 #endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
-#define BSWM_VENDOR_ID        62u
-#define BSWM_SW_MAJOR_VERSION 2u
-#define BSWM_SW_MINOR_VERSION 2u
-#define BSWM_SW_PATCH_VERSION 3u
-#define BSWM_AR_MAJOR_VERSION 4u
-#define BSWM_AR_MINOR_VERSION 9u
-#define BSWM_AR_PATCH_VERSION 0u
+#define BSWM_VENDOR_ID                62u
+#define BSWM_MODULE_ID                42u
+#define BSWM_SW_MAJOR_VERSION         2u
+#define BSWM_SW_MINOR_VERSION         2u
+#define BSWM_SW_PATCH_VERSION         3u
+#define BSWM_AR_RELEASE_MAJOR_VERSION 4u
+#define BSWM_AR_RELEASE_MINOR_VERSION 9u
+#define BSWM_AR_RELEASE_PATCH_VERSION 0u
 
 /* ===================================================== macros ===================================================== */
 
@@ -180,7 +166,6 @@ extern "C" {
 #define BSWM_API_ID_ECUM_CURRENT_WAKEUP                   0x10u
 #define BSWM_API_ID_ECUM_REQUESTED_STATE                  0x23u
 #define BSWM_API_ID_ETHIF_PORT_GRU_LINK_STATE             0x26u
-#define BSWM_API_ID_FRSM_CURRENT_STATE                    0x0cu
 #define BSWM_API_ID_ETHSM_CURRENT_STATE                   0x0du
 #define BSWM_API_ID_J1939DCM_BROADCAST_STATUS             0x1bu
 #define BSWM_API_ID_J1939NM_STATE_CHANGE_NOTIFY           0x18u
@@ -202,29 +187,44 @@ extern "C" {
 #define BSWM_API_ID_WDGM_REQUEST_PARTITION_RESET          0x11u
 #define BSWM_API_ID_BSWM_PARTITION_RESTARTED              0x1eu
 #define BSWM_API_ID_REQUEST_MODE                          0x02u
+#define BSWM_API_ID_INITCANSMREQUESTPORTS                 0x30u
+#define BSWM_API_ID_INITCOMMREQUESTPORTS                  0x31u
+#define BSWM_API_ID_INITDCMREQUESTPORTS                   0x32u
+#define BSWM_API_ID_INITECUMREQUESTPORTS                  0x33u
+#define BSWM_API_ID_INITETHIFREQUESTPORTS                 0x34u
+#define BSWM_API_ID_INITETHSMREQUESTPORTS                 0x35u
+#define BSWM_API_ID_INITFRSMREQUESTPORTS                  0x36u
+#define BSWM_API_ID_INITJ1939NMREQUESTPORTS               0x37u
+#define BSWM_API_ID_INITLINSMREQUESTPORTS                 0x38u
+#define BSWM_API_ID_INITLINTPREQUESTPORTS                 0x39u
+#define BSWM_API_ID_INITNMREQUESTPORTS                    0x3Au
+#define BSWM_API_ID_INITNVMREQUESTPORTS                   0x3Bu
+#define BSWM_API_ID_INITSDREQUESTPORTS                    0x3Cu
+#define BSWM_API_ID_INITSOADREQUESTPORTS                  0x3Du
+#define BSWM_API_ID_INITBSWMTIMER                         0x3Eu
 
 /* API ID for DoActionList */
 #define BSWM_API_ID_DO_ACTION_LIST 0X07u
 
 /*********Error code for development****************/
 /* No errors occur */
-#define BSWM_E_OK 0x0u
+#define BSWM_E_OK                    0x0u
 /*A service was called prior to initialization */
-#define BSWM_E_UNINIT 0x01u
+#define BSWM_E_UNINIT                0x01u
 /*A null pointer was passed as an argument*/
-#define BSWM_E_NULL_POINTER 0x02u
+#define BSWM_E_NULL_POINTER          0x02u
 /*A parameter was invalid (unspecific)*/
-#define BSWM_E_PARAM_INVALID 0x03u
+#define BSWM_E_PARAM_INVALID         0x03u
 /*A requesting user was out of range*/
 #define BSWM_E_REQ_USER_OUT_OF_RANGE 0x04u
 /*A requested mode was out of range*/
 #define BSWM_E_REQ_MODE_OUT_OF_RANGE 0x05u
 /*The provided configuration is inconsistent*/
-#define BSWM_E_PARAM_CONFIG 0x06u
+#define BSWM_E_PARAM_CONFIG          0x06u
 /*A parameter pointer was invalid*/
-#define BSWM_E_PARAM_POINTER 0x07u
+#define BSWM_E_PARAM_POINTER         0x07u
 /*Invalid configuration set selection*/
-#define BSWM_E_INIT_FAILED 0x08u
+#define BSWM_E_INIT_FAILED           0x08u
 
 /* ================================================ type definitions ================================================ */
 
@@ -439,13 +439,6 @@ typedef struct
     const NetworkHandleType* ethsmChRef;
 #endif /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
 
-#if (BSWM_FRSMINDICATION_ENABLED == STD_ON)
-    /**>The configuration of the request port for the event FrSM Indication. @range None */
-    const BswM_RqstPortLcCfgType* frsmInd;
-    /**>The configuration of the request port for the event FrSM Indication. @range None */
-    const NetworkHandleType* frsmChRef;
-#endif /*BSWM_FRSMINDICATION_ENABLED == STD_ON*/
-
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
     /**>The configuration of the request port for the event generic request. @range None */
     const BswM_RqstPortLcCfgType* genericRqst;
@@ -634,8 +627,13 @@ typedef struct
  * This container exists once per partition.
  *
  */
-typedef BswM_PbConfigType     BswM_ConfigType;
+typedef BswM_PbConfigType BswM_ConfigType;
+
+#define BSWM_START_SEC_VAR_FAST_CLEARED_UNSPECIFIED
+#include "BswM_MemMap.h"
 extern const BswM_ConfigType* BswM_ConfigPtr;
+#define BSWM_STOP_SEC_VAR_FAST_CLEARED_UNSPECIFIED
+#include "BswM_MemMap.h"
 #else
 typedef struct
 {
@@ -655,7 +653,11 @@ typedef struct
  * @synchronous TRUE
  * @trace       CPD-66209
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Init(const BswM_ConfigType* ConfigPtr);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Deinitializes the BSW Mode Manager.
@@ -666,7 +668,11 @@ void BswM_Init(const BswM_ConfigType* ConfigPtr);
  * @synchronous TRUE
  * @trace       CPD-66218
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Deinit(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_VERSION_INFO_API == STD_ON)
 /**
@@ -677,10 +683,14 @@ void BswM_Deinit(void);
  * @synchronous TRUE
  * @trace       CPD-66223
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_VERSION_INFO_API == STD_ON*/
 
-#if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
+#if ((BSWM_MULTI_PARTITION_ENABLED == STD_ON) && (BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON))
 /**
  * @brief       Function called by Restart Task if the partition containing the BswM has been restarted.
  * @return      None
@@ -688,8 +698,12 @@ void BswM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @synchronous TRUE
  * @trace       CPD-66224
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_BswMPartitionRestarted(void);
-#endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON && BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON*/
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
 /**
@@ -702,7 +716,11 @@ void BswM_BswMPartitionRestarted(void);
  * @synchronous TRUE
  * @trace       CPD-66220
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_RequestMode(BswM_UserType requesting_user, BswM_ModeType requested_mode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
 
 #ifdef __cplusplus

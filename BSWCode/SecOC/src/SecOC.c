@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -36,40 +36,9 @@
 #endif /* SECOC_SECURITY_EVENT_REPORTING_ENABLED  == STD_ON */
 #if (SECOC_CFUNC == SECOC_QUERY_FRESHNESS_VALUE)
 #include "SecOC_Callout.h"
-#else
-#include "Rte_SecOC.h"
 #endif /* SECOC_CFUNC == SECOC_QUERY_FRESHNESS_VALUE */
 
 /* ===================================================== macros ===================================================== */
-
-/** SecOC version information */
-#define SECOC_C_AR_MAJOR_VERSION 4u
-/** SecOC version information */
-#define SECOC_C_AR_MINOR_VERSION 9u
-/** SecOC version information */
-#define SECOC_C_AR_PATCH_VERSION 0u
-/** SecOC version information */
-#define SECOC_C_SW_MAJOR_VERSION 2u
-/** SecOC version information */
-#define SECOC_C_SW_MINOR_VERSION 2u
-/** SecOC version information */
-#define SECOC_C_SW_PATCH_VERSION 3u
-
-#if (SECOC_C_AR_MAJOR_VERSION != SECOC_H_AR_MAJOR_VERSION)
-#error "SecOC.c : Mismatch in Specification Major Version"
-#endif
-#if (SECOC_C_AR_MINOR_VERSION != SECOC_H_AR_MINOR_VERSION)
-#error "SecOC.c : Mismatch in Specification _MINOR Version"
-#endif
-#if (SECOC_C_AR_PATCH_VERSION != SECOC_H_AR_PATCH_VERSION)
-#error "SecOC.c : Mismatch in Specification PATCH Version"
-#endif
-#if (SECOC_C_SW_MAJOR_VERSION != SECOC_H_SW_MAJOR_VERSION)
-#error "SecOC.c : Mismatch in Software Major Version"
-#endif
-#if (SECOC_C_SW_MINOR_VERSION != SECOC_H_SW_MINOR_VERSION)
-#error "SecOC.c : Mismatch in Software MINOR Version"
-#endif
 
 /**
  * @brief Retrieves the minimum value between two values.
@@ -86,8 +55,6 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-#define SECOC_START_SEC_CODE
-#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the Application ID.
@@ -99,7 +66,11 @@
  * @synchronous TRUE
  * @trace       CPD-70368
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL ApplicationType SecOC_GetApplicationID(void);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Checks if the specified application is in the initialization state.
@@ -111,7 +82,11 @@ SECOC_LOCAL ApplicationType SecOC_GetApplicationID(void);
  * @synchronous TRUE
  * @trace       CPD-70369
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL SecOC_StateType SecOC_isInitState(ApplicationType appId);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U)
 /**
@@ -123,7 +98,11 @@ SECOC_LOCAL SecOC_StateType SecOC_isInitState(ApplicationType appId);
  * @synchronous TRUE
  * @trace       CPD-70370
  */
-SECOC_LOCAL void SECOC_SET_TX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_SetTxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Clears a specific transmit event.
@@ -134,7 +113,11 @@ SECOC_LOCAL void SECOC_SET_TX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70371
  */
-SECOC_LOCAL void SECOC_CLR_TX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_ClearTxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Checks if a specific event is a transmit event.
@@ -145,7 +128,12 @@ SECOC_LOCAL void SECOC_CLR_TX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70372
  */
-SECOC_LOCAL boolean SECOC_IS_TX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL boolean SecOC_IsTxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 ++ */ /* VL_SecOC_5016 */
 /**
  * @brief Retrieves the pointer to the processing configuration for a specific transmit PDU.
@@ -155,7 +143,11 @@ SECOC_LOCAL boolean SECOC_IS_TX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70373
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_PbTxPduProcessingType* SecOC_GetTxPduProcessingPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the processing data for a specific transmit PDU.
@@ -165,7 +157,11 @@ SECOC_LOCAL const SecOC_PbTxPduProcessingType* SecOC_GetTxPduProcessingPtr(uint1
  * @synchronous TRUE
  * @trace       CPD-70374
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxPduProcessingType* SecOC_GetTxPduProcessingDataPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the authentication PDU layer for a specific transmit PDU.
@@ -175,7 +171,12 @@ SECOC_LOCAL const SecOC_TxPduProcessingType* SecOC_GetTxPduProcessingDataPtr(uin
  * @synchronous TRUE
  * @trace       CPD-70375
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxAuthenticPduLayerType* SecOC_GetTxAuthenticPduLayerPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 -- */
 
 /**
@@ -186,7 +187,11 @@ SECOC_LOCAL const SecOC_TxAuthenticPduLayerType* SecOC_GetTxAuthenticPduLayerPtr
  * @synchronous TRUE
  * @trace       CPD-70376
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL ApplicationType SecOC_GetTxChannelApplicationId(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_SecOC_5016 */
 /**
@@ -197,7 +202,11 @@ SECOC_LOCAL ApplicationType SecOC_GetTxChannelApplicationId(uint16 idx);
  * @synchronous TRUE
  * @trace       CPD-70377
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduLayerType* SecOC_GetTxSecuredPduLayerPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the transmit Secured PDU for a specific index.
@@ -207,7 +216,11 @@ SECOC_LOCAL const SecOC_TxSecuredPduLayerType* SecOC_GetTxSecuredPduLayerPtr(uin
  * @synchronous TRUE
  * @trace       CPD-70378
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduType* SecOC_GetTxSecuredPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the transmit Secured PDU Collection for a specific index.
@@ -217,7 +230,11 @@ SECOC_LOCAL const SecOC_TxSecuredPduType* SecOC_GetTxSecuredPduPtr(uint16 idx);
  * @synchronous TRUE
  * @trace       CPD-70379
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduCollectionType* SecOC_GetTxSecuredPduCollectionPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the transmit Authentic PDU for a specific index.
@@ -227,7 +244,11 @@ SECOC_LOCAL const SecOC_TxSecuredPduCollectionType* SecOC_GetTxSecuredPduCollect
  * @synchronous TRUE
  * @trace       CPD-70380
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxAuthenticPduType* SecOC_GetTxAuthenticPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the transmit Cryptographic PDU for a specific index.
@@ -237,7 +258,11 @@ SECOC_LOCAL const SecOC_TxAuthenticPduType* SecOC_GetTxAuthenticPduPtr(uint16 id
  * @synchronous TRUE
  * @trace       CPD-70381
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxCryptographicPduType* SecOC_GetTxCryptographicPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the transmit Use Message Link for a specific index.
@@ -247,7 +272,12 @@ SECOC_LOCAL const SecOC_TxCryptographicPduType* SecOC_GetTxCryptographicPduPtr(u
  * @synchronous TRUE
  * @trace       CPD-70382
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetTxUseMessageLinkPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 -- */
 
 /**
@@ -261,7 +291,11 @@ SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetTxUseMessageLinkPtr(uint16 
  * @synchronous TRUE
  * @trace       CPD-70383
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint16 SecOC_FindProcessTxPduIndex(PduIdType TxPduId, uint16 startIdx, uint16 endIdx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Generates authenticator used to create Secured I-PDU.
@@ -271,7 +305,11 @@ SECOC_LOCAL uint16 SecOC_FindProcessTxPduIndex(PduIdType TxPduId, uint16 startId
  * @synchronous TRUE
  * @trace       CPD-70384
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Calculates the length of DataToAuthenticator.
@@ -281,7 +319,11 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70385
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint32 SecOC_TxCalcDataToAuthenticatorLength(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Constructs the DataToAuthenticator.
@@ -291,7 +333,11 @@ SECOC_LOCAL uint32 SecOC_TxCalcDataToAuthenticatorLength(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70386
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Generates the Authenticator retry process.
@@ -301,7 +347,11 @@ SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70387
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxGenerateAuthenticatorRetry(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Builds the Authenticator fail process.
@@ -311,7 +361,11 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticatorRetry(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70388
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Sends the Secured I-PDU.
@@ -321,7 +375,11 @@ SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70389
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Constructs the Secured I-PDU to be transmitted.
@@ -331,7 +389,11 @@ SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70390
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxConstructSecuredIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Constructs the Authentic I-PDU to be transmitted.
@@ -341,7 +403,11 @@ SECOC_LOCAL void SecOC_TxConstructSecuredIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70391
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxConstructAuthenticIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Constructs the Cryptographic I-PDU to be transmitted.
@@ -351,7 +417,11 @@ SECOC_LOCAL void SecOC_TxConstructAuthenticIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70392
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxConstructCryptographicIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Broadcasts the Secured I-PDU to the lower layer.
@@ -361,7 +431,11 @@ SECOC_LOCAL void SecOC_TxConstructCryptographicIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70393
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxBroadcastSecuredIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Broadcasts the Authentic I-PDU to the lower layer.
@@ -371,7 +445,11 @@ SECOC_LOCAL void SecOC_TxBroadcastSecuredIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70394
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxBroadcastAuthenticIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Broadcasts the Cryptographic I-PDU to the lower layer.
@@ -381,7 +459,11 @@ SECOC_LOCAL void SecOC_TxBroadcastAuthenticIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70395
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxBroadcastCryptographicIPDU(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
 /**
@@ -392,7 +474,11 @@ SECOC_LOCAL void SecOC_TxBroadcastCryptographicIPDU(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70396
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxTpAcquireData(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif
 
 /**
@@ -403,7 +489,11 @@ SECOC_LOCAL void SecOC_TxTpAcquireData(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70397
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxChannelReset(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U */
 
 #if (SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U)
@@ -416,7 +506,11 @@ SECOC_LOCAL void SecOC_TxChannelReset(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70398
  */
-SECOC_LOCAL void SECOC_SET_RX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_SetRxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Clears a specific receive event.
@@ -427,7 +521,11 @@ SECOC_LOCAL void SECOC_SET_RX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70399
  */
-SECOC_LOCAL void SECOC_CLR_RX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_ClearRxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Checks if a specific event is a receive event.
@@ -438,7 +536,12 @@ SECOC_LOCAL void SECOC_CLR_RX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70400
  */
-SECOC_LOCAL boolean SECOC_IS_RX_EVENT(uint16 i, uint16 e);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL boolean SecOC_IsRxEvent(uint16 i, uint16 e);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 ++ */ /* VL_SecOC_5016 */
 /**
  * @brief Retrieves the pointer to the receive PDU Processing for a specific index.
@@ -448,7 +551,11 @@ SECOC_LOCAL boolean SECOC_IS_RX_EVENT(uint16 i, uint16 e);
  * @synchronous TRUE
  * @trace       CPD-70401
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_PbRxPduProcessingType* SecOC_GetRxPduProcessingPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the application ID for a specific receive channel.
@@ -458,7 +565,11 @@ SECOC_LOCAL const SecOC_PbRxPduProcessingType* SecOC_GetRxPduProcessingPtr(uint1
  * @synchronous TRUE
  * @trace       CPD-70402
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL ApplicationType SecOC_GetRxChannelApplicationId(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive PDU Processing data for a specific index.
@@ -468,7 +579,11 @@ SECOC_LOCAL ApplicationType SecOC_GetRxChannelApplicationId(uint16 idx);
  * @synchronous TRUE
  * @trace       CPD-70403
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxPduProcessingType* SecOC_GetRxPduProcessingDataPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive Authentic PDU Layer for a specific index.
@@ -478,7 +593,11 @@ SECOC_LOCAL const SecOC_RxPduProcessingType* SecOC_GetRxPduProcessingDataPtr(uin
  * @synchronous TRUE
  * @trace       CPD-70404
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxAuthenticPduLayerType* SecOC_GetRxAuthenticPduLayerPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive Secured PDU Layer for a specific index.
@@ -488,7 +607,11 @@ SECOC_LOCAL const SecOC_RxAuthenticPduLayerType* SecOC_GetRxAuthenticPduLayerPtr
  * @synchronous TRUE
  * @trace       CPD-70405
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduLayerType* SecOC_GetRxSecuredPduLayerPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive secured PDU for a specific index.
@@ -498,7 +621,11 @@ SECOC_LOCAL const SecOC_RxSecuredPduLayerType* SecOC_GetRxSecuredPduLayerPtr(uin
  * @synchronous TRUE
  * @trace       CPD-70406
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduType* SecOC_GetRxSecuredPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive Secured PDU Collection for a specific index.
@@ -508,7 +635,11 @@ SECOC_LOCAL const SecOC_RxSecuredPduType* SecOC_GetRxSecuredPduPtr(uint16 idx);
  * @synchronous TRUE
  * @trace       CPD-70407
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduCollectionType* SecOC_GetRxSecuredPduCollectionPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive Authentic PDU for a specific index.
@@ -518,7 +649,11 @@ SECOC_LOCAL const SecOC_RxSecuredPduCollectionType* SecOC_GetRxSecuredPduCollect
  * @synchronous TRUE
  * @trace       CPD-70408
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxAuthenticPduType* SecOC_GetRxAuthenticPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the pointer to the receive Cryptographic PDU for a specific index.
@@ -528,7 +663,12 @@ SECOC_LOCAL const SecOC_RxAuthenticPduType* SecOC_GetRxAuthenticPduPtr(uint16 id
  * @synchronous TRUE
  * @trace       CPD-70409
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxCryptographicPduType* SecOC_GetRxCryptographicPduPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 -- */
 #if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
 /**
@@ -542,7 +682,11 @@ SECOC_LOCAL const SecOC_RxCryptographicPduType* SecOC_GetRxCryptographicPduPtr(u
  * @synchronous TRUE
  * @trace       CPD-70410
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxIfSecuredPduIndication(uint16 index, PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Processes the Authentic I-PDU receive indication.
@@ -554,7 +698,11 @@ SECOC_LOCAL void SecOC_RxIfSecuredPduIndication(uint16 index, PduIdType RxPduId,
  * @synchronous TRUE
  * @trace       CPD-70411
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Processes the Cryptographic I-PDU receive indication.
@@ -566,7 +714,11 @@ SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoTyp
  * @synchronous TRUE
  * @trace       CPD-70412
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U */
 
 /**
@@ -577,7 +729,11 @@ SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInf
  * @synchronous TRUE
  * @trace       CPD-70413
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Performs the verification process.
@@ -587,7 +743,11 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70414
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Verifies the received Secured I-PDU.
@@ -597,7 +757,11 @@ SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70415
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Calculates the length of DataToAuthenticator.
@@ -607,7 +771,11 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70416
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint32 SecOC_RxCalcDataToAuthenticatorLength(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Constructs DataToAuthenticator.
@@ -619,7 +787,11 @@ SECOC_LOCAL uint32 SecOC_RxCalcDataToAuthenticatorLength(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70417
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Builds the DataToAuthenticator retry process.
@@ -629,7 +801,11 @@ SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70418
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Verifies the Authentication information retry process.
@@ -639,7 +815,11 @@ SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70419
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxVerifyAuthenticInfoRetry(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_MAX_MSG_LINK_LEN > SECOC_CONST_0U)
 /**
@@ -652,7 +832,12 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticInfoRetry(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70420
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 ++ */ /* VL_SecOC_5016 */
 /**
  * @brief Retrieves the pointer to the receive Use Message Link for a specific index.
@@ -662,7 +847,12 @@ SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70421
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetRxUseMessageLinkPtr(uint16 idx);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
 /* PRQA S 5016 -- */
 #endif /* SECOC_MAX_MSG_LINK_LEN > SECOC_CONST_0U */
 
@@ -674,7 +864,11 @@ SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetRxUseMessageLinkPtr(uint16 
  * @synchronous TRUE
  * @trace       CPD-70422
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U)
 /**
@@ -685,7 +879,11 @@ SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70423
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxTransTpDataToUpperLayer(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Starts the receive Secured TP PDU process.
@@ -703,12 +901,16 @@ SECOC_LOCAL void SecOC_RxTransTpDataToUpperLayer(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70424
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpSecuredPduStartOfReception(
     uint16             index,
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Starts the receive Authentic TP PDU process.
@@ -726,12 +928,16 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpSecuredPduStartOfReception(
  * @synchronous TRUE
  * @trace       CPD-70425
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpAuthenticPduStartOfReception(
     uint16             index,
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Starts the receive Cryptographic TP PDU process.
@@ -749,12 +955,16 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpAuthenticPduStartOfReception(
  * @synchronous TRUE
  * @trace       CPD-70426
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
     uint16             index,
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U */
 
 #if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
@@ -766,7 +976,11 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
  * @synchronous TRUE
  * @trace       CPD-70427
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxLoadQueuedPdu(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif
 
 /**
@@ -777,7 +991,11 @@ SECOC_LOCAL void SecOC_RxLoadQueuedPdu(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70428
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxReportVerifyStatus(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Resets the channel runtime data to default values.
@@ -787,7 +1005,11 @@ SECOC_LOCAL void SecOC_RxReportVerifyStatus(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70429
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxChannelReset(uint16 index);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Calculates the runtime PDU length.
@@ -798,7 +1020,11 @@ SECOC_LOCAL void SecOC_RxChannelReset(uint16 index);
  * @synchronous TRUE
  * @trace       CPD-70430
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL PduLengthType SecOC_RxGetPduLength(uint8 headerLength, const uint8* headerPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
 
 /**
@@ -810,7 +1036,11 @@ SECOC_LOCAL PduLengthType SecOC_RxGetPduLength(uint8 headerLength, const uint8* 
  * @synchronous TRUE
  * @trace       CPD-70431
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_EndianSwap(uint8* dataPtr, uint8 size);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Shifts the array to the left.
@@ -822,7 +1052,11 @@ SECOC_LOCAL void SecOC_EndianSwap(uint8* dataPtr, uint8 size);
  * @synchronous TRUE
  * @trace       CPD-70432
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayShiftLeft(uint8* numArr, uint16 numLen, uint16 shiftBits);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Shifts the array to the right.
@@ -834,7 +1068,11 @@ SECOC_LOCAL void SecOC_ArrayShiftLeft(uint8* numArr, uint16 numLen, uint16 shift
  * @synchronous TRUE
  * @trace       CPD-70433
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayShiftRight(uint8* numArr, uint16 numLen, uint16 shiftBits);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Performs the bitwise OR operation on two number arrays.
@@ -846,7 +1084,11 @@ SECOC_LOCAL void SecOC_ArrayShiftRight(uint8* numArr, uint16 numLen, uint16 shif
  * @synchronous TRUE
  * @trace       CPD-70434
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayOrOp(uint8* numArr1, const uint8* numArr2, uint16 numLen);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Clears the low bits of a number array by shifting.
@@ -858,8 +1100,13 @@ SECOC_LOCAL void SecOC_ArrayOrOp(uint8* numArr1, const uint8* numArr2, uint16 nu
  * @synchronous TRUE
  * @trace       CPD-70435
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ClearLowBit(uint8* numArr, uint16 numLen, uint16 shiftBits);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
 /**
  * @brief Saves the input PduInfo to the queue.
  * @param[in] index : SECOC Channel index.
@@ -872,7 +1119,11 @@ SECOC_LOCAL void SecOC_ClearLowBit(uint8* numArr, uint16 numLen, uint16 shiftBit
  * @synchronous TRUE
  * @trace       CPD-70436
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_DataInQueue(uint16 index, PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Retrieves the input PduInfo from the queue.
@@ -886,8 +1137,15 @@ SECOC_LOCAL void SecOC_DataInQueue(uint16 index, PduIdType RxPduId, const PduInf
  * @synchronous TRUE
  * @trace       CPD-70437
  */
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL Std_ReturnType SecOC_DataOutQueue(uint16 index, PduIdType* RxPduIdPtr, PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+#endif /* SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U */
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * @brief Copies bits from the source to the destination.
  * @param[in] src : Pointer to the source buffer.
@@ -900,6 +1158,8 @@ SECOC_LOCAL Std_ReturnType SecOC_DataOutQueue(uint16 index, PduIdType* RxPduIdPt
  * @trace       CPD-70438
  */
 static void SecOC_CopyBitsFromSourceToDestination(const uint8* src, uint8* dst, uint16 srcIndex, uint16 bitlength);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
 /**
@@ -911,7 +1171,11 @@ static void SecOC_CopyBitsFromSourceToDestination(const uint8* src, uint8* dst, 
  * @synchronous TRUE
  * @trace       CPD-70439
  */
-SECOC_LOCAL_INLINE void SECOC_DET_REPORT(uint8 ApiId, uint8 ErrorId);
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL_INLINE void SecOC_ReportDetError(uint8 ApiId, uint8 ErrorId);
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 /**
  * @brief Reports a DET runtime error.
@@ -922,21 +1186,20 @@ SECOC_LOCAL_INLINE void SECOC_DET_REPORT(uint8 ApiId, uint8 ErrorId);
  * @synchronous TRUE
  * @trace       CPD-70440
  */
-SECOC_LOCAL_INLINE void SECOC_DET_REPORT_RUNTIMEERROR(uint8 ApiId, uint8 ErrorId);
-#else
-#define SECOC_DET_REPORT(ApiId, ErrorId)
-#define SECOC_DET_REPORT_RUNTIMEERROR(ApiId, ErrorId)
-#endif
-
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL_INLINE void SecOC_ReportDetRuntimeError(uint8 ApiId, uint8 ErrorId);
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"
+#endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
 /* ============================================ internal data definitions =========================================== */
 
-#define SECOC_START_SEC_VAR_INIT_PTR
+#define SECOC_START_SEC_VAR_CLEARED_PTR
 #include "SecOC_MemMap.h"
 /** @brief Pointer to configuration data. @range NA */
-SECOC_LOCAL const SecOC_ConfigType* SecOC_ConfigPtr = NULL_PTR;
-#define SECOC_STOP_SEC_VAR_INIT_PTR
+SECOC_LOCAL const SecOC_ConfigType* SecOC_ConfigPtr;
+#define SECOC_STOP_SEC_VAR_CLEARED_PTR
 #include "SecOC_MemMap.h"
 
 /* ============================================ external data definitions =========================================== */
@@ -944,7 +1207,6 @@ SECOC_LOCAL const SecOC_ConfigType* SecOC_ConfigPtr = NULL_PTR;
 /* ========================================== external function definitions ========================================= */
 #define SECOC_START_SEC_CODE
 #include "SecOC_MemMap.h"
-
 /**
  * Initialize the runtime parameters of the SecOC module.
  */
@@ -956,6 +1218,8 @@ void SecOC_Init(const SecOC_ConfigType* config)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(2, SECOC_INIT_ID, config);
+
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     uint8 detErrorId = E_OK;
     if (NULL_PTR == config)
@@ -1014,6 +1278,15 @@ void SecOC_Init(const SecOC_ConfigType* config)
                 }
             }
 #endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
+
+#if (STD_ON == SECOC_CLUSTER_KEY_ID_VALID_MANAGE_ENABLE)
+            /* Make all Key ids valid */
+            for (uint32 i = 0; i < SECOC_CLUSTER_KEY_ID_NUM; i++)
+            {
+                Csm_KeySetValid(SecOC_SecOCClusterKeyID[i]);
+            }
+#endif /* STD_ON == SECOC_CLUSTER_KEY_ID_VALID_MANAGE_ENABLE */
+
             /*Set the Init status */
             *lInitStatus = SECOC_INIT;
         }
@@ -1021,11 +1294,17 @@ void SecOC_Init(const SecOC_ConfigType* config)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_INIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_INIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
-}
 
+    SecOC_ArtiApiStop(1, SECOC_INIT_ID);
+}
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This service is used to deinitialize the SecOC module and clear all receive
  * buffers and send buffers.
@@ -1038,6 +1317,8 @@ void SecOC_DeInit(void)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(1, SECOC_DEINIT_ID);
+
     ApplicationType  partId      = SecOC_GetApplicationID();
     SecOC_StateType* lInitStatus = SecOC_GetInitStatusPtr(partId);
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
@@ -1084,11 +1365,17 @@ void SecOC_DeInit(void)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_DEINIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_DEINIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
-}
 
+    SecOC_ArtiApiStop(1, SECOC_DEINIT_ID);
+}
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This service is used to obtain the version information of the SecOC module.
  */
@@ -1100,22 +1387,30 @@ void SecOC_GetVersionInfo(Std_VersionInfoType* versioninfo)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(2, SECOC_GETVERSIONINFO_ID, versioninfo);
+
 #if (SECOC_DEV_ERROR_DETECT == STD_ON)
     if (versioninfo == NULL_PTR)
     {
-        SECOC_DET_REPORT(SECOC_GETVERSIONINFO_ID, SECOC_E_PARAM_POINTER);
+        SecOC_ReportDetError(SECOC_GETVERSIONINFO_ID, SECOC_E_PARAM_POINTER);
     }
     else
 #endif
     {
         versioninfo->vendorID         = SECOC_VENDOR_ID;
         versioninfo->moduleID         = SECOC_MODULE_ID;
-        versioninfo->sw_major_version = SECOC_C_SW_MAJOR_VERSION;
-        versioninfo->sw_minor_version = SECOC_C_SW_MINOR_VERSION;
-        versioninfo->sw_patch_version = SECOC_C_SW_PATCH_VERSION;
+        versioninfo->sw_major_version = SECOC_SW_MAJOR_VERSION;
+        versioninfo->sw_minor_version = SECOC_SW_MINOR_VERSION;
+        versioninfo->sw_patch_version = SECOC_SW_PATCH_VERSION;
     }
-}
 
+    SecOC_ArtiApiStop(1, SECOC_GETVERSIONINFO_ID);
+}
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This service is used by the upper module to request the transmission of
  * PDU and put the PDU information into the buffer of SecOC.
@@ -1128,6 +1423,8 @@ Std_ReturnType SecOC_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_IFTRANSMIT_ID, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
@@ -1179,7 +1476,7 @@ Std_ReturnType SecOC_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
         {
             SchM_Enter_SecOC_TxData();
             SecOC_TxRtDataPtr(TxPduId)->txPduStatus = SECOC_TX_CALC;
-            SECOC_SET_TX_EVENT(TxPduId, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
+            SecOC_SetTxEvent(TxPduId, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
             SecOC_TxRtDataPtr(TxPduId)->txPduLength = PduInfoPtr->SduLength;
             /* @req SWS_SecOC_00225,SWS_SecOC_00226 */
             SecOC_TxRtDataPtr(TxPduId)->txAuthBuildCnt = SECOC_CONST_0U;
@@ -1190,12 +1487,19 @@ Std_ReturnType SecOC_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_IFTRANSMIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_IFTRANSMIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(2, SECOC_IFTRANSMIT_ID, result);
+
     return result;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This service is used by the upper module to request the transmission of PDU.
  */
@@ -1207,7 +1511,10 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_TPTRANSMIT_ID, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_OK;
+#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -1218,23 +1525,18 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
         detErrorId = SECOC_E_UNINIT;
     }
     /*TxPduId error*/
-    /* PRQA S 2991,2995,2996 ++ */ /* VL_SecOC_2991,VL_SecOC_2995,VL_SecOC_2996 */
     else if (!((TxPduId >= SECOC_TX_IF_PDU_NUM) && (TxPduId < SECOC_TX_PDU_PRO_NUM)))
-    /* PRQA S 2991,2995,2996 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
-    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if (PduInfoPtr == NULL_PTR)
-    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
         const SecOC_PbTxPduProcessingType* txPduProcessingPtr    = SecOC_GetTxPduProcessingPtr(TxPduId);
         const SecOC_TxPduSecuredAreaType*  SecOCTxPduSecuredArea = txPduProcessingPtr->SecOCTxPduSecuredArea;
         uint32                             txPduSecuredAreaLength;
@@ -1253,28 +1555,33 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
         {
             SchM_Enter_SecOC_TxData();
             SecOC_TxRtDataPtr(TxPduId)->txPduStatus = SECOC_TX_CALC;
-            SECOC_SET_TX_EVENT(TxPduId, SECOC_TX_REQUEST);
+            SecOC_SetTxEvent(TxPduId, SECOC_TX_REQUEST);
             SecOC_TxRtDataPtr(TxPduId)->txPduLength = PduInfoPtr->SduLength;
             /* @req SWS_SecOC_00225,SWS_SecOC_00226 */
             SecOC_TxRtDataPtr(TxPduId)->txAuthBuildCnt = SECOC_CONST_0U;
             SchM_Exit_SecOC_TxData();
         }
-#else
-        (void)(TxPduId);
-        (void)(PduInfoPtr);
-#endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_TPTRANSMIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TPTRANSMIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(TxPduId);
+    (void)(PduInfoPtr);
+#endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(2, SECOC_TPTRANSMIT_ID, result);
+
     return result;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * Requests cancellation of an ongoing transmission of a PDU in a lower layer
  * communication module.After a successful cancellation,the buffer of the Tx
@@ -1288,6 +1595,8 @@ Std_ReturnType SecOC_IfCancelTransmit(PduIdType TxPduId)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(2, SECOC_IFCANCELTRANSMIT_ID, TxPduId);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
@@ -1337,12 +1646,19 @@ Std_ReturnType SecOC_IfCancelTransmit(PduIdType TxPduId)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_IFCANCELTRANSMIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_IFCANCELTRANSMIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(2, SECOC_IFCANCELTRANSMIT_ID, result);
+
     return result;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * Requests cancellation of an ongoing transmission of a PDU in a lower layer
  * communication module.After a successful cancellation,the buffer of the Tx
@@ -1356,7 +1672,11 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(2, SECOC_TPCANCELTRANSMIT_ID, TxPduId);
+
     Std_ReturnType result = E_NOT_OK;
+
+#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -1367,16 +1687,13 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((TxPduId < SECOC_TX_IF_PDU_NUM) || (TxPduId >= SECOC_TX_PDU_PRO_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
         const SecOC_TxSecuredPduType*       txSecuredPduPtr = SecOC_GetTxSecuredPduPtr(TxPduId);
         const SecOC_TxAuthenticPduType*     txAuthenticPduPtr;
         const SecOC_TxCryptographicPduType* txCryptographicPduPtr;
@@ -1402,23 +1719,26 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId)
         {
             /* Return E_NOT_OK */
         }
-#else
-        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
-        (void)(TxPduId);
-        /* PRQA S 2880 -- */
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_TPCANCELTRANSMIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TPCANCELTRANSMIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(TxPduId);
+#endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(2, SECOC_TPCANCELTRANSMIT_ID, result);
+
     return result;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * Requests cancellation of an ongoing reception of a PDU in a lower layer
  * transport protocol module.After a successful cancellation,the buffer of
@@ -1432,7 +1752,10 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(2, SECOC_TPCANCELRECEIVE_ID, RxPduId);
+
     Std_ReturnType result = E_NOT_OK;
+#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -1443,16 +1766,13 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((RxPduId < SECOC_RX_IF_PDU_NUM) || (RxPduId >= SECOC_RX_PDU_PRO_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
         const SecOC_RxSecuredPduType*       rxSecuredPduPtr = SecOC_GetRxSecuredPduPtr(RxPduId);
         const SecOC_RxAuthenticPduType*     rxAuthenticPduPtr;
         const SecOC_RxCryptographicPduType* rxCryptographicPduPtr;
@@ -1478,23 +1798,26 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
         {
             /* Return E_NOT_OK */
         }
-#else
-        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
-        (void)(RxPduId);
-        /* PRQA S 2880 -- */
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_TPCANCELRECEIVE_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TPCANCELRECEIVE_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(RxPduId);
+#endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(2, SECOC_TPCANCELRECEIVE_ID, result);
+
     return result;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This service provides the ability to force specific behaviour of SecOc:
  * accept or drop an I-PDU with or without performing the verification of
@@ -1505,6 +1828,7 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
 /* PRQA S 1503, 6070, 6010 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC */
 /* PRQA S 6080, 6050, 6030 ++ */ /* VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3, VL_MTR_SecOC_STMIF */
 /* PRQA S 6020 ++ */             /* VL_MTR_SecOC_STLIN */
+/* PRQA S 1513, 1707 ++ */       /* VL_SecOC_1513, VL_SecOC_1707 */
 Std_ReturnType SecOC_VerifyStatusOverride(
     uint16                   ValueID,
     SecOC_OverrideStatusType overrideStatus,
@@ -1512,7 +1836,11 @@ Std_ReturnType SecOC_VerifyStatusOverride(
 /* PRQA S 6020 -- */
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
+/* PRQA S 1513, 1707 -- */
 {
+    SecOC_ArtiApiStart(4, SECOC_VERIFYSTATUSOVERRIDE_ID, ValueID, overrideStatus, numberOfMessagesToOverride);
+
+#if (SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U)
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
@@ -1558,13 +1886,26 @@ Std_ReturnType SecOC_VerifyStatusOverride(
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_VERIFYSTATUSOVERRIDE_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_VERIFYSTATUSOVERRIDE_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    Std_ReturnType ret = E_OK;
+    (void)(ValueID);
+    (void)(overrideStatus);
+    (void)(numberOfMessagesToOverride);
+#endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(2, SECOC_VERIFYSTATUSOVERRIDE_ID, ret);
+
     return ret;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if defined(SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * The service provides the ability to enable the sending of un-authenticated
  * PDU to lower layer.When the interface corresponding to the freshness value
@@ -1579,6 +1920,12 @@ Std_ReturnType
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(
+        3,
+        SECOC_SENDDEFAULTAUTHENTICATIONINFORMATION_ID,
+        FreshnessValueID,
+        sendDefaultAuthenticationInformation);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
@@ -1609,14 +1956,17 @@ Std_ReturnType
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_SENDDEFAULTAUTHENTICATIONINFORMATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_SENDDEFAULTAUTHENTICATIONINFORMATION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(2, SECOC_SENDDEFAULTAUTHENTICATIONINFORMATION_ID, ret);
+
     return ret;
 }
-#endif
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"
+#endif
 
 #define SECOC_START_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
@@ -1632,6 +1982,8 @@ void SecOC_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_RXINDICATION_ID, RxPduId, PduInfoPtr);
+
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
     uint8           detErrorId = E_OK;
@@ -1695,9 +2047,11 @@ void SecOC_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_RXINDICATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_RXINDICATION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(1, SECOC_RXINDICATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
@@ -1716,6 +2070,9 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_TPRXINDICATION_ID, id, result);
+
+#if (SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
     uint8           detErrorId = E_OK;
@@ -1726,17 +2083,13 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U)
-
         SchM_Enter_SecOC_RxData();
         uint16  index;
         boolean cryptoTag = FALSE;
@@ -1757,8 +2110,8 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
         SchM_Exit_SecOC_RxData();
 
         if ((index < SECOC_RX_PDU_PRO_NUM)
-            && ((SECOC_IS_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER))
-                || (SECOC_IS_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
+            && ((SecOC_IsRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER))
+                || (SecOC_IsRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
             && (((SECOC_CONST_0U == SecOC_RxRtDataPtr(index)->sduRemaining))
                 || ((cryptoTag) && (SECOC_CONST_0U == SecOC_RxRtDataPtr(index)->sduCryptoRemaining))))
         {
@@ -1769,23 +2122,23 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
                 if (NULL_PTR != rxSecuredPduPtr)
                 {
                     /* @req SWS_SecOC_00085 */
-                    SECOC_CLR_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
+                    SecOC_ClearRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER);
+                    SecOC_SetRxEvent(index, SECOC_RX_INDICATION);
                 }
                 else
                 {
                     if (cryptoTag)
                     {
                         /* @req SWS_SecOC_00086 */
-                        SECOC_CLR_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER);
-                        SECOC_SET_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU);
+                        SecOC_ClearRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER);
+                        SecOC_SetRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU);
                     }
                     else
                     {
-                        SECOC_SET_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU);
-                        SECOC_CLR_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER);
+                        SecOC_SetRxEvent(index, SECOC_RX_AUTHENTIC_PDU);
+                        SecOC_ClearRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER);
                     }
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
+                    SecOC_SetRxEvent(index, SECOC_RX_INDICATION);
                 }
                 SecOC_RxRtDataPtr(index)->rxPduStatus = SECOC_RX_CALC;
                 SchM_Exit_SecOC_RxData();
@@ -1802,21 +2155,19 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
             /* @req SWS_SecOC_00084 */
             /* Reception of a Secured I-PDU not completed,Directly return */
         }
-#else
-        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
-        (void)(id);
-        (void)(result);
-        /* PRQA S 2880 -- */
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_TPRXINDICATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TPRXINDICATION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(id);
+    (void)(result);
+#endif /* SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(1, SECOC_TPRXINDICATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
@@ -1836,6 +2187,8 @@ void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_TXCONFIRMATION_ID, TxPduId, result);
+
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
     uint8           detErrorId = E_OK;
@@ -1868,8 +2221,8 @@ void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             /* @req SWS_SecOC_00063 */
             upLayerPduId = txPduProcessingPtr->SecOCTxAuthenticPduLayer->SecOCTxPduRAsUpLayerId;
             if ((NULL_PTR != txSecuredPduPtr)
-                || ((SECOC_IS_TX_EVENT(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED))
-                    && (SECOC_IS_TX_EVENT(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED))))
+                || ((SecOC_IsTxEvent(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED))
+                    && (SecOC_IsTxEvent(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED))))
             {
                 PduR_SecOCIfTxConfirmation(upLayerPduId, result);
 
@@ -1887,7 +2240,7 @@ void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
                 txRtPtr->txPduStatus    = SECOC_TX_NONE;
                 txRtPtr->txAuthBuildCnt = SECOC_CONST_0U;
                 /* Clear tx event */
-                SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+                SecOC_ClearTxEvent(index, SECOC_EVENT_TX_ALL);
                 SchM_Exit_SecOC_TxData();
             }
         }
@@ -1897,9 +2250,11 @@ void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_TXCONFIRMATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TXCONFIRMATION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(1, SECOC_TXCONFIRMATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
@@ -1919,6 +2274,8 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_TPTXCONFIRMATION_ID, id, result);
+
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
     uint8           detErrorId = E_OK;
@@ -1941,14 +2298,13 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 
         if (index < SECOC_TX_PDU_PRO_NUM)
         {
-            const SecOC_PbTxPduProcessingType*   txPduProcessingPtr     = SecOC_GetTxPduProcessingPtr(index);
             const SecOC_TxPduProcessingType*     txPduProcessingDataPtr = SecOC_GetTxPduProcessingDataPtr(index);
             const SecOC_TxSecuredPduType*        txSecuredPduPtr        = SecOC_GetTxSecuredPduPtr(index);
             const SecOC_TxAuthenticPduLayerType* txAuthenticPduLayerPtr = SecOC_GetTxAuthenticPduLayerPtr(index);
             PduIdType                            upLayerPduId = txAuthenticPduLayerPtr->SecOCTxPduRAsUpLayerId;
             if ((NULL_PTR != txSecuredPduPtr)
-                || ((SECOC_IS_TX_EVENT(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED))
-                    && (SECOC_IS_TX_EVENT(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED))))
+                || ((SecOC_IsTxEvent(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED))
+                    && (SecOC_IsTxEvent(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED))))
             {
                 /* @req SWS_SecOC_00074 */
                 if (SECOC_IFPDU == txAuthenticPduLayerPtr->SecOCPduType)
@@ -1975,7 +2331,7 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
                 txRtPtr->txPduStatus    = SECOC_TX_NONE;
                 txRtPtr->txAuthBuildCnt = SECOC_CONST_0U;
                 /* Clear tx event */
-                SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+                SecOC_ClearTxEvent(index, SECOC_EVENT_TX_ALL);
                 SchM_Exit_SecOC_TxData();
             }
         }
@@ -1987,9 +2343,11 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_TPTXCONFIRMATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TPTXCONFIRMATION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(1, SECOC_TPTXCONFIRMATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
@@ -2005,13 +2363,15 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 /* PRQA S 1503, 6070, 6010 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC */
 /* PRQA S 6080, 6050, 6030 ++ */ /* VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3, VL_MTR_SecOC_STMIF */
 /* PRQA S 6020, 6080, 1532 ++ */ /* VL_MTR_SecOC_STLIN, VL_MTR_SecOC_STPTH, VL_QAC_OneFunRef */
-/* PRQA S 5017 ++ */             /* VL_SecOC_5017 */
+/* PRQA S 5017, 2755 ++ */       /* VL_SecOC_5017, VL_SecOC_2755 */
 Std_ReturnType SecOC_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
-/* PRQA S 5017 -- */
+/* PRQA S 5017, 2755 -- */
 /* PRQA S 6020, 6080, 1532 -- */
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_TRIGGERTRANSMIT_ID, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId     = SecOC_GetApplicationID();
@@ -2175,9 +2535,12 @@ Std_ReturnType SecOC_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_TRIGGERTRANSMIT_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_TRIGGERTRANSMIT_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+
+    SecOC_ArtiApiStop(2, SECOC_TRIGGERTRANSMIT_ID, result);
+
     return result;
 }
 #define SECOC_STOP_SEC_CODE_FAST
@@ -2198,7 +2561,10 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(4, SECOC_COPYRXDATA_ID, id, info, bufferSizePtr);
+
     BufReq_ReturnType result = BUFREQ_E_NOT_OK;
+#if (SECOC_RX_TP_PDU_NUM > 0)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -2209,23 +2575,18 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
-    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if ((NULL_PTR == info) || (NULL_PTR == bufferSizePtr))
-    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_RX_TP_PDU_NUM > 0)
         SchM_Enter_SecOC_RxData();
 
         uint16  index;
@@ -2246,8 +2607,8 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
         }
 
         if ((index < SECOC_RX_PDU_PRO_NUM)
-            && ((SECOC_IS_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER))
-                || (SECOC_IS_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER))))
+            && ((SecOC_IsRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER))
+                || (SecOC_IsRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER))))
         {
             SecOC_RxPduRunTimeType* rxRtPtr = SecOC_RxRtDataPtr(index);
             if (SECOC_CONST_0U == info->SduLength)
@@ -2302,20 +2663,21 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
             /* Not find coresponding runtime data,return BUFREQ_E_NOT_OK */
         }
         SchM_Exit_SecOC_RxData();
-#else
-        (void)(id);
-        (void)(info);
-        *bufferSizePtr = 0u;
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_COPYRXDATA_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_COPYRXDATA_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(id);
+    (void)(info);
+    *bufferSizePtr = 0u;
+#endif /* SECOC_RX_TP_PDU_NUM > 0 */
+
+    SecOC_ArtiApiStop(2, SECOC_COPYRXDATA_ID, result);
+
     return result;
 }
 #define SECOC_STOP_SEC_CODE_FAST
@@ -2331,17 +2693,20 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
 /* PRQA S 1503, 6010, 6060 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STCAL */
 /* PRQA S 6070, 6010, 6080 ++ */ /* VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 /* PRQA S 6050, 6030, 6020 ++ */ /* VL_MTR_SecOC_STM19, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STLIN */
-/* PRQA S 1532, 5017 ++ */       /* VL_QAC_OneFunRef, VL_SecOC_5017 */
+/* PRQA S 1532, 5017, 2755 ++ */ /* VL_QAC_OneFunRef, VL_SecOC_5017, VL_SecOC_2755 */
 /* PRQA S 2889 ++ */             /* VL_QAC_OneFunRef */
 BufReq_ReturnType
     SecOC_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
 /* PRQA S 2889 -- */
-/* PRQA S 1532, 5017 -- */
+/* PRQA S 1532, 5017, 2755 -- */
 /* PRQA S 6050, 6030, 6020 -- */
 /* PRQA S 6070, 6010, 6080 -- */
 /* PRQA S 1503, 6010, 6060 -- */
 {
+    SecOC_ArtiApiStart(5, SECOC_COPYTXDATA_ID, id, info, retry, availableDataPtr);
+
     BufReq_ReturnType bufferReqStatus = BUFREQ_E_NOT_OK;
+#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -2352,23 +2717,18 @@ BufReq_ReturnType
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_TX_SEC_PDU_NUM) || (id < SECOC_TX_SEC_IF_PDU_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
-    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if ((NULL_PTR == info) || (NULL_PTR == availableDataPtr))
-    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
     else
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     {
-#if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
         const SecOC_TxSecuredPduType*       txSecuredPduPtr;
         const SecOC_TxAuthenticPduType*     txAuthenticPduPtr;
         const SecOC_TxCryptographicPduType* txCryptographicPduPtr;
@@ -2482,21 +2842,22 @@ BufReq_ReturnType
         *availableDataPtr = dataLength - lTxPduoffset;
 
         bufferReqStatus = BUFREQ_OK;
-#else
-        (void)(id);
-        (void)(info);
-        (void)(retry);
-        *availableDataPtr = 0u;
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_COPYTXDATA_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_COPYTXDATA_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(id);
+    (void)(info);
+    (void)(retry);
+    *availableDataPtr = 0u;
+#endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(2, SECOC_COPYTXDATA_ID, bufferReqStatus);
+
     return bufferReqStatus;
 }
 #define SECOC_STOP_SEC_CODE_FAST
@@ -2522,7 +2883,10 @@ BufReq_ReturnType SecOC_StartOfReception(
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(5, SECOC_STARTOFRECEPTION_ID, id, info, TpSduLength, bufferSizePtr);
+
     BufReq_ReturnType bufReqRet = BUFREQ_E_NOT_OK;
+#if (SECOC_RX_TP_PDU_NUM > 0)
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
 
@@ -2533,27 +2897,21 @@ BufReq_ReturnType SecOC_StartOfReception(
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
-    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
-    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if (NULL_PTR == bufferSizePtr)
-    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
     else
 #endif
     {
-#if (SECOC_RX_TP_PDU_NUM > 0)
-        const SecOC_PbRxPduProcessingType* rxPduProcessingPtr;
-        const SecOC_RxPduProcessingType* rxPduProcessingDataPtr = SecOC_GetRxPduProcessingDataPtr(SECOC_RX_IF_PDU_NUM);
-        const SecOC_RxSecuredPduType*    rxSecuredPduPtr;
-        const SecOC_RxAuthenticPduType*  rxAuthenticPduPtr;
+        const SecOC_PbRxPduProcessingType*  rxPduProcessingPtr;
+        const SecOC_RxSecuredPduType*       rxSecuredPduPtr;
+        const SecOC_RxAuthenticPduType*     rxAuthenticPduPtr;
         const SecOC_RxCryptographicPduType* rxCryptographicPduPtr;
         uint16                              index;
         boolean                             rxPduTag = FALSE;
@@ -2629,26 +2987,28 @@ BufReq_ReturnType SecOC_StartOfReception(
                 break;
             }
         }
-#else
-        (void)(id);
-        (void)(info);
-        (void)(TpSduLength);
-        *bufferSizePtr = 0u;
-#endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
-    /* PRQA S 2991,2995 -- */
     {
-        SECOC_DET_REPORT(SECOC_STARTOFRECEPTION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_STARTOFRECEPTION_ID, detErrorId);
     }
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
+#else
+    (void)(id);
+    (void)(info);
+    (void)(TpSduLength);
+    *bufferSizePtr = 0u;
+#endif /* SECOC_RX_TP_PDU_NUM > 0 */
+
+    SecOC_ArtiApiStop(2, SECOC_STARTOFRECEPTION_ID, bufReqRet);
+
     return bufReqRet;
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
 
+#if (SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U)
 #define SECOC_START_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
 /**
@@ -2659,11 +3019,13 @@ BufReq_ReturnType SecOC_StartOfReception(
 /* PRQA S 1503, 6070, 6010 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC */
 /* PRQA S 1532, 6080, 6050 ++ */ /* VL_QAC_OneFunRef, VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 /* PRQA S 6030, 6020 ++ */       /* VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STLIN */
-void SecOC_CsmGenerateJobFinishedIndication(const Crypto_JobType* job, Crypto_ResultType result)
+void SecOC_CsmGenerateJobFinishedIndication(uint32 jobId, Crypto_ResultType result)
 /* PRQA S 6030, 6020 -- */
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID, jobId, result);
+
     uint8 detErrorId = E_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
@@ -2681,14 +3043,14 @@ void SecOC_CsmGenerateJobFinishedIndication(const Crypto_JobType* job, Crypto_Re
         for (index = SECOC_CONST_0U; index < SECOC_TX_PDU_PRO_NUM; index++)
         {
             txPduProcessingDataPtr = SecOC_GetTxPduProcessingDataPtr(index);
-            if (txPduProcessingDataPtr->SecOCTxAuthServiceConfigRef->SecOCJobId == job->jobId)
+            if (txPduProcessingDataPtr->SecOCTxAuthServiceConfigRef->SecOCJobId == jobId)
             {
-                if (SECOC_IS_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_WAITING))
+                if (SecOC_IsTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_WAITING))
                 {
                     if (E_OK == result)
                     {
-                        SECOC_CLR_TX_EVENT(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
-                        SECOC_SET_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
+                        SecOC_ClearTxEvent(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
+                        SecOC_SetTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
                     }
                     else if (CRYPTO_E_BUSY == result)
                     {
@@ -2709,15 +3071,19 @@ void SecOC_CsmGenerateJobFinishedIndication(const Crypto_JobType* job, Crypto_Re
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID, detErrorId);
     }
 #else
     (void)detErrorId;
 #endif
+
+    SecOC_ArtiApiStop(1, SECOC_CSMGENERATEJOBFINISHEDINDICATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
+#endif /* SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U */
 
+#if (SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U)
 #define SECOC_START_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
 /**
@@ -2728,11 +3094,13 @@ void SecOC_CsmGenerateJobFinishedIndication(const Crypto_JobType* job, Crypto_Re
 /* PRQA S 1503, 6070, 6010 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC */
 /* PRQA S 1532, 6080, 6050 ++ */ /* VL_QAC_OneFunRef, VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 /* PRQA S 6030, 6020 ++ */       /* VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STLIN */
-void SecOC_CsmVerifyJobFinishedIndication(const Crypto_JobType* job, Crypto_ResultType result)
+void SecOC_CsmVerifyJobFinishedIndication(uint32 jobId, Crypto_ResultType result)
 /* PRQA S 6030, 6020 -- */
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(3, SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID, jobId, result);
+
     uint8 detErrorId = E_OK;
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     ApplicationType partId = SecOC_GetApplicationID();
@@ -2751,16 +3119,16 @@ void SecOC_CsmVerifyJobFinishedIndication(const Crypto_JobType* job, Crypto_Resu
         for (index = SECOC_CONST_0U; index < SECOC_RX_PDU_PRO_NUM; index++)
         {
             rxPduProcessingDataPtr = SecOC_GetRxPduProcessingDataPtr(index);
-            if (rxPduProcessingDataPtr->SecOCRxAuthServiceConfigRef->SecOCJobId == job->jobId)
+            if (rxPduProcessingDataPtr->SecOCRxAuthServiceConfigRef->SecOCJobId == jobId)
             {
-                if (SECOC_IS_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_WAITING))
+                if (SecOC_IsRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_WAITING))
                 {
                     rxRtPtr = SecOC_RxRtDataPtr(index);
                     if (E_OK == result)
                     {
                         SchM_Enter_SecOC_RxData();
-                        SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
-                        SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                        SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE);
+                        SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
 
                         /* @req SWS_SecOC_00239 */
                         /* Verification of the authenticator successfully executed,
@@ -2784,9 +3152,9 @@ void SecOC_CsmVerifyJobFinishedIndication(const Crypto_JobType* job, Crypto_Resu
                             || (SecOC_IgnoreVerificationResultIsEnabled))
                         {
                             SchM_Enter_SecOC_RxData();
-                            SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+                            SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE);
                             /* Continue to send authentic I-PDU to upper layer */
-                            SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                            SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
                             SchM_Exit_SecOC_RxData();
                         }
                         else if (
@@ -2822,14 +3190,17 @@ void SecOC_CsmVerifyJobFinishedIndication(const Crypto_JobType* job, Crypto_Resu
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
     if (detErrorId != E_OK)
     {
-        SECOC_DET_REPORT(SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID, detErrorId);
+        SecOC_ReportDetError(SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID, detErrorId);
     }
 #else
     (void)detErrorId;
 #endif
+
+    SecOC_ArtiApiStop(1, SECOC_CSMVERIFYJOBFINISHEDINDICATION_ID);
 }
 #define SECOC_STOP_SEC_CODE_FAST
 #include "SecOC_MemMap.h"
+#endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
 
 #define SECOC_START_SEC_CODE
 #include "SecOC_MemMap.h"
@@ -2846,13 +3217,17 @@ void SecOC_MainFunctionRx(void)
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
+    SecOC_ArtiApiStart(1, SECOC_MAINFUNCTIONRX_ID);
+
 #if (SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U)
-    uint16          index;
-    ApplicationType partId = SecOC_GetApplicationID();
-    if (SecOC_isInitState(partId) == SECOC_INIT)
+    uint16                           index;
+    ApplicationType                  partId             = SecOC_GetApplicationID();
+    const SecOC_PartitionConfigType* partitionConfigPtr = NULL_PTR;
+    if ((SecOC_isInitState(partId) == SECOC_INIT) && (SecOC_GetRxDataInPartition(partId, &partitionConfigPtr)))
     {
-        for (index = SECOC_CONST_0U; index < SECOC_RX_PDU_PRO_NUM; index++)
+        for (uint16 i = SECOC_CONST_0U; i < partitionConfigPtr->SecOCNumberofPuds; i++)
         {
+            index = partitionConfigPtr->SecOCPdus[i];
 #if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
             if (SECOC_RX_NONE == SecOC_RxRtDataPtr(index)->rxPduStatus)
             {
@@ -2883,8 +3258,14 @@ void SecOC_MainFunctionRx(void)
         }
     }
 #endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
-}
 
+    SecOC_ArtiApiStop(1, SECOC_MAINFUNCTIONRX_ID);
+}
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /**
  * This function performs the processing of the SecOC module's authentication
  * and verification processing for the Tx path.Perform corresponding processing
@@ -2898,16 +3279,19 @@ void SecOC_MainFunctionTx(void)
 /* PRQA S 1532, 6080, 6050 -- */
 /* PRQA S 1503, 6070, 6010 -- */
 {
-#if (SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U)
-    ApplicationType partId = SecOC_GetApplicationID();
-    uint16          index;
+    SecOC_ArtiApiStart(1, SECOC_MAINFUNCTIONTX_ID);
 
-    if (SecOC_isInitState(partId) == SECOC_INIT)
+#if (SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U)
+    ApplicationType                  partId = SecOC_GetApplicationID();
+    uint16                           index;
+    const SecOC_PartitionConfigType* partitionConfigPtr = NULL_PTR;
+    if ((SecOC_isInitState(partId) == SECOC_INIT) && (SecOC_GetTxDataInPartition(partId, &partitionConfigPtr)))
     {
         /* @req SWS_SecOC_00060,SWS_SecOC_00061 */
         /* Process Tx Pdus */
-        for (index = SECOC_CONST_0U; index < SECOC_TX_PDU_PRO_NUM; index++)
+        for (uint16 i = SECOC_CONST_0U; i < partitionConfigPtr->SecOCNumberofPuds; i++)
         {
+            index = partitionConfigPtr->SecOCPdus[i];
             if (SECOC_TX_NONE != SecOC_TxRtDataPtr(index)->txPduStatus)
             {
                 switch (SecOC_TxRtDataPtr(index)->txPduStatus)
@@ -2933,6 +3317,8 @@ void SecOC_MainFunctionTx(void)
         }
     }
 #endif /* SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U */
+
+    SecOC_ArtiApiStop(1, SECOC_MAINFUNCTIONTX_ID);
 }
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"
@@ -2940,7 +3326,6 @@ void SecOC_MainFunctionTx(void)
 /* ========================================== internal function definitions ========================================= */
 #define SECOC_START_SEC_CODE
 #include "SecOC_MemMap.h"
-
 SECOC_LOCAL ApplicationType SecOC_GetApplicationID(void)
 {
     ApplicationType applicationId = SECOC_CONST_0U;
@@ -2949,74 +3334,130 @@ SECOC_LOCAL ApplicationType SecOC_GetApplicationID(void)
 #endif
     return applicationId;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U)
-
-SECOC_LOCAL void SECOC_SET_TX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_SetTxEvent(uint16 i, uint16 e)
 {
     (SecOC_TxRtDataPtr(i)->SecOC_TxEvent |= (e));
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
-SECOC_LOCAL void SECOC_CLR_TX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_ClearTxEvent(uint16 i, uint16 e)
 {
     SecOC_TxRtDataPtr(i)->SecOC_TxEvent &= (uint16)(~(e));
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
-SECOC_LOCAL boolean SECOC_IS_TX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL boolean SecOC_IsTxEvent(uint16 i, uint16 e)
 {
     return ((SecOC_TxRtDataPtr(i)->SecOC_TxEvent & (e)) != SECOC_CONST_0U) ? TRUE : FALSE;
 }
 
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_PbTxPduProcessingType* SecOC_GetTxPduProcessingPtr(uint16 idx)
 {
-    return (&SecOC_ConfigPtr->SecOC_PbTxPduProcessing[idx]);
+    return (&SecOC_ConfigPtr->SecOCPbTxPduProcessing[idx]);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxPduProcessingType* SecOC_GetTxPduProcessingDataPtr(uint16 idx)
 {
     return (&SecOC_TxPduProcessingData[idx]);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxAuthenticPduLayerType* SecOC_GetTxAuthenticPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetTxPduProcessingPtr(idx)->SecOCTxAuthenticPduLayer);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL ApplicationType SecOC_GetTxChannelApplicationId(uint16 idx)
 {
     return (SecOC_GetTxPduProcessingPtr(idx)->ChannelApplicationId);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduLayerType* SecOC_GetTxSecuredPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetTxPduProcessingPtr(idx)->SecOCTxSecuredPduLayer);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduType* SecOC_GetTxSecuredPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduLayerPtr(idx)->SecOCTxSecuredPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxSecuredPduCollectionType* SecOC_GetTxSecuredPduCollectionPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduLayerPtr(idx)->SecOCTxSecuredPduCollection);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxAuthenticPduType* SecOC_GetTxAuthenticPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCTxAuthenticPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_TxCryptographicPduType* SecOC_GetTxCryptographicPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCTxCryptographicPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetTxUseMessageLinkPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCUseMessageLink);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint16 SecOC_FindProcessTxPduIndex(PduIdType TxPduId, uint16 startIdx, uint16 endIdx)
 {
     const SecOC_TxSecuredPduType*       txSecuredPduPtr;
@@ -3040,14 +3481,14 @@ SECOC_LOCAL uint16 SecOC_FindProcessTxPduIndex(PduIdType TxPduId, uint16 startId
             txAuthenticPduPtr = SecOC_GetTxAuthenticPduPtr(index);
             if (txAuthenticPduPtr->SecOCTxAuthenticPduId == TxPduId)
             {
-                SECOC_SET_TX_EVENT(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED);
+                SecOC_SetTxEvent(index, SECOC_TX_AUTHENTIC_PDU_CONFIRMED);
                 txPduTag = TRUE;
             }
 
             txCryptographicPduPtr = SecOC_GetTxCryptographicPduPtr(index);
             if (txCryptographicPduPtr->SecOCTxCryptographicPduId == TxPduId)
             {
-                SECOC_SET_TX_EVENT(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED);
+                SecOC_SetTxEvent(index, SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED);
                 txPduTag = TRUE;
             }
         }
@@ -3059,7 +3500,11 @@ SECOC_LOCAL uint16 SecOC_FindProcessTxPduIndex(PduIdType TxPduId, uint16 startId
     SchM_Exit_SecOC_TxData();
     return index;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index)
 /* PRQA S 5017, 6010, 6070  -- */
@@ -3075,10 +3520,10 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index)
     ApplicationType                  aplId                    = SecOC_GetApplicationID();
     uint8*                           SecOC_DataToAuthenticator;
     getAutherenticatorBuffer = SecOC_GetTxDataToAuthenticator(aplId, &SecOC_DataToAuthenticator);
-    if ((getAutherenticatorBuffer) && (SECOC_IS_TX_EVENT(index, SECOC_TX_REQUEST))
-        && (SECOC_IS_TX_EVENT(index, SECOC_TX_DATA_ACQUIRED)))
+    if ((getAutherenticatorBuffer) && (SecOC_IsTxEvent(index, SECOC_TX_REQUEST))
+        && (SecOC_IsTxEvent(index, SECOC_TX_DATA_ACQUIRED)))
     {
-        SECOC_CLR_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY);
+        SecOC_ClearTxEvent(index, SECOC_TX_TRANSMIT_RETRY);
         dataLength              = SecOC_TxCalcDataToAuthenticatorLength(index);
         ret                     = SecOC_TxConstructDataToAuthenticator(index);
         txRtPtr->txResultLength = SECOC_MAX_AUTHENTICATOR_LEN;
@@ -3122,12 +3567,12 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index)
 
                 if (SECOC_CRYPTO_PROCESSING_SYNC == jobPtr->SecOCCryptoProcessingType)
                 {
-                    SECOC_CLR_TX_EVENT(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
-                    SECOC_SET_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
+                    SecOC_ClearTxEvent(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
+                    SecOC_SetTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
                 }
                 else
                 {
-                    SECOC_SET_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_WAITING);
+                    SecOC_SetTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_WAITING);
                 }
                 SchM_Exit_SecOC_TxData();
             }
@@ -3166,7 +3611,11 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticator(uint16 index)
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint32 SecOC_TxCalcDataToAuthenticatorLength(uint16 index)
 {
     const SecOC_PbTxPduProcessingType* txPduProcessingPtr    = SecOC_GetTxPduProcessingPtr(index);
@@ -3191,6 +3640,11 @@ SECOC_LOCAL uint32 SecOC_TxCalcDataToAuthenticatorLength(uint16 index)
 
     return dataLength;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index)
 /* PRQA S 6070 -- */
@@ -3277,7 +3731,7 @@ SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index)
     if (txPduProcessingDataPtr->SecOCProvideTxTruncatedFreshnessValue)
     {
         /* @req SWS_SecOC_00223 */
-        ret = Rte_Call_FreshnessManagement_GetTxFreshnessTruncData(
+        ret = txPduProcessingDataPtr->rteCallOuts->SecOC_FreshnessManagementGetTxFreshnessTruncDataType(
             txPduProcessingPtr->SecOCFreshnessValueId,
             txRtPtr->txFreshnessValue,
             &freshnessValueLen,
@@ -3289,7 +3743,7 @@ SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index)
     {
 #if (STD_ON == SECOC_PROVIDE_TX_TRUNCATED_FRESHNESS_VALUE_DISABLED)
         /* @req SWS_SecOC_00224 */
-        ret = Rte_Call_FreshnessManagement_GetTxFreshness(
+        ret = txPduProcessingDataPtr->rteCallOuts->SecOC_FreshnessManagementGetTxFreshnessType(
             txPduProcessingPtr->SecOCFreshnessValueId,
             txRtPtr->txFreshnessValue,
             &freshnessValueLen);
@@ -3307,9 +3761,16 @@ SECOC_LOCAL Std_ReturnType SecOC_TxConstructDataToAuthenticator(uint16 index)
     }
     SchM_Exit_SecOC_Authentication();
 
+    (void)freshnessValueTruncLen;
+    (void)truncatedFreshnessValue;
+
     return ret;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxGenerateAuthenticatorRetry(uint16 index)
 {
     const SecOC_TxPduProcessingType* txPduProcessingPtr = SecOC_GetTxPduProcessingDataPtr(index);
@@ -3330,11 +3791,15 @@ SECOC_LOCAL void SecOC_TxGenerateAuthenticatorRetry(uint16 index)
 
 /* @req SWS_SecOC_00155 */
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-        SECOC_DET_REPORT(SECOC_MAINFUNCTIONTX_ID, SECOC_E_CRYPTO_FAILURE);
+        SecOC_ReportDetError(SECOC_MAINFUNCTIONTX_ID, SECOC_E_CRYPTO_FAILURE);
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
 /* PRQA S 6070 -- */
@@ -3361,8 +3826,8 @@ SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
         {
             txRtPtr->txResultBuffer[i] = SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN;
         }
-        SECOC_CLR_TX_EVENT(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
-        SECOC_SET_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
+        SecOC_ClearTxEvent(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
+        SecOC_SetTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
     }
     else
     {
@@ -3379,7 +3844,7 @@ SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
     {
         SchM_Enter_SecOC_TxData();
         /*  Cancel transmission */
-        SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+        SecOC_ClearTxEvent(index, SECOC_EVENT_TX_ALL);
         txRtPtr->txPduStatus    = SECOC_TX_NONE;
         txRtPtr->txAuthBuildCnt = SECOC_CONST_0U;
         SchM_Exit_SecOC_TxData();
@@ -3398,7 +3863,11 @@ SECOC_LOCAL void SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3406,14 +3875,14 @@ SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index)
     const SecOC_TxSecuredPduType* txSecuredPduPtr = SecOC_GetTxSecuredPduPtr(index);
     uint16                        freshnessValueId;
 
-    if ((SECOC_IS_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED))
-        || (SECOC_IS_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY)))
+    if ((SecOC_IsTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED))
+        || (SecOC_IsTxEvent(index, SECOC_TX_TRANSMIT_RETRY)))
     {
-        SECOC_CLR_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
+        SecOC_ClearTxEvent(index, SECOC_TX_GENERATE_FINISH_IND_CONFIRMED);
         if (NULL_PTR != txSecuredPduPtr)
         {
             /* SecOC transmit the Secured I-PDU in one message */
-            if (!SECOC_IS_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY))
+            if (!SecOC_IsTxEvent(index, SECOC_TX_TRANSMIT_RETRY))
             {
                 SecOC_TxConstructSecuredIPDU(index);
             }
@@ -3430,14 +3899,14 @@ SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index)
              */
 
             /* Send original Authentic I-PDU */
-            if (!SECOC_IS_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY))
+            if (!SecOC_IsTxEvent(index, SECOC_TX_TRANSMIT_RETRY))
             {
                 SecOC_TxConstructAuthenticIPDU(index);
             }
             SecOC_TxBroadcastAuthenticIPDU(index);
 
             /* Send Cryptographic I-PDU */
-            if (!SECOC_IS_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY))
+            if (!SecOC_IsTxEvent(index, SECOC_TX_TRANSMIT_RETRY))
             {
                 SecOC_TxConstructCryptographicIPDU(index);
             }
@@ -3446,12 +3915,12 @@ SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index)
         SecOC_TxPduRunTimeType* txRtPtr = SecOC_TxRtDataPtr(index);
         if (SECOC_MAX_TRANSMITRETRIES_NUM > txRtPtr->retryTransmitNum)
         {
-            SECOC_SET_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY);
+            SecOC_SetTxEvent(index, SECOC_TX_TRANSMIT_RETRY);
         }
         else
         {
             txRtPtr->txPduStatus = SECOC_TX_NONE;
-            SECOC_CLR_TX_EVENT(index, SECOC_TX_TRANSMIT_RETRY);
+            SecOC_ClearTxEvent(index, SECOC_TX_TRANSMIT_RETRY);
         }
 
         /* @req SWS_SecOC_00232,SWS_SecOC_00233 */
@@ -3462,12 +3931,16 @@ SECOC_LOCAL void SecOC_TxSendSecuredIPDU(uint16 index)
 #if (SECOC_CFUNC == SECOC_QUERY_FRESHNESS_VALUE)
             (void)SecOC_SPduTxConfirmation(freshnessValueId);
 #else
-            (void)Rte_Call_FreshnessManagement_SPduTxConfirmation(freshnessValueId);
-#endif
+            (void)SecOC_GetTxPduProcessingDataPtr(index)->rteCallOuts->SecOC_SPduTxConfirmationType(freshnessValueId);
+#endif /* SECOC_CFUNC == SECOC_QUERY_FRESHNESS_VALUE */
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxConstructSecuredIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3533,12 +4006,8 @@ SECOC_LOCAL void SecOC_TxConstructSecuredIPDU(uint16 index)
         fvTruncLenInBits  = txPduProcessingPtr->SecOCFreshnessValueTruncLength;
         fvLenInBytes      = (uint8)SECOC_BIT_TO_BYTE(fvLenInBits);
         fvTruncLenInBytes = (uint8)SECOC_BIT_TO_BYTE(fvTruncLenInBits);
-        if (SECOC_CONST_0U != (SECOC_MOD_FROM_EIGHT((fvLenInBits))))
-        {
-            fvOffsetBits = SECOC_CONST_8U - (uint16)SECOC_MOD_FROM_EIGHT(fvLenInBits);
-        }
 
-        fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits) + fvOffsetBits;
+        fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits);
 
         SecOC_ArrayShiftLeft(txRtPtr->txFreshnessValue, fvLenInBytes, fvOffsetBits);
         (void)IStdLib_MemCpy(&destPtr[offset], txRtPtr->txFreshnessValue, fvTruncLenInBytes);
@@ -3576,7 +4045,11 @@ SECOC_LOCAL void SecOC_TxConstructSecuredIPDU(uint16 index)
     SecOC_ArrayOrOp(&destPtr[offset], &txRtPtr->txResultBuffer[SECOC_CONST_0U], authInfoTruncLenInBytes);
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxConstructAuthenticIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3621,7 +4094,11 @@ SECOC_LOCAL void SecOC_TxConstructAuthenticIPDU(uint16 index)
     (void)IStdLib_MemCpy(&destPtr[offset], srcPtr, txRtPtr->txPduLength);
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxConstructCryptographicIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3656,12 +4133,7 @@ SECOC_LOCAL void SecOC_TxConstructCryptographicIPDU(uint16 index)
         fvLenInBytes      = (uint8)SECOC_BIT_TO_BYTE((uint16)fvLenInBits);
         fvTruncLenInBytes = (uint8)SECOC_BIT_TO_BYTE((uint16)fvTruncLenInBits);
 
-        if (SECOC_CONST_0U != (SECOC_MOD_FROM_EIGHT((fvLenInBits))))
-        {
-            fvOffsetBits = SECOC_CONST_8U - (uint16)SECOC_MOD_FROM_EIGHT(fvLenInBits);
-        }
-
-        fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits) + fvOffsetBits;
+        fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits);
 
         SchM_Enter_SecOC_TxData();
         SecOC_ArrayShiftLeft(txRtPtr->txFreshnessValue, fvLenInBytes, fvOffsetBits);
@@ -3742,7 +4214,11 @@ SECOC_LOCAL void SecOC_TxConstructCryptographicIPDU(uint16 index)
 #endif /* SECOC_MAX_MSG_LINK_LEN > 0 */
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxBroadcastSecuredIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3801,7 +4277,11 @@ SECOC_LOCAL void SecOC_TxBroadcastSecuredIPDU(uint16 index)
 #endif
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxBroadcastAuthenticIPDU(uint16 index)
 {
     const SecOC_TxAuthenticPduType* txAuthenticPduPtr = SecOC_GetTxAuthenticPduPtr(index);
@@ -3831,7 +4311,11 @@ SECOC_LOCAL void SecOC_TxBroadcastAuthenticIPDU(uint16 index)
 #endif
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxBroadcastCryptographicIPDU(uint16 index)
 /* PRQA S 6070 -- */
@@ -3893,8 +4377,12 @@ SECOC_LOCAL void SecOC_TxBroadcastCryptographicIPDU(uint16 index)
 #endif
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL  */
 SECOC_LOCAL void SecOC_TxTpAcquireData(uint16 index)
 /* PRQA S 6070 -- */
@@ -3905,9 +4393,8 @@ SECOC_LOCAL void SecOC_TxTpAcquireData(uint16 index)
     PduLengthType                      availableDataLen;
     PduInfoType                        pduInfo;
     PduIdType                          pduId;
-    uint16                             offset = SECOC_CONST_0U;
 
-    if ((SECOC_IS_TX_EVENT(index, SECOC_TX_REQUEST)) && (!SECOC_IS_TX_EVENT(index, SECOC_TX_DATA_ACQUIRED)))
+    if ((SecOC_IsTxEvent(index, SECOC_TX_REQUEST)) && (!SecOC_IsTxEvent(index, SECOC_TX_DATA_ACQUIRED)))
     {
         SchM_Enter_SecOC_TxData();
         pduInfo.SduDataPtr = txPduProcessingPtr->SecOCAuthenticPduBufferRef;
@@ -3934,12 +4421,16 @@ SECOC_LOCAL void SecOC_TxTpAcquireData(uint16 index)
         else
         {
             /* BUFREQ_OK */
-            SECOC_SET_TX_EVENT(index, SECOC_TX_DATA_ACQUIRED);
+            SecOC_SetTxEvent(index, SECOC_TX_DATA_ACQUIRED);
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_TxChannelReset(uint16 index)
 {
     const SecOC_TxPduProcessingType* txPduProcessingDataPtr = SecOC_GetTxPduProcessingDataPtr(index);
@@ -3970,75 +4461,127 @@ SECOC_LOCAL void SecOC_TxChannelReset(uint16 index)
     }
 
     /* Clear tx event */
-    SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+    SecOC_ClearTxEvent(index, SECOC_EVENT_TX_ALL);
     SchM_Exit_SecOC_TxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_TX_PDU_PRO_NUM > SECOC_CONST_0U */
 
 #if (SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U)
-SECOC_LOCAL void SECOC_SET_RX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_SetRxEvent(uint16 i, uint16 e)
 {
     (SecOC_RxRtDataPtr(i)->SecOC_RxEvent |= (e));
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
-SECOC_LOCAL void SECOC_CLR_RX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL void SecOC_ClearRxEvent(uint16 i, uint16 e)
 {
     /* PRQA S 4397 ++ */ /* VL_SecOC_4397 */
     (SecOC_RxRtDataPtr(i)->SecOC_RxEvent &= ~(e));
     /* PRQA S 4397 -- */
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
-SECOC_LOCAL boolean SECOC_IS_RX_EVENT(uint16 i, uint16 e)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL boolean SecOC_IsRxEvent(uint16 i, uint16 e)
 {
     return ((SecOC_RxRtDataPtr(i)->SecOC_RxEvent & (e)) != SECOC_CONST_0U) ? TRUE : FALSE;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_PbRxPduProcessingType* SecOC_GetRxPduProcessingPtr(uint16 idx)
 {
-    return &SecOC_ConfigPtr->SecOC_PbRxPduProcessing[idx];
+    return &SecOC_ConfigPtr->SecOCPbRxPduProcessing[idx];
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL ApplicationType SecOC_GetRxChannelApplicationId(uint16 idx)
 {
     return (SecOC_GetRxPduProcessingPtr(idx)->ChannelApplicationId);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxPduProcessingType* SecOC_GetRxPduProcessingDataPtr(uint16 idx)
 {
     return (const SecOC_RxPduProcessingType*)&SecOC_RxPduProcessingData[idx];
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxAuthenticPduLayerType* SecOC_GetRxAuthenticPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetRxPduProcessingPtr(idx)->SecOCRxAuthenticPduLayer);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduLayerType* SecOC_GetRxSecuredPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetRxPduProcessingPtr(idx)->SecOCRxSecuredPduLayer);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduType* SecOC_GetRxSecuredPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduLayerPtr(idx)->SecOCRxSecuredPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxSecuredPduCollectionType* SecOC_GetRxSecuredPduCollectionPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduLayerPtr(idx)->SecOCRxSecuredPduCollection);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxAuthenticPduType* SecOC_GetRxAuthenticPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCRxAuthenticPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_RxCryptographicPduType* SecOC_GetRxCryptographicPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCRxCryptographicPdu);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6030, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STCAL */
 SECOC_LOCAL void SecOC_RxIfSecuredPduIndication(uint16 index, PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 5017, 6010, 6030, 6070 -- */
@@ -4107,8 +4650,8 @@ SECOC_LOCAL void SecOC_RxIfSecuredPduIndication(uint16 index, PduIdType RxPduId,
                     SchM_Enter_SecOC_RxData();
                     (void)IStdLib_MemCpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_SECURED_PDU);
+                    SecOC_SetRxEvent(index, SECOC_RX_INDICATION);
+                    SecOC_SetRxEvent(index, SECOC_RX_SECURED_PDU);
                     rxRtPtr->rxPduStatus     = SECOC_RX_CALC;
                     rxRtPtr->rxSecuredPduLen = pduInfo.SduLength;
                     /* @req SWS_SecOC_00235 */
@@ -4129,7 +4672,11 @@ SECOC_LOCAL void SecOC_RxIfSecuredPduIndication(uint16 index, PduIdType RxPduId,
         /* Received length is smaller than configured length, discard the IPDU*/
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6030, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STCAL */
 /* PRQA S 6080 ++ */                   /* VL_MTR_SecOC_STPTH */
 SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoType* PduInfoPtr)
@@ -4182,7 +4729,7 @@ SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoTyp
                 rxRtPtr->rxAuthBuildAttempts   = SECOC_CONST_0U;
                 rxRtPtr->rxVerifyAttempts      = SECOC_CONST_0U;
                 (void)IStdLib_MemSet(rxRtPtr->rxFreshnessValue, 0u, sizeof(rxRtPtr->rxFreshnessValue));
-                SECOC_CLR_RX_EVENT(
+                SecOC_ClearRxEvent(
                     index,
                     SECOC_RX_INDICATION | SECOC_RX_AUTHENTIC_PDU | SECOC_RX_PARSED_MESSAGE
                         | SECOC_RX_VERIFY_FINISH_IND_WAITING);
@@ -4215,9 +4762,9 @@ SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoTyp
                     (void)IStdLib_MemCpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
                     /* @req SWS_SecOC_00203,SWS_SecOC_00208 */
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU);
-                    if ((SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
+                    SecOC_SetRxEvent(index, SECOC_RX_INDICATION);
+                    SecOC_SetRxEvent(index, SECOC_RX_AUTHENTIC_PDU);
+                    if ((SecOC_IsRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
                         || (((SECOC_OVERRIDE_SKIP_UNTIL_NOTICE == rxRtPtr->rxOverrideStatus)
                              || (SECOC_OVERRIDE_SKIP_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus))
                             && (rxRtPtr->rxNumOfMsgToOverride > SECOC_CONST_0U)))
@@ -4241,7 +4788,11 @@ SECOC_LOCAL void SecOC_RxIfAuthenticPduIndication(uint16 index, const PduInfoTyp
         /* Received length is smaller than configured length, discard the IPDU*/
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6030, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STCAL */
 /* PRQA S 6080 ++ */                   /* VL_MTR_SecOC_STPTH */
 SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInfoType* PduInfoPtr)
@@ -4295,7 +4846,7 @@ SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInf
                 rxRtPtr->rxAuthBuildAttempts   = SECOC_CONST_0U;
                 rxRtPtr->rxVerifyAttempts      = SECOC_CONST_0U;
                 (void)IStdLib_MemSet(rxRtPtr->rxFreshnessValue, 0u, sizeof(rxRtPtr->rxFreshnessValue));
-                SECOC_CLR_RX_EVENT(
+                SecOC_ClearRxEvent(
                     index,
                     SECOC_RX_INDICATION | SECOC_RX_CRYPTOGRAPHIC_PDU | SECOC_RX_PARSED_MESSAGE
                         | SECOC_RX_VERIFY_FINISH_IND_WAITING);
@@ -4323,15 +4874,15 @@ SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInf
             if (interBufLen >= pduInfo.SduLength)
             {
                 if ((NULL_PTR == sameBufferPtr) || (!sameBufferPtr->SecOCSameBufferInUse[SECOC_CONST_0U])
-                    || (SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU)))
+                    || (SecOC_IsRxEvent(index, SECOC_RX_AUTHENTIC_PDU)))
                 {
                     SchM_Enter_SecOC_RxData();
                     (void)IStdLib_MemCpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
                     /* @req SWS_SecOC_00203,SWS_SecOC_00208 */
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU);
-                    if (SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU))
+                    SecOC_SetRxEvent(index, SECOC_RX_INDICATION);
+                    SecOC_SetRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU);
+                    if (SecOC_IsRxEvent(index, SECOC_RX_AUTHENTIC_PDU))
                     {
                         rxRtPtr->rxPduStatus = SECOC_RX_CALC;
                     }
@@ -4352,8 +4903,12 @@ SECOC_LOCAL void SecOC_RxIfCryptographicPduIndication(uint16 index, const PduInf
         /* Received length is smaller than configured length, discard the IPDU*/
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U */
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6020, 6030 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STLIN, VL_MTR_SecOC_STMIF */
 /* PRQA S 6070, 6080, 6050 ++ */       /* VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
@@ -4386,9 +4941,9 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
     /* If SecOCRxSecuredPduCollection is used then SecOC shall not perform any
      * verification until it has received both the Authentic I-PDU and
      * Cryptographic I-PDU which make up the Secured I-PDU.*/
-    if (((SECOC_IS_RX_EVENT(index, SECOC_RX_INDICATION)) && (SECOC_IS_RX_EVENT(index, SECOC_RX_SECURED_PDU)))
-        || ((SECOC_IS_RX_EVENT(index, SECOC_RX_INDICATION)) && (SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU))
-            && (SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU)))
+    if (((SecOC_IsRxEvent(index, SECOC_RX_INDICATION)) && (SecOC_IsRxEvent(index, SECOC_RX_SECURED_PDU)))
+        || ((SecOC_IsRxEvent(index, SECOC_RX_INDICATION)) && (SecOC_IsRxEvent(index, SECOC_RX_AUTHENTIC_PDU))
+            && (SecOC_IsRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU)))
         || (((SECOC_OVERRIDE_SKIP_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus)
              && (rxRtPtr->rxNumOfMsgToOverride > SECOC_CONST_0U))
             || (SECOC_OVERRIDE_SKIP_UNTIL_NOTICE == rxRtPtr->rxOverrideStatus)))
@@ -4454,7 +5009,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
                         SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueTruncLength));
                     if (SECOC_CONST_0U != SECOC_MOD_FROM_EIGHT(fvTruncLenInBits))
                     {
-                        SecOC_ArrayShiftRight(
+                        SecOC_ClearLowBit(
                             rxRtPtr->rxParsedFreshnessValue,
                             fvLenInBytes,
                             (SECOC_CONST_8U - (uint16)SECOC_MOD_FROM_EIGHT((uint16)fvTruncLenInBits)));
@@ -4518,7 +5073,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
                     /* Parse Authentic PDU */
                     (void)IStdLib_MemCpy(rxRtPtr->rxParsedAuthPduBufPtr, &rxAuthenticPduBufPtr[offset], authPduLen);
 
-                    if (SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
+                    if (SecOC_IsRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
                     {
                         /* Parse Freshness value */
                         (void)IStdLib_MemCpy(
@@ -4527,7 +5082,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
                             SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueTruncLength));
                         if (SECOC_CONST_0U != SECOC_MOD_FROM_EIGHT(fvTruncLenInBits))
                         {
-                            SecOC_ArrayShiftRight(
+                            SecOC_ClearLowBit(
                                 rxRtPtr->rxParsedFreshnessValue,
                                 fvLenInBytes,
                                 (SECOC_CONST_8U - (uint16)SECOC_MOD_FROM_EIGHT((uint16)fvTruncLenInBits)));
@@ -4551,7 +5106,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
             SchM_Enter_SecOC_RxData();
             if (securedRxPduVerification)
             {
-                SECOC_SET_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+                SecOC_SetRxEvent(index, SECOC_RX_PARSED_MESSAGE);
             }
             else
             {
@@ -4559,7 +5114,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
                 /* SecOC extract the Authentic I-PDU without Authentication*/
                 rxRtPtr->rxVerifyResult     = CRYPTO_E_VER_NOT_OK;
                 rxRtPtr->rxSkipVerification = TRUE;
-                SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
             }
             SchM_Exit_SecOC_RxData();
         }
@@ -4584,7 +5139,7 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
             SecOC_RxChannelReset(index);
         }
         SchM_Enter_SecOC_RxData();
-        SECOC_CLR_RX_EVENT(index, SECOC_RX_INDICATION);
+        SecOC_ClearRxEvent(index, SECOC_RX_INDICATION);
         SchM_Exit_SecOC_RxData();
     }
     else
@@ -4592,12 +5147,16 @@ SECOC_LOCAL void SecOC_RxParseSecuredIpdu(uint16 index)
         rxRtPtr->rxPduStatus = SECOC_RX_NONE;
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index)
 {
     SecOC_RxPduRunTimeType* rxRtPtr = SecOC_RxRtDataPtr(index);
 
-    if (SECOC_IS_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE))
+    if (SecOC_IsRxEvent(index, SECOC_RX_PARSED_MESSAGE))
     {
         /* Handle numberOfMessageOverride counter */
         rxRtPtr->rxBakNumOfMsgToOverride = rxRtPtr->rxNumOfMsgToOverride;
@@ -4616,7 +5175,7 @@ SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index)
         else
         {
             /* Not performe authenticator verification */
-            SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE | SECOC_RX_CRYPTOGRAPHIC_PDU);
+            SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE | SECOC_RX_CRYPTOGRAPHIC_PDU);
             rxRtPtr->rxVeryfyResult = SECOC_NO_VERIFICATION;
 
             if ((SECOC_OVERRIDE_SKIP_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus)
@@ -4624,7 +5183,7 @@ SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index)
             {
                 /* I-PDU is sent to upper layer */
                 rxRtPtr->rxVerifyResult = CRYPTO_E_VER_NOT_OK;
-                SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
             }
             else
             {
@@ -4647,6 +5206,11 @@ SECOC_LOCAL void SecOC_RxVerifyProcee(uint16 index)
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070, 6030 ++ */ /* VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STMIF */
 SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
 /* PRQA S 6070, 6030 -- */
@@ -4661,7 +5225,7 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
     uint8*                             SecOC_DataToAuthenticator;
     boolean getAutherenticatorBuffer = SecOC_GetRxDataToAuthenticator(aplId, &SecOC_DataToAuthenticator);
 
-    if ((getAutherenticatorBuffer) && (SECOC_IS_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE)))
+    if ((getAutherenticatorBuffer) && (SecOC_IsRxEvent(index, SECOC_RX_PARSED_MESSAGE)))
     {
         dataLength = SecOC_RxCalcDataToAuthenticatorLength(index);
         ret        = SecOC_RxConstructDataToAuthenticator(index);
@@ -4705,8 +5269,8 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
             {
                 if (SECOC_CRYPTO_PROCESSING_SYNC == jobPtr->SecOCCryptoProcessingType)
                 {
-                    SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                    SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE);
+                    SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
                     /* @req SWS_SecOC_00239 */
                     /* Verification of the authenticator successfully executed,
                      * the authentication build counter shall be set to 0. */
@@ -4714,7 +5278,7 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
                 }
                 else
                 {
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_WAITING);
+                    SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_WAITING);
                 }
             }
             else if (CRYPTO_E_BUSY == ret)
@@ -4733,7 +5297,7 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
                     || (SecOC_IgnoreVerificationResultIsEnabled))
                 {
                     /* Continue to send authentic I-PDU to upper layer */
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                    SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
                 }
                 else if (
                     (E_NOT_OK != ret)
@@ -4767,7 +5331,11 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticationInfo(uint16 index)
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL uint32 SecOC_RxCalcDataToAuthenticatorLength(uint16 index)
 {
     const SecOC_PbRxPduProcessingType* rxPduProcessingPtr = SecOC_GetRxPduProcessingPtr(index);
@@ -4789,7 +5357,11 @@ SECOC_LOCAL uint32 SecOC_RxCalcDataToAuthenticatorLength(uint16 index)
 
     return dataLength;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070, 6020 ++ */ /* VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STLIN */
 SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index)
 /* PRQA S 6070, 6020 -- */
@@ -4908,7 +5480,7 @@ SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index)
     if (rxPduProcessingDataPtr->SecOCUseAuthDataFreshness)
     {
         /* @req SWS_SecOC_00244 */
-        ret = Rte_Call_FreshnessManagement_GetRxFreshnessAuthData(
+        ret = rxPduProcessingDataPtr->rteCallOuts->SecOC_FreshnessManagementGetRxFreshnessAuthDataType(
             rxPduProcessingPtr->SecOCFreshnessValueId,
             rxRtPtr->rxParsedFreshnessValue,
             rxPduProcessingPtr->SecOCFreshnessValueTruncLength,
@@ -4923,7 +5495,7 @@ SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index)
     {
 #if (STD_ON == SECOC_USE_AUTHDATA_FRESHNESS_DISABLED)
         /* @req SWS_SecOC_00245 */
-        ret = Rte_Call_FreshnessManagement_GetRxFreshness(
+        ret = rxPduProcessingDataPtr->rteCallOuts->SecOC_FreshnessManagementGetRxFreshnessType(
             rxPduProcessingPtr->SecOCFreshnessValueId,
             rxRtPtr->rxParsedFreshnessValue,
             rxPduProcessingPtr->SecOCFreshnessValueTruncLength,
@@ -4963,9 +5535,15 @@ SECOC_LOCAL Std_ReturnType SecOC_RxConstructDataToAuthenticator(uint16 index)
         SecOC_RxChannelReset(index);
     }
 
+    (void)authDataFreshnessPtr;
+
     return ret;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL */
 SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index)
 /* PRQA S 6070 -- */
@@ -4994,7 +5572,7 @@ SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index)
             SchM_Enter_SecOC_RxData();
             /* According override setup, send authentic IPDU to upper layer */
             rxRtPtr->rxVerifyResult = CRYPTO_E_VER_NOT_OK;
-            SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+            SecOC_SetRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
             SchM_Exit_SecOC_RxData();
         }
         else
@@ -5007,7 +5585,7 @@ SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index)
             SecOC_RxReportVerifyStatus(index);
 
             /* Authentication Build retry fail */
-            if (SECOC_IS_RX_EVENT(index, SECOC_RX_SECURED_PDU))
+            if (SecOC_IsRxEvent(index, SECOC_RX_SECURED_PDU))
             {
                 /* Not use SecOCRxSecuredPduCollection, channel reset */
                 SecOC_RxChannelReset(index);
@@ -5017,7 +5595,7 @@ SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index)
                 SchM_Enter_SecOC_RxData();
                 /* Use SecOCRxSecuredPduCollection,Authentication build may
                  * success when Authentic I-PDU or Cryptographic PDU Update */
-                SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+                SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE);
                 SchM_Exit_SecOC_RxData();
             }
         }
@@ -5025,11 +5603,15 @@ SECOC_LOCAL void SecOC_RxAuthenticationBuildRetry(uint16 index)
         /* @req SWS_SecOC_00248 */
         /* Report runtime error to DET */
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-        SECOC_DET_REPORT_RUNTIMEERROR(SECOC_MAINFUNCTIONRX_ID, SECOC_E_FRESHNESS_FAILURE);
+        SecOC_ReportDetRuntimeError(SECOC_MAINFUNCTIONRX_ID, SECOC_E_FRESHNESS_FAILURE);
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL */
 SECOC_LOCAL void SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
 /* PRQA S 6070 -- */
@@ -5058,7 +5640,7 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
         SecOC_RxReportVerifyStatus(index);
 
         /* Verify Authentication retry fail */
-        if (SECOC_IS_RX_EVENT(index, SECOC_RX_SECURED_PDU))
+        if (SecOC_IsRxEvent(index, SECOC_RX_SECURED_PDU))
         {
             /* Not use SecOCRxSecuredPduCollection, channel reset */
             SecOC_RxChannelReset(index);
@@ -5068,26 +5650,32 @@ SECOC_LOCAL void SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
             SchM_Enter_SecOC_RxData();
             /* Use SecOCRxSecuredPduCollection,Verify authentication may
                success when Authentic I-PDU or Cryptographic PDU Update */
-            SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+            SecOC_ClearRxEvent(index, SECOC_RX_PARSED_MESSAGE);
             SchM_Exit_SecOC_RxData();
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_MAX_MSG_LINK_LEN > SECOC_CONST_0U)
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL const SecOC_UseMessageLinkType* SecOC_GetRxUseMessageLinkPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCUseMessageLink);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL */
 SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index)
 /* PRQA S 6070 -- */
 {
-    const SecOC_PbRxPduProcessingType*       rxPduProcessingPtr = SecOC_GetRxPduProcessingPtr(index);
-    const SecOC_SameBufferPduCollectionType* sameBufferPtr =
-        SecOC_GetRxPduProcessingDataPtr(index)->SecOCSameBufferPduRef;
+    const SecOC_PbRxPduProcessingType*      rxPduProcessingPtr        = SecOC_GetRxPduProcessingPtr(index);
     const SecOC_RxPduRunTimeType*           rxRtPtr                   = SecOC_RxRtDataPtr(index);
     const SecOC_RxSecuredPduCollectionType* rxSecuredPduCollectionPtr = SecOC_GetRxSecuredPduCollectionPtr(index);
     const SecOC_UseMessageLinkType*         msgLinkPtr;
@@ -5099,7 +5687,6 @@ SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index)
     uint8                                   msgCryptoLinkArray[SECOC_MAX_MSG_LINK_LEN] = {0};
     uint16                                  offsetBits;
     PduLengthType                           authPduLen;
-    uint16                                  msgLinkStartPos;
     uint16                                  msgLinkLenInByte;
     uint8                                   headerLen;
     Std_ReturnType                          ret = E_OK;
@@ -5108,9 +5695,8 @@ SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index)
     {
         SchM_Enter_SecOC_RxData();
         msgLinkPtr = SecOC_GetRxUseMessageLinkPtr(index);
-        if ((NULL_PTR != msgLinkPtr) && (SECOC_IS_RX_EVENT(index, SECOC_RX_INDICATION))
-            && (SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU))
-            && (SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU)))
+        if ((NULL_PTR != msgLinkPtr) && (SecOC_IsRxEvent(index, SECOC_RX_INDICATION))
+            && (SecOC_IsRxEvent(index, SECOC_RX_AUTHENTIC_PDU)) && (SecOC_IsRxEvent(index, SECOC_RX_CRYPTOGRAPHIC_PDU)))
         {
             /* Pickup message link from Authentic I-PDU */
             rxAuthenticPduPtr     = SecOC_GetRxAuthenticPduPtr(index);
@@ -5154,8 +5740,12 @@ SECOC_LOCAL Std_ReturnType SecOC_RxMessageLinkCheck(uint16 index)
 
     return ret;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_MAX_MSG_LINK_LEN > SECOC_CONST_0U */
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL */
 SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
 /* PRQA S 6070 -- */
@@ -5168,9 +5758,9 @@ SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
     BufReq_ReturnType bufReqRet;
 #endif
 
-    if (SECOC_IS_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED))
+    if (SecOC_IsRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED))
     {
-        SECOC_CLR_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+        SecOC_ClearRxEvent(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
 
         /* @req SWS_SecOC_00081,SWS_SecOC_00088 */
         if ((SECOC_OVERRIDE_PASS_UNTIL_NOTICE == rxRtPtr->rxOverrideStatus)
@@ -5211,7 +5801,7 @@ SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
                 if ((BUFREQ_OK == bufReqRet) && (rxRtPtr->upLayerBufSize > SECOC_CONST_0U))
                 {
                     SchM_Enter_SecOC_RxData();
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER);
+                    SecOC_SetRxEvent(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER);
                     SchM_Exit_SecOC_RxData();
                 }
                 else
@@ -5255,13 +5845,16 @@ SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
         SecOC_RxReportVerifyStatus(index);
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
 #if (SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_SecOC_STCAL */
 SECOC_LOCAL void SecOC_RxTransTpDataToUpperLayer(uint16 index)
 /* PRQA S 6070 -- */
 {
-    const SecOC_PbRxPduProcessingType*   rxPduProcessingPtr     = SecOC_GetRxPduProcessingPtr(index);
     const SecOC_RxAuthenticPduLayerType* rxAuthenticPduLayerPtr = SecOC_GetRxAuthenticPduLayerPtr(index);
     SecOC_RxPduRunTimeType*              rxRtPtr                = SecOC_RxRtDataPtr(index);
     BufReq_ReturnType                    bufReqRet;
@@ -5271,7 +5864,7 @@ SECOC_LOCAL void SecOC_RxTransTpDataToUpperLayer(uint16 index)
     PduIdType                            pduId;
     boolean                              quitFlag = FALSE;
 
-    if (SECOC_IS_RX_EVENT(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER))
+    if (SecOC_IsRxEvent(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER))
     {
         SchM_Enter_SecOC_RxData();
         pduLen = SECOC_MIN(rxRtPtr->sduRemaining, rxRtPtr->upLayerBufSize);
@@ -5322,7 +5915,11 @@ SECOC_LOCAL void SecOC_RxTransTpDataToUpperLayer(uint16 index)
         }
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6030, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STCAL */
 /* PRQA S 6080 ++ */                   /* VL_MTR_SecOC_STPTH */
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpSecuredPduStartOfReception(
@@ -5389,8 +5986,8 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpSecuredPduStartOfReception(
                         rxRtPtr->tpRxPduOffset += info->SduLength;
                     }
 
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER);
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_SECURED_PDU);
+                    SecOC_SetRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER);
+                    SecOC_SetRxEvent(index, SECOC_RX_SECURED_PDU);
                     rxRtPtr->rxPduStatus      = SECOC_RX_CALC;
                     rxRtPtr->rxSecuredPduLen  = TpSduLength;
                     rxRtPtr->rxVerifyAttempts = SECOC_CONST_0U;
@@ -5428,7 +6025,11 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpSecuredPduStartOfReception(
 
     return bufReqRet;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6010, 6030, 6070 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STCAL */
 /* PRQA S 6080, 6050 ++ */             /* VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpAuthenticPduStartOfReception(
@@ -5517,7 +6118,7 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpAuthenticPduStartOfReception(
                         rxRtPtr->tpRxPduOffset += info->SduLength;
                     }
 
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER);
+                    SecOC_SetRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER);
                     rxRtPtr->rxPduStatus       = SECOC_RX_CALC;
                     rxRtPtr->rxAuthenticPduLen = TpSduLength;
                     rxRtPtr->rxVerifyAttempts  = SECOC_CONST_0U;
@@ -5555,7 +6156,11 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpAuthenticPduStartOfReception(
 
     return bufReqRet;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 /* PRQA S 5017, 6070, 6010, 6050 ++ */ /* VL_SecOC_5017, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STST3 */
 /* PRQA S 6030 ++ */                   /* VL_MTR_SecOC_STMIF */
 SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
@@ -5577,7 +6182,7 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
 
     if ((SECOC_CONST_0U != TpSduLength) && (NULL_PTR != info) && (info->SduLength <= TpSduLength))
     {
-        if ((SECOC_RX_NONE != rxRtPtr->rxPduStatus) && (SECOC_IS_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
+        if ((SECOC_RX_NONE != rxRtPtr->rxPduStatus) && (SecOC_IsRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
         {
             switch (rxPduProcessingDataPtr->SecOCReceptionOverflowStrategy)
             {
@@ -5612,7 +6217,7 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
                 {
                     sameBufferPtr->SecOCSameBufferInUse[SECOC_CONST_0U] = FALSE;
                 }
-                SECOC_CLR_RX_EVENT(
+                SecOC_ClearRxEvent(
                     index,
                     SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER | SECOC_RX_VERIFY_FINISH_IND_WAITING | SECOC_RX_PARSED_MESSAGE
                         | SECOC_RX_CRYPTOGRAPHIC_PDU | SECOC_RX_INDICATION);
@@ -5628,7 +6233,7 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
             }
         }
 
-        if ((SECOC_RX_NONE == rxRtPtr->rxPduStatus) || (!SECOC_IS_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
+        if ((SECOC_RX_NONE == rxRtPtr->rxPduStatus) || (!SecOC_IsRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER)))
         {
             rxCryptographicPduPtr = SecOC_GetRxCryptographicPduPtr(index);
             SchM_Enter_SecOC_RxData();
@@ -5638,8 +6243,8 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
             if (interBufLen >= TpSduLength)
             {
                 if ((NULL_PTR == sameBufferPtr) || (!sameBufferPtr->SecOCSameBufferInUse[SECOC_CONST_0U])
-                    || (SECOC_IS_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER))
-                    || (SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU)))
+                    || (SecOC_IsRxEvent(index, SECOC_RX_TP_DATA_FROM_LOWER))
+                    || (SecOC_IsRxEvent(index, SECOC_RX_AUTHENTIC_PDU)))
                 {
                     rxRtPtr->sduCryptoRemaining  = TpSduLength;
                     rxRtPtr->tpRxCryptoPduOffset = SECOC_CONST_0U;
@@ -5647,7 +6252,7 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
                     (void)IStdLib_MemCpy(destPtr, info->SduDataPtr, info->SduLength);
                     rxRtPtr->sduCryptoRemaining -= info->SduLength;
                     rxRtPtr->tpRxCryptoPduOffset += info->SduLength;
-                    SECOC_SET_RX_EVENT(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER);
+                    SecOC_SetRxEvent(index, SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER);
                     rxRtPtr->rxPduStatus           = SECOC_RX_CALC;
                     rxRtPtr->rxCryptographicPduLen = TpSduLength;
                     rxRtPtr->rxVerifyAttempts      = SECOC_CONST_0U;
@@ -5685,9 +6290,13 @@ SECOC_LOCAL BufReq_ReturnType SecOC_RxTpCryptographicPduStartOfReception(
 
     return bufReqRet;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_TP_PDU_NUM > SECOC_CONST_0U */
 
 #if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxLoadQueuedPdu(uint16 index)
 {
     uint8          SecOC_TempMsgBuf[SECOC_MAX_RX_SECURED_MSG_LENGTH];
@@ -5703,8 +6312,12 @@ SECOC_LOCAL void SecOC_RxLoadQueuedPdu(uint16 index)
         SecOC_RxIfSecuredPduIndication(index, pduId, &pduInfo);
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxReportVerifyStatus(uint16 index)
 {
 #if (SECOC_VERIFICATION_STATUS_CALLOUT_NUM > 0) || (SECOC_QUERY_FRESHNESS_VALUE == SECOC_RTE)
@@ -5754,8 +6367,9 @@ SECOC_LOCAL void SecOC_RxReportVerifyStatus(uint16 index)
 #endif /* SECOC_VERIFICATION_STATUS_CALLOUT_NUM > 0 */
 
 #if (SECOC_QUERY_FRESHNESS_VALUE == SECOC_RTE)
-    boolean notifySwcFlag = FALSE;
-    (void)Rte_Write_VerificationStatus_verificationStatus(&verificationStatus);
+    const SecOC_RxPduProcessingType* rxPduProcessingDataPtr = SecOC_GetRxPduProcessingDataPtr(index);
+    boolean                          notifySwcFlag          = FALSE;
+    (void)rxPduProcessingDataPtr->rteCallOuts->SecOC_WriteVerificationStatusverificationStatusType(&verificationStatus);
     /* Both True and False AuthenticationStatus is propagated to SWC */
     if (SECOC_BOTH == rxPduProcessingPtr->SecOCClientServerVerificationStatusPropagationMode)
     {
@@ -5777,15 +6391,21 @@ SECOC_LOCAL void SecOC_RxReportVerifyStatus(uint16 index)
     }
     if (notifySwcFlag)
     {
-        (void)Rte_Call_VerificationStatusNotification_VerifyStatus(
+        (void)rxPduProcessingDataPtr->rteCallOuts->SecOC_VerificationStatusNotificationVerifyStatusType(
             (const SecOC_VerificationStatusType*)&verificationStatus);
     }
 #endif
+    (void)idx;
+    (void)notifyFlag;
 #else
     (void)index;
 #endif /* SECOC_VERIFICATION_STATUS_CALLOUT_NUM > 0 || SECOC_QUERY_FRESHNESS_VALUE == SECOC_RTE */
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_RxChannelReset(uint16 index)
 {
     SchM_Enter_SecOC_RxData();
@@ -5829,10 +6449,14 @@ SECOC_LOCAL void SecOC_RxChannelReset(uint16 index)
     }
 
     /* Clear rx event */
-    SECOC_CLR_RX_EVENT(index, SECOC_EVENT_RX_ALL);
+    SecOC_ClearRxEvent(index, SECOC_EVENT_RX_ALL);
     SchM_Exit_SecOC_RxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL PduLengthType SecOC_RxGetPduLength(uint8 headerLength, const uint8* headerPtr)
 {
     uint32 pduLength = SECOC_CONST_0U;
@@ -5845,8 +6469,12 @@ SECOC_LOCAL PduLengthType SecOC_RxGetPduLength(uint8 headerLength, const uint8* 
 
     return ((PduLengthType)pduLength);
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* SECOC_RX_PDU_PRO_NUM > SECOC_CONST_0U */
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_EndianSwap(uint8* dataPtr, uint8 size)
 {
     uint8 i;
@@ -5863,7 +6491,11 @@ SECOC_LOCAL void SecOC_EndianSwap(uint8* dataPtr, uint8 size)
         dataPtr[i]         = temp;
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayShiftLeft(uint8* numArr, uint16 numLen, uint16 shiftBits)
 {
     uint16 leftNumByte   = SECOC_BIT_TO_BYTE(((numLen * SECOC_CONST_8U) - shiftBits));
@@ -5892,7 +6524,11 @@ SECOC_LOCAL void SecOC_ArrayShiftLeft(uint8* numArr, uint16 numLen, uint16 shift
         numArr[i] = SECOC_CONST_0U;
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayShiftRight(uint8* numArr, uint16 numLen, uint16 shiftBits)
 {
     uint16 leftNumByte   = SECOC_BIT_TO_BYTE(((numLen * SECOC_CONST_8U) - shiftBits));
@@ -5921,7 +6557,11 @@ SECOC_LOCAL void SecOC_ArrayShiftRight(uint8* numArr, uint16 numLen, uint16 shif
         numArr[i] = SECOC_CONST_0U;
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ArrayOrOp(uint8* numArr1, const uint8* numArr2, uint16 numLen)
 {
     /* Note: The length of numArr1 must equal to numArr2 */
@@ -5932,7 +6572,11 @@ SECOC_LOCAL void SecOC_ArrayOrOp(uint8* numArr1, const uint8* numArr2, uint16 nu
         numArr1[i] = numArr1[i] | numArr2[i];
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_ClearLowBit(uint8* numArr, uint16 numLen, uint16 shiftBits)
 {
     uint16 leftNumByte = SECOC_BIT_TO_BYTE(((numLen * SECOC_CONST_8U) - shiftBits));
@@ -5944,7 +6588,12 @@ SECOC_LOCAL void SecOC_ClearLowBit(uint8* numArr, uint16 numLen, uint16 shiftBit
         /* PRQA S 4397 -- */
     }
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#if (SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_DataInQueue(uint16 index, PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
     const SecOC_RxPduProcessingType* rxPduProcessingDataPtr = SecOC_GetRxPduProcessingDataPtr(index);
@@ -5988,7 +6637,11 @@ SECOC_LOCAL void SecOC_DataInQueue(uint16 index, PduIdType RxPduId, const PduInf
     }
     SchM_Exit_SecOC_RxData();
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL Std_ReturnType SecOC_DataOutQueue(uint16 index, PduIdType* RxPduIdPtr, PduInfoType* PduInfoPtr)
 {
     const SecOC_RxPduProcessingType* rxPduProcessingDataPtr = SecOC_GetRxPduProcessingDataPtr(index);
@@ -6039,19 +6692,28 @@ SECOC_LOCAL Std_ReturnType SecOC_DataOutQueue(uint16 index, PduIdType* RxPduIdPt
 
     return ret;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+#endif /* SECOC_RX_IF_PDU_NUM > SECOC_CONST_0U */
 
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
-SECOC_LOCAL_INLINE void SECOC_DET_REPORT(uint8 ApiId, uint8 ErrorId)
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
+SECOC_LOCAL_INLINE void SecOC_ReportDetError(uint8 ApiId, uint8 ErrorId)
 {
     (void)Det_ReportError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
 }
-SECOC_LOCAL_INLINE void SECOC_DET_REPORT_RUNTIMEERROR(uint8 ApiId, uint8 ErrorId)
+
+SECOC_LOCAL_INLINE void SecOC_ReportDetRuntimeError(uint8 ApiId, uint8 ErrorId)
 {
     (void)Det_ReportRuntimeError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
 }
-
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 #endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL SecOC_StateType SecOC_isInitState(ApplicationType appId)
 {
     SecOC_StateType        initStatus = SECOC_UNINIT;
@@ -6063,7 +6725,11 @@ SECOC_LOCAL SecOC_StateType SecOC_isInitState(ApplicationType appId)
     }
     return initStatus;
 }
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
 
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 SECOC_LOCAL void SecOC_CopyBitsFromSourceToDestination(const uint8* src, uint8* dst, uint16 srcIndex, uint16 bitlength)
 {
     uint16 startByteIndex      = SECOC_DIV_SHIFT(srcIndex, SECOC_CONST_3U);
@@ -6135,6 +6801,5 @@ SECOC_LOCAL void SecOC_CopyBitsFromSourceToDestination(const uint8* src, uint8* 
         }
     }
 }
-
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"

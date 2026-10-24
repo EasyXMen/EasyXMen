@@ -44,6 +44,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define ETHSM_START_SEC_CODE
+#include "EthSM_MemMap.h"
 /**
  * @brief       This service is called by the TcpIp to report the actual TcpIp state (e.g. online, offline).
  * @param[in]   CtrlIdx    EthIf controller index to identify the communication network where the TcpIp state is changed
@@ -53,6 +55,8 @@ extern "C" {
  * @trace       CPD-69980
  */
 void EthSM_TcpIpModeIndication(uint8 CtrlIdx, TcpIp_StateType TcpIpState);
+#define ETHSM_STOP_SEC_CODE
+#include "EthSM_MemMap.h"
 
 #ifdef __cplusplus
 }

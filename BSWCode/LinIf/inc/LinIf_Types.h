@@ -42,6 +42,7 @@
 #define LINIF_DO_NOT_CARE_FRAME_PID      0xffu
 #define LINIF_ASSIGN_PID_MSG_PAYLOAD_LEN 4u
 #define LINIF_NC_FRAME_PCI_VALUE         6u
+#define LINIF_MIRROR_BUFFER_LEN          8u
 
 /* ================================================ type definitions ================================================ */
 typedef uint8 LinIf_SchHandleType;
@@ -137,6 +138,13 @@ typedef enum
     LINIF_SLAVE_FRAME_IDLE,
     LINIF_SLAVE_FRAME_RESPONSE /*Response transmitting or receiving*/
 } LinIf_SlaveFrameStatusType;
+
+typedef enum
+{
+    LINIF_SLAVE_NC_FRAME_ACCEPT,
+    LINIF_SLAVE_NC_FRAME_IGNORE,
+    LINIF_SLAVE_NC_FRAME_REJECT
+} LinIf_SlaveNcFrameCheckResult;
 
 /**
  * @brief Container the configuration param of the rxPdu referenced by linif frame
@@ -264,6 +272,15 @@ typedef struct LinIf_EntryTag
 #endif
 } LinIf_EntryType;
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+typedef struct LinIf_MirrorBufferTypeTag
+{
+    uint8 TxFrameDataBuffer[LINIF_MIRROR_BUFFER_LEN];
+    uint8 TxDataLen;
+    uint8 FramePid;
+} LinIf_MirrorBufferType;
+#endif
+
 /**
  * @brief Define LinIf master node and slave node param
  */
@@ -303,6 +320,7 @@ typedef struct LinIf_TransceiverDrvConfigTag
 {
     EcuM_WakeupSourceType WakeUpSource;
     uint8                 TrcvIdRef;
+    uint8                 TrcvDrvId;
 } LinIf_TransceiverDrvConfigType;
 
 /**
@@ -341,29 +359,14 @@ typedef struct LinIf_ChannelTag
 } LinIf_ChannelType;
 
 /**
- * @brief Define lin driver api
- */
-typedef struct Lin_DriverApiTag
-{
-    Lin_StatusType (*LinGetStatus)(uint8 Channel, uint8** Lin_SduPtr);
-    Std_ReturnType (*LinGoToSleep)(uint8 Channel);
-    Std_ReturnType (*LinGoToSleepInternal)(uint8 Channel);
-#if (LINIF_LIN_AUTOSAR_VERSION >= LINIF_LIN_AUTOSAR_431)
-    Std_ReturnType (*LinSendFrame)(uint8 Channel, const Lin_PduType* PduInfoPtr);
-#else
-    Std_ReturnType (*LinSendFrame)(uint8 Channel, Lin_PduType* PduInfoPtr);
-#endif
-    Std_ReturnType (*LinWakeup)(uint8 Channel);
-    Std_ReturnType (*LinWakeupInternal)(uint8 Channel);
-    Std_ReturnType (*LinCheckWakeup)(uint8 Channel);
-} Lin_DriverApiType;
-
-/**
  * @brief Define LinIf slave node run time data type
  */
 typedef struct LinIf_SlaveRuntimeTag
 {
-    uint8                      NcResponse[LINIF_NC_RESPONSE_LEN];
+    uint8 NcResponse[LINIF_NC_RESPONSE_LEN];
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+    LinIf_MirrorBufferType TxMirrorBuffer;
+#endif
     const LinIf_FrameType*     CurFrame;
     LinIf_ChannelStateType     ChannelState;
     LinIf_SlaveFrameStatusType FrameStatus;
@@ -375,25 +378,36 @@ typedef struct LinIf_SlaveRuntimeTag
     boolean                    WakeupFlag;
     boolean                    WaitWakeupConfirmFlag;
     boolean                    GotoSleepConfirmationFlag;
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+    boolean BusMirrorEnable;
+#endif
 } LinIf_SlaveRuntimeType;
 
 typedef struct LinIf_MasterRuntimeTag
 {
-    Lin_PduType                    TxPdu;
+    Lin_PduType TxPdu;
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+    LinIf_MirrorBufferType TxMirrorBuffer;
+#endif
     const LinIf_ScheduleTableType* CurSchedule;
     const LinIf_ScheduleTableType* ResSchedule;
+    const LinIf_ScheduleTableType* ResCySchedule;
     const LinIf_ScheduleTableType* RdySchedule;
     const LinIf_EntryType*         CurEntry;
     LinIf_ChannelStateType         ChannelState;
     PduIdType                      TxPduId;
     uint16                         CurEntryIndex;
     uint16                         ResEntryIndex;
+    uint16                         ResCySchEntryIndex;
     uint16                         RootEvent;
     uint16_least                   Timer;
 #if (LINIF_MASTER_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
     LinIf_SchHandleType CollisionResolvingRef;
 #endif
     boolean WakeupFlag;
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+    boolean BusMirrorEnable;
+#endif
 } LinIf_MasterRuntimeType;
 
 typedef struct LinIf_PbsMapTypeTag
@@ -421,5 +435,34 @@ typedef struct LinIf_ConfigTag
     uint8                               NumOfMasterFrame;
     uint8                               NumOfSlaveFrame;
 } LinIf_ConfigType;
+
+/**
+ * @brief Define lin driver api
+ */
+typedef struct Lin_DriverApiTag
+{
+    Lin_StatusType (*LinGetStatus)(uint8 Channel, const uint8** Lin_SduPtr);
+    Std_ReturnType (*LinGoToSleep)(uint8 Channel);
+    Std_ReturnType (*LinGoToSleepInternal)(uint8 Channel);
+#if (LINIF_LIN_AUTOSAR_VERSION >= LINIF_LIN_AUTOSAR_431)
+    Std_ReturnType (*LinSendFrame)(uint8 Channel, const Lin_PduType* PduInfoPtr);
+#else
+    Std_ReturnType (*LinSendFrame)(uint8 Channel, Lin_PduType* PduInfoPtr);
+#endif
+    Std_ReturnType (*LinWakeup)(uint8 Channel);
+    Std_ReturnType (*LinWakeupInternal)(uint8 Channel);
+    Std_ReturnType (*LinCheckWakeup)(uint8 Channel);
+} LinIf_LinDriverApiType;
+
+#if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
+typedef struct
+{
+    Std_ReturnType (*LinTrcvSetOpMode)(uint8 Channel, LinTrcv_TrcvModeType TransceiverMode);
+    Std_ReturnType (*LinTrcvGetOpMode)(uint8 Channel, LinTrcv_TrcvModeType* TransceiverModePtr);
+    Std_ReturnType (*LinTrcvGetBusWuReason)(uint8 Channel, LinTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
+    Std_ReturnType (*LinTrcvSetWakeupMode)(uint8 Channel, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
+    Std_ReturnType (*LinTrcvCheckWakeup)(uint8 LinNetwork);
+} LinIf_TrcvDriverApiType;
+#endif
 
 #endif

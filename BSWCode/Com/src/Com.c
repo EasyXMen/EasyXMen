@@ -25,6 +25,7 @@
 #include "Com_Internal.h"
 #include "Com_Cbk.h"
 #include "Det.h"
+#include "Com_Arti.h"
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -34,9 +35,7 @@
 /* PRQA S 2814,2824 ++ */  /* VL_QAC_DerefNullPtr */
 /* PRQA S 0316,2844 ++ */  /* VL_QAC_0316,VL_Com_NullPtrValue */
 /* PRQA S 6520,6530 EOF */ /* VL_MTR_Com_STVAR,VL_MTR_Com_STECT */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
-/* PRQA S 5015 ++ */ /* VL_Com_UntrustedMethod */
+/* PRQA S 5015 ++ */       /* VL_Com_UntrustedMethod */
 /**
  * @brief         Init the RxPdu Runtime Manager and Buffer
  * @param[in]     RxMainfunctionId:MainfunctionId from Rx
@@ -44,7 +43,12 @@
  * @synchronous   TRUE
  * @trace         CPD-66040
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_PduBufferRxInit(Com_MainFunctionIdType RxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         Init the TxPdu Runtime Manager and Buffer
  * @param[in]     TxMainfunctionId:MainfunctionId from Tx
@@ -52,7 +56,12 @@ COM_LOCAL void Com_PduBufferRxInit(Com_MainFunctionIdType RxMainfunctionId);
  * @synchronous   TRUE
  * @trace         CPD-66042
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_PduBufferTxInit(Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         Init the Runtime RxSignal/RxGroupSignal Buffer
  * @param[in]     PartitionId:Partition index
@@ -60,7 +69,12 @@ COM_LOCAL void Com_PduBufferTxInit(Com_MainFunctionIdType TxMainfunctionId);
  * @synchronous   TRUE
  * @trace         CPD-66044
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SignalBufferInit(uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         If TxPdu TxConfirmation handle
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -71,11 +85,16 @@ COM_LOCAL void Com_SignalBufferInit(uint16 PartitionId);
  * @trace         CPD-66046
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxConfirmationHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
     Com_MainFunctionIdType      TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Rx Pdu DM timeout enable/disable handle
  * @param[in]     RxMainfunctionId:MainfunctionId from Rx
@@ -86,9 +105,14 @@ COM_LOCAL void Com_TxConfirmationHandle(
  * @trace         CPD-66047
  */
 #if (COM_MAX_RXIPDUGROUP_NUMBER > 0u) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_RxPduDMCtrHandle(Com_MainFunctionIdType RxMainfunctionId, Com_IpduGroupIdType IpduGroupId, boolean IsEnable);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Used to handle all Rx Ipdu state change or not
  * @param[in]     RxMainfunctionId:MainfunctionId from Rx
@@ -100,12 +124,17 @@ COM_LOCAL void
  * @trace         CPD-66048
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_RXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_RxIpduControl(
     Com_MainFunctionIdType RxMainfunctionId,
     Com_IpduGroupIdType    IpduGroupId,
     boolean                Initialize,
     boolean                IsEnable);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Init the rx ipdu buffer,all signal buffer(included in the ipdu,except source signal)
  * @param[in]     RxIpduPtr:Pointer of RxIpdu
@@ -117,12 +146,17 @@ COM_LOCAL void Com_RxIpduControl(
  * @trace         CPD-66051
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxPduBufferAndSignalBuffer(
     const Com_RxIPduType*             RxIpduPtr,
     Com_RxIPduRunTimeStateType*       RxIpduStatePtr,
     Com_MainFunctionIdType            RxMainfunctionId,
     const Com_RxIPduRunTimeStateType* RxIpduInitStatePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 #if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
 /**
  * @brief         Set the reception deadline monitoring timer for the included signals and signal groups to
@@ -133,8 +167,13 @@ COM_LOCAL void Com_ResetRxPduBufferAndSignalBuffer(
  * @synchronous   TRUE
  * @trace         CPD-66052
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPduRunTimeStateType* RxIpduStatePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 #if ((COM_MAX_IPDUGROUP_NUMBER > 0u) && ((COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER) > 0u))
 /**
  * @brief         Set the reception deadline monitoring timer for the included signals and signal groups to 0
@@ -144,8 +183,13 @@ COM_LOCAL void Com_ResetRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPdu
  * @synchronous   TRUE
  * @trace         CPD-66053
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_DisableRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPduRunTimeStateType* RxIpduStatePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Reset OCCURRENCE of filter with FilterAlgorithm ONE_EVERY_N.
  * @param[in]     RxIpduPtr:Pointer of RxIpdu
@@ -154,8 +198,13 @@ COM_LOCAL void Com_DisableRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIP
  * @trace         CPD-66078
  */
 #if ((COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduType* RxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Com_InitHandle is called by Com_Init
  * @param[in]     ApplicationPartitionId: Id of Application
@@ -164,11 +213,16 @@ COM_LOCAL void Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduType* RxIpduPtr)
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_InitHandle(
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     ApplicationType ApplicationPartitionId,
 #endif
     uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         Com_DeInitHandle is called by Com_DeInit
  * @param[in]     ApplicationPartitionId: Id of Application
@@ -177,11 +231,16 @@ COM_LOCAL void Com_InitHandle(
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_DeInitHandle(
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     ApplicationType ApplicationPartitionId,
 #endif
     uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 #if (COM_MULITIVARIANT_SUPPORT == STD_ON)
 /**
  * @brief         get internal IPdu Group Id of the Com module
@@ -191,7 +250,12 @@ COM_LOCAL void Com_DeInitHandle(
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_IpduGroupIdType Com_GetIpduGroupIdFromUserId(uint16 apiId, Com_IpduGroupIdType ipduGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         get internal ISignal or GroupSignal Id of the Com module
  * @param[in]     apiId: Id of Application
@@ -200,7 +264,12 @@ COM_LOCAL Com_IpduGroupIdType Com_GetIpduGroupIdFromUserId(uint16 apiId, Com_Ipd
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_SignalIdType Com_GetSignalAndGroupSignalIdFromUserId(uint16 apiId, Com_SignalIdType signalId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         get internal SignalGroup Id of the Com module
  * @param[in]     apiId: Id of Application
@@ -209,7 +278,12 @@ COM_LOCAL Com_SignalIdType Com_GetSignalAndGroupSignalIdFromUserId(uint16 apiId,
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_SignalGroupIdType Com_GetSignalGroupIdFromUserId(uint16 apiId, Com_SignalGroupIdType signalGroupId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         get internal Pdu Id of the Com module
  * @param[in]     apiId: Id of Application
@@ -218,11 +292,13 @@ COM_LOCAL Com_SignalGroupIdType Com_GetSignalGroupIdFromUserId(uint16 apiId, Com
  * @synchronous   TRUE
  * @trace
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL PduIdType Com_GetPduIdFromUserId(uint16 apiId, PduIdType pduId);
-#endif
-/* PRQA S 5015 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+/* PRQA S 5015 -- */
 /* ============================================ internal data definitions =========================================== */
 #define COM_START_SEC_VAR_CLEARED_8
 #include "Com_MemMap.h"
@@ -233,6 +309,11 @@ COM_LOCAL Com_StatusType Com_Status[COM_MAX_PARTITION_NUMBER];
 #define COM_START_SEC_VAR_CLEARED_16
 #include "Com_MemMap.h"
 Com_SignalIdType Com_CfgTxSignalNum;
+#define COM_STOP_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_16
+#include "Com_MemMap.h"
 Com_SignalIdType Com_CfgRxSignalNum; /* PRQA S 1504 */ /* VL_Com_1504 */
 #define COM_STOP_SEC_VAR_CLEARED_16
 #include "Com_MemMap.h"
@@ -240,6 +321,11 @@ Com_SignalIdType Com_CfgRxSignalNum; /* PRQA S 1504 */ /* VL_Com_1504 */
 #define COM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Com_MemMap.h"
 PduIdType Com_CfgTxPduNum; /* PRQA S 1514 */ /* VL_Com_1514 */
+#define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Com_MemMap.h"
 PduIdType Com_CfgRxPduNum; /* PRQA S 1504 */ /* VL_Com_1504 */
 #define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Com_MemMap.h"
@@ -254,6 +340,11 @@ COM_LOCAL boolean Com_GlobalInitStatus = FALSE;
 #define COM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Com_MemMap.h"
 COM_LOCAL boolean Com_IpduGroupDMEnable[COM_MAX_IPDUGROUP_NUMBER];
+#define COM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_IpduGroupEnable[COM_MAX_IPDUGROUP_NUMBER];
 #define COM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Com_MemMap.h"
@@ -262,40 +353,107 @@ COM_LOCAL boolean Com_IpduGroupEnable[COM_MAX_IPDUGROUP_NUMBER];
 #define COM_START_SEC_VAR_CLEARED_PTR
 #include "Com_MemMap.h"
 const Com_ConfigType* Com_ConfigStd = NULL_PTR;
-
-#if (COM_MAX_RXIPDU_NUMBER > 0u)
-const Com_RxIPduType* Com_CfgRxIPduPtr = NULL_PTR;
-#endif
-#if (COM_MAX_TXIPDU_NUMBER > 0u)
-const Com_TxIPduType* Com_CfgTxIPduPtr = NULL_PTR;
-#endif
-const Com_RxSignalType*      Com_CfgRxSignalPtr      = NULL_PTR;
-const Com_TxSignalType*      Com_CfgTxSignalPtr      = NULL_PTR;
-const Com_RxSignalGroupType* Com_CfgRxSignalGroupPtr = NULL_PTR;
-const Com_TxSignalGroupType* Com_CfgTxSignalGroupPtr = NULL_PTR;
-const Com_RxGroupSignalType* Com_CfgRxGroupSignalPtr = NULL_PTR;
-const Com_TxGroupSignalType* Com_CfgTxGroupSignalPtr = NULL_PTR;
-#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
-const uint16* Com_CfgMainFuncRxPartitionRangePtr = NULL_PTR;
-const uint16* Com_CfgMainFuncTxPartitionRangePtr = NULL_PTR;
-#endif
-#if (COM_MAX_GWMAPPING_NUMBER > 0u)
-const Com_GwMappingConfigType* Com_CfgGwMappingConfigPtr = NULL_PTR;
-#endif
-#if (STD_ON == COM_SIGNAL_INITVALUE_SUPPORT)
-const Com_SignalInitValueType* Com_CfgSignalInitValuePtr = NULL_PTR;
-#endif
-#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
-const Com_TxModeAndSignalFilterPtrType* Com_CfgTxModeAndSignalFilterPtr = NULL_PTR;
-#endif
-#if (STD_ON == COM_SIGNAL_TIMEOUT_SUPPORT)
-const Com_SignalTimeoutType* Com_CfgSignalTimeoutPtr = NULL_PTR;
-#endif
 #define COM_STOP_SEC_VAR_CLEARED_PTR
 #include "Com_MemMap.h"
-/* ========================================== external function definitions ========================================= */
-#define COM_START_SEC_CODE
+
+#if (COM_MAX_RXIPDU_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
 #include "Com_MemMap.h"
+const Com_RxIPduType* Com_CfgRxIPduPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#if (COM_MAX_TXIPDU_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_TxIPduType* Com_CfgTxIPduPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_RxSignalType* Com_CfgRxSignalPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_TxSignalType* Com_CfgTxSignalPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_RxSignalGroupType* Com_CfgRxSignalGroupPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_TxSignalGroupType* Com_CfgTxSignalGroupPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_RxGroupSignalType* Com_CfgRxGroupSignalPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_TxGroupSignalType* Com_CfgTxGroupSignalPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const uint16* Com_CfgMainFuncRxPartitionRangePtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const uint16* Com_CfgMainFuncTxPartitionRangePtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#if (COM_MAX_GWMAPPING_NUMBER > 0u)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_GwMappingConfigType* Com_CfgGwMappingConfigPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#if (STD_ON == COM_SIGNAL_INITVALUE_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_SignalInitValueType* Com_CfgSignalInitValuePtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_TxModeAndSignalFilterPtrType* Com_CfgTxModeAndSignalFilterPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+
+#if (STD_ON == COM_SIGNAL_TIMEOUT_SUPPORT)
+#define COM_START_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+const Com_SignalTimeoutType* Com_CfgSignalTimeoutPtr = NULL_PTR;
+#define COM_STOP_SEC_VAR_CLEARED_PTR
+#include "Com_MemMap.h"
+#endif
+/* ========================================== external function definitions ========================================= */
 /* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_Com_ReferencedOnlyOne */
 /**
  * This service initializes internal and external interfaces and
@@ -303,8 +461,12 @@ const Com_SignalTimeoutType* Com_CfgSignalTimeoutPtr = NULL_PTR;
  * After calling this function the inter-ECU communication is still disabled.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_Init(const Com_ConfigType* config)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x01, config);
+
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8 errorId = COM_E_NONE;
     if (NULL_PTR == config)
@@ -326,11 +488,15 @@ void Com_Init(const Com_ConfigType* config)
         partitionId                            = Com_PartitonIdFromList(applicationPartitionId);
 #endif
 #if (STD_ON == COM_DEV_ERROR_DETECT)
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
         if (COM_UNUSED_UINT16 == partitionId)
         {
             errorId = COM_E_PARTITION;
         }
         else if (COM_UNINIT != Com_Status[partitionId])
+#else
+        if (COM_UNINIT != Com_Status[partitionId])
+#endif
         {
             errorId = COM_E_INIT_FAILED;
         }
@@ -389,16 +555,26 @@ void Com_Init(const Com_ConfigType* config)
         (void)Det_ReportError(COM_MODULE_ID, COM_INSTANCE_ID, COM_INIT_ID, errorId);
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x01);
+
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * This service stops the inter-ECU communication. All started I-PDU groups are stopped and have to be started again,
  * if needed, after Com_Init is called. By a call to Com_DeInit.
  * the AUTOSAR COM module is put into an not initialized state.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_DeInit(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 1, 0x02);
+
     uint16 partitionId = 0u;
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     ApplicationType applicationPartitionId = GetApplicationID();
@@ -406,11 +582,15 @@ void Com_DeInit(void)
 #endif
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8 errorId = COM_E_NONE;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     if (COM_UNUSED_UINT16 == partitionId)
     {
         errorId = COM_E_PARTITION;
     }
     else if (COM_INIT != Com_Status[partitionId])
+#else
+    if (COM_INIT != Com_Status[partitionId])
+#endif
     {
         errorId = COM_E_INIT_FAILED;
     }
@@ -430,8 +610,12 @@ void Com_DeInit(void)
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x02);
+
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /* PRQA S 2895 ++ */ /* VL_Com_NegtiveValueType */
 /**
@@ -439,10 +623,14 @@ void Com_DeInit(void)
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3677 ++ */ /* VL_Com_NeverModify */
 void Com_IpduGroupStart(Com_IpduGroupIdType IpduGroupId, boolean initialize)
 /* PRQA S 3677 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x03, IpduGroupId, initialize);
+
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
 #endif
@@ -518,8 +706,12 @@ void Com_IpduGroupStart(Com_IpduGroupIdType IpduGroupId, boolean initialize)
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x03);
+
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -527,10 +719,14 @@ void Com_IpduGroupStart(Com_IpduGroupIdType IpduGroupId, boolean initialize)
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3677 ++ */ /* VL_Com_NeverModify */
 void Com_IpduGroupStop(Com_IpduGroupIdType IpduGroupId)
 /* PRQA S 3677 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x04, IpduGroupId);
+
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
 #endif
@@ -605,8 +801,13 @@ void Com_IpduGroupStop(Com_IpduGroupIdType IpduGroupId)
         (void)Det_ReportError(COM_MODULE_ID, COM_INSTANCE_ID, COM_IPDUGROUPSTOP_ID, errorId);
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x04);
+
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -614,8 +815,12 @@ void Com_IpduGroupStop(Com_IpduGroupIdType IpduGroupId)
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x06, IpduGroupId);
+
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
 #endif
@@ -671,7 +876,11 @@ void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId)
     }
 #endif
     COM_NOUSED(IpduGroupId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x06);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -679,8 +888,12 @@ void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId)
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_DisableReceptionDM(Com_IpduGroupIdType IpduGroupId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x05, IpduGroupId);
+
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
 #endif
@@ -735,15 +948,23 @@ void Com_DisableReceptionDM(Com_IpduGroupIdType IpduGroupId)
     }
 #endif
     COM_NOUSED(IpduGroupId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x05);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
  * Returns the status of the AUTOSAR COM module.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 Com_StatusType Com_GetStatus(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 1, 0x07);
+
     Com_StatusType moduleStatus = COM_UNINIT;
     for (uint16 partitionId = 0u; partitionId < COM_MAX_PARTITION_NUMBER; ++partitionId)
     {
@@ -753,15 +974,25 @@ Com_StatusType Com_GetStatus(void)
             break;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x07, moduleStatus);
+
     return moduleStatus;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 #if (STD_ON == COM_VERSION_INFO_API)
 /**
  * Returns the version information of this module.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x09, versioninfo);
+
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
     {
@@ -776,7 +1007,11 @@ void Com_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = COM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = COM_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x09);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /*******************************************************************************
 **                      Communication Services                                **
@@ -786,8 +1021,12 @@ void Com_GetVersionInfo(Std_VersionInfoType* versioninfo)
  * identified by SignalId with the signal referenced by the SignalDataPtr parameter.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendSignal(Com_SignalIdType SignalId, const void* SignalDataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x0A, SignalId, SignalDataPtr);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -855,15 +1094,25 @@ uint8 Com_SendSignal(Com_SignalIdType SignalId, const void* SignalDataPtr)
 #endif
     COM_NOUSED(SignalId);
     COM_NOUSED(SignalDataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x0A, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief The service Com_SendDynSignal updates the signal object identified by SignalId
  *        with the signal referenced by the SignalDataPtr parameter.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendDynSignal(Com_SignalIdType SignalId, const void* SignalDataPtr, uint16 Length)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 4, 0x21, SignalId, SignalDataPtr, Length);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)
@@ -932,15 +1181,25 @@ uint8 Com_SendDynSignal(Com_SignalIdType SignalId, const void* SignalDataPtr, ui
     COM_NOUSED(SignalId);
     COM_NOUSED(SignalDataPtr);
     COM_NOUSED(Length);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x21, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * Com_ReceiveSignal copies the data of the signal identified by SignalId to the location specified by
  * SignalDataPtr.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_ReceiveSignal(Com_SignalIdType SignalId, void* SignalDataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x0B, SignalId, SignalDataPtr);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1020,18 +1279,28 @@ uint8 Com_ReceiveSignal(Com_SignalIdType SignalId, void* SignalDataPtr)
 #endif
     COM_NOUSED(SignalId);
     COM_NOUSED(SignalDataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x0B, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * Com_ReceiveDynSignal copies the data of the signal identified by SignalId to the
  * location specified by SignalDataPtr and stores the length of the dynamical length
  * signal at the position given by the Length parameter.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 uint8 Com_ReceiveDynSignal(Com_SignalIdType SignalId, void* SignalDataPtr, uint16* Length)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 4, 0x22, SignalId, SignalDataPtr, Length);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE;
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1118,15 +1387,24 @@ uint8 Com_ReceiveDynSignal(Com_SignalIdType SignalId, void* SignalDataPtr, uint1
     COM_NOUSED(SignalId);
     COM_NOUSED(SignalDataPtr);
     COM_NOUSED(Length);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x22, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * The service Com_SendSignalGroup copies the content of the associated shadow buffer to the associated I-PDU.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendSignalGroup(Com_SignalGroupIdType SignalGroupId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x0D, SignalGroupId);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1186,15 +1464,25 @@ uint8 Com_SendSignalGroup(Com_SignalGroupIdType SignalGroupId)
     }
 #endif
     COM_NOUSED(SignalGroupId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x0D, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief The service Com_ReceiveSignalGroup copies the received signal group from the I-PDU to the
  *        shadow buffer.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x0E, SignalGroupId);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1273,8 +1561,13 @@ uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId)
     }
 #endif
     COM_NOUSED(SignalGroupId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x0E, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 /**
  * The service Com_SendSignalGroupArray copies the content of the provided
  * SignalGroupArrayPtr to the associated I-PDU. The provided data shall
@@ -1282,8 +1575,12 @@ uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId)
  *
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendSignalGroupArray(Com_SignalGroupIdType SignalGroupId, const uint8* SignalGroupArrayPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x23, SignalGroupId, SignalGroupArrayPtr);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1349,8 +1646,13 @@ uint8 Com_SendSignalGroupArray(Com_SignalGroupIdType SignalGroupId, const uint8*
 
     COM_NOUSED(SignalGroupId);
     COM_NOUSED(SignalGroupArrayPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x23, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * The service Com_ReceiveSignalGroupArray copies the received signal group
@@ -1358,8 +1660,12 @@ uint8 Com_SendSignalGroupArray(Com_SignalGroupIdType SignalGroupId, const uint8*
  *
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_ReceiveSignalGroupArray(Com_SignalGroupIdType SignalGroupId, uint8* SignalGroupArrayPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x24, SignalGroupId, SignalGroupArrayPtr);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1424,16 +1730,25 @@ uint8 Com_ReceiveSignalGroupArray(Com_SignalGroupIdType SignalGroupId, uint8* Si
 #endif
     COM_NOUSED(SignalGroupId);
     COM_NOUSED(SignalGroupArrayPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x24, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * The service Com_InvalidateSignal invalidates the signal with the given SignalId
  * by setting its value to its configured ComSignalDataInvalidValue.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_InvalidateSignal(Com_SignalIdType SignalId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x10, SignalId);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1493,15 +1808,25 @@ uint8 Com_InvalidateSignal(Com_SignalIdType SignalId)
     }
 #endif
     COM_NOUSED(SignalId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x10, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * The service Com_InvalidateSignalGroup invalidates all group signals of the signal
  * group with the given SignalGroupId by setting their values to their configured ComSignalDataInvalidValues.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_InvalidateSignalGroup(Com_SignalGroupIdType SignalGroupId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x1B, SignalGroupId);
+
     uint8 ret = COM_SERVICE_NOT_AVAILABLE; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1561,14 +1886,24 @@ uint8 Com_InvalidateSignalGroup(Com_SignalGroupIdType SignalGroupId)
     }
 #endif
     COM_NOUSED(SignalGroupId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x1B, ret);
+
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * By a call to Com_TriggerIPDUSend the I-PDU with the given ID is triggered for transmission.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x17, PduId);
+
     Std_ReturnType returnValue = E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1638,8 +1973,14 @@ Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId)
     }
 #endif
     COM_NOUSED(PduId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x17, returnValue);
+
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 #if (STD_ON == COM_METADATA_SUPPORT)
 /**
  * By a call to Com_TriggerIPDUSendWithMetaData the AUTOSAR COM module
@@ -1648,8 +1989,12 @@ Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId)
  * length of the I-PDU. Then the I-PDU is triggered for transmission.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uint8* MetaData)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x28, PduId, MetaData);
+
     Std_ReturnType returnValue = E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1726,8 +2071,13 @@ Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uint8* Met
 #endif
     COM_NOUSED(PduId);
     COM_NOUSED(MetaData);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x28, returnValue);
+
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * The service Com_SwitchIpduTxMode sets the transmission mode of the I-PDU referenced by PduId
@@ -1735,8 +2085,12 @@ Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uint8* Met
  * requested transmission mode was already active for this I-PDU, the call will have no effect.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_SwitchIpduTxMode(PduIdType PduId, boolean Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x27, PduId, Mode);
+
 #if (STD_ON == COM_TMS_ENABLE)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
@@ -1799,15 +2153,25 @@ void Com_SwitchIpduTxMode(PduIdType PduId, boolean Mode)
 #endif
     COM_NOUSED(PduId);
     COM_NOUSED(Mode);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x27);
+
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * This function performs the processing of the AUTOSAR COM module's receive processing that
  * are not directly handled within the COM's functions invoked by the PDU-R, for example *
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_MainFunctionRx(Com_MainFunctionIdType RxMainFunctionId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x18, RxMainFunctionId);
+
     uint16 partitionId = 0u;
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
@@ -1827,14 +2191,23 @@ void Com_MainFunctionRx(Com_MainFunctionIdType RxMainFunctionId)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x18);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * This function performs the processing of the AUTOSAR COM module's transmission activities
  * that are not directly handled within the COM's function invoked by the RTE, for example Com_SendSignal.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_MainFunctionTx(Com_MainFunctionIdType TxMainFunctionId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x19, TxMainFunctionId);
+
     uint16 partitionId = 0u;
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     uint16 osApplicationId = GetApplicationID();
@@ -1854,14 +2227,22 @@ void Com_MainFunctionTx(Com_MainFunctionIdType TxMainFunctionId)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x19);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * Calls the signal gateway part of the AUTOSAR COM module to forward received signals to be routed.
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctionId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 2, 0x1A, RouteSignalsMainFunctionId);
+
     uint16 partitionId = 0u;
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     partitionId = Com_PartitonIdFromList(GetApplicationID());
@@ -1876,6 +2257,8 @@ void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctio
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x1A);
 }
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
@@ -1890,6 +2273,8 @@ void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctio
 #include "Com_MemMap.h"
 Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
+
     Std_ReturnType returnValue = E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -1965,15 +2350,24 @@ Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 #endif
     COM_NOUSED(TxPduId);
     COM_NOUSED(PduInfoPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x41, returnValue);
+
     return returnValue;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * Indication of a received I-PDU from a lower layer communication interface module.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
+
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
     uint16 partitionId = 0u;
@@ -2054,16 +2448,25 @@ void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 #endif
     COM_NOUSED(RxPduId);
     COM_NOUSED(PduInfoPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x42);
+
     return;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * Called after an I-PDU has been received via the TP API, the result indicates whether the transmission was
  * successful or not.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 void Com_TpRxIndication(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x45, id, result);
+
 #if (STD_ON == COM_RXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
@@ -2129,15 +2532,24 @@ void Com_TpRxIndication(PduIdType id, Std_ReturnType result)
 #endif
     COM_NOUSED(id);
     COM_NOUSED(result);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x45);
+
     return;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * The lower layer communication interface module confirms the transmission of an IPDU.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x40, TxPduId, result);
+
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
     uint16 partitionId = 0u;
@@ -2206,16 +2618,25 @@ void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
     }
 #endif
     COM_NOUSED(TxPduId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x40);
+
     return;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * This function is called after the I-PDU has been transmitted on its network, the
  * result indicates whether the transmission was successful or not.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 void Com_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 3, 0x48, id, result);
+
 #if (STD_ON == COM_TXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
@@ -2282,8 +2703,13 @@ void Com_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 #endif
     COM_NOUSED(id);
     COM_NOUSED(result);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 1, 0x48);
+
     return;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * This function is called at the start of receiving an N-SDU. The N-SDU might be
@@ -2291,11 +2717,15 @@ void Com_TpTxConfirmation(PduIdType id, Std_ReturnType result)
  * N-PDU (SF).
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 BufReq_ReturnType
     Com_StartOfReception(PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 5, 0x46, id, info, TpSduLength, bufferSizePtr);
+
     BufReq_ReturnType bufReq = BUFREQ_E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 #if (STD_ON == COM_RXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -2365,8 +2795,13 @@ BufReq_ReturnType
     COM_NOUSED(info);
     COM_NOUSED(TpSduLength);
     COM_NOUSED(bufferSizePtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x46, bufReq);
+
     return bufReq;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper
@@ -2374,10 +2809,14 @@ BufReq_ReturnType
  * remaining data is written to the position indicated by bufferSizePtr.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 4, 0x44, id, info, bufferSizePtr);
+
     BufReq_ReturnType bufReq = BUFREQ_E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 #if (STD_ON == COM_RXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -2450,8 +2889,13 @@ BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
     COM_NOUSED(id);
     COM_NOUSED(info);
     COM_NOUSED(bufferSizePtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x44, bufReq);
+
     return bufReq;
 }
+#define COM_STOP_SEC_CODE_FAST
+#include "Com_MemMap.h"
 
 /**
  * This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
@@ -2461,11 +2905,15 @@ BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
  * size of the remaining data is written to the position indicated by availableDataPtr.
  *
  */
+#define COM_START_SEC_CODE_FAST
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 BufReq_ReturnType
     Com_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
+/* PRQA S 3673 -- */
 {
-    /* PRQA S 3673 -- */
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Start, 5, 0x43, id, info, retry, availableDataPtr);
+
     BufReq_ReturnType bufReq = BUFREQ_E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 #if (STD_ON == COM_TXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -2540,6 +2988,9 @@ BufReq_ReturnType
     COM_NOUSED(info);
     COM_NOUSED(retry);
     COM_NOUSED(availableDataPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Com, 0, Bsw_Return, 2, 0x43, bufReq);
+
     return bufReq;
 }
 /* PRQA S 1503,1532 -- */
@@ -2581,10 +3032,14 @@ COM_LOCAL void Com_PduBufferRxInit(Com_MainFunctionIdType RxMainfunctionId)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief Init the TxPdu Runtime Manager and Buffer
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_PduBufferTxInit(Com_MainFunctionIdType TxMainfunctionId)
 {
 #if (0u < COM_MAX_TXIPDU_NUMBER)
@@ -2612,11 +3067,15 @@ COM_LOCAL void Com_PduBufferTxInit(Com_MainFunctionIdType TxMainfunctionId)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief Init the Runtime RxSignal/RxGroupSignal Buffer
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6080 ++ */ /* VL_MTR_Com_STPTH */
 COM_LOCAL void Com_SignalBufferInit(uint16 PartitionId)
 /* PRQA S 6080 -- */
@@ -2741,12 +3200,16 @@ COM_LOCAL void Com_SignalBufferInit(uint16 PartitionId)
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief If TxPdu TxConfirmation handle
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxConfirmationHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -2820,6 +3283,8 @@ COM_LOCAL void Com_TxConfirmationHandle(
     TxIpduStatePtr->TxIpduRTStFlag &= COM_TX_TRANSMITING_DIS;
     COM_NOUSED(TxMainfunctionId);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2827,6 +3292,8 @@ COM_LOCAL void Com_TxConfirmationHandle(
  *
  */
 #if (COM_MAX_RXIPDUGROUP_NUMBER > 0u) && (0u < COM_MAX_RXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_Com_STMIF */
 COM_LOCAL void
     Com_RxPduDMCtrHandle(Com_MainFunctionIdType RxMainfunctionId, Com_IpduGroupIdType IpduGroupId, boolean IsEnable)
@@ -2875,11 +3342,15 @@ COM_LOCAL void
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief  used to handle all Rx Ipdu state change or not
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_RXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6030 ++ */ /* VL_MTR_Com_STMIF */
 COM_LOCAL void Com_RxIpduControl(
     Com_MainFunctionIdType RxMainfunctionId,
@@ -2891,17 +3362,26 @@ COM_LOCAL void Com_RxIpduControl(
     Com_RxIPduRunTimeStateType* rxIpduStateMainfunctionPtr = Com_RxIPduRunTimeState[RxMainfunctionId];
     uint16                      startRxIpduId              = Com_GetStartOfMainFunctionRx(RxMainfunctionId);
     uint16                      endRxIpduId                = Com_GetEndOfMainFunctionRx(RxMainfunctionId);
+    boolean                     groupEnable;
+    boolean                     groupMatch;
     for (uint16 cirCnt = startRxIpduId; cirCnt < endRxIpduId; ++cirCnt)
     {
-        const Com_RxIPduType* rxIpduPtr = &Com_CfgRxIPduPtr[cirCnt];
+        const Com_RxIPduType*       rxIpduPtr              = &Com_CfgRxIPduPtr[cirCnt];
+        uint16                      idpduIdPerMainfunction = cirCnt - startRxIpduId;
+        Com_RxIPduRunTimeStateType* rxIpduStatePtr         = &rxIpduStateMainfunctionPtr[idpduIdPerMainfunction];
+        uint8                       activeEnable           = rxIpduStatePtr->RxIpduRTStFlag & COM_RX_ACTIVE_EN;
+        groupEnable                                        = FALSE;
+        groupMatch                                         = FALSE;
         for (Com_RxIpduGroupIdType counter = rxIpduPtr->IPduGroupsRefStartId; counter < rxIpduPtr->IPduGroupsRefEndId;
              ++counter)
         {
+            if (Com_IsIpduGroupEnable(Com_ConfigStd->IpduGroupRefPtr->RxIpduGroupRef[counter]))
+            {
+                groupEnable = TRUE;
+            }
             if (IpduGroupId == Com_ConfigStd->IpduGroupRefPtr->RxIpduGroupRef[counter])
             {
-                uint16                      idpduIdPerMainfunction = cirCnt - startRxIpduId;
-                Com_RxIPduRunTimeStateType* rxIpduStatePtr = &rxIpduStateMainfunctionPtr[idpduIdPerMainfunction];
-                uint8                       activeEnable   = rxIpduStatePtr->RxIpduRTStFlag & COM_RX_ACTIVE_EN;
+                groupMatch = TRUE;
                 /*the pdu restart*/
                 if (IsEnable && (COM_RX_ACTIVE_EN != activeEnable))
                 {
@@ -2931,31 +3411,34 @@ COM_LOCAL void Com_RxIpduControl(
                             rxIpduInitStatePtr);
                     }
                 }
-                else if (!IsEnable && (COM_RX_ACTIVE_EN == activeEnable))
-                {
-                    SchM_Enter_Com_MultiCore_Lock();
-                    rxIpduStatePtr->RxIpduRTStFlag &= COM_RX_ACTIVE_DIS;
-                    SchM_Exit_Com_MultiCore_Lock();
-/*disable rx i-pdu(all signal/signal group) DM Counter*/
-#if ((COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER) > 0u)
-                    Com_DisableRxPduTimeOut(rxIpduPtr, rxIpduStatePtr);
-#endif
-                }
-                else
-                {
-                    /* do nothing */
-                }
+            }
+            if (groupMatch && groupEnable)
+            {
                 break;
             }
         }
+        if (groupMatch && !groupEnable && (COM_RX_ACTIVE_EN == activeEnable))
+        {
+            SchM_Enter_Com_MultiCore_Lock();
+            rxIpduStatePtr->RxIpduRTStFlag &= COM_RX_ACTIVE_DIS;
+            SchM_Exit_Com_MultiCore_Lock();
+/*disable rx i-pdu(all signal/signal group) DM Counter*/
+#if ((COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER) > 0u)
+            Com_DisableRxPduTimeOut(rxIpduPtr, rxIpduStatePtr);
+#endif
+        }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
 /**
  * @brief init the rx ipdu buffer,all signal buffer(included in the ipdu,except source signal)
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxPduBufferAndSignalBuffer(
     const Com_RxIPduType*             RxIpduPtr,
     Com_RxIPduRunTimeStateType*       RxIpduStatePtr,
@@ -3070,6 +3553,8 @@ COM_LOCAL void Com_ResetRxPduBufferAndSignalBuffer(
     RxIpduStatePtr->RxIpduRTStFlag &= COM_RX_INDICATION_DIS;
     RxIpduStatePtr->RxIpduLength = RxIpduInitStatePtr->RxIpduLength;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief set the reception deadline monitoring timer for the included signals and signal groups to the configured
@@ -3077,11 +3562,12 @@ COM_LOCAL void Com_ResetRxPduBufferAndSignalBuffer(
  *
  */
 #if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPduRunTimeStateType* RxIpduStatePtr)
 {
 #if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType updateBitPosition;
-    uint8                  updateBitMask;
 #endif
     uint8 rxDMFlag = 0u;
 
@@ -3168,6 +3654,8 @@ COM_LOCAL void Com_ResetRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPdu
     }
 #endif
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3175,6 +3663,8 @@ COM_LOCAL void Com_ResetRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPdu
  *
  */
 #if ((COM_MAX_IPDUGROUP_NUMBER > 0u) && ((COM_MAX_RXSIGNAL_NUMBER + COM_MAX_RXSIGNALGROUP_NUMBER) > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_DisableRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIPduRunTimeStateType* RxIpduStatePtr)
 {
 /* PRQA S 2934 ++ */ /* VL_Com_NullPtrValue */
@@ -3202,12 +3692,16 @@ COM_LOCAL void Com_DisableRxPduTimeOut(const Com_RxIPduType* RxIpduPtr, Com_RxIP
     RxIpduStatePtr->RxIpduBaseDMTimeout = 0u;
     COM_NOUSED(RxIpduPtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /**
  * @brief reset OCCURRENCE of filter with FilterAlgorithm ONE_EVERY_N.
  *
  */
 #if ((COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduType* RxIpduPtr)
 {
 /*reset signal/group signal of rx pdu which FilterAlgorithm is ONE_EVERY_N*/
@@ -3250,12 +3744,16 @@ COM_LOCAL void Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduType* RxIpduPtr)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 /* PRQA S 2895 -- */
 /**
  * @brief Com_InitHandle is used by Com_Init
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_Com_STCAL */
 COM_LOCAL void Com_InitHandle(
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
@@ -3304,10 +3802,15 @@ COM_LOCAL void Com_InitHandle(
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief Com_DeInitHandle is used by Com_DeInit
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_DeInitHandle(
 #if (STD_ON == COM_MULTIPLE_PARTITION_USED)
     ApplicationType ApplicationPartitionId,
@@ -3364,10 +3867,15 @@ COM_LOCAL void Com_DeInitHandle(
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 #if (COM_MULITIVARIANT_SUPPORT == STD_ON)
 /**
  * get internal IPdu Group Id of the Com module
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_IpduGroupIdType Com_GetIpduGroupIdFromUserId(uint16 apiId, Com_IpduGroupIdType ipduGroupId)
 {
     Com_IpduGroupIdType groupId = COM_UNUSED_UINT16;
@@ -3387,9 +3895,14 @@ COM_LOCAL Com_IpduGroupIdType Com_GetIpduGroupIdFromUserId(uint16 apiId, Com_Ipd
     }
     return groupId;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * get internal ISignal or GroupSignal Id of the Com module
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_SignalIdType Com_GetSignalAndGroupSignalIdFromUserId(uint16 apiId, Com_SignalIdType signalId)
 {
     Com_SignalIdType sigId = COM_UNUSED_UINT16;
@@ -3409,9 +3922,14 @@ COM_LOCAL Com_SignalIdType Com_GetSignalAndGroupSignalIdFromUserId(uint16 apiId,
     }
     return sigId;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * get internal SignalGroup Id of the Com module
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Com_SignalGroupIdType Com_GetSignalGroupIdFromUserId(uint16 apiId, Com_SignalGroupIdType signalGroupId)
 {
     Com_SignalGroupIdType sigGrpId = COM_UNUSED_UINT16;
@@ -3431,9 +3949,14 @@ COM_LOCAL Com_SignalGroupIdType Com_GetSignalGroupIdFromUserId(uint16 apiId, Com
     }
     return sigGrpId;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * get internal Pdu Id of the Com module
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL PduIdType Com_GetPduIdFromUserId(uint16 apiId, PduIdType pduId)
 {
     PduIdType pduIdret = COM_UNUSED_UINT16;
@@ -3453,10 +3976,26 @@ COM_LOCAL PduIdType Com_GetPduIdFromUserId(uint16 apiId, PduIdType pduId)
     }
     return pduIdret;
 }
-
-#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+
+#endif
+
+#if (COM_MAX_IPDUGROUP_NUMBER > 0u)
+/**
+ * @brief provide state of an IpduGroup.
+ *
+ */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
+boolean Com_IsIpduGroupEnable(Com_IpduGroupIdType IpduGroupId)
+{
+    return Com_IpduGroupEnable[IpduGroupId];
+}
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+#endif
+
 /* PRQA S 0316,2844 -- */
 /* PRQA S 2814,2824 -- */
 /* PRQA S 3120,3132 -- */

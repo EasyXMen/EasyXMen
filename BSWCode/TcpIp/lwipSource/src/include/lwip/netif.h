@@ -228,7 +228,11 @@ typedef err_t (*netif_mld_mac_filter_fn)(struct netif *netif,
 
 #if LWIP_DHCP || LWIP_AUTOIP || LWIP_IGMP || LWIP_IPV6_MLD || LWIP_IPV6_DHCP6 || (LWIP_NUM_NETIF_CLIENT_DATA > 0)
 #if LWIP_NUM_NETIF_CLIENT_DATA > 0
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t netif_alloc_client_data_id(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 /** @ingroup netif_cd
  * Set client data. Obtain ID from netif_alloc_client_data_id().
@@ -421,40 +425,96 @@ struct netif {
 #else /* LWIP_SINGLE_NETIF */
 /** The list of network interfaces. */
 #define TCPIP_VAR_NETIF_LIST(coreIndex)       g_netif_list[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct netif *g_netif_list[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #define NETIF_FOREACH(netif) for ((netif) = TCPIP_VAR_NETIF_LIST(TcpIp_MulticoreIndex); (netif) != NULL; (netif) = (netif)->next)
 #endif /* LWIP_SINGLE_NETIF */
 /** The default network interface. */
 #define TCPIP_VAR_NETIF_DEFAULT(coreIndex)    g_netif_default[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct netif *g_netif_default[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_init(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *netif_add_noaddr(struct netif *netif, void *state, netif_init_fn init, netif_input_fn input);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *netif_add(struct netif *netif,
                             const ip4_addr_t *ipaddr, const ip4_addr_t *netmask, const ip4_addr_t *gw,
                             void *state, netif_init_fn init, netif_input_fn input);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_addr(struct netif *netif, const ip4_addr_t *ipaddr, const ip4_addr_t *netmask,
                     const ip4_addr_t *gw);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else /* LWIP_IPV4 */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *netif_add(struct netif *netif, void *state, netif_init_fn init, netif_input_fn input);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4 */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_remove(struct netif * netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Returns a network interface given its name. The name is of the form
    "et0", where the first two letters are the "name" field in the
    netif structure, and the digit is in the num field in the same
    structure. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif *netif_find(const char *name);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_default(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_netmask(struct netif *netif, const ip4_addr_t *netmask);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_gw(struct netif *netif, const ip4_addr_t *gw);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
 /** @ingroup netif_ip4 */
 #define netif_ip4_addr(netif)    ((const ip4_addr_t*)ip_2_ip4(&((netif)->ip_addr)))
 /** @ingroup netif_ip4 */
@@ -473,27 +533,55 @@ void netif_set_gw(struct netif *netif, const ip4_addr_t *gw);
 #define netif_clear_flags(netif, clr_flags)   do { (netif)->flags = (u8_t)((netif)->flags & (u8_t)(~(clr_flags) & 0xff)); } while(0)
 #define netif_is_flag_set(netif, flag)        (((netif)->flags & (flag)) != 0)
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_up(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_down(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup netif
  * Ask if an interface is up
  */
 #define netif_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_STATUS_CALLBACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_status_callback(struct netif *netif, netif_status_callback_fn status_callback);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 #if LWIP_NETIF_REMOVE_CALLBACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_remove_callback(struct netif *netif, netif_status_callback_fn remove_callback);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_REMOVE_CALLBACK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_link_up(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_link_down(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Ask if a link is up */
 #define netif_is_link_up(netif) (((netif)->flags & NETIF_FLAG_LINK_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_LINK_CALLBACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_callback);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_HOSTNAME
@@ -521,27 +609,68 @@ void netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_
 #endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
 
 #if ENABLE_LOOPBACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t netif_loop_output(struct netif *netif, struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_poll(struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if !LWIP_NETIF_LOOPBACK_MULTITHREADING
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_poll_all(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t netif_input(struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV6
 /** @ingroup netif_ip6 */
 #define netif_ip_addr6(netif, i)  ((const ip_addr_t*)(&((netif)->ip6_addr[i])))
 /** @ingroup netif_ip6 */
 #define netif_ip6_addr(netif, i)  ((const ip6_addr_t*)ip_2_ip6(&((netif)->ip6_addr[i])))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_ip6_addr_set(struct netif *netif, s8_t addr_idx, const ip6_addr_t *addr6);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_ip6_addr_set_parts(struct netif *netif, s8_t addr_idx, u32_t i0, u32_t i1, u32_t i2, u32_t i3);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define netif_ip6_addr_state(netif, i)  ((netif)->ip6_addr_state[i])
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_ip6_addr_set_state(struct netif* netif, s8_t addr_idx, u8_t state);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 s8_t netif_get_ip6_addr_match(struct netif *netif, const ip6_addr_t *ip6addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_create_ip6_linklocal_address(struct netif *netif, u8_t from_mac_48bit);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t netif_add_ip6_address(struct netif *netif, const ip6_addr_t *ip6addr, s8_t *chosen_idx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define netif_set_ip6_autoconfig_enabled(netif, action) do { if(netif) { (netif)->ip6_autoconfig_enabled = (action); }}while(0)
 #if LWIP_IPV6_ADDRESS_LIFETIMES
 #define netif_ip6_addr_valid_life(netif, i)  \
@@ -572,9 +701,21 @@ err_t netif_add_ip6_address(struct netif *netif, const ip6_addr_t *ip6addr, s8_t
 #define NETIF_RESET_HINTS(netif)
 #endif /* LWIP_NETIF_USE_HINTS */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t netif_name_to_index(const char *name);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 char * netif_index_to_name(u8_t idx, char *name);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif* netif_get_by_index(u8_t idx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Interface indexes always start at 1 per RFC 3493, section 4, num starts at 0 (internal index is 0..254)*/
 #define netif_get_index(netif)      ((u8_t)((netif)->num + 1))
@@ -681,9 +822,21 @@ typedef struct netif_ext_callback
 } netif_ext_callback_t;
 
 #define NETIF_DECLARE_EXT_CALLBACK(name) static netif_ext_callback_t name;
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_add_ext_callback(netif_ext_callback_t* callback, netif_ext_callback_fn fn, const struct netif* netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_remove_ext_callback(netif_ext_callback_t* callback);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void netif_invoke_ext_callback(struct netif* netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t* args);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
 #define NETIF_DECLARE_EXT_CALLBACK(name)
 #define netif_add_ext_callback(callback, fn, netif)
@@ -692,7 +845,11 @@ void netif_invoke_ext_callback(struct netif* netif, netif_nsc_reason_t reason, c
 #endif
 
 #if LWIP_TESTMODE && LWIP_HAVE_LOOPIF
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct netif* netif_get_loopif(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 

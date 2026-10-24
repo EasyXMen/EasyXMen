@@ -33,9 +33,7 @@
 /* PRQA S 2814,2824 ++ */ /* VL_QAC_DerefNullPtr */
 /* PRQA S 0316,2844 ++ */ /* VL_QAC_0316,VL_Com_NullPtrValue */
 /* PRQA S 6520 EOF */     /* VL_MTR_Com_STVAR */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
-/* PRQA S 5015 ++ */ /* VL_Com_UntrustedMethod */
+/* PRQA S 5015 ++ */      /* VL_Com_UntrustedMethod */
 /**
  * @brief         Reset OCCURRENCE of filter with FilterAlgorithm ONE_EVERY_N.
  * @param[in]     TxIpduPtr:Pointer of TxIpdu
@@ -44,8 +42,13 @@
  * @trace         CPD-66404
  */
 #if (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetTxOccurrenceOfPduFilter(const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Called by Com_TxIpduControl.init the tx ipdu buffer,all signal buffer (included in the ipdu) and
  *                init the TMC.
@@ -58,12 +61,17 @@ COM_LOCAL void Com_ResetTxOccurrenceOfPduFilter(const Com_TxIPduType* TxIpduPtr)
  * @trace         CPD-66405
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
     PduIdType                         IpduId,
     Com_MainFunctionIdType            TxMainfunctionId,
     Com_TxIPduRunTimeStateType*       TxIpduStatePtr,
     const Com_TxIPduRunTimeStateType* TxIpduInitStatePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Pack tx group signal(not dynamic).
  * @param[in]     TxGroupSignalPtr:TxGroupSignal pointer
@@ -74,11 +82,16 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
  * @trace         CPD-66406
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxGroupSignalPack(
     const Com_TxGroupSignalType* TxGroupSignalPtr,
     const Com_TxIPduType*        TxIpduPtr,
     Com_MainFunctionIdType       TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         The group signal value changed,judge it will trigger calculate the new TMC of the signal new value.
  * @param[in]     DestSignalType:Dest signal type
@@ -91,12 +104,17 @@ COM_LOCAL void Com_TxGroupSignalPack(
  * @trace         CPD-66407
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_TxSignalTMCCalculate(
     Com_SignalConfigType DestSignalType,
     const void*          SignalValuePtr,
     const void*          TxSignalTMCPtr,
     uint64               SignalOldValue);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Change the signal value to uint64 type.
  * @param[in]     SignalType:Signaltype of signal/groupSignal
@@ -108,8 +126,13 @@ COM_LOCAL boolean Com_TxSignalTMCCalculate(
  * @trace         CPD-66410
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* SignalValuePtr, uint8 ComBitSize);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Update the uint8_n signal value.
  * @param[in]     TxIPduBufferId:TxIpdu buffer index
@@ -126,14 +149,19 @@ COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* Sig
 #if (                                                                                   \
     (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) && (0u < COM_MAX_TXIPDUBUFF_SIZE) \
     && (0u < COM_MAX_SIGNAL_8BITBUFF_SIZE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_TxGroupSignalUpdateUint8N(
     Com_TxIpduBufIdType    TxIPduBufferId,
     Com_SignalIdType       GroupSignalId,
     uint16                 GroupSignalInitValueId,
     uint16                 PartitionId,
     Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 #endif
+
 /**
  * @brief         Send Signal Group(Array) handle
  * @param[in]     TxSignalGroupPtr:TxSignalGroup pointer
@@ -146,13 +174,18 @@ COM_LOCAL boolean Com_TxGroupSignalUpdateUint8N(
  * @trace         CPD-66411
  */
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SendSignalGroupArrayInternalHandle(
     const Com_TxSignalGroupType* TxSignalGroupPtr,
     Com_TxIPduRunTimeStateType*  TxIpduStatePtr,
     const Com_TxIPduType*        TxIpduPtr,
     boolean                      TriggerOnChange,
     uint16                       RptNum);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Trigger IPdu Send handle
  * @param[in]     TxIpduPtr:Pointer of TxIpdu
@@ -164,6 +197,8 @@ COM_LOCAL void Com_SendSignalGroupArrayInternalHandle(
  * @trace         CPD-66412
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Std_ReturnType Com_TriggerIPDUSendInternalHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -171,7 +206,10 @@ COM_LOCAL Std_ReturnType Com_TriggerIPDUSendInternalHandle(
     PduIdType IpduId,
 #endif
     Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Get TxModeTimeOffset of True/False TxMode
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -181,8 +219,13 @@ COM_LOCAL Std_ReturnType Com_TriggerIPDUSendInternalHandle(
  * @synchronous   TRUE
  * @trace         CPD-66413
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GetTxModeOffset(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean TMS);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief         Tx pdu DM timeout notification.
  * @param[in]     TxIpduPtr:Pointer of TxIpdu
@@ -191,8 +234,13 @@ COM_LOCAL void
  * @trace         CPD-66414
  */
 #if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Calculate DM and MDT
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -203,9 +251,14 @@ COM_LOCAL void Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr);
  * @trace
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL
 boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         When the tx mode is direct.return the boolean value for the tx pdu need to transmit or not.
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -222,9 +275,14 @@ boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduStatePtr, co
     || ((0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
         || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER)                              \
         || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxDirect(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         When the tx mode is period.
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -238,9 +296,14 @@ COM_LOCAL boolean
 #if (0u < COM_MAX_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_PERIOD_NUMBER)  \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxPeriod(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         When the tx mode is mixed.return the boolean value for the tx pdu need to transmit or not.
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -253,9 +316,14 @@ COM_LOCAL boolean
  */
 #if (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxMixed(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         It is called in case the transmission is not possible because the corresponding I-PDU group is
  * stopped.
@@ -265,8 +333,13 @@ COM_LOCAL boolean
  * @trace         CPD-66436
  */
 #if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_InvokeErrorNotification(const Com_TxIPduType* TxIpduPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Send the tx pdu in Com_MainFunctionTx
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -278,6 +351,8 @@ COM_LOCAL void Com_InvokeErrorNotification(const Com_TxIPduType* TxIpduPtr);
  * @trace         CPD-66437
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_MainFunction_SendPdu(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -285,7 +360,10 @@ COM_LOCAL void Com_MainFunction_SendPdu(
     PduIdType TxIpduId,
 #endif
     Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Get signal old value
  * @param[in]     SignalType:Signaltype of signal/groupSignal
@@ -297,8 +375,13 @@ COM_LOCAL void Com_MainFunction_SendPdu(
  * @trace         CPD-66438
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalBufferId, uint16 PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         The tx signal value change,calculate the new TMC and TMS.
  * @param[in]     TxIpduStatePtr:State of TxIpdu
@@ -311,13 +394,18 @@ COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalB
  * @trace         CPD-66439
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxSignalTMHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
     Com_SignalIdType            TxSignalId,
     const void*                 TxSignalDataPtr,
     Com_MainFunctionIdType      TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Set Tx signal(not dynamic signal) to signalbuffer,return the buffer value is changed or not.
  * @param[in]     SignalType:Signaltype of signal/groupSignal
@@ -331,6 +419,8 @@ COM_LOCAL void Com_TxSignalTMHandle(
  * @trace         CPD-68737
  */
 #if ((COM_MAX_TXSIGNALGROUP_NUMBER > 0u) || (0u < COM_MAX_TXSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SetTxSignalBuff(
     Com_SignalType SignalType,
     uint16         ComSignalLength,
@@ -338,7 +428,10 @@ COM_LOCAL boolean Com_SetTxSignalBuff(
     const void*    SignalNewDataPtr,
     uint8          ComBitSize,
     uint16         PartitionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Pack the Tx signal into ipdu Tx buffer.
  * @param[in]     TxSignalId:TxSignal index
@@ -349,9 +442,14 @@ COM_LOCAL boolean Com_SetTxSignalBuff(
  * @trace         CPD-66440
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_TxSignalPack(const Com_TxSignalType* txSignalPtr, uint16 PartitionId, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Called by Com_SendSignal,Com_SendDynSignal.send Tx signal handle.
  * @param[in]     TxIpduPtr:Pointer of TxIpdu
@@ -365,13 +463,18 @@ COM_LOCAL void
  * @trace         CPD-66441
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint8 Com_SendTxSignalHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     Com_TransferPropertyType    SignalTxProperty,
     boolean                     DMSignal,
     boolean                     ValueChanged);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Called by Com_SendSignal,Com_InvalidateSignalGroup.send Tx group signal handle.
  * @param[in]     TxGroupSignalId:TxGroupSignal index
@@ -382,8 +485,13 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
  * @trace         CPD-66442
  */
 #if (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, const void* SignalDataPtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Set Tx dynamic signal to signalbuffer,return the buffer value is changed or not.
  * @param[in]     TxIpduPtr:Pointer of TxIpdu
@@ -399,13 +507,18 @@ COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, co
 #if (                                                                                            \
     ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)) \
     || ((0u < COM_MAX_TXSIGNAL_NUMBER) && (STD_ON == COM_TX_SIGNAL_TYPE_UINT8_DYN_ENABLE)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SetDynTxSignalBuff(
     const Com_TxIPduType*             TxIpduPtr,
     const Com_TxIPduRunTimeStateType* TxRuntimeStatePtr,
     uint8*                            Signal8BitRuntimeBuffPtr,
     const void*                       SignalNewDataPtr,
     uint16                            Length);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Pack the Tx signal group into ipdu Tx buffer.
  * @param[in]     SignalGroupId:SignalGroup index
@@ -415,8 +528,13 @@ COM_LOCAL boolean Com_SetDynTxSignalBuff(
  * @trace         CPD-66444
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGroupId, Com_MainFunctionIdType TxMainfunctionId);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief         Update every group signal buffer,calculate every TMC,return the signal group is changed or not
  *                for trigger transmit.
@@ -429,27 +547,45 @@ COM_LOCAL void Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGroupId, Com_Ma
  * @trace         CPD-66445
  */
 #if ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal(
     Com_SignalGroupIdType   TxSignalGroupId,
     Com_TxGroupSignalIdType GroupSignalNumber,
     Com_TxIpduBufIdType     TxIPduBufferId);
-#endif
-/* PRQA S 5015 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+
+/**
+ * @brief         Stop tx Ipdu.
+ * @param[in]     TxIpduPtr:Pointer of TxIpdu
+ * @param[in]     txIpduStatePtr:TxIpdu state pointer
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace
+ */
+#if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
+COM_LOCAL void Com_TxPduStop(const Com_TxIPduType* txIpduPtr, Com_TxIPduRunTimeStateType* txIpduStatePtr);
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+#endif
+/* PRQA S 5015 -- */
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /* PRQA S 1532,2895 ++ */ /* VL_Com_ReferencedOnlyOne,VL_Com_NegtiveValueType */
 /**
  * @brief Send SignalGroup(Array) handle
  *
  */
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, const uint8* SignalGroupArrayPtr)
 {
     uint8                        ret              = COM_SERVICE_NOT_AVAILABLE;
@@ -534,6 +670,8 @@ uint8 Com_SendSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, const 
     COM_NOUSED(SignalGroupArrayPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -542,6 +680,8 @@ uint8 Com_SendSignalGroupArrayHandle(Com_SignalGroupIdType SignalGroupId, const 
  *
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendTxDynGroupSignalHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     Com_SignalIdType            TxGroupSignalId,
@@ -552,7 +692,6 @@ uint8 Com_SendTxDynGroupSignalHandle(
     const Com_TxGroupSignalType* txGroupSignalPtr = &Com_CfgTxGroupSignalPtr[TxGroupSignalId];
     Com_TxSignalGroupIdType      signalGroupId    = txGroupSignalPtr->ComSignalGroupRef;
     const Com_TxSignalGroupType* txSignalGroupPtr = &Com_CfgTxSignalGroupPtr[signalGroupId];
-    Com_MainFunctionIdType       txMainfunctionId = txSignalGroupPtr->TxMainfunctionId;
     /*group signal(not dynamic) isn't send by the API,InitialValueOnly signal group don't expect to be called by any
      * API*/
     if ((COM_UINT8_DYN != txGroupSignalPtr->ComSignalType) || txSignalGroupPtr->ComInitialValueOnly)
@@ -580,7 +719,7 @@ uint8 Com_SendTxDynGroupSignalHandle(
             boolean valueChanged = Com_SetDynTxSignalBuff(
                 txIpduPtr,
                 (const Com_TxIPduRunTimeStateType*)TxIpduStatePtr,
-                signal8BitRuntimeBuffPtr,
+                &signal8BitRuntimeBuffPtr[groupSignalBufferId],
                 SignalDataPtr,
                 DynLength);
             txSigGrpStPtr->DynamicSignalLength = DynLength;
@@ -632,6 +771,8 @@ uint8 Com_SendTxDynGroupSignalHandle(
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -640,6 +781,8 @@ uint8 Com_SendTxDynGroupSignalHandle(
  *
  */
 #if (STD_ON == COM_TX_SIGNAL_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 1505 ++ */ /* VL_Com_1505 */
 void Com_ConfirmationProcess(const Com_TxIPduType* TxIpduPtr)
 /* PRQA S 1505 -- */ /* VL_Com_1505 */
@@ -684,6 +827,8 @@ void Com_ConfirmationProcess(const Com_TxIPduType* TxIpduPtr)
     COM_NOUSED(TxIpduPtr);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -691,6 +836,8 @@ void Com_ConfirmationProcess(const Com_TxIPduType* TxIpduPtr)
  *
  */
 #if (((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)) && (0u < COM_MAX_TXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendSignalHandle(
     Com_SignalIdType       SignalId,
     const void*            SignalDataPtr,
@@ -794,11 +941,15 @@ uint8 Com_SendSignalHandle(
     COM_NOUSED(SignalDataPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief Send Dynamic Signal handle
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_SendDynSignalHandle(
     Com_SignalIdType       SignalId,
     const void*            SignalDataPtr,
@@ -931,9 +1082,13 @@ uint8 Com_SendDynSignalHandle(
     COM_NOUSED(SignalDataPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (0u < COM_MAX_TXIPDU_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               Send SignalGroup handle
@@ -1002,10 +1157,9 @@ uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFun
             {
                 /*the signal group configuration timeout,the DM timer isn't start by other signals/signal groups,Tx
                  * Mode isn't NONE*/
-                Com_TxModeModeType ipduTxMode = txIpduStatePtr->IpduTxMode;
 #if (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_ENABLE)
-                if ((COM_UNUSED_TXSIGGRPTIMEOUTID != txSignalGroupPtr->TimeoutIndex) && (COM_TX_MODE_NONE != ipduTxMode)
-                    && (0u == txIpduStatePtr->DMCnt))
+                if ((COM_UNUSED_TXSIGGRPTIMEOUTID != txSignalGroupPtr->TimeoutIndex)
+                    && (COM_TX_MODE_NONE != txIpduStatePtr->IpduTxMode) && (0u == txIpduStatePtr->DMCnt))
                 {
                     /*restart the tx DM timer*/
                     txIpduStatePtr->DMCnt = txIpduPtr->TxIpduDM;
@@ -1018,9 +1172,10 @@ uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFun
     || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) \
     || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER)                                                         \
     || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
-                if ((COM_TX_MODE_DIRECT == ipduTxMode) || (COM_TX_MODE_MIXED == ipduTxMode)
-                    || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == ipduTxMode)
-                    || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
+                if ((COM_TX_MODE_DIRECT == txIpduStatePtr->IpduTxMode)
+                    || (COM_TX_MODE_MIXED == txIpduStatePtr->IpduTxMode)
+                    || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == txIpduStatePtr->IpduTxMode)
+                    || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == txIpduStatePtr->IpduTxMode))
                 {
                     uint8 NTimesTransmitNeed = txSigGrpStPtr->TxSigGrpRTStFlag & COM_NTIMESTRANSMITNEED_EN;
                     if (COM_NTIMESTRANSMITNEED_EN == NTimesTransmitNeed)
@@ -1061,6 +1216,8 @@ uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFun
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1068,6 +1225,8 @@ uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFun
  *
  */
 #if ((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)) && (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_InvalidateSignalHandle(Com_SignalIdType SignalId)
 {
     uint8 ret = COM_SERVICE_NOT_AVAILABLE;
@@ -1161,12 +1320,17 @@ uint8 Com_InvalidateSignalHandle(Com_SignalIdType SignalId)
     COM_NOUSED(SignalId);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Send Invalidate SignalGroup handle
  *
  */
 #if ((COM_MAX_TXSIGNAL_NUMBER > 0u) || (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)) && (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 uint8 Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
 {
     uint8                        ret              = COM_SERVICE_NOT_AVAILABLE;
@@ -1301,6 +1465,8 @@ uint8 Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1308,6 +1474,8 @@ uint8 Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 Std_ReturnType Com_TriggerIPDUSendHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -1351,9 +1519,13 @@ Std_ReturnType Com_TriggerIPDUSendHandle(
     }
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 #if (STD_ON == COM_METADATA_SUPPORT) && (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               Trigger IPDU(with metadata) send handle
@@ -1420,12 +1592,17 @@ Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
     }
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief  Switch Ipdu Transmit Mode Handle
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_SwitchIpduTxModeHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -1457,18 +1634,33 @@ void Com_SwitchIpduTxModeHandle(
         && ((COM_TX_MODE_MIXED == TxIpduStatePtr->IpduTxMode) || (COM_TX_MODE_PERIODIC == TxIpduStatePtr->IpduTxMode)
             || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == TxIpduStatePtr->IpduTxMode)))
     {
-        if ((Mode && (COM_TX_TMS_EN != TMS)) || (!Mode && (COM_TX_TMS_EN == TMS)))
+        if (Mode)
         {
-            Com_GetTxModeOffset(TxIpduStatePtr, TxIpduPtr, Mode);
+            if (COM_TX_TMS_EN != TMS)
+            {
+                Com_GetTxModeOffset(TxIpduStatePtr, TxIpduPtr, Mode);
+            }
+        }
+        else
+        {
+            if (COM_TX_TMS_EN == TMS)
+            {
+                Com_GetTxModeOffset(TxIpduStatePtr, TxIpduPtr, Mode);
+            }
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief TxPdu MainFunction handle
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_Com_STCAL */
 void Com_MainFunctionTxHandle(Com_MainFunctionIdType TxMainfunctionId)
 /* PRQA S 6070 -- */
@@ -1495,7 +1687,16 @@ void Com_MainFunctionTxHandle(Com_MainFunctionIdType TxMainfunctionId)
             }
 #endif
             /* Calculate DM, if DM > 0u, DM-- every mainfunction */
+#if (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER)                 \
+    || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER)                                               \
+    || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_PERIOD_NUMBER) \
+    || (0u < COM_MAX_TX_MODE_FALSE_PERIOD_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER)               \
+    || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER)   \
+    || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
             boolean ipduMDTRun = Com_MainTxDMTimeoutMdtCal(txIpduStatePtr, txIpduPtr);
+#else
+            (void)Com_MainTxDMTimeoutMdtCal(txIpduStatePtr, txIpduPtr);
+#endif
             switch (txIpduStatePtr->IpduTxMode)
             {
 #if (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) \
@@ -1554,12 +1755,17 @@ void Com_MainFunctionTxHandle(Com_MainFunctionIdType TxMainfunctionId)
         }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief TxPdu Trigger Transmit handle
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 Std_ReturnType Com_TriggerTransmitHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -1630,6 +1836,8 @@ Std_ReturnType Com_TriggerTransmitHandle(
 
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1637,6 +1845,8 @@ Std_ReturnType Com_TriggerTransmitHandle(
  *
  */
 #if ((0u < COM_MAX_TXIPDU_NUMBER) && (STD_ON == COM_TXTPPDU_SUPPORT))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_TpTxConfirmationHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -1707,10 +1917,15 @@ void Com_TpTxConfirmationHandle(
 
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+
 /**
  * @brief TP TxPdu copy pdu data handle
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 BufReq_ReturnType Com_CopyTxDataHandle(
     PduIdType              TxIpduId,
     Com_MainFunctionIdType TxMainfunctionId,
@@ -1737,8 +1952,8 @@ BufReq_ReturnType Com_CopyTxDataHandle(
         if ((NULL_PTR != retry) && (TP_DATARETRY == retry->TpDataState))
         {
             txIpduStatePtr->TxOffset = (txIpduStatePtr->TxOffset >= retry->TxTpDataCnt)
-                                           ? (txIpduStatePtr->TxOffset - (uint16)retry->TxTpDataCnt)
-                                           : 0u;
+                                           ? (txIpduStatePtr->TxOffset - retry->TxTpDataCnt)
+                                           : (PduLengthType)0u;
             /*will not happen general,TP module guarantee*/
         }
         if (((uint16)txIpduStatePtr->TxOffset + (uint16)info->SduLength) <= txIpduStatePtr->TxIpduLength)
@@ -1768,12 +1983,17 @@ BufReq_ReturnType Com_CopyTxDataHandle(
     }
     return bufReq;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Reset the counter of tx Ipdu MDT.
  *
  */
 #if (STD_ON == COM_MDT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
 /* PRQA S 3673 -- */
@@ -1795,7 +2015,10 @@ void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_Tx
     COM_NOUSED(TxIpduPtr);
     COM_NOUSED(TxIpduStatePtr);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,
  *        Com_TriggerTransmit,Com_TxConfirmation,Com_TpTxConfirmation,
@@ -1805,6 +2028,8 @@ void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_Tx
  */
 #if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
     || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 void Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdType TxMainfunctionId)
 {
 #if (0u < COM_MAX_TXIPDUBUFF_SIZE)
@@ -1845,7 +2070,7 @@ void Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdT
         }
     }
 #endif
-#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE) && (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER > 0u)
     Com_GwDestinationDescriptionIdType destSignalNumber, destSignalId;
     destSignalNumber = TxIpduPtr->IPduDespSignalsRefNumber;
     destSignalId     = TxIpduPtr->IPduDespSignalsRefStartId;
@@ -1865,18 +2090,18 @@ void Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdT
     COM_NOUSED(TxMainfunctionId);
     return;
 }
-#endif
-/* PRQA S 1532,2895 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+/* PRQA S 1532,2895 -- */
 /* ========================================== internal function definitions ========================================= */
-#define COM_START_SEC_CODE
-#include "Com_MemMap.h"
 /* PRQA S 1532,2895 ++ */ /* VL_Com_ReferencedOnlyOne,VL_Com_NegtiveValueType */
 /**
  * @brief get TxModeTimeOffset of True/False TxMode
  *
  */
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_GetTxModeOffset(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean TMS)
 {
@@ -1920,14 +2145,19 @@ COM_LOCAL void
         }
     }
     TxIpduStatePtr->PeriodCnt = txModeOffset;
+    COM_NOUSED(TxIpduPtr);
     COM_NOUSED(TMS);
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 
 /**
  * @brief reset OCCURRENCE of filter with FilterAlgorithm ONE_EVERY_N.
  *
  */
 #if (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetTxOccurrenceOfPduFilter(const Com_TxIPduType* TxIpduPtr)
 {
 /*reset signal/group signal/dest description signal of tx pdu which FilterAlgorithm is ONE_EVERY_N*/
@@ -1982,6 +2212,8 @@ COM_LOCAL void Com_ResetTxOccurrenceOfPduFilter(const Com_TxIPduType* TxIpduPtr)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -1990,6 +2222,8 @@ COM_LOCAL void Com_ResetTxOccurrenceOfPduFilter(const Com_TxIPduType* TxIpduPtr)
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
     PduIdType                         IpduId,
     Com_MainFunctionIdType            TxMainfunctionId,
@@ -2107,6 +2341,8 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
     TxIpduStatePtr->RptNum   = 0u;
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2114,6 +2350,8 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
  *
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxGroupSignalPack(
     const Com_TxGroupSignalType* TxGroupSignalPtr,
     const Com_TxIPduType*        TxIpduPtr,
@@ -2196,6 +2434,8 @@ COM_LOCAL void Com_TxGroupSignalPack(
         Com_TxSignalPackHandle(COM_TX_GROUP_SIGNAL, TxGroupSignalPtr, txData, &iPduBufferPtr[ipduBufferIndex]);
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2205,6 +2445,8 @@ COM_LOCAL void Com_TxGroupSignalPack(
  *
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_TxSignalTMCCalculate(
     Com_SignalConfigType DestSignalType,
     const void*          SignalValuePtr,
@@ -2283,6 +2525,8 @@ COM_LOCAL boolean Com_TxSignalTMCCalculate(
     COM_NOUSED(SignalOldValue);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2290,6 +2534,8 @@ COM_LOCAL boolean Com_TxSignalTMCCalculate(
  *
  */
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* SignalValuePtr, uint8 ComBitSize)
 {
     uint64 signalNewValue = 0u;
@@ -2324,6 +2570,8 @@ COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* Sig
     /* PRQA S 4391 -- */
     return signalNewValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2334,6 +2582,8 @@ COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* Sig
 #if (                                                                                   \
     (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) && (0u < COM_MAX_TXIPDUBUFF_SIZE) \
     && (0u < COM_MAX_SIGNAL_8BITBUFF_SIZE))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_TxGroupSignalUpdateUint8N(
     Com_TxIpduBufIdType    TxIPduBufferId,
     Com_SignalIdType       GroupSignalId,
@@ -2365,6 +2615,8 @@ COM_LOCAL boolean Com_TxGroupSignalUpdateUint8N(
     }
     return triggerOnChange;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 #endif
 
@@ -2373,6 +2625,8 @@ COM_LOCAL boolean Com_TxGroupSignalUpdateUint8N(
  *
  */
 #if ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_SendSignalGroupArrayInternalHandle(
     const Com_TxSignalGroupType* TxSignalGroupPtr,
     Com_TxIPduRunTimeStateType*  TxIpduStatePtr,
@@ -2447,6 +2701,8 @@ COM_LOCAL void Com_SendSignalGroupArrayInternalHandle(
     COM_NOUSED(TxIpduPtr);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2454,6 +2710,8 @@ COM_LOCAL void Com_SendSignalGroupArrayInternalHandle(
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL Std_ReturnType Com_TriggerIPDUSendInternalHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -2534,13 +2792,18 @@ COM_LOCAL Std_ReturnType Com_TriggerIPDUSendInternalHandle(
     }
     return returnValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_MainFunctionTx.
  *        tx pdu DM timeout notification.
  *
  */
 #if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr)
 {
 #if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE)
@@ -2580,12 +2843,17 @@ COM_LOCAL void Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Calculate DM and MDT
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 COM_LOCAL boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
 /* PRQA S 3673 -- */
@@ -2633,7 +2901,10 @@ COM_LOCAL boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduSt
     COM_NOUSED(TxIpduPtr);
     return ipduMDTRun;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_MainFunctionTx.
  *        the handle of Com_MainFunctionTx,when the tx mode is direct.
@@ -2646,13 +2917,21 @@ COM_LOCAL boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduSt
     || ((0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
         || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER)                              \
         || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxDirect(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
 {
-    boolean            ret = FALSE;
+    boolean ret = FALSE;
+#if (                                                                                       \
+    (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER))
     Com_TxModeModeType txMode;
-    uint8              TxDelay = TxIpduStatePtr->TxIpduRTStFlag & COM_TX_DELAY_EN;
-#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
+#endif
+    uint8 TxDelay = TxIpduStatePtr->TxIpduRTStFlag & COM_TX_DELAY_EN;
+#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)                                                   \
+    && ((0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
+        || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER))
     const Com_TxModeAndSignalFilterPtrType* txFilterPtr = Com_CfgTxModeAndSignalFilterPtr;
 #endif
 
@@ -2677,7 +2956,9 @@ COM_LOCAL boolean
         uint8 TMS = TxIpduStatePtr->TxIpduRTStFlag & COM_TX_TMS_EN;
         if (TMS != COM_TX_TMS_EN)
         {
+#if ((0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER))
             txMode = TxIpduPtr->TxFalseModeMode;
+#endif
 #if (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER)
             TxIpduStatePtr->NTimeCnt =
                 (txMode == COM_TX_MODE_DIRECT)
@@ -2694,7 +2975,9 @@ COM_LOCAL boolean
         else
 #endif
         {
+#if ((0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER))
             txMode = TxIpduPtr->TxTrueModeMode;
+#endif
 #if (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER)
             TxIpduStatePtr->NTimeCnt =
                 (txMode == COM_TX_MODE_DIRECT)
@@ -2713,8 +2996,11 @@ COM_LOCAL boolean
     {
         ret = TRUE;
     }
+    COM_NOUSED(TxIpduPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2724,6 +3010,8 @@ COM_LOCAL boolean
 #if (0u < COM_MAX_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_PERIOD_NUMBER)  \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxPeriod(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
 {
@@ -2796,6 +3084,8 @@ COM_LOCAL boolean
     }
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2806,6 +3096,8 @@ COM_LOCAL boolean
  */
 #if (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
     || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean
     Com_MainFuncTxMixed(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
 {
@@ -2819,6 +3111,8 @@ COM_LOCAL boolean
     }
     return transmitRequest;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2828,6 +3122,8 @@ COM_LOCAL boolean
  *
  */
 #if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_InvokeErrorNotification(const Com_TxIPduType* TxIpduPtr)
 {
     const Com_Tx_ErrorAndNotificationType* txErrorAndNotificationPtr = Com_ConfigStd->TxErrorAndNotificationPtr;
@@ -2865,6 +3161,8 @@ COM_LOCAL void Com_InvokeErrorNotification(const Com_TxIPduType* TxIpduPtr)
 #endif
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -2872,6 +3170,8 @@ COM_LOCAL void Com_InvokeErrorNotification(const Com_TxIPduType* TxIpduPtr)
  *
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_MainFunction_SendPdu(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -2961,9 +3261,13 @@ COM_LOCAL void Com_MainFunction_SendPdu(
     }
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 #if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalBufferId, uint16 PartitionId)
 {
     uint64 oldValue = COM_UNUSED_UINT64;
@@ -3023,12 +3327,17 @@ COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalB
     }
     return oldValue;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief the tx signal value change,calculate the new TMC and TMS.
  *
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxSignalTMHandle(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType*       TxIpduPtr,
@@ -3082,6 +3391,8 @@ COM_LOCAL void Com_TxSignalTMHandle(
     COM_NOUSED(TxSignalDataPtr);
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3090,6 +3401,8 @@ COM_LOCAL void Com_TxSignalTMHandle(
  *
  */
 #if ((COM_MAX_TXSIGNALGROUP_NUMBER > 0u) || (0u < COM_MAX_TXSIGNAL_NUMBER))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6040 ++ */ /* VL_MTR_Com_STPAR */
 COM_LOCAL boolean Com_SetTxSignalBuff(
     Com_SignalType SignalType,
@@ -3202,13 +3515,18 @@ COM_LOCAL boolean Com_SetTxSignalBuff(
     COM_NOUSED(SignalNewDataPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_SendSignal.
  *        pack the Tx signal into ipdu Tx buffer.
  *
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void
     Com_TxSignalPack(const Com_TxSignalType* txSignalPtr, uint16 PartitionId, Com_MainFunctionIdType TxMainfunctionId)
 {
@@ -3291,6 +3609,8 @@ COM_LOCAL void
             Com_TxSignalPackHandle(COM_TX_SIGNAL, txSignalPtr, txData, &txIpduRuntimeBuffPtr[ipduBufferIndex]);
         }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3298,6 +3618,8 @@ COM_LOCAL void
  *
  */
 #if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint8 Com_SendTxSignalHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -3305,15 +3627,17 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
     boolean                     DMSignal,
     boolean                     ValueChanged)
 {
-    uint16                            txIpduDM     = TxIpduPtr->TxIpduDM;
+    uint16 txIpduDM = TxIpduPtr->TxIpduDM;
+#if (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ON_CHANGE_ENABLE)
     Com_TxModeNumberOfRepetitionsType txModeRptNum = 1u;
-    Com_TxModeModeType                ipduTxMode   = TxIpduStatePtr->IpduTxMode;
+#endif
+    Com_TxModeModeType ipduTxMode = TxIpduStatePtr->IpduTxMode;
 #if ((STD_ON == COM_TX_SIG_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ON_CHANGE_ENABLE))
     boolean initDMCnt = FALSE;
 #endif
     /*the signal config timeout,the DM timer isn't start by other signals,the Tx mode is not NONE.then start the DM
      * timer here*/
-    if ((0u == TxIpduStatePtr->DMCnt) && DMSignal && (COM_TX_MODE_NONE != TxIpduStatePtr->IpduTxMode))
+    if ((0u == TxIpduStatePtr->DMCnt) && DMSignal && (COM_TX_MODE_NONE != ipduTxMode))
     {
         TxIpduStatePtr->DMCnt = txIpduDM;
 #if ((STD_ON == COM_TX_SIG_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ON_CHANGE_ENABLE))
@@ -3329,7 +3653,10 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
         || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == ipduTxMode)
         || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
     {
-#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
+#if (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ON_CHANGE_ENABLE)
+#if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)                                                   \
+    && ((0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER) \
+        || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_TRUE_MIXED_NUMBER))
         const Com_TxModeAndSignalFilterPtrType* txFilterPtr = Com_CfgTxModeAndSignalFilterPtr;
 #endif
 #if (STD_ON == COM_TMS_ENABLE)
@@ -3367,6 +3694,7 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
                     : txModeRptNum;
 #endif
         }
+#endif
 #if (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_PROP_TRIGGERED_ON_CHANGE_ENABLE) \
     || (STD_ON == COM_TX_SIG_PROP_TRIG_ON_CH_NO_REPETITION_ENABLE)                                         \
     || (STD_ON == COM_TX_SIG_PROP_TRIG_NO_REPETITION_ENABLE)
@@ -3411,6 +3739,8 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
     COM_NOUSED(SignalTxProperty);
     return E_OK;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3418,6 +3748,8 @@ COM_LOCAL uint8 Com_SendTxSignalHandle(
  *
  */
 #if (COM_MAX_TXGROUPSIGNAL_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, const void* SignalDataPtr)
 {
     const Com_TxGroupSignalType* txGroupSignalPtr = &Com_CfgTxGroupSignalPtr[TxGroupSignalId];
@@ -3463,15 +3795,15 @@ COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, co
                 SignalDataPtr,
                 txGroupSignalPtr->ComBitSize,
                 txIpduPtr->IpduPartitionId);
+#if (STD_ON == COM_TX_SIG_GROUP_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIGGERED_ON_CHANGE_ENABLE) \
+    || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIG_ON_CH_NO_REPETITION_ENABLE)                                               \
+    || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIG_NO_REPETITION_ENABLE)
         Com_TransferPropertyType signalTxProperty =
 #if (STD_ON == COM_TX_SIG_GROUP_PROP_TRIGGERED_ON_CHANGE_ENABLE)
             (COM_GROUPSIGNAL_TMC_NONE != txGroupSignalPtr->ComTransferProperty) ? txGroupSignalPtr->ComTransferProperty
                                                                                 :
 #endif
                                                                                 txSignalGroupPtr->ComTransferProperty;
-#if (STD_ON == COM_TX_SIG_GROUP_PROP_TRIGGERED_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIGGERED_ON_CHANGE_ENABLE) \
-    || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIG_ON_CH_NO_REPETITION_ENABLE)                                               \
-    || (STD_ON == COM_TX_SIG_GROUP_PROP_TRIG_NO_REPETITION_ENABLE)
         Com_TxSignalGroupRunTimeStateType* txSigGrpStPtr = &Com_TxSignalGroupState[signalGroupId];
         switch (signalTxProperty)
         {
@@ -3516,6 +3848,40 @@ COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, co
 
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
+#endif
+
+/**
+ * @brief Called by Com_TxIpduControl. stop Tx Ipdu
+ *
+ */
+#if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
+COM_LOCAL void Com_TxPduStop(const Com_TxIPduType* txIpduPtr, Com_TxIPduRunTimeStateType* txIpduStatePtr)
+{
+    SchM_Enter_Com_MultiCore_Lock();
+    txIpduStatePtr->TxIpduRTStFlag &= COM_TX_ACTIVE_DIS;
+    SchM_Exit_Com_MultiCore_Lock();
+    uint8 Transmiting = txIpduStatePtr->TxIpduRTStFlag & COM_TX_TRANSMITING_EN;
+    if (COM_TX_TRANSMITING_EN == Transmiting)
+    {
+#if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
+        Com_InvokeErrorNotification(txIpduPtr);
+#endif
+#if (STD_ON == COM_CANCELLATION_SUPPORT)
+        if (txIpduPtr->ComIPduCancellationSupport)
+        {
+            (void)PduR_ComCancelTransmit(txIpduPtr->ComPduIdRef);
+        }
+#endif
+        txIpduStatePtr->TxIpduRTStFlag &= COM_TX_TRANSMITING_DIS;
+    }
+    txIpduStatePtr->DMCnt = 0u;
+}
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3523,6 +3889,8 @@ COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, co
  *
  */
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u) && (COM_MAX_TXIPDUGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 /* PRQA S 6030,6070 ++ */ /* VL_MTR_Com_STMIF,VL_MTR_Com_STCAL */
 void Com_TxIpduControl(
     Com_MainFunctionIdType TxMainfunctionId,
@@ -3533,18 +3901,26 @@ void Com_TxIpduControl(
 {
     PduIdType startTxIpduId = Com_GetStartOfMainFunctionTx(TxMainfunctionId);
     PduIdType endTxIpduId   = Com_GetEndOfMainFunctionTx(TxMainfunctionId);
+    boolean   groupEnable;
+    boolean   groupMatch;
     for (PduIdType cirCnt = startTxIpduId; cirCnt < endTxIpduId; ++cirCnt)
     {
-        const Com_TxIPduType* txIpduPtr = &Com_CfgTxIPduPtr[cirCnt];
+        const Com_TxIPduType*       txIpduPtr              = &Com_CfgTxIPduPtr[cirCnt];
+        PduIdType                   idpduIdPerMainfunction = cirCnt - startTxIpduId;
+        Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[TxMainfunctionId][idpduIdPerMainfunction];
+        uint8                       activeEnable   = txIpduStatePtr->TxIpduRTStFlag & COM_TX_ACTIVE_EN;
+        groupEnable                                = FALSE;
+        groupMatch                                 = FALSE;
         for (Com_RxIpduGroupIdType counter = txIpduPtr->IPduGroupsRefStartId; counter < txIpduPtr->IPduGroupsRefEndId;
              ++counter)
         {
+            if (Com_IsIpduGroupEnable(Com_ConfigStd->IpduGroupRefPtr->TxIpduGroupRef[counter]))
+            {
+                groupEnable = TRUE;
+            }
             if (IpduGroupId == Com_ConfigStd->IpduGroupRefPtr->TxIpduGroupRef[counter])
             {
-                PduIdType                   idpduIdPerMainfunction = cirCnt - startTxIpduId;
-                Com_TxIPduRunTimeStateType* txIpduStatePtr =
-                    &Com_TxIPduRunTimeState[TxMainfunctionId][idpduIdPerMainfunction];
-                uint8 activeEnable = txIpduStatePtr->TxIpduRTStFlag & COM_TX_ACTIVE_EN;
+                groupMatch = TRUE;
                 if (IsEnable && (COM_TX_ACTIVE_EN != activeEnable))
                 {
                     SchM_Enter_Com_MultiCore_Lock();
@@ -3571,7 +3947,6 @@ void Com_TxIpduControl(
                     if (Initialize)
                     {
                         /*init the tx ipdu buffer,all signal buffer(included in the ipdu) and init the TMC,TMS*/
-                        Com_TxModeModeType                ipduTxMode = txIpduStatePtr->IpduTxMode;
                         const Com_TxIPduRunTimeStateType* txIpduInitStateMainfunctionPtr =
                             Com_ConfigStd->TxIpduInitStatePtr[TxMainfunctionId];
                         const Com_TxIPduRunTimeStateType* txIpduInitStatePtr =
@@ -3581,44 +3956,32 @@ void Com_TxIpduControl(
                             TxMainfunctionId,
                             txIpduStatePtr,
                             txIpduInitStatePtr);
-                        if ((COM_TX_MODE_MIXED == ipduTxMode) || (COM_TX_MODE_PERIODIC == ipduTxMode)
-                            || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
-                        {
-                            boolean TMS = (COM_TX_TMS_EN == (txIpduStatePtr->TxIpduRTStFlag & COM_TX_TMS_EN));
-                            Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, TMS);
-                        }
                     }
-                }
-                else if (!IsEnable && (COM_TX_ACTIVE_EN == activeEnable))
-                {
-                    SchM_Enter_Com_MultiCore_Lock();
-                    txIpduStatePtr->TxIpduRTStFlag &= COM_TX_ACTIVE_DIS;
-                    SchM_Exit_Com_MultiCore_Lock();
-                    uint8 Transmiting = txIpduStatePtr->TxIpduRTStFlag & COM_TX_TRANSMITING_EN;
-                    if (COM_TX_TRANSMITING_EN == Transmiting)
+                    /* CPT-19185 To achieve busoff recover, reset the PeriodCnt to timeOffset even when \
+                       initialize equals false */
+                    Com_TxModeModeType ipduTxMode = txIpduStatePtr->IpduTxMode;
+                    if ((COM_TX_MODE_MIXED == ipduTxMode) || (COM_TX_MODE_PERIODIC == ipduTxMode)
+                        || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
                     {
-#if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
-                        Com_InvokeErrorNotification(txIpduPtr);
-#endif
-#if (STD_ON == COM_CANCELLATION_SUPPORT)
-                        if (txIpduPtr->ComIPduCancellationSupport)
-                        {
-                            (void)PduR_ComCancelTransmit(txIpduPtr->ComPduIdRef);
-                        }
-#endif
-                        txIpduStatePtr->TxIpduRTStFlag &= COM_TX_TRANSMITING_DIS;
+                        boolean TMS = (COM_TX_TMS_EN == (txIpduStatePtr->TxIpduRTStFlag & COM_TX_TMS_EN));
+                        Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, TMS);
                     }
-                    txIpduStatePtr->DMCnt = 0u;
                 }
-                else
-                {
-                    /* do nothing */
-                }
+            }
+            if (groupMatch && groupEnable)
+            {
                 break;
             }
         }
+
+        if (groupMatch && !groupEnable && (COM_TX_ACTIVE_EN == activeEnable))
+        {
+            Com_TxPduStop(txIpduPtr, txIpduStatePtr);
+        }
     }
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
 
 /**
@@ -3629,6 +3992,8 @@ void Com_TxIpduControl(
 #if (                                                                                            \
     ((0u < COM_MAX_TXSIGNALGROUP_NUMBER) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)) \
     || ((0u < COM_MAX_TXSIGNAL_NUMBER) && (STD_ON == COM_TX_SIGNAL_TYPE_UINT8_DYN_ENABLE)))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_SetDynTxSignalBuff(
     const Com_TxIPduType*             TxIpduPtr,
     const Com_TxIPduRunTimeStateType* TxRuntimeStatePtr,
@@ -3659,13 +4024,18 @@ COM_LOCAL boolean Com_SetDynTxSignalBuff(
     COM_NOUSED(SignalNewDataPtr);
     return ret;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_SendSignalGroup.
  *        pack the Tx signal group into ipdu Tx buffer.
  *
  */
 #if (COM_MAX_TXSIGNALGROUP_NUMBER > 0u)
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL void Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGroupId, Com_MainFunctionIdType TxMainfunctionId)
 {
     const Com_TxSignalGroupType* txSignalGroupPtr = &Com_CfgTxSignalGroupPtr[SignalGroupId];
@@ -3715,7 +4085,10 @@ COM_LOCAL void Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGroupId, Com_Ma
     }
     return;
 }
+#define COM_STOP_SEC_CODE
+#include "Com_MemMap.h"
 #endif
+
 /**
  * @brief Called by Com_SendSignalGroupArray.
  *        update every group signal buffer,calculate every TMC,
@@ -3723,6 +4096,8 @@ COM_LOCAL void Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGroupId, Com_Ma
  *
  */
 #if ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0u))
+#define COM_START_SEC_CODE
+#include "Com_MemMap.h"
 COM_LOCAL boolean Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal(
     Com_SignalGroupIdType   TxSignalGroupId,
     Com_TxGroupSignalIdType GroupSignalNumber,
@@ -3862,10 +4237,10 @@ COM_LOCAL boolean Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal(
     }
     return triggerOnChange;
 }
-#endif
-/* PRQA S 1532,2895 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
+#endif
+/* PRQA S 1532,2895 -- */
 /* PRQA S 0316,2844 -- */
 /* PRQA S 2814,2824 -- */
 /* PRQA S 3120,3132 -- */

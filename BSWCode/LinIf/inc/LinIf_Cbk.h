@@ -39,6 +39,8 @@
 /* ========================================= external function declarations ========================================= */
 #if (LINIF_WAKEUP_SUPPORT == STD_ON)
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               The LIN Driver or LIN Transceiver Driver will call this function to report the
  *                      wake up source after the successful wakeup detection during CheckWakeup or after
@@ -50,11 +52,15 @@
  * @trace               CPD-56887
  */
 void LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource);
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               The LIN Driver will call this function to report a received LIN header. This function
  *                      is only applicable for LIN slave nodes
@@ -71,7 +77,11 @@ void LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource);
  * @trace               CPD-56889
  */
 Std_ReturnType LinIf_HeaderIndication(NetworkHandleType Channel, Lin_PduType* PduPtr);
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               The LIN Driver will call this function to report a successfully received response and
  *                      provides the reception data to the LIN Interface. This function is only applicable
@@ -85,7 +95,11 @@ Std_ReturnType LinIf_HeaderIndication(NetworkHandleType Channel, Lin_PduType* Pd
  * @trace               CPD-56890
  */
 void LinIf_RxIndication(NetworkHandleType Channel, uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               The LIN Driver will call this function to report a successfully transmitted response.
  *                      This function is only applicable for LIN slave nodes.
@@ -95,7 +109,11 @@ void LinIf_RxIndication(NetworkHandleType Channel, uint8* Lin_SduPtr);
  * @trace               CPD-56891
  */
 void LinIf_TxConfirmation(NetworkHandleType Channel);
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               The LIN Driver will call this function to report a detected error event during header
  *                      or response processing This function is only applicable for LIN slave nodes
@@ -106,6 +124,8 @@ void LinIf_TxConfirmation(NetworkHandleType Channel);
  * @trace               CPD-56892
  */
 void LinIf_LinErrorIndication(NetworkHandleType Channel, Lin_SlaveErrorType ErrorStatus);
+#define LINIF_STOP_SEC_CALLOUT_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 

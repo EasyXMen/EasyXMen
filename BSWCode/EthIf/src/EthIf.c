@@ -36,6 +36,7 @@
 #if (STD_ON == ETHIF_HAST_SWITCH_PORT_GROUP_NO_CONNECT_CONTROLLER)
 #include "BswM_EthIf.h"
 #endif
+#include "EthIf_Arti.h"
 /* ===================================================== macros ===================================================== */
 #if !defined(ETHIF_LOCAL_INLINE)
 #define ETHIF_LOCAL_INLINE static inline
@@ -88,6 +89,7 @@
 /* PRQA S 6040,6030 ++*/  /* VL_MTR_EthIf_QacSTPAR,  VL_MTR_EthIf_QacSTMIF */
 /* PRQA S 6520,6510 EOF*/ /* VL_MTR_EthIf_QacSTVAR, VL_MTR_EthIf_QacSTCONF */
 /* PRQA S 1536 EOF */     /* VL_EthIf_1536 */
+/* PRQA S 6540 EOF */     /* VL_MTR_EthIf_STTPP */
 typedef struct
 {
     Eth_ModeType          EthIfTrcvMode;
@@ -135,6 +137,8 @@ ETHIF_LOCAL_INLINE void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
 #define ETHIF_DET_REPORT(appiId, errorId)
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   call configured RxIndication functions. */
 ETHIF_LOCAL void EthIf_InternalUpperLayerRxIndication(
     uint8               ethifCtrlId,
@@ -143,11 +147,15 @@ ETHIF_LOCAL void EthIf_InternalUpperLayerRxIndication(
     const uint8*        PhysAddrPtr,
     const Eth_DataType* upperLayerDataPtr,
     uint16              upperLayerLenByte);
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R21_11)
 /* @Brief   handle controller mode request of TxoffLine. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeTxOffLine(uint8 ctrlIdx);
+#endif
 
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
 /* @Brief   handle controller mode request of active with wakeup request. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActiveWithWakeup(uint8 ctrlIdx);
 #endif
@@ -155,57 +163,94 @@ ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActiveWithWakeup(uint
 /* @Brief   handle controller mode request of ACTIVE. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActive(uint8 ctrlIdx);
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   handle controller mode request of Down. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlModeDown(uint8 ctrlIdx);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(transceiver, switch and switchportGroup) trigger by controller mode
  * request.*/
 ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetHardwareMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(transceiver) trigger by controller mode request. */
 ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetTrcvMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(switch trigger by controller mode request. */
 ETHIF_LOCAL void
     EthIf_InternalSetCtrlModeSetSwitchPortMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to excute EthSwt_GetLinkState */
 ETHIF_LOCAL_INLINE Std_ReturnType
     EthIf_InternalSwitchPortGetLinkState(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_LinkStateType* LinkStatePtr);
-
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to excute EthIf_GetSwitchPortSignalQuality */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalGetSwitchPortSignalQuality(
     uint8                          SwitchIdx,
     uint8                          SwitchPortIdx,
     EthIf_SignalQualityResultType* ResultPtr);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(switchportGroup) trigger by controller mode request. */
 ETHIF_LOCAL void
     EthIf_InternalSetCtrlModeSetSwitchPortGroupMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet switchportGroup trigger by BswM. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetSwitchPortGroupMode(uint8 ethIfGroupIdx, Eth_ModeType setMode);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief Is all switchPortGroup referenced same port are requested down mode. */
 ETHIF_LOCAL boolean EthIf_InternalIsALLPortGroupRequestModeDown(uint8 ethIfSwtIdx, uint8 portIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
+
+#if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u) || (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
 /* @Brief   get port state request by requested transceiver mode. */
 ETHIF_LOCAL_INLINE void
     EthIf_InternalGetTrcvStateCoupledWithMode(Eth_ModeType trcvMode, EthTrcv_LinkStateType* trcvState);
+#endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   exceute request ethernet driver to set controller mode. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlMode(uint8 ctrlIdx, Eth_ModeType mode);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief get EthIfCtrl Id by PhyCtrl and VlanId */
 ETHIF_LOCAL Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
 ETHIF_LOCAL_INLINE uint8 EthIf_GetEthIfPartionByEcuCParttion(uint8 ecuCPartition);
@@ -221,39 +266,66 @@ ETHIF_LOCAL_INLINE void EthIf_InternalUpdateSignalQuality(EthIf_SignalQualityRes
 ETHIF_LOCAL_INLINE void
     EthIf_InternalGetElementRange(const uint8* indexArray, uint8 rangeIndex, EthIf_ElementRangeType* range);
 #endif
+
+#if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
 /* internal used function to excute EthTrcv_GetLinkState */
 ETHIF_LOCAL_INLINE Std_ReturnType
     EthIf_InternalTransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr);
-
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431) && (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
-/* internal used function to excute EthIf_GetTrcvSignalQuality */
-ETHIF_LOCAL Std_ReturnType EthIf_InternalGetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResultType* ResultPtr);
-#endif
-
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to report transceiver link state change to controller */
 ETHIF_LOCAL void EthIf_InternalTrcvLinkChgNotificationToCtrl(uint8 trcvIdx, EthTrcv_LinkStateType newLinkState);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#endif
+
+#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431) && (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
+/* internal used function to excute EthIf_GetTrcvSignalQuality */
+ETHIF_LOCAL Std_ReturnType EthIf_InternalGetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResultType* ResultPtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#endif
 
 /* internal used function to report transceiver link state change to user */
 ETHIF_LOCAL_INLINE void EthIf_InternalTrcvLinkChgNotificationToUser(uint8 ctrlIdx, EthTrcv_LinkStateType newLinkState);
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to polling  switchport link state.*/
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortLinkState(uint8 ethIfPartition);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to check EthIfPortStartupActiveTime and EthIfSwitchOffPortTimeDelay of switchPorts.*/
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortTimer(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_HAST_SWITCH_PORT_REF_TRANSCEIVER == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to polling  switchport signal quality. */
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortSignalQuality(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief check StartActiveTimer and SwitchOffPortTimer. */
 ETHIF_LOCAL void EthIf_InteralCheckSwitchPortTimer(uint8 ethIfSwitchPortIdx);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* internal used function to polling  transceiver link state and quality. */
 ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
     uint8   ethIfPartition,
@@ -263,19 +335,32 @@ ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
     boolean reqGetSignal
 #endif
 );
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* to switch link state  */
 ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchLinkState(uint8 ethIfPartition);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* to check switchPortGroup link state  */
 ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchPortGroupLinkState(uint8 ethIfPartition);
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* get linkstate of switchPortGroup */
 ETHIF_LOCAL void
     EthIf_InteralGetSwitchPortGroupLinkState(uint8 switchPortGroupIdx, EthTrcv_LinkStateType* groupLinkStatePtr);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 ETHIF_LOCAL_INLINE void EthIf_InternalReportTxConfirmationToUpper(
@@ -284,13 +369,28 @@ ETHIF_LOCAL_INLINE void EthIf_InternalReportTxConfirmationToUpper(
     Eth_BufIdxType bufIdx,
     Std_ReturnType result);
 
+#if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidTransceiver(uint8 trcvIdx, uint8 ethIfPartition, uint8* errorCode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidController(uint8 ctrlIdx, uint8 ethIfPartition, uint8* errorCode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidSwitch(uint8 swtIdx, uint8 ethIfPartition, uint8* errorCode);
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#endif
 #endif
 
 /* ============================================ internal data definition ============================================ */
@@ -325,6 +425,8 @@ ETHIF_LOCAL EthIf_MainFuncRunningCountType EthIf_TrcvPollingCnt[ETHIF_USED_PARTI
  */
 void EthIf_Init(const EthIf_ConfigType* CfgPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x01, CfgPtr);
+
     uint8 index;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
     uint8 ecuCPartition  = (uint8)GetApplicationID();
@@ -414,14 +516,22 @@ void EthIf_Init(const EthIf_ConfigType* CfgPtr)
         }
         EthIf_InitStatus[ethIfPartition] = TRUE;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x01);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_VERSION_INFO_API == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief   Returns the version information of this module.
  */
 void EthIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x0B, VersionInfoPtr);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     if (NULL_PTR == VersionInfoPtr)
     {
@@ -437,12 +547,20 @@ void EthIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
         VersionInfoPtr->sw_patch_version = ETHIF_SW_PATCH_VERSION;
         VersionInfoPtr->vendorID         = ETHIF_VENDOR_ID;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x0B);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief    Enables / disables the indexed controller. */
 Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x03, CtrlIdx, CtrlMode);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -469,12 +587,12 @@ Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode)
             case ETH_MODE_ACTIVE:
                 ret = EthIf_InternalSetCtrlModeActive(CtrlIdx);
                 break;
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R20_11)
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
             case ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST:
                 ret = EthIf_InternalSetCtrlModeActiveWithWakeup(CtrlIdx);
                 break;
 #endif
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R21_11)
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R21_11)
             case ETH_MODE_ACTIVE_TX_OFFLINE:
                 ret = EthIf_InternalSetCtrlModeTxOffLine(CtrlIdx);
                 break;
@@ -487,12 +605,21 @@ Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode)
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x03, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief  Obtains the state of the indexed controller. */
 Std_ReturnType EthIf_GetControllerMode(uint8 CtrlIdx, Eth_ModeType* CtrlModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x04, CtrlIdx, CtrlModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -526,13 +653,22 @@ Std_ReturnType EthIf_GetControllerMode(uint8 CtrlIdx, Eth_ModeType* CtrlModePtr)
             ret          = E_OK;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x04, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_WAKEUP_SUPPORT == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief  This API request the affected Ethernet hardware to check for a signaled wake-up. */
 Std_ReturnType EthIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x30, WakeupSource);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -599,14 +735,23 @@ Std_ReturnType EthIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x30, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R22_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief  obtains the wake up reasons of the indexed Ethernet Transceiver (PHY). */
 Std_ReturnType EthIf_GetPhyWakeupReason(uint8 TrcvIdx, EthTrcv_WakeupReasonType* WakeupReasonPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x69, TrcvIdx, WakeupReasonPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -638,15 +783,23 @@ Std_ReturnType EthIf_GetPhyWakeupReason(uint8 TrcvIdx, EthTrcv_WakeupReasonType*
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x69, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R22_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  This function obtains the wake up reasons of the indexed Ethernet switch port. */
 Std_ReturnType
     EthIf_GetSwitchPortWakeupReason(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_WakeupReasonType* WakeupReasonPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x67, SwitchIdx, SwitchPortIdx, WakeupReasonPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -682,13 +835,22 @@ Std_ReturnType
                 WakeupReasonPtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x67, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  Obtains the physical source address used by the indexed controller. */
 void EthIf_GetPhysAddr(uint8 CtrlIdx, uint8* PhysAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x08, CtrlIdx, PhysAddrPtr);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -712,11 +874,19 @@ void EthIf_GetPhysAddr(uint8 CtrlIdx, uint8* PhysAddrPtr)
         uint8 driverId       = ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(CtrlIdx);
         ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_GetPhysAddr(ethContrllerId, PhysAddrPtr);
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x08);
+}
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  Sets the physical source address used by the indexed controller. */
 void EthIf_SetPhysAddr(uint8 CtrlIdx, const uint8* PhysAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x0D, CtrlIdx, PhysAddrPtr);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -740,11 +910,19 @@ void EthIf_SetPhysAddr(uint8 CtrlIdx, const uint8* PhysAddrPtr)
         uint8 driverId       = ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(CtrlIdx);
         ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_SetPhysAddr(ethContrllerId, PhysAddrPtr);
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x0D);
+}
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Update the physical source address to/from the indexed controller filter. */
 Std_ReturnType EthIf_UpdatePhysAddrFilter(uint8 CtrlIdx, const uint8* PhysAddrPtr, Eth_FilterActionType Action)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x0C, CtrlIdx, PhysAddrPtr, Action);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -770,13 +948,22 @@ Std_ReturnType EthIf_UpdatePhysAddrFilter(uint8 CtrlIdx, const uint8* PhysAddrPt
         uint8 driverId       = ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(CtrlIdx);
         ret = ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_UpdatePhysAddrFilter(ethContrllerId, PhysAddrPtr, Action);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x0C, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 /* @brief         Returns the number and index of all active Ethernet controllers. */
 #if (STD_ON == ETHIF_GET_CTRL_IDX_LIST)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 Std_ReturnType EthIf_GetCtrlIdxList(uint8* NumberOfCtrlIdx, uint8* CtrlIdxListPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x44, NumberOfCtrlIdx, CtrlIdxListPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -818,14 +1005,23 @@ Std_ReturnType EthIf_GetCtrlIdxList(uint8* NumberOfCtrlIdx, uint8* CtrlIdxListPt
         }
         ret = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x44, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_GET_VLAN_ID_SUPPORT == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief         Returns the VLAN identifier of the requested Ethernet controller. */
 Std_ReturnType EthIf_GetVlanId(uint8 CtrlIdx, uint16* VlanIdPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x43, CtrlIdx, VlanIdPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -867,17 +1063,35 @@ Std_ReturnType EthIf_GetVlanId(uint8 CtrlIdx, uint16* VlanIdPtr)
         ret = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x43, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_GET_AND_RESET_MEASUREMENT_DATA_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief         Returns the VLAN identifier of the requested Ethernet controller. */
 Std_ReturnType EthIf_GetAndResetMeasurementData(
     EthIf_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
     uint32*                  MeasurementDataPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        4,
+        0x45,
+        MeasurementIdx,
+        MeasurementResetNeeded,
+        MeasurementDataPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
     uint8 ecuCPartition  = (uint8)GetApplicationID();
@@ -924,15 +1138,23 @@ Std_ReturnType EthIf_GetAndResetMeasurementData(
         SchM_Exit_EthIf_ExclusiveArea();
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x45, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_STORE_CONFIGURATION_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Trigger the storage/reset of the configuration of the learned MAC/Port tables of a switch in a
  * persistent manner */
 Std_ReturnType EthIf_StoreConfiguration(uint8 SwitchIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x2C, SwitchIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -955,15 +1177,23 @@ Std_ReturnType EthIf_StoreConfiguration(uint8 SwitchIdx)
         ret                = ETHIF_SWITCH_DRIVER_API_CFG(driverId).EthSwt_StoreConfiguration(ethSwitchIdx);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x2C, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_RESET_CONFIGURATION_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief        The function shall request to reset the configuration of the learned MAC/Port tables of a Ethernet
  * switch in a persistent manner. */
 Std_ReturnType EthIf_ResetConfiguration(uint8 SwitchIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x2D, SwitchIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -989,15 +1219,23 @@ Std_ReturnType EthIf_ResetConfiguration(uint8 SwitchIdx)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x2D, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_GLOBAL_TIME_SUPPORT == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Reads the current time of the timestamp clock and the current time of the PHC in an atomic
  * operation. */
 Std_ReturnType EthIf_GetCurrentTimeTuple(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeTupleType* currentTimeTuplePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x95, CtrlIdx, ClkUnitIdx, currentTimeTuplePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1045,12 +1283,21 @@ Std_ReturnType EthIf_GetCurrentTimeTuple(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeTu
         (void)ClkUnitIdx;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x95, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Activates egress time stamping on a dedicated message object. */
 void EthIf_EnableEgressTimeStamp(uint8 CtrlIdx, Eth_BufIdxType BufIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x23, CtrlIdx, BufIdx);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -1074,8 +1321,14 @@ void EthIf_EnableEgressTimeStamp(uint8 CtrlIdx, Eth_BufIdxType BufIdx)
         ETHIF_ETH_DRIVER_API_CFG(driverIdx).Eth_EnableEgressTimeStamp(ethCtrlIdx, (uint8)BufIdx);
 #endif
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x23);
+}
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Reads back the ingress time stamp on a dedicated message object. */
 Std_ReturnType EthIf_GetIngressTimeStamp(
     uint8                  CtrlIdx,
@@ -1083,6 +1336,8 @@ Std_ReturnType EthIf_GetIngressTimeStamp(
     Eth_TimeStampQualType* timeQualPtr,
     Eth_TimeStampType*     timeStampPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x25, CtrlIdx, DataPtr, timeQualPtr, timeStampPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -1119,9 +1374,16 @@ Std_ReturnType EthIf_GetIngressTimeStamp(
         ret = E_OK;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x25, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Reads back the egress time stamp on a dedicated message object. */
 Std_ReturnType EthIf_GetEgressTimeStamp(
     uint8                  CtrlIdx,
@@ -1129,6 +1391,8 @@ Std_ReturnType EthIf_GetEgressTimeStamp(
     Eth_TimeStampQualType* timeQualPtr,
     Eth_TimeStampType*     timeStampPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x24, CtrlIdx, BufIdx, timeQualPtr, timeStampPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -1162,14 +1426,23 @@ Std_ReturnType EthIf_GetEgressTimeStamp(
         ret = E_OK;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x24, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if ((ETHIF_PHC_SUPPORT == STD_ON) && (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11))
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Sets the absolute time of the PHC. */
 Std_ReturnType EthIf_SetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, const TimeStampType* timeStampPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x96, CtrlIdx, ClkUnitIdx, timeStampPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1199,12 +1472,21 @@ Std_ReturnType EthIf_SetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, const TimeStamp
         uint8 driverId       = ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(CtrlIdx);
         ret = ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_SetPhcTime(ethContrllerId, ClkUnitIdx, timeStampPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x96, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Sets the absolute time of the PHC. */
 Std_ReturnType EthIf_SetPhcCorrection(uint8 CtrlIdx, uint8 ClkUnitIdx, sint32 rateDeviation, sint32 offset)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x97, CtrlIdx, ClkUnitIdx, rateDeviation, offset);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1231,13 +1513,22 @@ Std_ReturnType EthIf_SetPhcCorrection(uint8 CtrlIdx, uint8 ClkUnitIdx, sint32 ra
         ret =
             ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_SetPhcCorrection(ethContrllerId, ClkUnitIdx, rateDeviation, offset);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x97, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Returns the current time value out of the HW registers of the PHC. */
 Std_ReturnType
     EthIf_GetPhcTime(uint8 CtrlIdx, uint8 ClkUnitIdx, TimeStampQualType* timeQualPtr, TimeStampType* timeStampPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x98, CtrlIdx, ClkUnitIdx, timeQualPtr, timeStampPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1268,14 +1559,22 @@ Std_ReturnType
         ret = ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_GetPhcTime(ethContrllerId, ClkUnitIdx, timeQualPtr, timeStampPtr);
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x98, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Enables/disables the generation of a PPS signal. */
 Std_ReturnType EthIf_SetPpsSignalMode(uint8 CtrlIdx, uint8 ClkUnitIdx, boolean signalMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x99, CtrlIdx, ClkUnitIdx, signalMode);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -1300,14 +1599,23 @@ Std_ReturnType EthIf_SetPpsSignalMode(uint8 CtrlIdx, uint8 ClkUnitIdx, boolean s
         uint8 driverId       = ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(CtrlIdx);
         ret = ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_SetPpsSignalMode(ethContrllerId, ClkUnitIdx, signalMode);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x99, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Request a mode for the EthIfSwtPortGroup. */
 Std_ReturnType EthIf_SwitchPortGroupRequestMode(EthIf_SwitchPortGroupIdxType PortGroupIdx, Eth_ModeType PortMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x06, PortGroupIdx, PortMode);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -1346,14 +1654,22 @@ Std_ReturnType EthIf_SwitchPortGroupRequestMode(EthIf_SwitchPortGroupIdxType Por
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x06, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Request to set all configured and affected EthSwtPorts to ETH_MODE_ACTIVE. */
 Std_ReturnType EthIf_StartAllPorts(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 1, 0x07);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1404,12 +1720,17 @@ Std_ReturnType EthIf_StartAllPorts(void)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x07, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_SWITCH_MANAGEMENT_SUPPORT)
-
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief         Provides additional management information along to an Ethernet frame that requires special treatment
  * within the Switch.*/
 Std_ReturnType EthIf_SetSwitchMgmtInfo(
@@ -1417,6 +1738,8 @@ Std_ReturnType EthIf_SetSwitchMgmtInfo(
     Eth_BufIdxType       BufIdx,
     EthSwt_MgmtInfoType* MgmtInfoPtr) /* PRQA S 3673 */ /* VL_EthIf_TypeOfPointerCouldbePointToConst */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x38, CtrlIdx, BufIdx, MgmtInfoPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1460,14 +1783,22 @@ Std_ReturnType EthIf_SetSwitchMgmtInfo(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x38, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if ((STD_ON == ETHIF_GLOBAL_TIME_SUPPORT) && (ETHIF_SWITCH_SWITCHS_NUM > 0))
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Activates egress time stamping on a dedicated message object, addressed by CtrlIdx and BufIdx. */
 Std_ReturnType EthIf_SwitchEnableTimeStamping(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSwt_MgmtInfoType* MgmtInfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x39, CtrlIdx, BufIdx, MgmtInfo);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1504,15 +1835,24 @@ Std_ReturnType EthIf_SwitchEnableTimeStamping(uint8 CtrlIdx, Eth_BufIdxType BufI
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x39, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_VERIFY_CONFIG_API)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Forwarded to EthSwt_VerifyConfig. EthSwt_VerifyConfig verifies the Switch Configuration
                     depending on the HW-Architecture, HW-capability and the intended accuracy of this verification. */
 Std_ReturnType EthIf_VerifyConfig(uint8 SwitchIdx, boolean* Result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x40, SwitchIdx, Result);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1541,15 +1881,22 @@ Std_ReturnType EthIf_VerifyConfig(uint8 SwitchIdx, boolean* Result)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x40, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (STD_ON == ETHIF_SET_FORWARDING_MODE_API)
-
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Control of switch frame forwarding. */
 Std_ReturnType EthIf_SetForwardingMode(uint8 SwitchIdx, boolean mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x41, SwitchIdx, mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1574,14 +1921,22 @@ Std_ReturnType EthIf_SetForwardingMode(uint8 SwitchIdx, boolean mode)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x41, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Retrieves the signal quality of the link of the given Ethernet transceiver. */
 Std_ReturnType EthIf_GetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResultType* ResultPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x18, TrcvIdx, ResultPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -1608,12 +1963,20 @@ Std_ReturnType EthIf_GetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResu
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x18, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Clear the stored signal quality of the link of the given Ethernet transceiver.*/
 Std_ReturnType EthIf_ClearTrcvSignalQuality(uint8 TrcvIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x19, TrcvIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -1639,18 +2002,25 @@ Std_ReturnType EthIf_ClearTrcvSignalQuality(uint8 TrcvIdx)
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x19, ret);
+
     return ret;
 }
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           Retrieves the signal quality of the link of the given Ethernet switch port.
  */
 Std_ReturnType
     EthIf_GetSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchPortIdx, EthIf_SignalQualityResultType* ResultPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x1A, SwitchIdx, SwitchPortIdx, ResultPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1678,14 +2048,23 @@ Std_ReturnType
     {
         ret = EthIf_InternalGetSwitchPortSignalQuality(SwitchIdx, SwitchPortIdx, ResultPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x1A, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Clear the stored signal quality of the link of the given Ethernet switch port. */
 Std_ReturnType EthIf_ClearSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchPortIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x1B, SwitchIdx, SwitchPortIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -1714,14 +2093,22 @@ Std_ReturnType EthIf_ClearSwitchPortSignalQuality(uint8 SwitchIdx, uint8 SwitchP
         ret                                                                                  = E_OK;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x1B, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Activates a given test mode. */
 Std_ReturnType EthIf_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x17, TrcvIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -1748,12 +2135,21 @@ Std_ReturnType EthIf_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode)
         }
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x17, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Activates a given loopback mode. */
 Std_ReturnType EthIf_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x12, TrcvIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -1781,12 +2177,20 @@ Std_ReturnType EthIf_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeTy
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x12, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Activates a given transmission mode. */
 Std_ReturnType EthIf_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_PhyTxModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x13, TrcvIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -1818,16 +2222,23 @@ Std_ReturnType EthIf_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_PhyTxModeType Mode)
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x13, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Retrieves the cable diagnostics result of a given transceiver. */
 Std_ReturnType EthIf_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* ResultPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x78, TrcvIdx, ResultPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
-    uint8 errorCode;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
     uint8 ecuCPartition  = (uint8)GetApplicationID();
@@ -1835,6 +2246,7 @@ Std_ReturnType EthIf_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagR
 #else
     uint8 ethIfPartition = 0u;
 #endif
+    uint8 errorCode;
     if (EthIf_DetCheckIsInvalidTransceiver(TrcvIdx, ethIfPartition, &errorCode))
     {
         ETHIF_DET_REPORT(ETHIF_SERVICE_ID_GET_CABLE_DIAGNOSTICS_RESULT, errorCode);
@@ -1855,16 +2267,23 @@ Std_ReturnType EthIf_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagR
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x78, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the PHY identifier of the Ethernet Interface according to IEEE 802.3-2015. */
 Std_ReturnType EthIf_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPtr, uint8* RevisionNrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x15, TrcvIdx, OrgUniqueIdPtr, ModelNrPtr, RevisionNrPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
-    uint8 errorCode;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
     uint8 ecuCPartition  = (uint8)GetApplicationID();
@@ -1872,6 +2291,7 @@ Std_ReturnType EthIf_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uin
 #else
     uint8 ethIfPartition = 0u;
 #endif
+    uint8 errorCode;
     if (EthIf_DetCheckIsInvalidTransceiver(TrcvIdx, ethIfPartition, &errorCode))
     {
         ETHIF_DET_REPORT(ETHIF_SERVICE_ID_GET_PHY_IDENTIFIER, errorCode);
@@ -1893,11 +2313,16 @@ Std_ReturnType EthIf_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uin
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x15, ret);
+
     return ret;
 }
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Provides access to a transmit buffer of the specified Ethernet controller. */
 BufReq_ReturnType EthIf_ProvideTxBuffer(
     uint8           CtrlIdx,
@@ -1907,6 +2332,21 @@ BufReq_ReturnType EthIf_ProvideTxBuffer(
     uint8**         BufPtr,
     uint16*         LenBytePtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        7,
+        0x09,
+        CtrlIdx,
+        FrameType,
+        Priority,
+        BufIdxPtr,
+        BufPtr,
+        LenBytePtr);
+
     BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 
 #if (ETHIF_CTRL_HAS_CONFIGED_VLAN == STD_ON)
@@ -2002,9 +2442,16 @@ BufReq_ReturnType EthIf_ProvideTxBuffer(
     }
     (void)Priority;
     (void)FrameType;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x09, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Triggers transmission of a previously filled transmit buffer. */
 Std_ReturnType EthIf_Transmit(
     uint8          CtrlIdx,
@@ -2014,6 +2461,21 @@ Std_ReturnType EthIf_Transmit(
     uint16         LenByte,
     const uint8*   PhysAddrPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        7,
+        0x0A,
+        CtrlIdx,
+        BufIdx,
+        FrameType,
+        TxConfirmation,
+        LenByte,
+        PhysAddrPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2074,16 +2536,25 @@ Std_ReturnType EthIf_Transmit(
         }
         SchM_Exit_EthIf_ExclusiveArea();
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x0A, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_ENABLE_RX_INTERRUPT == STD_OFF)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @SWS_EthIf_00099: The receive frame check shall be pre compile time configurable On/Off by the configuration
  *                    parameter: EthIfEnableRxInterrupt
  * brif : The function checks for new received frames and issues reception indications in polling mode.
  */
 void EthIf_MainFunctionRx(uint8 ethIfPartition)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x20, ethIfPartition);
+
     if (EthIf_InitStatus[ethIfPartition])
     {
 #if ((STD_ON == ETHIF_DEV_ERROR_DETECT) && (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED))
@@ -2098,7 +2569,7 @@ void EthIf_MainFunctionRx(uint8 ethIfPartition)
             Eth_RxStatusType RxStatusPtr    = ETH_NOT_RECEIVED;
             uint8            lastPhyCtrlIdx = INVALID_UINT8;
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
-            uint8 FifoIdx;
+            uint8 FifoIdx = 0u;
 #endif /* ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431 */
 
 #if (ETHIF_USED_PARTITION_NUM > 1)
@@ -2145,16 +2616,24 @@ void EthIf_MainFunctionRx(uint8 ethIfPartition)
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x20);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ENABLE_TX_INTERRUPT == STD_OFF)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @SWS_EthIf_00100: The transmission confirmation check shall be pre compile time configurable On/Off by the
  *                   configuration parameter: EthIfEnableTxInterrupt.
  * brif : The function issues transmission confirmations in polling mode. It checks also for transceiver state changes.
  */
 void EthIf_MainFunctionTx(uint8 ethIfPartition)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x21, ethIfPartition);
+
     if (EthIf_InitStatus[ethIfPartition])
     {
 #if ((STD_ON == ETHIF_DEV_ERROR_DETECT) && (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED))
@@ -2222,11 +2701,17 @@ void EthIf_MainFunctionTx(uint8 ethIfPartition)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x21);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #endif
 
 #if (ETHIF_MAIN_FUNCTION_STATE_PERIOD > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * The function is polling different communication hardware (Ethernet
  * transceiver, Ethernet switch ports) related information, e.g. link state,
@@ -2234,6 +2719,8 @@ void EthIf_MainFunctionTx(uint8 ethIfPartition)
  */
 void EthIf_MainFunctionState(uint8 ethIfPartition)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x05, ethIfPartition);
+
     if (EthIf_InitStatus[ethIfPartition])
     {
 #if ((STD_ON == ETHIF_DEV_ERROR_DETECT) && (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED))
@@ -2267,12 +2754,20 @@ void EthIf_MainFunctionState(uint8 ethIfPartition)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x05);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Called asynchronously when mode has been read out. */
 void EthIf_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x0E, CtrlIdx, CtrlMode);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -2299,7 +2794,7 @@ void EthIf_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode)
         for (uint8 idx = 0u; idx < ETHIF_CONTROLLER_CONTROLLER_NUM; idx++)
         {
             Eth_ModeType requestEthMode = EthIf_ControllerInformation[idx].ReqCtrlMode;
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
             if (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == requestEthMode)
             {
                 requestEthMode = ETH_MODE_ACTIVE;
@@ -2315,12 +2810,20 @@ void EthIf_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode)
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x0E);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief   Called asynchronously when a mode change has been read out. */
 void EthIf_TrcvModeIndication(uint8 TrcvIdx, Eth_ModeType TrcvMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x0F, TrcvIdx, TrcvMode);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -2349,10 +2852,16 @@ void EthIf_TrcvModeIndication(uint8 TrcvIdx, Eth_ModeType TrcvMode)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x0F);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_SWITCHS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           The EthIf shall determine the expected notifications based on the EthSwtPort configuration. In
  *                  case the EthSwtPort references an EthTrcv the EthIf expects a notification from the EthTrcv via
@@ -2361,6 +2870,8 @@ void EthIf_TrcvModeIndication(uint8 TrcvIdx, Eth_ModeType TrcvMode)
  */
 void EthIf_SwitchPortModeIndication(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType PortMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x46, SwitchIdx, SwitchPortIdx, PortMode);
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -2384,8 +2895,14 @@ void EthIf_SwitchPortModeIndication(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_Mo
         uint8        portIndex                                 = indexPtr[SwitchPortIdx];
         EthIf_SwitchPortRuntimeInformation[portIndex].PortMode = PortMode;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x46);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           This API is called by the corresponding EthTrcv, if a sleep indication was detected on the network.
  * @param[in]       TrcvIdx : Index of the Ethernet transceiver within the context of the Ethernet Interface.
@@ -2396,6 +2913,8 @@ void EthIf_SwitchPortModeIndication(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_Mo
  */
 void EthIf_SleepIndication(uint8 TrcvIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x68, TrcvIdx);
+
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -2415,11 +2934,19 @@ void EthIf_SleepIndication(uint8 TrcvIdx)
         /* EthSM do not fulfill EthSM_SleepIndication yet */
     }
 #endif
+    ETHIF_NOUSED(TrcvIdx);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x68);
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtain state of the indexed transceiver. */
 Std_ReturnType EthIf_GetTransceiverMode(uint8 TrcvIdx, Eth_ModeType* TrcvModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x4A, TrcvIdx, TrcvModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -2457,15 +2984,23 @@ Std_ReturnType EthIf_GetTransceiverMode(uint8 TrcvIdx, Eth_ModeType* TrcvModePtr
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4A, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief  Obtains the link state of the indexed switch port.
  */
 Std_ReturnType EthIf_SwitchPortGetLinkState(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_LinkStateType* LinkStatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x4B, SwitchIdx, SwitchPortIdx, LinkStatePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
@@ -2488,13 +3023,22 @@ Std_ReturnType EthIf_SwitchPortGetLinkState(uint8 SwitchIdx, uint8 SwitchPortIdx
     {
         ret = EthIf_InternalSwitchPortGetLinkState(SwitchIdx, SwitchPortIdx, LinkStatePtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4B, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the link state of the indexed transceiver. */
 Std_ReturnType EthIf_TransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x4C, TrcvIdx, LinkStatePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -2526,13 +3070,21 @@ Std_ReturnType EthIf_TransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateTyp
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4C, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_GET_BAUDRATE == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the baud rate of the indexed transceiver. */
 Std_ReturnType EthIf_TransceiverGetBaudRate(uint8 TrcvIdx, EthTrcv_BaudRateType* BaudRatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x4E, TrcvIdx, BaudRatePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -2564,13 +3116,21 @@ Std_ReturnType EthIf_TransceiverGetBaudRate(uint8 TrcvIdx, EthTrcv_BaudRateType*
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4E, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the duplex mode of the indexed transceiver.*/
 Std_ReturnType EthIf_TransceiverGetDuplexMode(uint8 TrcvIdx, EthTrcv_DuplexModeType* DuplexModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x50, TrcvIdx, DuplexModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -2602,13 +3162,21 @@ Std_ReturnType EthIf_TransceiverGetDuplexMode(uint8 TrcvIdx, EthTrcv_DuplexModeT
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x50, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Request the MgmtObject of the (in this context) unique DataPtr. */
 Std_ReturnType EthIf_GetRxMgmtObject(uint8 CtrlIdx, Eth_DataType* DataPtr, EthSwt_MgmtObjectType** MgmtObjectPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x47, CtrlIdx, DataPtr, MgmtObjectPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2641,12 +3209,20 @@ Std_ReturnType EthIf_GetRxMgmtObject(uint8 CtrlIdx, Eth_DataType* DataPtr, EthSw
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x47, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Request the MgmtObject of the (in this context) unique BufIdx. */
 Std_ReturnType EthIf_GetTxMgmtObject(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSwt_MgmtObjectType** MgmtObjectPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x48, CtrlIdx, BufIdx, MgmtObjectPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2682,12 +3258,21 @@ Std_ReturnType EthIf_GetTxMgmtObject(uint8 CtrlIdx, Eth_BufIdxType BufIdx, EthSw
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x48, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief         Obtains the port over which this MAC-address can be reached. */
 Std_ReturnType EthIf_GetPortMacAddr(const uint8* MacAddrPtr, uint8* SwtichIdxPtr, uint8* PortIdxPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x28, MacAddrPtr, SwtichIdxPtr, PortIdxPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2735,12 +3320,20 @@ Std_ReturnType EthIf_GetPortMacAddr(const uint8* MacAddrPtr, uint8* SwtichIdxPtr
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x28, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief         Obtains the address resolution table of a switch and copies the list into a user provided buffer. */
 Std_ReturnType EthIf_GetArlTable(uint8 switchIdx, uint16* numberOfElements, Eth_MacVlanType* arlTableListPointer)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x29, switchIdx, numberOfElements, arlTableListPointer);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2771,13 +3364,22 @@ Std_ReturnType EthIf_GetArlTable(uint8 switchIdx, uint16* numberOfElements, Eth_
             numberOfElements,
             arlTableListPointer);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x29, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the duplex mode of the indexed switch port. */
 Std_ReturnType
     EthIf_SwitchPortGetDuplexMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_DuplexModeType* DuplexModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x4F, SwitchIdx, SwitchPortIdx, DuplexModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2806,12 +3408,21 @@ Std_ReturnType
             ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_GetDuplexMode(ethSwtIdx, SwitchPortIdx, DuplexModePtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4F, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Reads a list with drop counter values of the corresponding port of the switch. */
 Std_ReturnType EthIf_SwitchPortGetCounterValues(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_CounterType* CounterPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x51, SwitchIdx, SwitchPortIdx, CounterPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2841,13 +3452,21 @@ Std_ReturnType EthIf_SwitchPortGetCounterValues(uint8 SwitchIdx, uint8 SwitchPor
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x51, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Returns a list of statistic counters defined with Eth_RxTatsType. The majority of these Counters
  * are derived from the IETF RFC2819. */
 Std_ReturnType EthIf_SwitchPortGetRxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_RxStatsType* RxStatsPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x52, SwitchIdx, SwitchPortIdx, RxStatsPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2876,12 +3495,21 @@ Std_ReturnType EthIf_SwitchPortGetRxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, 
             ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_GetRxStats(ethSwtIdx, SwitchPortIdx, RxStatsPtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x52, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           List of values to read statistic values for transmission. */
 Std_ReturnType EthIf_SwitchPortGetTxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_TxStatsType* TxStatsPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x53, SwitchIdx, SwitchPortIdx, TxStatsPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2910,15 +3538,24 @@ Std_ReturnType EthIf_SwitchPortGetTxStats(uint8 SwitchIdx, uint8 SwitchPortIdx, 
             ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_GetTxStats(ethSwtIdx, SwitchPortIdx, TxStatsPtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x53, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           List of values to read statistic error counter values for transmission from. */
 Std_ReturnType EthIf_SwitchPortGetTxErrorCounterValues(
     uint8                         SwitchIdx,
     uint8                         SwitchPortIdx,
     Eth_TxErrorCounterValuesType* TxStatsPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x54, SwitchIdx, SwitchPortIdx, TxStatsPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2951,13 +3588,21 @@ Std_ReturnType EthIf_SwitchPortGetTxErrorCounterValues(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x54, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Returns the MAC learning mode. */
 Std_ReturnType
     EthIf_SwitchPortGetMacLearningMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthSwt_MacLearningType* MacLearningModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x55, SwitchIdx, SwitchPortIdx, MacLearningModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -2990,9 +3635,15 @@ Std_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x55, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Returns the MAC learning mode. */
 Std_ReturnType EthIf_GetSwitchPortIdentifier(
     uint8   SwitchIdx,
@@ -3001,6 +3652,20 @@ Std_ReturnType EthIf_GetSwitchPortIdentifier(
     uint8*  ModelNrPtr,
     uint8*  RevisionNrPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        6,
+        0x56,
+        SwitchIdx,
+        SwitchPortIdx,
+        OrgUniqueIdPtr,
+        ModelNrPtr,
+        RevisionNrPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3031,13 +3696,21 @@ Std_ReturnType EthIf_GetSwitchPortIdentifier(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x56, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief            Obtain the Organizationally Unique Identifier that is given by the IEEE of the indexed Ethernet
  * switch.*/
 Std_ReturnType EthIf_GetSwitchIdentifier(uint8 SwitchIdx, uint32* OrgUniqueIdPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x57, SwitchIdx, OrgUniqueIdPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3067,15 +3740,23 @@ Std_ReturnType EthIf_GetSwitchIdentifier(uint8 SwitchIdx, uint32* OrgUniqueIdPtr
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x57, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Store the given port mirror configuration in a shadow buffer in the Ethernet switch driver for the
  * given MirroredSwitchIdx. */
 Std_ReturnType EthIf_WritePortMirrorConfiguration(
     uint8                           MirroredSwitchIdx,
     const EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x58, MirroredSwitchIdx, PortMirrorConfigurationPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3107,13 +3788,21 @@ Std_ReturnType EthIf_WritePortMirrorConfiguration(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x58, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Obtain the port mirror configuration of the given Ethernet switch. */
 Std_ReturnType
     EthIf_ReadPortMirrorConfiguration(uint8 MirroredSwitchIdx, EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x59, MirroredSwitchIdx, PortMirrorConfigurationPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3145,12 +3834,20 @@ Std_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x59, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Delete the stored port mirror configuration of the given MirroredSwitchIdx. */
 Std_ReturnType EthIf_DeletePortMirrorConfiguration(uint8 MirroredSwitchIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x5A, MirroredSwitchIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3176,12 +3873,20 @@ Std_ReturnType EthIf_DeletePortMirrorConfiguration(uint8 MirroredSwitchIdx)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5A, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtain the current status of the port mirroring for the indexed Ethernet switch port. */
 Std_ReturnType EthIf_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_PortMirrorStateType* PortMirrorStatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x5B, SwitchIdx, PortIdx, PortMirrorStatePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3214,14 +3919,22 @@ Std_ReturnType EthIf_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_P
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5B, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief  Request to set the given port mirroring state of the port mirror configuration for the given Ethernet switch.
  */
 Std_ReturnType
     EthIf_SetPortMirrorState(uint8 MirroredSwitchIdx, uint8 PortIdx, EthSwt_PortMirrorStateType PortMirrorState)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x5C, MirroredSwitchIdx, PortIdx, PortMirrorState);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3248,12 +3961,20 @@ Std_ReturnType
         (void)PortIdx;
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5C, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Activates a given test mode of the indexed Ethernet switch port. */
 Std_ReturnType EthIf_SetPortTestMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTestModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x5D, SwitchIdx, PortIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3279,12 +4000,20 @@ Std_ReturnType EthIf_SetPortTestMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_Phy
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5D, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Activates a given test loop-back mode of the indexed Ethernet switch port. */
 Std_ReturnType EthIf_SetPortLoopbackMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyLoopbackModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x5E, SwitchIdx, PortIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3310,12 +4039,20 @@ Std_ReturnType EthIf_SetPortLoopbackMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5E, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Activates a given transmission mode of the indexed Ethernet switch port. */
 Std_ReturnType EthIf_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTxModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x5F, SwitchIdx, PortIdx, Mode);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3340,15 +4077,24 @@ Std_ReturnType EthIf_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTx
             ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_SetPortTxMode(ethSwtIdx, PortIdx, Mode);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x5F, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief            Retrieves the cable diagnostics result of the indexed Ethernet switch port respectively the
  *                   referenced Ethernet Transceiver Driver. */
 Std_ReturnType
     EthIf_GetPortCableDiagnosticsResult(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_CableDiagResultType* ResultPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x60, SwitchIdx, PortIdx, ResultPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3381,14 +4127,22 @@ Std_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x60, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief            Trigger the cable diagnostics of the given Ethernet Switch port (PortIdx) by calling EthTrcv_Run
  *                    CableDiagnostic of the referenced Ethernet transceiver. */
 Std_ReturnType EthIf_RunPortCableDiagnostic(uint8 SwitchIdx, uint8 PortIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x61, SwitchIdx, PortIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3422,15 +4176,22 @@ Std_ReturnType EthIf_RunPortCableDiagnostic(uint8 SwitchIdx, uint8 PortIdx)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x61, ret);
+
     return ret;
 }
-
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Trigger the cable diagnostics for the given Ethernet transceiver. */
 Std_ReturnType EthIf_RunCableDiagnostic(uint8 TrcvIdx)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 2, 0x62, TrcvIdx);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -3460,14 +4221,22 @@ Std_ReturnType EthIf_RunCableDiagnostic(uint8 TrcvIdx)
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x62, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R20_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the media access mode of the transceiver.  */
 Std_ReturnType EthIf_TransceiverGetMacMethod(uint8 TrcvIdx, EthTrcv_MacMethodType* MacModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x66, TrcvIdx, MacModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
@@ -3499,14 +4268,22 @@ Std_ReturnType EthIf_TransceiverGetMacMethod(uint8 TrcvIdx, EthTrcv_MacMethodTyp
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x66, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           When MACPHY controller are used, obtains the SPI interface status. */
 Std_ReturnType EthIf_EthGetSpiStatus(uint8 CtrlIdx, Eth_SpiStatusType* SpiStatusPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x6A, CtrlIdx, SpiStatusPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3536,12 +4313,16 @@ Std_ReturnType EthIf_EthGetSpiStatus(uint8 CtrlIdx, Eth_SpiStatusType* SpiStatus
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x6A, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 /* ========================================== internal function definition ========================================== */
 
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R21_11)
 /* @Brief   handle controller mode request of TxoffLine. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeTxOffLine(uint8 ctrlIdx)
 {
@@ -3557,7 +4338,8 @@ ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeTxOffLine(uint8 ctrlI
     }
     return ret;
 }
-
+#endif
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
 /* @Brief   handle controller mode request of active with wakeup request. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActiveWithWakeup(uint8 ctrlIdx)
 {
@@ -3568,8 +4350,8 @@ ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActiveWithWakeup(uint
 
     return ret;
 }
-
 #endif
+
 /* @Brief   handle controller mode request of ACTIVE. */
 ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActive(uint8 ctrlIdx)
 {
@@ -3580,6 +4362,8 @@ ETHIF_LOCAL_INLINE Std_ReturnType EthIf_InternalSetCtrlModeActive(uint8 ctrlIdx)
     return ret;
 }
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   handle controller mode request of Down. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlModeDown(uint8 ctrlIdx)
 {
@@ -3614,7 +4398,11 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlModeDown(uint8 ctrlIdx)
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(transceiver, switch and switchportGroup) trigger by controller mode
  * request.*/
 ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetHardwareMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode)
@@ -3648,7 +4436,11 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetHardwareMode(uint8 ctrlIdx, Eth_Mod
         EthIf_ControllerInformation[ctrlIdx].NoHardwareRefReportLinkChg = TRUE;
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(transceiver) trigger by controller mode request. */
 ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetTrcvMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode)
 {
@@ -3657,7 +4449,10 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetTrcvMode(uint8 ctrlIdx, Eth_ModeTyp
     /* @SWS_EthIf_00484 : reference to an EthIfTransceiver, ETH_MODE_DOWN requecst check is ETH_MODE_ACTIVE */
     /* @SWS_EthIf_00479 : ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST independent of the current mode */
     if ((checkMode == EthIf_TransceiverInformation[ethIfTrcvIdx].TrcvMode)
-        || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+        || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode)
+#endif
+    )
     {
         EthTrcv_LinkStateType reqTrcvState;
         EthIf_InternalGetTrcvStateCoupledWithMode(setMode, &reqTrcvState);
@@ -3672,12 +4467,18 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetTrcvMode(uint8 ctrlIdx, Eth_ModeTyp
         (void)ETHIF_ETHTRCV_DRIVER_API_CFG(driverId).EthTrcv_TransceiverLinkStateRequest(ethTrcvIdx, reqTrcvState);
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Obtains the mode of the indexed switch port.*/
 Std_ReturnType EthIf_GetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType* PortModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x49, SwitchIdx, SwitchPortIdx, PortModePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3711,9 +4512,16 @@ Std_ReturnType EthIf_GetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth
                 ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_GetSwitchPortMode(ethSwtIdx, SwitchPortIdx, PortModePtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x49, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(switch trigger by controller mode request. */
 ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetSwitchPortMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode)
 {
@@ -3735,7 +4543,10 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetSwitchPortMode(uint8 ctrlIdx, Eth_M
             uint8        portIndex = indexPtr[iterateIdx];
             EthIf_SwitchPortRuntimeInformation[portIndex].StartActiveTimer = 0u;
             if ((checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
-                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode)
+#endif
+            )
             {
                 if (NULL_PTR != ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_SetSwitchPortMode)
                 {
@@ -3781,11 +4592,17 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetSwitchPortMode(uint8 ctrlIdx, Eth_M
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_GET_BAUDRATE == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Obtains the baud rate of the indexed switch port. */
 Std_ReturnType EthIf_SwitchPortGetBaudRate(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_BaudRateType* BaudRatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x4D, SwitchIdx, SwitchPortIdx, BaudRatePtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3814,13 +4631,22 @@ Std_ReturnType EthIf_SwitchPortGetBaudRate(uint8 SwitchIdx, uint8 SwitchPortIdx,
             ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_GetBaudRate(ethSwtIdx, SwitchPortIdx, BaudRatePtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x4D, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief           Retrieves the data in memory of the indexed Ethernet switch in variable length. */
 Std_ReturnType EthIf_SwitchGetCfgDataRaw(uint8 SwitchIdx, uint32 Offset, uint16 Length, uint8* BufferPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 5, 0x63, SwitchIdx, Offset, Length, BufferPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3850,12 +4676,20 @@ Std_ReturnType EthIf_SwitchGetCfgDataRaw(uint8 SwitchIdx, uint32 Offset, uint16 
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x63, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /*  @brief           Retrieves the data in memory of the indexed Ethernet switch in variable length. */
 Std_ReturnType EthIf_SwitchGetCfgDataInfo(uint8 SwitchIdx, uint32* DataSizePtr, uint32* DataAdressPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x64, SwitchIdx, DataSizePtr, DataAdressPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3885,9 +4719,15 @@ Std_ReturnType EthIf_SwitchGetCfgDataInfo(uint8 SwitchIdx, uint32* DataSizePtr, 
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x64, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /**
  * @brief           The function retrieves the maximum amount of allocated FIFO buffer of the indexed Ethernet switch
  *                    egress port. If the Ethernet switch hardware does not support Ethernet switch port based maximal
@@ -3899,6 +4739,19 @@ Std_ReturnType EthIf_SwitchPortGetMaxFIFOBufferFillLevel(
     uint8   SwitchPortEgressFifoIdx,
     uint32* SwitchPortEgressFifoBufferLevelPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        5,
+        0x65,
+        SwitchPortIdx,
+        PortIdx,
+        SwitchPortEgressFifoIdx,
+        SwitchPortEgressFifoBufferLevelPtr);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
@@ -3932,12 +4785,18 @@ Std_ReturnType EthIf_SwitchPortGetMaxFIFOBufferFillLevel(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 2, 0x65, ret);
+
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet hardwar(switchportGroup) trigger by controller mode request. */
 ETHIF_LOCAL void
     EthIf_InternalSetCtrlModeSetSwitchPortGroupMode(uint8 ctrlIdx, Eth_ModeType setMode, Eth_ModeType checkMode)
@@ -3959,7 +4818,10 @@ ETHIF_LOCAL void
             uint8 portIndex                                                = indexPtr[iterateIdx];
             EthIf_SwitchPortRuntimeInformation[portIndex].StartActiveTimer = 0u;
             if ((checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
-                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode)
+#endif
+            )
             {
                 uint8 ethIfSwtIdx = ETHIF_SWITCHPORT_CFG_SWITCHPORT(portIndex).EthIfEthIfSwtIdx;
                 uint8 port        = ETHIF_SWITCHPORT_CFG_SWITCHPORT(portIndex).EthPortIdx;
@@ -4007,9 +4869,13 @@ ETHIF_LOCAL void
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   set mode or state of ethernet switchportGroup trigger by BswM. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetSwitchPortGroupMode(uint8 ethIfGroupIdx, Eth_ModeType setMode)
 {
@@ -4061,7 +4927,10 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalSetSwitchPortGroupMode(uint8 ethIfGroup
             EthIf_SwitchPortRuntimeInformation[portIndex].StartActiveTimer = 0u;
             if ((((ETH_MODE_DOWN == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
                   && (ETH_MODE_ACTIVE == setMode))
-                 || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+                 || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode)
+#endif
+                     )
                 && (NULL_PTR != ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_SetSwitchPortMode))
             {
                 ret = ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_SetSwitchPortMode(ethSwitch, port, setMode);
@@ -4091,7 +4960,11 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalSetSwitchPortGroupMode(uint8 ethIfGroup
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief Is all switchPortGroup referenced same port are requested down mode. */
 ETHIF_LOCAL boolean EthIf_InternalIsALLPortGroupRequestModeDown(uint8 ethIfSwtIdx, uint8 portIdx)
 {
@@ -4103,7 +4976,7 @@ ETHIF_LOCAL boolean EthIf_InternalIsALLPortGroupRequestModeDown(uint8 ethIfSwtId
     {
         const uint8* indexPtr = ETHIF_SWITCHPORTGROUP_CFG_SWITCHPORTGROUP(groupIdx).RefEthSwtPortList;
         uint8        portNum  = ETHIF_SWITCHPORTGROUP_CFG_SWITCHPORTGROUP(groupIdx).EthSwtPortNum;
-        for (uint8 idx; idx < portNum; idx++)
+        for (uint8 idx = 0u; idx < portNum; idx++)
         {
             uint8 portCfgIndex = indexPtr[idx];
             if ((ethIfSwtIdx == ETHIF_SWITCHPORT_CFG_SWITCHPORT(portCfgIndex).EthIfEthIfSwtIdx)
@@ -4121,8 +4994,11 @@ ETHIF_LOCAL boolean EthIf_InternalIsALLPortGroupRequestModeDown(uint8 ethIfSwtId
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u) || (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
 /* @Brief   get port state request by requested transceiver mode. */
 ETHIF_LOCAL_INLINE void
     EthIf_InternalGetTrcvStateCoupledWithMode(Eth_ModeType trcvMode, EthTrcv_LinkStateType* trcvState)
@@ -4136,7 +5012,10 @@ ETHIF_LOCAL_INLINE void
         *trcvState = ETHTRCV_LINK_STATE_ACTIVE;
     }
 }
+#endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @Brief   exceute request ethernet driver to set controller mode. */
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlMode(uint8 ctrlIdx, Eth_ModeType mode)
 {
@@ -4158,6 +5037,8 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlMode(uint8 ctrlIdx, Eth_ModeT
 
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
 ETHIF_LOCAL_INLINE uint8 EthIf_GetEthIfPartionByEcuCParttion(uint8 ecuCPartition)
@@ -4203,6 +5084,8 @@ ETHIF_LOCAL_INLINE void
 }
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
     uint8   ethIfPartition,
     boolean reqGetLinkState
@@ -4212,8 +5095,6 @@ ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
 #endif
 )
 {
-    Std_ReturnType        ret = E_NOT_OK;
-    EthTrcv_LinkStateType linkState;
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
     for (uint8 trcvIdx = 0u; trcvIdx < ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM; trcvIdx++)
     {
@@ -4225,7 +5106,8 @@ ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
                     related information with the period */
             if (reqGetLinkState)
             {
-                ret = EthIf_InternalTransceiverGetLinkState(trcvIdx, &linkState);
+                EthTrcv_LinkStateType linkState;
+                Std_ReturnType        ret = EthIf_InternalTransceiverGetLinkState(trcvIdx, &linkState);
                 if ((E_OK == ret) && (EthIf_TransceiverInformation[trcvIdx].TrcvLinkState != linkState))
                 {
                     EthIf_InternalTrcvLinkChgNotificationToCtrl(trcvIdx, linkState);
@@ -4291,20 +5173,8 @@ ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
     (void)ethIfPartition;
 #endif
 }
-
-ETHIF_LOCAL void EthIf_InternalTrcvLinkChgNotificationToCtrl(uint8 trcvIdx, EthTrcv_LinkStateType newLinkState)
-{
-    for (uint8 ctrlIdx = 0u; ctrlIdx < ETHIF_CONTROLLER_CONTROLLER_NUM; ctrlIdx++)
-    {
-        /* @SWS_EthIf_00230: Upon change of link state <User>_TrcvLinkStateChg shallbe invoked for every affected
-         * EthIfController  */
-        if ((ETHIF_CONTROLLER_CFG_CONTROLLER(ctrlIdx).TrcvRefIdx == trcvIdx)
-            && (ETHIF_CONTROLLER_CFG_CONTROLLER(ctrlIdx).TrcvRefType == CONTROLLER_REF_TRANSCEIVER))
-        {
-            EthIf_InternalTrcvLinkChgNotificationToUser(ctrlIdx, newLinkState);
-        }
-    }
-}
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 ETHIF_LOCAL_INLINE void EthIf_InternalTrcvLinkChgNotificationToUser(uint8 ctrlIdx, EthTrcv_LinkStateType newLinkState)
 {
@@ -4320,6 +5190,8 @@ ETHIF_LOCAL_INLINE void EthIf_InternalTrcvLinkChgNotificationToUser(uint8 ctrlId
 }
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortLinkState(uint8 ethIfPartition)
 {
     EthTrcv_LinkStateType linkState;
@@ -4354,7 +5226,11 @@ ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortLinkState(uint8 ethIfPartition)
     EthIf_InteralCheckChgOfSwitchPortGroupLinkState(ethIfPartition);
 #endif
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortTimer(uint8 ethIfPartition)
 {
     EthTrcv_LinkStateType linkState;
@@ -4377,8 +5253,12 @@ ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortTimer(uint8 ethIfPartition)
         EthIf_InteralCheckSwitchPortTimer(cfgPortIndex);
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
 #if (ETHIF_HAST_SWITCH_PORT_REF_TRANSCEIVER == STD_ON)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortSignalQuality(uint8 ethIfPartition)
 {
 #if (ETHIF_USED_PARTITION_NUM > 1)
@@ -4408,10 +5288,14 @@ ETHIF_LOCAL void EthIf_InteralPollEthSwitchPortSignalQuality(uint8 ethIfPartitio
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief check StartActiveTimer and SwitchOffPortTimer. */
 ETHIF_LOCAL void EthIf_InteralCheckSwitchPortTimer(uint8 ethIfSwitchPortIdx)
 {
@@ -4456,7 +5340,11 @@ ETHIF_LOCAL void EthIf_InteralCheckSwitchPortTimer(uint8 ethIfSwitchPortIdx)
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchLinkState(uint8 ethIfPartition)
 {
     EthTrcv_LinkStateType linkState;
@@ -4484,9 +5372,13 @@ ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchLinkState(uint8 ethIfPartition)
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchPortGroupLinkState(uint8 ethIfPartition)
 {
     EthTrcv_LinkStateType linkState;
@@ -4517,7 +5409,11 @@ ETHIF_LOCAL void EthIf_InteralCheckChgOfSwitchPortGroupLinkState(uint8 ethIfPart
         }
     }
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void
     EthIf_InteralGetSwitchPortGroupLinkState(uint8 switchPortGroupIdx, EthTrcv_LinkStateType* groupLinkStatePtr)
 {
@@ -4545,6 +5441,8 @@ ETHIF_LOCAL void
     }
     *groupLinkStatePtr = linkState;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
@@ -4562,6 +5460,7 @@ ETHIF_LOCAL_INLINE Std_ReturnType
 }
 #endif
 
+#if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
 ETHIF_LOCAL_INLINE
 Std_ReturnType EthIf_InternalTransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr)
 {
@@ -4575,7 +5474,28 @@ Std_ReturnType EthIf_InternalTransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_Link
     return ret;
 }
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
+ETHIF_LOCAL void EthIf_InternalTrcvLinkChgNotificationToCtrl(uint8 trcvIdx, EthTrcv_LinkStateType newLinkState)
+{
+    for (uint8 ctrlIdx = 0u; ctrlIdx < ETHIF_CONTROLLER_CONTROLLER_NUM; ctrlIdx++)
+    {
+        /* @SWS_EthIf_00230: Upon change of link state <User>_TrcvLinkStateChg shallbe invoked for every affected
+         * EthIfController  */
+        if ((ETHIF_CONTROLLER_CFG_CONTROLLER(ctrlIdx).TrcvRefIdx == trcvIdx)
+            && (ETHIF_CONTROLLER_CFG_CONTROLLER(ctrlIdx).TrcvRefType == CONTROLLER_REF_TRANSCEIVER))
+        {
+            EthIf_InternalTrcvLinkChgNotificationToUser(ctrlIdx, newLinkState);
+        }
+    }
+}
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+#endif
+
 #if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_431) && (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL Std_ReturnType EthIf_InternalGetTrcvSignalQuality(uint8 TrcvIdx, EthIf_SignalQualityResultType* ResultPtr)
 {
     Std_ReturnType ret        = E_NOT_OK;
@@ -4598,9 +5518,13 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalGetTrcvSignalQuality(uint8 TrcvIdx, Eth
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL Std_ReturnType EthIf_InternalGetSwitchPortSignalQuality(
     uint8                          SwitchIdx,
     uint8                          SwitchPortIdx,
@@ -4631,6 +5555,8 @@ ETHIF_LOCAL Std_ReturnType EthIf_InternalGetSwitchPortSignalQuality(
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
 ETHIF_LOCAL_INLINE void EthIf_InternalReportTxConfirmationToUpper(
@@ -4646,7 +5572,10 @@ ETHIF_LOCAL_INLINE void EthIf_InternalReportTxConfirmationToUpper(
     }
 }
 
+#if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidTransceiver(uint8 trcvIdx, uint8 ethIfPartition, uint8* errorCode)
 {
     boolean ret = TRUE;
@@ -4679,8 +5608,12 @@ ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidTransceiver(uint8 trcvIdx, uint8 ethI
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 #endif
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidController(uint8 ctrlIdx, uint8 ethIfPartition, uint8* errorCode)
 {
     boolean ret = TRUE;
@@ -4713,7 +5646,12 @@ ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidController(uint8 ctrlIdx, uint8 ethIf
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
+
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidSwitch(uint8 swtIdx, uint8 ethIfPartition, uint8* errorCode)
 {
     boolean ret = TRUE;
@@ -4746,12 +5684,15 @@ ETHIF_LOCAL boolean EthIf_DetCheckIsInvalidSwitch(uint8 swtIdx, uint8 ethIfParti
     }
     return ret;
 }
-#endif
 #define ETHIF_STOP_SEC_CODE
 #include "EthIf_MemMap.h"
+#endif
+
+#endif
 
 #define ETHIF_START_SEC_CODE_FAST
 #include "EthIf_MemMap.h"
+/* PRQA S 6020 ++ */ /* VL_MTR_EthIf_QacSTLIN */
 /*  @brief           Receive indication of an Ethernet frame which was received by the indexed controller. */
 void EthIf_RxIndication(
     uint8               CtrlIdx,
@@ -4768,17 +5709,49 @@ void EthIf_RxIndication(
 #endif
 )
 {
-    const uint8* u8DataPtr      = (const uint8*)DataPtr;
-    uint8        ethIfPartition = 0u;
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11)
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        9,
+        0x10,
+        CtrlIdx,
+        FrameType,
+        IsBroadcast,
+        PhysAddrPtr,
+        DataPtr,
+        DataLen,
+        IngressTimeTuplePtr,
+        RxHandleId);
+#else
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        EthIf,
+        0,
+        Bsw_Start,
+        7,
+        0x10,
+        CtrlIdx,
+        FrameType,
+        IsBroadcast,
+        PhysAddrPtr,
+        DataPtr,
+        DataLen);
+#endif
 
+    const uint8* u8DataPtr = (const uint8*)DataPtr;
+#if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
+    uint8 ecuCPartition  = (uint8)GetApplicationID();
+    uint8 ethIfPartition = EthIf_GetEthIfPartionByEcuCParttion(ecuCPartition);
+#else
+    uint8 ethIfPartition = 0u;
+#endif
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
-#if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
-    uint8 ecuCPartition = (uint8)GetApplicationID();
-    ethIfPartition      = EthIf_GetEthIfPartionByEcuCParttion(ecuCPartition);
-#else
-    ethIfPartition = 0u;
-#endif
     if ((ETHIF_PHYCONTROLLER_PHYCONTROLLER_NUM) <= CtrlIdx)
     {
         ETHIF_DET_REPORT(ETHIF_SERVICE_ID_RX_INDICATION, ETHIF_E_INV_CTRL_IDX);
@@ -4889,12 +5862,20 @@ void EthIf_RxIndication(
         }
 #endif
     }
+    ETHIF_NOUSED(ethIfPartition);
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R23_11)
-    (void)RxHandleId;
-    (void)IngressTimeTuplePtr;
+    ETHIF_NOUSED(RxHandleId);
+    ETHIF_NOUSED(IngressTimeTuplePtr);
 #endif
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x10);
+}
+/* PRQA S 6020 -- */
+#define ETHIF_STOP_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
+
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 /* @brief get EthIfCtrl Id by PhyCtrl and VlanId */
 ETHIF_LOCAL Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId)
 {
@@ -4921,7 +5902,11 @@ ETHIF_LOCAL Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 E
     }
     return ret;
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE
+#include "EthIf_MemMap.h"
 ETHIF_LOCAL void EthIf_InternalUpperLayerRxIndication(
     uint8               ethifCtrlId,
     Eth_FrameType       upperLayerFrameType,
@@ -4960,7 +5945,11 @@ ETHIF_LOCAL void EthIf_InternalUpperLayerRxIndication(
     }
 #endif
 }
+#define ETHIF_STOP_SEC_CODE
+#include "EthIf_MemMap.h"
 
+#define ETHIF_START_SEC_CODE_FAST
+#include "EthIf_MemMap.h"
 /*  @brief           Confirms frame transmission by the indexed controller. */
 void EthIf_TxConfirmation(
     uint8          CtrlIdx,
@@ -4971,6 +5960,12 @@ void EthIf_TxConfirmation(
 #endif
 )
 {
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 4, 0x11, CtrlIdx, BufIdx, Result);
+#else
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Start, 3, 0x11, CtrlIdx, BufIdx);
+#endif
+
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
     uint8 errorCode;
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
@@ -5029,9 +6024,10 @@ void EthIf_TxConfirmation(
             }
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, EthIf, 0, Bsw_Return, 1, 0x11);
+}
 #define ETHIF_STOP_SEC_CODE_FAST
 #include "EthIf_MemMap.h"
-/* PRQA S 1503,1532 -- */
 /* PRQA S 6040,6030 -- */
+/* PRQA S 1503,1532 -- */

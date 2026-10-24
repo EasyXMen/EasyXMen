@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -30,61 +30,75 @@
 #endif
 
 /* ===================================================== macros ===================================================== */
-#define XCP_C_AR_MAJOR_VERSION 4u
-#define XCP_C_AR_MINOR_VERSION 9u
-#define XCP_C_AR_PATCH_VERSION 0u
-#define XCP_C_SW_MAJOR_VERSION 3u
-#define XCP_C_SW_MINOR_VERSION 0u
-#define XCP_C_SW_PATCH_VERSION 3u
-
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
 #define XCP_VENDOR_ID (uint16)62
 #define XCP_MODULE_ID (uint16)212
 #endif
 
-/* ------------------------------------------------- Version  Check ------------------------------------------------- */
-#if (XCP_C_AR_MAJOR_VERSION != XCP_H_AR_MAJOR_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-#if (XCP_C_AR_MINOR_VERSION != XCP_H_AR_MINOR_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-#if (XCP_C_AR_PATCH_VERSION != XCP_H_AR_PATCH_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-#if (XCP_C_SW_MAJOR_VERSION != XCP_H_SW_MAJOR_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-#if (XCP_C_SW_MINOR_VERSION != XCP_H_SW_MINOR_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-#if (XCP_C_SW_PATCH_VERSION != XCP_H_SW_PATCH_VERSION)
-#error "Xcp.c : Mismatch in Specification Major Version"
-#endif
-
-/* ========================================== internal function declarations ======================================== */
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
+/* ========================================== internal function declarations ======================================== */
 XCP_LOCAL void Xcp_PendingTaskHandle(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_GenericCommandHandle(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_RxCommandHal(const PduLengthType len, const uint8* dataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_TxQueueHandler(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_SendServ(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 #if (XCP_BYTE_ORDER_CHECK == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL boolean Xcp_ByteOrder_Check(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_RxBlockHal(const uint8 pid, const PduLengthType len, const uint8* dataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_INTERLEAVED_MODE == STD_ON)
-XCP_LOCAL void    Xcp_InterLeavedHandler(void);
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_InterLeavedHandler(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL boolean Xcp_IsInterleavedBufFull(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_INTERLEAVED_MODE == STD_ON*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_Cmd_ReservedCmd(void);
-
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
@@ -359,10 +373,10 @@ Xcp_ChannelCommonType Xcp_ChannelCommonData;
 #define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
 
-#define XCP_START_SEC_VAR_INIT_UNSPECIFIED
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
-boolean Xcp_ModuleInit = FALSE;
-#define XCP_STOP_SEC_VAR_INIT_UNSPECIFIED
+boolean Xcp_ModuleInit;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
 
 #define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
@@ -374,11 +388,24 @@ const Xcp_ConfigType* Xcp_PbCfgPtr;
 #define XCP_START_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
 uint8 Xcp_CmdBuffer[XCP_MAX_CTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 uint8 Xcp_RespBuffer[XCP_MAX_CTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 uint8 Xcp_EvBuffer[XCP_MAX_CTO];
-/* PRQA S 1514 ++ */ /* VL_Xcp_IndirectUse */
-uint8 Xcp_ServBuffer[XCP_MAX_CTO];
-/* PRQA S 1514 -- */
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+XCP_LOCAL uint8 Xcp_ServBuffer[XCP_MAX_CTO]; /*PRQA S 3218*/ /*VL_Xcp_3218*/
 #define XCP_STOP_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
 
@@ -406,6 +433,8 @@ Xcp_AGType Xcp_BlockBuffer[XCP_BLOCK_BUFFER_SIZE];
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void Xcp_Init(const Xcp_ConfigType* Xcp_ConfigPtr)
 {
+    Xcp_ArtiApiStart(2, XCP_SERVICE_ID_INIT, Xcp_ConfigPtr);
+
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR == Xcp_ConfigPtr)
     {
@@ -459,11 +488,18 @@ void Xcp_Init(const Xcp_ConfigType* Xcp_ConfigPtr)
 #endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
         Xcp_ModuleInit = TRUE;
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_INIT);
+
     return;
 }
 /* PRQA S 1503 -- */
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_BYTE_ORDER_CHECK == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL boolean Xcp_ByteOrder_Check(void)
 {
     uint32 testVar = 1;
@@ -477,9 +513,13 @@ XCP_LOCAL boolean Xcp_ByteOrder_Check(void)
 
     return TRUE;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TIME_STAMP)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Reads the current system timer value and converts it to milliseconds.This
  * function retrieves the current value of the system timer and converts it
@@ -496,8 +536,12 @@ uint32 Xcp_ReadOutMS(void)
 
     return (OSCurMs);
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TIME_STAMP*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Main function for XCP protocol handling.Manages transmission status,
  * timeout, and command execution.Handles pending tasks, set requests,
@@ -508,6 +552,8 @@ uint32 Xcp_ReadOutMS(void)
 void Xcp_MainFunction(void)
 /* PRQA S 1532 -- */
 {
+    Xcp_ArtiApiStart(1, XCP_SERVICE_ID_MAINFUNCTION);
+
     /* In case something is in transmission */
     if (0x00U != (Xcp_ChannelCommonData.SendStatus & XCP_SEND_PENDING))
     {
@@ -550,8 +596,13 @@ void Xcp_MainFunction(void)
         Xcp_ChannelCommonData.CommandStatus = XCP_CMD_EXECUTE;
         Xcp_GenericCommandHandle();
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_MAINFUNCTION);
+
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_INTERLEAVED_MODE == STD_ON)
 /**
@@ -560,6 +611,8 @@ void Xcp_MainFunction(void)
  * extracts command data, and updates the command reception status.
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_InterLeavedHandler(void)
 {
     if (Xcp_ChannelCommonData.InterLevRecv == TRUE)
@@ -582,6 +635,11 @@ XCP_LOCAL void Xcp_InterLeavedHandler(void)
         }
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks if the interleaved buffer is full.This function determines
  * whether the interleaved buffer is full by comparing the rear and
@@ -615,9 +673,13 @@ XCP_LOCAL boolean Xcp_IsInterleavedBufFull(void)
     }
     return isFull;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_INTERLEAVED_MODE == STD_ON*/
 
 #if (XCP_VERSION_INFO_API == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves version information of the XCP module.
  * This function fills a provided structure with version information of the XCP
@@ -626,13 +688,15 @@ XCP_LOCAL boolean Xcp_IsInterleavedBufFull(void)
  */
 void Xcp_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    Xcp_ArtiApiStart(2, XCP_SERVICE_ID_GET_VERSION_INFO, versioninfo);
+
     Std_VersionInfoType Xcp_VersionInfo = {
         XCP_VENDOR_ID,
         XCP_MODULE_ID,
 
-        XCP_C_SW_MAJOR_VERSION,
-        XCP_C_SW_MINOR_VERSION,
-        XCP_C_SW_PATCH_VERSION};
+        XCP_SW_MAJOR_VERSION,
+        XCP_SW_MINOR_VERSION,
+        XCP_SW_PATCH_VERSION};
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR == versioninfo)
     {
@@ -648,21 +712,36 @@ void Xcp_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = Xcp_VersionInfo.sw_minor_version;
         versioninfo->sw_patch_version = Xcp_VersionInfo.sw_patch_version;
     }
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_GET_VERSION_INFO);
+
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_SUPPRESS_TX_SUPPORTED == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Set whether the XCP transfer mode is enabled or disabled.
  */
 void Xcp_SetTransmissionMode(NetworkHandleType Channel, Xcp_TransmissionModeType Mode)
 {
+    Xcp_ArtiApiStart(3, XCP_SERVICE_ID_SETTRANSMISSOINMODE, Channel, Mode);
+
     (void)Channel;
     (void)Mode;
+
+    Xcp_ArtiApiStop(1, XCP_SERVICE_ID_SETTRANSMISSOINMODE);
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears the current status of the XCP channel. This function sets the protection
  * status of the XCP channel to a predefined protection level, resets the session
@@ -688,7 +767,11 @@ void Xcp_ClearStatus(void)
 
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Initializes the command processing for the XCP channel. This function sets the
  * command status to idle. If either master or slave block mode is enabled, it
@@ -710,7 +793,11 @@ void Xcp_CommandInit(void)
 #endif /*XCP_INTERLEAVED_MODE == STD_ON*/
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the pending tasks for the XCP protocol layer. This function checks if
  * the programming resource is enabled and, if so, calls the function responsible
@@ -723,7 +810,11 @@ XCP_LOCAL void Xcp_PendingTaskHandle(void)
 #endif
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles generic commands for the XCP protocol. This function reads the command
  * code from the command buffer, initializes the response buffer, and processes
@@ -778,7 +869,11 @@ XCP_LOCAL void Xcp_GenericCommandHandle(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Transmits data over the communication channel used by the XCP protocol. This
  * function prepares the data to be sent, sets the length and data pointer, and
@@ -827,7 +922,11 @@ Std_ReturnType Xcp_Transmit(PduIdType pduId, PduLengthType len, uint8* dataPtr)
 #endif
     return ret;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Copies a 32-bit unsigned integer to a byte buffer according to the specified
  * byte order. This function takes the 32-bit data, the destination buffer pointer,
@@ -856,7 +955,11 @@ void Xcp_CopyU4ToU1Buffer(const uint32 u4Data, uint8* pu1BufferPtr, uint8 byteOr
     return;
 }
 /* PRQA S 1503 -- */
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Copies a 16-bit unsigned integer to a byte buffer according to the specified
  * byte order. This function takes the 16-bit data, the destination buffer pointer,
@@ -879,7 +982,11 @@ void Xcp_CopyU2ToU1Buffer(const uint16 u2Data, uint8* pu1BufferPtr, uint8 byteOr
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Copies a 32-bit unsigned integer from a byte buffer according to the specified
  * byte order. This function takes the source buffer pointer, the destination
@@ -903,7 +1010,11 @@ void Xcp_CopyU1BufferToU4(const uint8* pu1BufferPtr, uint32* pu4Data, uint8 byte
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Copies a 16-bit unsigned integer from a byte buffer according to the specified
  * byte order. This function takes the source buffer pointer, the destination
@@ -924,6 +1035,8 @@ void Xcp_CopyU1BufferToU2(const uint8* pu1BufferPtr, uint16* pu2Data, uint8 byte
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Copies data from a source buffer to a destination buffer. This function performs
@@ -933,6 +1046,8 @@ void Xcp_CopyU1BufferToU2(const uint8* pu1BufferPtr, uint16* pu2Data, uint8 byte
  * MISRA coding standards and considers the byte order for unaligned data.
  */
 /*PRQA S 3673 ++*/ /* VL_QAC_3673 */
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 void Xcp_BufferCopy(const void* srcPtr, void* destPtr, uint32 u4Length)
 /*PRQA S 3673 --*/
 {
@@ -1030,7 +1145,11 @@ void Xcp_BufferCopy(const void* srcPtr, void* destPtr, uint32 u4Length)
         }
     }
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets an error code in the XCP response buffer. This function updates the response
  * buffer with the error PID and the specified error code, setting the response length
@@ -1044,6 +1163,11 @@ void Xcp_SetErrorCode(uint8 u1ErrorCode)
     Xcp_ChannelCommonData.RespLength      = XCP_RESP_ERR_LEN;
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sends a response over the XCP channel. This function sets the send status to
  * indicate a response request and checks if the response is pending. It supports
@@ -1138,6 +1262,11 @@ void Xcp_SendResp(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sends an event over the XCP channel. This function sets the send status to
  * indicate an event request, prepares the event buffer with the event PID, and
@@ -1163,7 +1292,11 @@ void Xcp_SendEv(void)
 
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sends a service message over the XCP channel. This function sets the send status
  * to indicate a service request, checks if the service is pending, and if not, it
@@ -1187,6 +1320,11 @@ XCP_LOCAL void Xcp_SendServ(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  *  This function processes the received data based on the current connection status
  *  and the received PID. It checks if the received command is a connect command or
@@ -1249,8 +1387,12 @@ void Xcp_RxIndication(const PduLengthType len, const uint8* dataPtr)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks for errors in the XCP receive indication. This function verifies that the
  * module is initialized, the PDU pointer is valid, and the PDU ID is within the
@@ -1289,8 +1431,12 @@ boolean Xcp_RxIndCheckDetErr(PduIdType XcpRxPduId, const PduInfoType* XcpRxPduPt
     }
     return errorFlag;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_DEV_ERROR_DETECT == STD_ON*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Processes received XCP commands. This function handles the reception of commands
  * in both interleaved and non-interleaved modes. It checks the command PID and
@@ -1443,6 +1589,8 @@ XCP_LOCAL void Xcp_RxCommandHal(const PduLengthType len, const uint8* dataPtr)
     SchM_Exit_Xcp_Exclusive_Common();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Processes received block commands in XCP. This function handles `DOWNLOAD_NEXT`
@@ -1452,6 +1600,8 @@ XCP_LOCAL void Xcp_RxCommandHal(const PduLengthType len, const uint8* dataPtr)
  * incorrect, it sets an error code and sends a response indicating the error.
  */
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /* PRQA S 5017, 6010, 6080 ++ */ /* VL_Xcp_5017, VL_MTR_Xcp_STCYC, VL_MTR_Xcp_STPTH */
 XCP_LOCAL void Xcp_RxBlockHal(const uint8 pid, const PduLengthType len, const uint8* dataPtr)
 /* PRQA S 5017, 6010, 6080 -- */
@@ -1550,8 +1700,12 @@ XCP_LOCAL void Xcp_RxBlockHal(const uint8 pid, const PduLengthType len, const ui
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the transmission confirmation in XCP. This function clears the send pending
  * flag and resets the transmit timeout counter. It updates the command status based
@@ -1602,8 +1756,12 @@ void Xcp_TxConfirmation(const PduIdType pduId)
     Xcp_TxQueueHandler();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks for errors in the XCP transmit indication. This function verifies that
  * the module is initialized. If the module is not initialized, it reports an error
@@ -1622,8 +1780,12 @@ boolean Xcp_TxIndCheckDetErr(void)
     }
     return errFlag;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_DEV_ERROR_DETECT == STD_ON*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Manages the transmit queue for XCP. This function checks the send status for
  * response, service, and event requests and calls the respective send functions
@@ -1659,7 +1821,11 @@ XCP_LOCAL void Xcp_TxQueueHandler(void)
 #endif
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles reserved or unknown XCP commands. This function sets an error code
  * indicating an unknown command and sends a response to notify the sender of

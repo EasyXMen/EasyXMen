@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -24,7 +24,6 @@
 
 /* =================================================== inclusions =================================================== */
 #include "Csm_Internal.h"
-
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -32,10 +31,14 @@
 /* ========================================== internal function declarations ======================================== */
 #if (CSM_DEV_ERROR_DETECT == STD_ON)
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief  the initialization status of a service.
  */
 static Std_ReturnType Csm_ChkInitStatus(uint8 servId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -58,7 +61,11 @@ boolean Csm_ChkInitParam(const Csm_ConfigType* configPtr)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_GetVersionInfo()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkGetVersionInfo(const Std_VersionInfoType* versioninfo, uint8 sid)
@@ -73,7 +80,11 @@ Std_ReturnType Csm_ChkGetVersionInfo(const Std_VersionInfoType* versioninfo, uin
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_Servicexxx()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkServiceParam(uint32 jobId, uint8 sid)
@@ -92,7 +103,7 @@ Std_ReturnType Csm_ChkServiceParam(uint32 jobId, uint8 sid)
     }
     if (E_OK == ret)
     {
-        service = Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service;
+        service = Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service;
 
         if (((CSM_SID_HASH == sid) && (service != CRYPTO_HASH))
             || ((CSM_SID_RANDOM_GEN == sid) && (service != CRYPTO_RANDOMGENERATE))
@@ -103,16 +114,36 @@ Std_ReturnType Csm_ChkServiceParam(uint32 jobId, uint8 sid)
             || ((CSM_SID_SIG_GEN == sid) && (service != CRYPTO_SIGNATUREGENERATE))
             || ((CSM_SID_SIG_VERIFY == sid) && (service != CRYPTO_SIGNATUREVERIFY))
             || ((CSM_SID_ENCRYPT == sid) && (service != CRYPTO_ENCRYPT))
-            || ((CSM_SID_DECRYPT == sid) && (service != CRYPTO_DECRYPT)))
+            || ((CSM_SID_DECRYPT == sid) && (service != CRYPTO_DECRYPT))
+            || ((CSM_SID_CUSTOM_SEV == sid) && (service != CRYPTO_CUSTOM_SERVICE)))
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
+        }
+        else if ((CSM_SID_SAVE_CONTEXT == sid) || (CSM_SID_RESTORE_CONTEXT == sid))
+        {
+            if ((service != CRYPTO_HASH) && (service != CRYPTO_ENCRYPT) && (service != CRYPTO_DECRYPT)
+                && (service != CRYPTO_AEADENCRYPT) && (service != CRYPTO_AEADDECRYPT) && (service != CRYPTO_MACGENERATE)
+                && (service != CRYPTO_MACVERIFY) && (service != CRYPTO_SIGNATUREGENERATE)
+                && (service != CRYPTO_SIGNATUREVERIFY))
+            {
+                ret = E_NOT_OK;
+                Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
+            }
+        }
+        else
+        {
+            /*Do nothing.*/
         }
     }
 
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyElementSet()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyEleSetParam(uint32 keyId, const uint8* keyPtr, uint32 keyLength, uint8 sid)
@@ -145,7 +176,11 @@ Std_ReturnType Csm_ChkKeyEleSetParam(uint32 keyId, const uint8* keyPtr, uint32 k
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeySetValid()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeySetValid(uint32 keyId, uint8 sid)
@@ -164,6 +199,11 @@ Std_ReturnType Csm_ChkKeySetValid(uint32 keyId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeySetInvalid()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeySetInValid(uint32 keyId, uint8 sid)
@@ -182,6 +222,11 @@ Std_ReturnType Csm_ChkKeySetInValid(uint32 keyId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyElementGet()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyEleGet(uint32 keyId, const uint8* keyPtr, const uint32* keyLengthPtr, uint8 sid)
@@ -214,7 +259,11 @@ Std_ReturnType Csm_ChkKeyEleGet(uint32 keyId, const uint8* keyPtr, const uint32*
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyElementCopy()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyEleCopy(const uint32 keyId, const uint32 targetKeyId, uint8 sid)
@@ -233,7 +282,11 @@ Std_ReturnType Csm_ChkKeyEleCopy(const uint32 keyId, const uint32 targetKeyId, u
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyCopy()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyCopy(const uint32 keyId, const uint32 targetKeyId, uint8 sid)
@@ -252,7 +305,11 @@ Std_ReturnType Csm_ChkKeyCopy(const uint32 keyId, const uint32 targetKeyId, uint
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyElementCopyPartial()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyEleCopyPart(uint32 keyId, uint32 targetKeyId, uint8 sid)
@@ -271,7 +328,11 @@ Std_ReturnType Csm_ChkKeyEleCopyPart(uint32 keyId, uint32 targetKeyId, uint8 sid
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_RandomSeed()*/
 Std_ReturnType Csm_ChkRandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLength, uint8 sid)
 {
@@ -302,7 +363,11 @@ Std_ReturnType Csm_ChkRandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seed
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyGenerate()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyGenerate(uint32 keyId, uint8 sid)
@@ -321,7 +386,11 @@ Std_ReturnType Csm_ChkKeyGenerate(uint32 keyId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyDerive()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkKeyDerive(uint32 keyId, uint32 targetKeyId, uint8 sid)
@@ -340,7 +409,11 @@ Std_ReturnType Csm_ChkKeyDerive(uint32 keyId, uint32 targetKeyId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyExchangeCalcPubVal()*/
 Std_ReturnType Csm_ChkExCalcPubVal(const uint8* publicValuePtr, const uint32* publicValueLengthPtr, uint8 sid)
 {
@@ -361,7 +434,11 @@ Std_ReturnType Csm_ChkExCalcPubVal(const uint8* publicValuePtr, const uint32* pu
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_KeyExchangeCalcSecret()*/
 Std_ReturnType Csm_ChkExCalcSecVal(const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength, uint8 sid)
 {
@@ -387,7 +464,11 @@ Std_ReturnType Csm_ChkExCalcSecVal(const uint8* partnerPublicValuePtr, uint32 pa
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeySetValid()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkJobKeySetValid(uint32 jobId, uint8 sid)
@@ -403,7 +484,7 @@ Std_ReturnType Csm_ChkJobKeySetValid(uint32 jobId, uint8 sid)
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYSETVALID)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYSETVALID)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -415,6 +496,11 @@ Std_ReturnType Csm_ChkJobKeySetValid(uint32 jobId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeySetInValid()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkJobKeySetInValid(uint32 jobId, uint8 sid)
@@ -430,7 +516,7 @@ Std_ReturnType Csm_ChkJobKeySetInValid(uint32 jobId, uint8 sid)
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYSETINVALID)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYSETINVALID)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -442,6 +528,11 @@ Std_ReturnType Csm_ChkJobKeySetInValid(uint32 jobId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for Csm_JobRandomSeed()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkJobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPtr, uint32 seedLength, uint8 sid)
@@ -457,7 +548,7 @@ Std_ReturnType Csm_ChkJobRandomSeed(uint32 jobId, uint32 keyId, const uint8* see
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_RANDOMSEED)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_RANDOMSEED)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -469,7 +560,11 @@ Std_ReturnType Csm_ChkJobRandomSeed(uint32 jobId, uint32 keyId, const uint8* see
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeyGenerate()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkJobKeyGenerate(uint32 jobId, uint32 keyId, uint8 sid)
@@ -485,7 +580,7 @@ Std_ReturnType Csm_ChkJobKeyGenerate(uint32 jobId, uint32 keyId, uint8 sid)
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYGENERATE)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYGENERATE)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -497,7 +592,11 @@ Std_ReturnType Csm_ChkJobKeyGenerate(uint32 jobId, uint32 keyId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeyDerive()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkJobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId, uint8 sid)
@@ -513,7 +612,7 @@ Std_ReturnType Csm_ChkJobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyI
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYDERIVE)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYDERIVE)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -525,7 +624,11 @@ Std_ReturnType Csm_ChkJobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyI
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeyExchangeCalcPubVal()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType
@@ -539,7 +642,7 @@ Std_ReturnType
         ret = E_NOT_OK;
         Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
     }
-    else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYEXCHANGECALCPUBVAL)
+    else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYEXCHANGECALCPUBVAL)
     {
         ret = E_NOT_OK;
         Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -551,7 +654,11 @@ Std_ReturnType
 
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_JobKeyExchangeCalcSecret()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType
@@ -568,7 +675,7 @@ Std_ReturnType
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_PARAM_HANDLE);
         }
-        else if (Csm_JobCfg[jobId].jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYEXCHANGECALCSECRET)
+        else if (Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->primitiveInfo->service != CRYPTO_KEYEXCHANGECALCSECRET)
         {
             ret = E_NOT_OK;
             Csm_ReportDetErr(sid, CSM_E_SERVICE_TYPE);
@@ -580,7 +687,11 @@ Std_ReturnType
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_CancelJob()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkCancelJob(uint32 jobId, uint8 sid)
@@ -601,7 +712,7 @@ Std_ReturnType Csm_ChkCancelJob(uint32 jobId, uint8 sid)
         {
             jobCfgPtr = &(Csm_JobCfg[jobId]);
             /*[SWS_Csm_01086]*/
-            if (CRYPTO_PROCESSING_SYNC == jobCfgPtr->jobPrimitiveInfo->processingType)
+            if (CRYPTO_PROCESSING_SYNC == jobCfgPtr->jobPtr->jobPrimitiveInfo->processingType)
             {
                 ret = E_NOT_OK;
                 Csm_ReportDetErr(sid, CSM_E_PROCESSING_MODE);
@@ -610,7 +721,11 @@ Std_ReturnType Csm_ChkCancelJob(uint32 jobId, uint8 sid)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*check parameters for  Csm_CallbackNotification()*/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType Csm_ChkCbkNotify(const Crypto_JobType* job, uint8 sid)
@@ -631,6 +746,7 @@ Std_ReturnType Csm_ChkCbkNotify(const Crypto_JobType* job, uint8 sid)
 }
 #define CSM_STOP_SEC_CODE
 #include "Csm_MemMap.h"
+
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/

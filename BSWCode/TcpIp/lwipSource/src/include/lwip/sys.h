@@ -120,6 +120,8 @@ typedef void (*lwip_thread_fn)(void *arg);
 
 #else /* LWIP_COMPAT_MUTEX */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Create a new mutex.
@@ -135,25 +137,41 @@ typedef void (*lwip_thread_fn)(void *arg);
  * @return ERR_OK if successful, another err_t otherwise
  */
 err_t sys_mutex_new(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Blocks the thread until the mutex can be grabbed.
  * @param mutex the mutex to lock
  */
 void sys_mutex_lock(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Releases the mutex previously locked through 'sys_mutex_lock()'.
  * @param mutex the mutex to unlock
  */
 void sys_mutex_unlock(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Deallocates a mutex.
  * @param mutex the mutex to delete
  */
 void sys_mutex_free(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #ifndef sys_mutex_valid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Returns 1 if the mutes is valid, 0 if it is not valid.
@@ -162,8 +180,12 @@ void sys_mutex_free(sys_mutex_t *mutex);
  * This may also be a define, in which case the function is not prototyped.
  */
 int sys_mutex_valid(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef sys_mutex_set_invalid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mutex
  * Invalidate a mutex so that sys_mutex_valid() returns 0.
@@ -172,11 +194,15 @@ int sys_mutex_valid(sys_mutex_t *mutex);
  * This may also be a define, in which case the function is not prototyped.
  */
 void sys_mutex_set_invalid(sys_mutex_t *mutex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #endif /* LWIP_COMPAT_MUTEX */
 
 /* Semaphore functions: */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  * Create a new semaphore
@@ -193,12 +219,20 @@ void sys_mutex_set_invalid(sys_mutex_t *mutex);
  * @return ERR_OK if successful, another err_t otherwise
  */
 err_t sys_sem_new(sys_sem_t *sem, u8_t count);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  * Signals a semaphore
  * @param sem the semaphore to signal
  */
 void sys_sem_signal(sys_sem_t *sem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  *  Blocks the thread while waiting for the semaphore to be signaled. If the
@@ -217,15 +251,23 @@ void sys_sem_signal(sys_sem_t *sem);
  * @return SYS_ARCH_TIMEOUT on timeout, any other value on success
  */
 u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  * Deallocates a semaphore.
  * @param sem semaphore to delete
  */
 void sys_sem_free(sys_sem_t *sem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Wait for a semaphore - forever/no timeout */
 #define sys_sem_wait(sem)                  sys_arch_sem_wait(sem, 0)
 #ifndef sys_sem_valid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  * Returns 1 if the semaphore is valid, 0 if it is not valid.
@@ -234,8 +276,12 @@ void sys_sem_free(sys_sem_t *sem);
  * This may also be a define, in which case the function is not prototyped.
  */
 int sys_sem_valid(sys_sem_t *sem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef sys_sem_set_invalid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_sem
  * Invalidate a semaphore so that sys_sem_valid() returns 0.
@@ -244,6 +290,8 @@ int sys_sem_valid(sys_sem_t *sem);
  * This may also be a define, in which case the function is not prototyped.
  */
 void sys_sem_set_invalid(sys_sem_t *sem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef sys_sem_valid_val
 /**
@@ -259,15 +307,21 @@ void sys_sem_set_invalid(sys_sem_t *sem);
 #endif
 
 #ifndef sys_msleep
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_misc
  * Sleep for specified number of ms
  */
 void sys_msleep(u32_t ms); /* only has a (close to) 1 ms resolution. */
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 /* Mailbox functions. */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Creates an empty mailbox for maximum "size" elements. Elements stored
@@ -283,6 +337,10 @@ void sys_msleep(u32_t ms); /* only has a (close to) 1 ms resolution. */
  * @return ERR_OK if successful, another err_t otherwise
  */
 err_t sys_mbox_new(sys_mbox_t *mbox, int size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Post a message to an mbox - may not fail
@@ -292,6 +350,10 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size);
  * @param msg message to post (ATTENTION: can be NULL)
  */
 void sys_mbox_post(sys_mbox_t *mbox, void *msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Try to post a message to an mbox - may fail if full.
@@ -302,6 +364,10 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg);
  * @param msg message to post (ATTENTION: can be NULL)
  */
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Try to post a message to an mbox - may fail if full.
@@ -312,6 +378,10 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg);
  * @param msg message to post (ATTENTION: can be NULL)
  */
 err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Blocks the thread until a message arrives in the mailbox, but does
@@ -334,8 +404,12 @@ err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg);
  * @return SYS_ARCH_TIMEOUT on timeout, any other value if a message has been received
  */
 u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /* Allow port to override with a macro, e.g. special timeout for sys_arch_mbox_fetch() */
 #ifndef sys_arch_mbox_tryfetch
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * This is similar to sys_arch_mbox_fetch, however if a message is not
@@ -353,11 +427,15 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout);
  *         or SYS_MBOX_EMPTY if the mailbox is empty
  */
 u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 /**
  * For now, we map straight to sys_arch implementation.
  */
 #define sys_mbox_tryfetch(mbox, msg) sys_arch_mbox_tryfetch(mbox, msg)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Deallocates a mailbox. If there are messages still present in the
@@ -367,8 +445,12 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg);
  * @param mbox mbox to delete
  */
 void sys_mbox_free(sys_mbox_t *mbox);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define sys_mbox_fetch(mbox, msg) sys_arch_mbox_fetch(mbox, msg, 0)
 #ifndef sys_mbox_valid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Returns 1 if the mailbox is valid, 0 if it is not valid.
@@ -377,8 +459,12 @@ void sys_mbox_free(sys_mbox_t *mbox);
  * This may also be a define, in which case the function is not prototyped.
  */
 int sys_mbox_valid(sys_mbox_t *mbox);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef sys_mbox_set_invalid
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_mbox
  * Invalidate a mailbox so that sys_mbox_valid() returns 0.
@@ -387,6 +473,8 @@ int sys_mbox_valid(sys_mbox_t *mbox);
  * This may also be a define, in which case the function is not prototyped.
  */
 void sys_mbox_set_invalid(sys_mbox_t *mbox);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #ifndef sys_mbox_valid_val
 /**
@@ -402,6 +490,8 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox);
 #endif
 
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_misc
  * The only thread function:
@@ -418,6 +508,8 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox);
  * @param stacksize stack size in bytes for the new thread (may be ignored by ports)
  * @param prio priority of the new thread (may be ignored by ports) */
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* NO_SYS */
 
@@ -431,18 +523,26 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 #define LWIP_MARK_TCPIP_THREAD()
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_misc
  * sys_init() must be called before anything else.
  * Initialize the sys_arch layer.
  */
 void sys_init(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifndef sys_jiffies
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Ticks/jiffies since power up.
  */
 u32_t sys_jiffies(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef LWIP_FUZZ_SYS_NOW
@@ -450,6 +550,8 @@ u32_t sys_jiffies(void);
 extern u32_t sys_now_offset;
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_time
  * Returns the current time in milliseconds,
@@ -459,6 +561,8 @@ extern u32_t sys_now_offset;
  * timestamps, internal timeouts for NO_SYS==1).
  */
 u32_t sys_now(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Critical Region Protection */
 /* These functions must be implemented in the sys_arch.c file.

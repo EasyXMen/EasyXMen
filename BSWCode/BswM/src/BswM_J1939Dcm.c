@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON)
 /**
  * Initializes the J1939 DCM request ports by setting the initial broadcast status.
  * This function retrieves configuration data, iterates through the channels, and sets the initial status if provided.
@@ -49,6 +49,8 @@
 void BswM_InitJ1939DcmRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITJ1939NMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -77,11 +79,18 @@ void BswM_InitJ1939DcmRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)
+            Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITJ1939NMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITJ1939NMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the broadcast status of a specific J1939 channel.
  * This function fetches the configuration data and returns the broadcast status for the given channel index.
@@ -102,9 +111,13 @@ boolean BswM_GetJ1939ChBroadStatus(NetworkHandleType j1939ChIdx)
     }
     return j1939Status;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the broadcast status for J1939 channels based on the provided network mask.
  * This function checks the configuration, updates the broadcast status for each channel,
@@ -114,6 +127,8 @@ boolean BswM_GetJ1939ChBroadStatus(NetworkHandleType j1939ChIdx)
 void BswM_J1939DcmBroadcastStatus(uint16 NetworkMask)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_J1939DCM_BROADCAST_STATUS, NetworkMask);
+
 #if (BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -181,9 +196,11 @@ void BswM_J1939DcmBroadcastStatus(uint16 NetworkMask)
 #else
     (void)NetworkMask;
 #endif /*BSWM_J1939DCMBROADCASTSTATUS_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_J1939DCM_BROADCAST_STATUS);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #endif /*BSWM_J1939DCM_ENABLED == STD_ON*/

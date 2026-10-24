@@ -162,6 +162,8 @@ DOIP_LOCAL_INLINE boolean DoIP_IsSucceedConfirmation(uint8 activationType);
  */
 DOIP_LOCAL_INLINE void DoIP_RegisterSocket(uint8 index, SoAd_SoConIdType soConId, uint16 sa, uint16 ta);
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Is SA already registered.
  * @param[in]   soConId: Specified socket.
@@ -180,6 +182,10 @@ DOIP_LOCAL boolean DoIP_CheckSaAlreadyRegistered(
     uint16                           sa,
     uint8*                           rspCode,
     DoIP_SocketAssignmentResultType* socketAssignmentResult);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send alive check request.
@@ -193,6 +199,10 @@ DOIP_LOCAL boolean DoIP_CheckSaAlreadyRegistered(
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_StartAliveCheck(uint16 sa, DoIP_SocketAssignmentResultType* socketAssignmentResult);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Assign socket.
@@ -210,6 +220,10 @@ DOIP_LOCAL boolean DoIP_StartAliveCheck(uint16 sa, DoIP_SocketAssignmentResultTy
  */
 DOIP_LOCAL DoIP_SocketAssignmentResultType
     DoIP_AssignSocket(SoAd_SoConIdType soConId, uint16 sa, uint16 ta, uint8* rspCode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send routing activation response message.
@@ -223,6 +237,10 @@ DOIP_LOCAL DoIP_SocketAssignmentResultType
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Check whether the routing activation request is valid.
@@ -238,6 +256,10 @@ DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, 
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsValidRaReq(uint16 sa, uint16* ta, uint8 activationType, uint8* raRspCode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle routing activation request.
@@ -249,6 +271,10 @@ DOIP_LOCAL boolean DoIP_IsValidRaReq(uint16 sa, uint16* ta, uint8 activationType
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandleRaReq(PduIdType soadTxPduRef, uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* alive check */
 
@@ -262,6 +288,10 @@ DOIP_LOCAL void DoIP_HandleRaReq(PduIdType soadTxPduRef, uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send alive check request to one tester.
@@ -272,6 +302,10 @@ DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_StartSingleAliveCheck(uint16 sa);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send alive check request to all tester.
@@ -282,6 +316,10 @@ DOIP_LOCAL void DoIP_StartSingleAliveCheck(uint16 sa);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_StartAllAliveCheck(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Handle pending routing activation request.
@@ -299,6 +337,10 @@ DOIP_LOCAL void DoIP_HandlePendingRaReq(
     uint8                        txRxCtxIdx,
     const DoIP_TcpConnStatusType tcpConnStatusArray[],
     DoIP_TcpConnStatusType*      tcpConnStatus);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Handle alive check response.
@@ -310,6 +352,10 @@ DOIP_LOCAL void DoIP_HandlePendingRaReq(
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandleAliveCheckRsp(uint16 soadTxPduRef, uint8 txRxCtxIdx);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* timer */
 
@@ -324,6 +370,10 @@ DOIP_LOCAL void DoIP_HandleAliveCheckRsp(uint16 soadTxPduRef, uint8 txRxCtxIdx);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_HandleInitInactiveTimer(DoIP_TcpConnStatusType* tcpConnStatus);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Handle general inactive timer.
@@ -334,6 +384,10 @@ DOIP_LOCAL boolean DoIP_HandleInitInactiveTimer(DoIP_TcpConnStatusType* tcpConnS
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandleGeneralInactiveTimer(DoIP_TcpConnStatusType* tcpConnStatus);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief        Handle alive check timer.
@@ -344,6 +398,8 @@ DOIP_LOCAL void DoIP_HandleGeneralInactiveTimer(DoIP_TcpConnStatusType* tcpConnS
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandleAliveCheckTimer(DoIP_TcpConnStatusType* tcpConnStatus);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* PRQA S 5016 ++ */ /* VL_DoIP_5016 */
 DOIP_LOCAL_INLINE Std_ReturnType
@@ -351,11 +407,10 @@ DOIP_LOCAL_INLINE Std_ReturnType
 /* PRQA S 5016 -- */
 /* ========================================== external function definitions ========================================= */
 
-#define DOIP_START_SEC_CODE
-#include "DoIP_MemMap.h"
-
 /* ----------------------------------------- connect ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle routing activation request when close tcp connection.
  */
@@ -376,9 +431,12 @@ void DoIP_HandleRaWhenCloseTcpConnection(void)
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- pending ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Pending non diagnostic message.
  */
@@ -427,7 +485,8 @@ Std_ReturnType
     /* PRQA S 2814,2934,2844 -- */
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 DOIP_LOCAL_INLINE Std_ReturnType
     DoIP_UnreadqueueNonDiagMsg(DoIP_NonDiagQueueType* queue, PduIdType soadTxPduRef, const PduInfoType* pduInfoPtr)
 {
@@ -474,7 +533,8 @@ DOIP_LOCAL_INLINE Std_ReturnType
     /* PRQA S 2814,2934,2844 -- */
     return ret;
 }
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle non diagnostic message in queued.
  */
@@ -510,7 +570,10 @@ boolean DoIP_HandlePendingNonDiagMsg(DoIP_TcpTxRxContextType* ctx)
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Clear pending routing activation request.
  */
@@ -522,9 +585,12 @@ void DoIP_ClearPendingRaMsg(void)
     DoIP_PendingRa.SoConId      = DOIP_INVALID_UINT8;
     DoIP_PendingRa.SoadTxPduRef = DOIP_INVALID_UINT16;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- rcv ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle tcp non diagnostic message.
  */
@@ -549,9 +615,12 @@ void DoIP_HandleTcpNonDiagMsg(PduIdType soadTxPduRef, uint8 txRxCtxIdx, uint16 p
         break;
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ----------------------------------------- timer ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle timers.
  */
@@ -571,11 +640,11 @@ void DoIP_HandleTcpTimeout(void) /* PRQA S 1532 */ /* VL_DoIP_RefeOneFile */
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 
 /* ----------------------------------------- pending ----------------------------------------- */
-
 /**
  * @brief Get message from queue.
  */
@@ -604,9 +673,7 @@ DOIP_LOCAL_INLINE DoIP_NonDiagItemType* DoIP_DequeueNonDiagMsg(DoIP_NonDiagQueue
     SchM_Exit_DoIP_ExclusiveArea();
     return item;
 }
-
 /* ----------------------------------------- routing activate ----------------------------------------- */
-
 /**
  * @brief Check whether the SA is valid.
  */
@@ -782,7 +849,8 @@ DOIP_LOCAL_INLINE void DoIP_RegisterSocket(uint8 index, SoAd_SoConIdType soConId
     DoIP_TcpConnStatus[index].RaState              = DOIP_SOCKET_ACTIVATED;
     /* PRQA S 2844 -- */
 }
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Is SA already registered.
  */
@@ -820,7 +888,10 @@ DOIP_LOCAL boolean DoIP_CheckSaAlreadyRegistered(
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send alive check request.
  */
@@ -864,7 +935,10 @@ DOIP_LOCAL boolean DoIP_StartAliveCheck(uint16 sa, DoIP_SocketAssignmentResultTy
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Assign socket.
  */
@@ -898,7 +972,10 @@ DOIP_LOCAL DoIP_SocketAssignmentResultType
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send routing activation response message.
  */
@@ -950,7 +1027,10 @@ DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, 
     }
     SchM_Exit_DoIP_ExclusiveArea();
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check whether the routing activation request is valid.
  */
@@ -975,7 +1055,10 @@ DOIP_LOCAL boolean DoIP_IsValidRaReq(uint16 sa, uint16* ta, uint8 activationType
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle routing activation request.
  */
@@ -1048,10 +1131,14 @@ DOIP_LOCAL void DoIP_HandleRaReq(PduIdType soadTxPduRef, uint8 txRxCtxIdx)
         }
     }
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 6070 -- */
 
 /* ----------------------------------------- alive check ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send alive check request.
  */
@@ -1101,7 +1188,10 @@ DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx)
     }
     SchM_Exit_DoIP_ExclusiveArea();
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send alive check request to one tester.
  */
@@ -1125,7 +1215,10 @@ DOIP_LOCAL void DoIP_StartSingleAliveCheck(uint16 sa)
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send alive check request to all tester.
  */
@@ -1168,7 +1261,10 @@ DOIP_LOCAL void DoIP_StartAllAliveCheck(void)
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle pending routing activation request.
  */
@@ -1224,7 +1320,10 @@ DOIP_LOCAL void DoIP_HandlePendingRaReq(
         DoIP_ClearPendingRaMsg();
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle alive check response.
  */
@@ -1274,9 +1373,13 @@ DOIP_LOCAL void DoIP_HandleAliveCheckRsp(uint16 soadTxPduRef, uint8 txRxCtxIdx)
         DoIP_ResetTcpRxContext(txRxCtxIdx);
     }
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 4461 -- */
 /* ----------------------------------------- timer ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle initial inactive timer.
  */
@@ -1316,7 +1419,10 @@ DOIP_LOCAL boolean DoIP_HandleInitInactiveTimer(DoIP_TcpConnStatusType* tcpConnS
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle general inactive timer.
  */
@@ -1350,7 +1456,10 @@ DOIP_LOCAL void DoIP_HandleGeneralInactiveTimer(DoIP_TcpConnStatusType* tcpConnS
         DoIP_CloseSoCon(soConId, TRUE);
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle alive check timer.
  */

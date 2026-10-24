@@ -44,6 +44,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Indication that a NM-message has been received in the Bus Sleep Mode, what indicates that some nodes in the network
  * have already entered the Network Mode.
@@ -53,7 +55,11 @@ extern "C" {
  * @trace        CPD-59633
  */
 void ComM_Nm_NetworkStartIndication(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Notification that the network management has entered Network Mode.
  * @param[in]    Channel  Channel
@@ -62,7 +68,11 @@ void ComM_Nm_NetworkStartIndication(NetworkHandleType Channel);
  * @trace        CPD-59634
  */
 void ComM_Nm_NetworkMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Notification that the network management has entered Prepare Bus-Sleep Mode.
  * @param[in]    Channel  Channel
@@ -71,7 +81,11 @@ void ComM_Nm_NetworkMode(NetworkHandleType Channel);
  * @trace        CPD-59635
  */
 void ComM_Nm_PrepareBusSleepMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Notification that the network management has entered Bus-Sleep Mode. This callback function should perform a
  * transition of the hardware and transceiver to bus-sleep mode.
@@ -81,7 +95,11 @@ void ComM_Nm_PrepareBusSleepMode(NetworkHandleType Channel);
  * @trace        CPD-59636
  */
 void ComM_Nm_BusSleepMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * If NmIf has started to shut down the coordinated busses, AND not all coordinated busses have indicated bus sleep
  * state, AND on at least on one of the coordinated busses NM is restarted, THEN the NM Interface shall call the
@@ -93,8 +111,12 @@ void ComM_Nm_BusSleepMode(NetworkHandleType Channel);
  * @trace        CPD-59637
  */
 void ComM_Nm_RestartIndication(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to indicate the current aggregated external / internal PNC request called by Nm.
  * @param[in]    PncBitVectorPtr  Pointer to the PNC bit vector which contain the current aggregated internal and
@@ -104,8 +126,12 @@ void ComM_Nm_RestartIndication(NetworkHandleType Channel);
  * @trace        CPD-59638
  */
 void ComM_Nm_UpdateEIRA(const uint8* PncBitVectorPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Function to indicate the current external PNC request per channel called by Nm.
  * @param[in]    Channel          Channel
@@ -116,6 +142,8 @@ void ComM_Nm_UpdateEIRA(const uint8* PncBitVectorPtr);
  * @trace        CPD-59639
  */
 void ComM_Nm_UpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #endif
 

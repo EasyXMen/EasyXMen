@@ -32,6 +32,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Triggers on changes of the UDS status byte. Allows to trigger on ROE Event for subservice On
  *                DTCStatusChanged.
@@ -46,6 +48,8 @@ extern "C" {
  */
 Std_ReturnType
     Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 #ifdef __cplusplus
 }

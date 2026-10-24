@@ -25,6 +25,7 @@
 /* =================================================== inclusions =================================================== */
 #include "Dcm_Cfg.h"
 #if (STD_ON == DCM_UDS_0X29)
+#include "Dcm_Arti.h"
 #if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 #include "Csm.h"
 #endif
@@ -40,7 +41,7 @@
 /**
  * @brief The subfunction deAuthenticate
  */
-#define DCM_DEAUTHENTICATE 0u
+#define DCM_DEAUTHENTICATE    0u
 #if ((STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 /**
  * @brief The subfunction verifyCertificateUnidirectional
@@ -49,7 +50,7 @@
 /**
  * @brief The subfunction verifyCertificateBidirectional
  */
-#define DCM_VERIFYCERTIFICATE_BIDIRECTIONAL 2u
+#define DCM_VERIFYCERTIFICATE_BIDIRECTIONAL  2u
 #endif
 #ifdef DCM_UDS_0X29_0X3
 /**
@@ -101,11 +102,11 @@
 /**
  * @brief Bit 0: Read access
  */
-#define DCM_DID_READ_ACCESS 0x01u
+#define DCM_DID_READ_ACCESS    0x01u
 /**
  * @brief Bit 1: Write access
  */
-#define DCM_DID_WRITE_ACCESS 0x02u
+#define DCM_DID_WRITE_ACCESS   0x02u
 /**
  * @brief Bit2: Control access (by InputOutputControlByIdentifier)
  */
@@ -115,11 +116,11 @@
 /**
  * @brief Bit 0: Access to sub-function startRoutine
  */
-#define DCM_RID_START_ACCESS 0x01u
+#define DCM_RID_START_ACCESS   0x01u
 /**
  * @brief Bit1: Access to sub-function stopRoutine
  */
-#define DCM_RID_STOP_ACCESS 0x02u
+#define DCM_RID_STOP_ACCESS    0x02u
 /**
  * @brief Bit2: Access to sub-function requestRoutineResult
  */
@@ -213,6 +214,10 @@ typedef struct KeyMCertInfoType
  * @brief authentication ctrl structure @range NA
  */
 DCM_LOCAL Dcm_AuthenticationCtrlType Dcm_AuthenticationCtrl[DCM_MAINCONNECTION_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief authentication info structure @range NA
  */
@@ -227,34 +232,42 @@ DCM_LOCAL Dcm_AuthenticateInfoType Dcm_AuthenticateInfo[DCM_MAINCONNECTION_NUM];
 DCM_LOCAL KeyM_CertificateIdType Dcm_KeyMCertID;
 #define DCM_STOP_SEC_VAR_CLEARED_16
 #include "Dcm_MemMap.h"
+#if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 #define DCM_START_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
-#if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 /**
  * @brief configured challengeLength @range 0..0xFFFFFFFF
  */
 DCM_LOCAL uint32 Dcm_ChallengeLength;
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
+#endif
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /**
  * @brief KeyM result for asynchronous KeyM request @range NA
  */
 DCM_LOCAL KeyM_CertificateStatusType Dcm_KeyMResult;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief Csm verify result for asynchronous Csm request @range NA
  */
 DCM_LOCAL Crypto_VerifyResultType Dcm_CsmVerifyResult;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief to store challengeData @range NA
  */
 DCM_LOCAL uint8 Dcm_challengeData[DCM_DSP_AUTHENTICATION_MAX_ECU_CHALLENGE_LENGTH];
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
+#endif
 #ifdef DCM_UDS_0X29_0X4
 /* ============================================ external data definitions =========================================== */
 #define DCM_START_SEC_VAR_CLEARED_BOOLEAN
@@ -269,6 +282,10 @@ boolean Dcm_TransmitCertificate;
  * @brief Csm result for asynchronous Csm request @range NA
  */
 Crypto_ResultType Dcm_CsmResult;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief async authenticate process status
  */
@@ -285,6 +302,8 @@ uint32 Dcm_CsmJobId;
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
 #ifdef DCM_AUTHENTICATION_PERSIST_STATE_BLOCK_ID
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to store the current authentication State
  * @return        void
@@ -293,10 +312,14 @@ uint32 Dcm_CsmJobId;
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x29_AuthenticateStore(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 #ifdef DCM_AUTHENTICATION_GENERAL_NRC
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to set to configured nrc (if have)
  * @param[out]    ErrorCode : If the operation <Module>_<DiagnosticService> returns value E_NOT_OK, the Dcm module shall
@@ -307,8 +330,12 @@ DCM_LOCAL void Dcm_UDS0x29_AuthenticateStore(void);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x29_SetNrc(Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to set authentication role
  * @param[in]     connectionId : the current connectionId
@@ -318,9 +345,13 @@ DCM_LOCAL void Dcm_UDS0x29_SetNrc(Dcm_NegativeResponseCodeType* ErrorCode);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x29_SetDeAuthenticateRole(uint16 connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function clears the white list
  * @param[in]     connectionId : the current connectionId
@@ -330,7 +361,11 @@ DCM_LOCAL void Dcm_UDS0x29_SetDeAuthenticateRole(uint16 connectionId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x29_ClearWhiteList(uint16 connectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x29 subfunction 0x00
  * @param[in]     ConnectionId : the current connection id
@@ -348,8 +383,12 @@ DCM_LOCAL void Dcm_UDS0x29_ClearWhiteList(uint16 connectionId);
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x29_0x00(uint16 ConnectionId, Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Checkes KeyM asynchronous result and set errorCode accordingly
  * @param[out]    ErrorCode : If the operation <Module>_<DiagnosticService> returns value E_NOT_OK, the Dcm module shall
@@ -362,6 +401,10 @@ DCM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_KeyMAsyncCheck(Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function deals with challenge and output accordingly
  * @param[in]     ConnectionId  : the current connection Id
@@ -382,6 +425,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_Challenge(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function deals with Csm Generate asynchronous result
@@ -403,6 +450,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmGenerateResult(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function deals with Csm Signature asynchronous result
@@ -423,6 +474,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmSignatureResult(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         The service interpreter for UDS 0x29 subfunction 0x01 or 0x02
@@ -446,6 +501,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Handle UDS 0x29 subfunction 0x01 or 0x02 when opStatus is DCM_INITIAL
@@ -467,12 +526,16 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02_InitialHandle(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X29_0X3
 #if (                                                                                                                \
     (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         gets the specific lists
  * @param[in]     Dcm_KeyMCertInfo : the input cerfication info
@@ -494,10 +557,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_getlist(
     uint8*                        DataPtr,
     uint8*                        DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         gets the white lists
  * @param[in]     ConnectionId : the current connection Id
@@ -513,7 +580,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_getlist(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_whitelist(uint16 ConnectionId, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         updates the authentication State
  * @param[in]     ConnectionId : the current connection Id
@@ -529,6 +600,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_whitelist(uint16 ConnectionId, Dcm_Neg
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_Update(uint16 ConnectionId, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x29 subfunction 0x03
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -551,9 +626,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X29_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x29 subfunction 0x04
  * @param[in]     OpStatus       : Indicates the current operation status
@@ -574,6 +653,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04(
     Dcm_OpStatusType              OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Handles interaction with KeyM for UDS 0x29 subfunction 0x04
@@ -592,6 +675,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x29_0x04_KeyMProcess(KeyM_CertDataType* certData, uint16 CertId, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check conditions for subfunction 0x04
@@ -612,9 +699,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode,
     uint16*                       TransmitCertificateRef);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X29_0X8
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x29 subfunction 0x08
  * @param[inout]  pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -630,7 +721,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04_ConditionCheck(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x08(Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         checks whether the role is validated
  * @param[in]     ConnectionId : the current connection Id
@@ -644,7 +739,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x08(Dcm_MsgContextType* pMsgContext, Dcm_N
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_RoleCheck(uint16 ConnectionId, const uint8* RoleRef, uint8 RoleNum);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         checks whether the service is in white list
  * @param[in]     ConnectionId : the current connection Id
@@ -657,10 +756,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_RoleCheck(uint16 ConnectionId, const uint8*
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_WhiteListCheck(uint16 ConnectionId, Dcm_MsgLenType CheckLength);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X2F))
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         checks whether the did is in white list
  * @param[in]     ConnectionId : the current connection Id
@@ -673,11 +776,15 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_WhiteListCheck(uint16 ConnectionId, Dcm_Msg
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_DidWhiteListCheck(uint16 ConnectionId, uint16 RecDid);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X31)
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         checks whether the rid is in white list
  * @param[in]     ConnectionId : the current connection Id
@@ -689,6 +796,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_DidWhiteListCheck(uint16 ConnectionId, uint
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_RidWhiteListCheck(uint16 ConnectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 /* ========================================== external function definitions ========================================= */
@@ -777,7 +886,10 @@ Std_ReturnType Dcm_UDS0x29(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set deauthentication for targeted connection
  */
@@ -796,7 +908,10 @@ void Dcm_UDS0x29_SetDeAuthenticate(uint16 ConnectionId)
 #endif
     Dcm_AuthenticateAsync = DCM_ASYNC_IDLE;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * initialize variables for UDS 0x29
  */
@@ -829,25 +944,34 @@ void Dcm_UDS0x29_Init(void)
 #endif
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * callback function for asynchronous KeyM jobs finish notification
  */
 Std_ReturnType Dcm_KeyMAsyncCertificateVerifyFinished(KeyM_CertificateIdType CertID, KeyM_CertificateStatusType Result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x91, CertID, Result);
     if (Dcm_KeyMCertID == CertID)
     {
         Dcm_KeyMResult        = Result;
         Dcm_AuthenticateAsync = DCM_KEYM_VERIFY_ASYNC_FINISH;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x91, E_OK);
     return E_OK;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * callback function for asynchronous Csm jobs finish notification
  */
 Std_ReturnType Dcm_CsmAsyncJobFinished(uint32 jobId, Crypto_ResultType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x90, jobId, result);
     if (Dcm_CsmJobId == jobId)
     {
         Dcm_CsmResult = result;
@@ -875,14 +999,19 @@ Std_ReturnType Dcm_CsmAsyncJobFinished(uint32 jobId, Crypto_ResultType result)
         }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x90, E_OK);
     return E_OK;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set deauthenticationRole for targeted connection
  */
 Std_ReturnType Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_AuthenticationRoleType deauthenticatedRole)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Start, 3, 0x79, connectionId, deauthenticatedRole);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == Dcm_CfgPtr)
     {
@@ -903,10 +1032,14 @@ Std_ReturnType Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_Authent
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dcm, 0, Bsw_Return, 2, 0x79, E_OK);
     return E_OK;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * turn on authentication default session timeout
  */
@@ -919,8 +1052,11 @@ void Dcm_UDS0x29_SetAuthenticationCtrlOn(uint16 ConnectionId)
         Dcm_AuthenticationCtrl[ConnectionId].AuthenticationCurTimer = DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * turn off authentication default session timeout
  */
@@ -932,8 +1068,11 @@ void Dcm_UDS0x29_SetAuthenticationCtrlOff(uint16 ConnectionId)
         Dcm_AuthenticationCtrl[ConnectionId].AuthenticationState = DCM_AUTHENTICATIONTIMER_OFF;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * periodically check authentication timer, set to deauthentication if timeout
  */
@@ -947,16 +1086,19 @@ void Dcm_UDS0x29_MainFunction(void)
             if (TRUE == DcmInternal_DecreaseTimer(&Dcm_AuthenticationCtrl[index].AuthenticationCurTimer))
             {
                 Dcm_UDS0x29_SetDeAuthenticate(index);
-#if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID) && (STD_ON == DCM_DDDID_CHECK_SOURCE))
+#if ((STD_ON == DCM_UDS_0X2A) && (DCM_DID_NUM > 0u))
                 Dcm_UDS0x2A_StatusChangeHandle();
 #endif
             }
         }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if (STD_ON == DCM_UDS_0X31)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check authentication status for rid
  */
@@ -1015,11 +1157,14 @@ Std_ReturnType Dcm_UDS0x29_RidAuthenticationCheck(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if (                                                                                                            \
     (STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X24) || (STD_ON == DCM_UDS_0X2A) \
     || (STD_ON == DCM_UDS_0X2C) || (STD_ON == DCM_UDS_0X2F))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check authentication status for did
  */
@@ -1060,8 +1205,11 @@ Std_ReturnType Dcm_UDS0x29_DidAuthenticationCheck(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check authentication status for configured RoleRef
  */
@@ -1091,9 +1239,9 @@ Std_ReturnType Dcm_UDS0x29_AuthenticationCheck(
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
+#ifdef DCM_AUTHENTICATION_PERSIST_STATE_BLOCK_ID
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-#ifdef DCM_AUTHENTICATION_PERSIST_STATE_BLOCK_ID
 /**
  * store the current authentication status
  */
@@ -1108,10 +1256,13 @@ DCM_LOCAL void Dcm_UDS0x29_AuthenticateStore(void)
         (void)NvM_WritePRAMBlock(blockId);
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if ((STD_ON == DCM_UDS_0X29_0X3) || (STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
 #ifdef DCM_AUTHENTICATION_GENERAL_NRC
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set to DcmDspAuthenticationGeneralNRC if configured modeRule passes
  */
@@ -1126,9 +1277,12 @@ DCM_LOCAL void Dcm_UDS0x29_SetNrc(Dcm_NegativeResponseCodeType* ErrorCode)
         *ErrorCode = DCM_AUTHENTICATION_GENERAL_NRC;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * called to set authentication role
  */
@@ -1144,10 +1298,13 @@ DCM_LOCAL void Dcm_UDS0x29_SetDeAuthenticateRole(uint16 connectionId)
         Dcm_AuthenticateInfo[connectionId].Certificate |= (uint32)((uint32)1u << pos);
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * clear the whilelist
  */
@@ -1180,8 +1337,11 @@ DCM_LOCAL void Dcm_UDS0x29_ClearWhiteList(uint16 connectionId)
     }
 #endif
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x00
  */
@@ -1208,8 +1368,11 @@ DCM_LOCAL Std_ReturnType
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X29_0X1) || (STD_ON == DCM_UDS_0X29_0X2))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with KeyM Asynchronous result
  */
@@ -1305,7 +1468,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_KeyMAsyncCheck(Dcm_NegativeResponseCodeType
 #endif
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deals with challenge and output accordingly
  */
@@ -1366,7 +1532,10 @@ DCM_LOCAL Std_ReturnType
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function deals with Csm Generate asynchronous result */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmGenerateResult(
     uint16                        ConnectionId,
@@ -1474,7 +1643,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmGenerateResult(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function deals with Csm Signature asynchronous result */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmSignatureResult(
     uint16                        ConnectionId,
@@ -1513,7 +1685,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_HandleCsmSignatureResult(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x01/0x02
  */
@@ -1545,7 +1720,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02_InitialHandle(
     uint16                        ConnectionId,
     Dcm_MsgContextType*           pMsgContext,
@@ -1632,12 +1810,15 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02_InitialHandle(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X29_0X3
 #if (                                                                                                                \
     (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with subfunction 0x03, gets the specific lists
  */
@@ -1705,11 +1886,15 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_getlist(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with subfunction 0x03, gets the specific whitelist
  */
@@ -1772,8 +1957,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_whitelist(uint16 ConnectionId, Dcm_Neg
 #endif
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with subfunction 0x03, updates the authentication State
  */
@@ -1838,7 +2027,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_Update(uint16 ConnectionId, Dcm_Negati
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x03
  */
@@ -1942,9 +2135,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X29_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x04
  */
@@ -1999,7 +2195,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x29_0x04_KeyMProcess(KeyM_CertDataType* certData, uint16 CertId, Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -2042,7 +2242,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode,
@@ -2088,9 +2292,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x04_ConditionCheck(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X29_0X8
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * The service interpreter for UDS 0x19, subfunctiun 0x08
  */
@@ -2112,8 +2319,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x08(Dcm_MsgContextType* pMsgContext, Dcm_N
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check whether current authentication status satisfies roleRef
  */
@@ -2137,8 +2347,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_RoleCheck(uint16 ConnectionId, const uint8*
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check for whitelist(did, rid, and service)
  */
@@ -2190,10 +2403,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_WhiteListCheck(uint16 ConnectionId, Dcm_Msg
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X2F))
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check whitelist fo did
  */
@@ -2253,11 +2469,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_DidWhiteListCheck(uint16 ConnectionId, uint
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
-
 #if (STD_ON == DCM_UDS_0X31)
 #ifdef DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check whitelist fo rid
  */
@@ -2324,8 +2543,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_RidWhiteListCheck(uint16 ConnectionId)
     }
     return result;
 }
-#endif
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
+#endif
 #endif

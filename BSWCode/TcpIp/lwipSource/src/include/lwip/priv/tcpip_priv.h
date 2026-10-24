@@ -94,7 +94,11 @@ struct netif;
 #define API_MSG_M_DEF_C(t, m)           const t * m
 #endif /* LWIP_MPU_COMPATIBLE */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcpip_send_msg_wait_sem(tcpip_callback_fn fn, void *apimsg, sys_sem_t* sem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 struct tcpip_api_call_data
 {
@@ -108,7 +112,11 @@ struct tcpip_api_call_data
 #endif /* !LWIP_TCPIP_CORE_LOCKING */
 };
 typedef err_t (*tcpip_api_call_fn)(struct tcpip_api_call_data* call);
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t tcpip_api_call(tcpip_api_call_fn fn, struct tcpip_api_call_data *call);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 enum tcpip_msg_type {
 #if !LWIP_TCPIP_CORE_LOCKING

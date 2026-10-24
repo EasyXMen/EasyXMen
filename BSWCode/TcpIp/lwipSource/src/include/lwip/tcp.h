@@ -399,26 +399,62 @@ enum lwip_event {
   LWIP_EVENT_ERR
 };
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t lwip_tcp_event(void *arg, struct tcp_pcb *pcb,
          enum lwip_event,
          struct pbuf *p,
          u16_t size,
          err_t err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_EVENT_API */
 
 /* Application program's interface: */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb * tcp_new     (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb * tcp_new_ip_type (u8_t type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_arg     (struct tcp_pcb *pcb, void *arg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_CALLBACK_API
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_recv    (struct tcp_pcb *pcb, tcp_recv_fn recv);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_sent    (struct tcp_pcb *pcb, tcp_sent_fn sent);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_err     (struct tcp_pcb *pcb, tcp_err_fn err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_accept  (struct tcp_pcb *pcb, tcp_accept_fn accept);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CALLBACK_API */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_poll    (struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interval);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define          tcp_set_flags(pcb, set_flags)     do { (pcb)->flags = (tcpflags_t)((pcb)->flags |  (set_flags)); } while(0)
 #define          tcp_clear_flags(pcb, clr_flags)   do { (pcb)->flags = (tcpflags_t)((pcb)->flags & (tcpflags_t)(~(clr_flags) & TCP_ALLFLAGS)); } while(0)
@@ -445,8 +481,16 @@ void             tcp_poll    (struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interv
 #define          tcp_backlog_set(pcb, new_backlog) do { \
   LWIP_ASSERT("pcb->state == LISTEN (called for wrong pcb?)", (pcb)->state == LISTEN); \
   ((struct tcp_pcb_listen *)(pcb))->backlog = ((new_backlog) ? (new_backlog) : 1); } while(0)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_backlog_delayed(struct tcp_pcb* pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_backlog_accepted(struct tcp_pcb* pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else  /* TCP_LISTEN_BACKLOG */
 #define          tcp_backlog_set(pcb, new_backlog)
 #define          tcp_backlog_delayed(pcb)
@@ -454,30 +498,82 @@ void             tcp_backlog_accepted(struct tcp_pcb* pcb);
 #endif /* TCP_LISTEN_BACKLOG */
 #define          tcp_accepted(pcb) do { LWIP_UNUSED_ARG(pcb); } while(0) /* compatibility define, not needed any more */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_recved  (struct tcp_pcb *pcb, u16_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_bind    (struct tcp_pcb *pcb, const ip_addr_t *ipaddr,
                               u16_t port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_bind_netif(struct tcp_pcb *pcb, const struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_connect (struct tcp_pcb *pcb, const ip_addr_t *ipaddr,
                               u16_t port, tcp_connected_fn connected);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb * tcp_listen_with_backlog_and_err(struct tcp_pcb *pcb, u8_t backlog, err_t *err);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct tcp_pcb * tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** @ingroup tcp_raw */
 #define          tcp_listen(pcb) tcp_listen_with_backlog(pcb, TCP_DEFAULT_LISTEN_BACKLOG)
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_abort (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_close   (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_shutdown(struct tcp_pcb *pcb, int shut_rx, int shut_tx);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_write   (struct tcp_pcb *pcb, const void *dataptr, u16_t len,
                               u8_t apiflags);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             tcp_setprio (struct tcp_pcb *pcb, u8_t prio);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_output  (struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            tcp_tcp_get_tcp_addrinfo(struct tcp_pcb *pcb, int local, ip_addr_t *addr, u16_t *port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define tcp_dbg_get_tcp_state(pcb) ((pcb)->state)
 
@@ -485,10 +581,26 @@ err_t            tcp_tcp_get_tcp_addrinfo(struct tcp_pcb *pcb, int local, ip_add
 #define tcp_new_ip6() tcp_new_ip_type(IPADDR_TYPE_V6)
 
 #if LWIP_TCP_PCB_NUM_EXT_ARGS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t tcp_ext_arg_alloc_id(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_ext_arg_set_callbacks(struct tcp_pcb *pcb, u8_t id, const struct tcp_ext_arg_callbacks * const callbacks);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void tcp_ext_arg_set(struct tcp_pcb *pcb, u8_t id, void *arg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *tcp_ext_arg_get(const struct tcp_pcb *pcb, u8_t id);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

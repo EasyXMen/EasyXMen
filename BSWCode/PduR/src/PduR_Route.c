@@ -31,8 +31,16 @@
 
 /* ============================================ internal data definition ============================================ */
 #if ((PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_IfRxIndBufferedDirect(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfo);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_IfTxConfBufferedDirect(PduIdType srcPduId, PduIdType destPduId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 /* ============================================ external data definition ============================================ */
 
@@ -40,35 +48,71 @@ static void PduR_IfTxConfBufferedDirect(PduIdType srcPduId, PduIdType destPduId)
 #if (                                                           \
     (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON) \
     || (PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON))
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_IfTransmitForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_TriggerTransmitForward(PduIdType srcPduId, PduIdType destPduId, PduInfoType* pduInfoPtr);
-static void           PduR_IfTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static void PduR_IfTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_IfRxIndicationForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
     || PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_TpTransmitForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static BufReq_ReturnType PduR_CopyTxDataForward(
     PduIdType            srcPduId,
     PduIdType            destPduId,
     const PduInfoType*   pduInfoPtr,
     const RetryInfoType* retryInfoPtr,
     PduLengthType*       availableDataPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_TpTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_EvaluateUpLayerConfirmationStatus(PduIdType srcPduId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 #if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
     || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_TpDestinationProcess(PduIdType srcPduId, PduIdType destPduId, uint8 apiId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 /* PRQA S 5016 ++ */ /* VL_PduR_5016 */
@@ -77,32 +121,41 @@ static inline const PduR_BswModuleType* PduR_GetBswModulePtrOfDestPdu(PduIdType 
 /* PRQA S 5016 -- */ /* VL_PduR_5016 */
 /* ========================================== external function definition ========================================== */
 /* PRQA S 3672 ++ */ /* VL_PduR_FuncPtrNonConst */
-#define PDUR_START_SEC_CODE
-#include "PduR_MemMap.h"
 #if (PDUR_TRANSMIT_SUPPORT == STD_ON)
 /**
  * PduR interface transmit implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType PduR_PduRIfTransmit(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
 /* PRQA S 1532 -- */
 {
     Std_ReturnType retval = E_NOT_OK;
 #if (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON)
-    retval = PduR_IfTransmitForward(srcPduId, destPduId, pduInfoPtr);
-    if ((retval != E_NOT_OK) && PduR_GetTransmissionConfirmationOfDestPdu(destPduId))
+    PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+    retval                                 = PduR_IfTransmitForward(srcPduId, destPduId, pduInfoPtr);
+    if ((retval == E_NOT_OK) || (!PduR_GetTransmissionConfirmationOfDestPdu(destPduId)))
     {
-        PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+        PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
     }
+#else
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(destPduId);
+    PDUR_NOUSED(pduInfoPtr);
 #endif
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TRANSMIT_SUPPORT == STD_ON)
 /**
  * PduR transport protocal transmit implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType PduR_PduRTpTransmit(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
 /* PRQA S 1532 -- */
@@ -111,17 +164,35 @@ Std_ReturnType PduR_PduRTpTransmit(PduIdType srcPduId, PduIdType destPduId, cons
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
     retval = PduR_TpTransmitForward(srcPduId, destPduId, pduInfoPtr);
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+    if (retval != E_NOT_OK)
+    {
+        PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+    }
+    else
+    {
+        PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
+    }
+#endif
+#else
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(destPduId);
+    PDUR_NOUSED(pduInfoPtr);
 #endif
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_TRANSMIT == STD_ON)
 /**
  * PduR cancel transmit implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-Std_ReturnType PduR_PduRCanceTransmit(PduIdType srcPduId, PduIdType destPduId)
+Std_ReturnType PduR_PduRCancelTransmit(PduIdType srcPduId, PduIdType destPduId)
 /* PRQA S 1532 -- */
 {
     Std_ReturnType                       retval            = E_NOT_OK;
@@ -152,7 +223,8 @@ Std_ReturnType PduR_PduRCanceTransmit(PduIdType srcPduId, PduIdType destPduId)
         break;
 #endif /* end of PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED */
 #if (PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON)
-    case PDUR_ROUTE_TP_TX_NOBUFFERED:
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST:
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST:
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
         if (bswModulePtr->TpCancelTransmitApi != NULL_PTR)
         {
@@ -174,12 +246,16 @@ Std_ReturnType PduR_PduRCanceTransmit(PduIdType srcPduId, PduIdType destPduId)
     PDUR_NOUSED(srcPduId);
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_RECEIVE == STD_ON)
 /**
  * PduR cancel receive implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType PduR_PduRCancelReceive(PduIdType srcPduId, PduIdType destPduId)
 /* PRQA S 1532 -- */
@@ -203,18 +279,25 @@ Std_ReturnType PduR_PduRCancelReceive(PduIdType srcPduId, PduIdType destPduId)
         PduIdType bswModulePduId = PduR_GetBswModulePduIdOfSrcPdu(srcPduId);
         retval                   = cancelReceiveApiPtr(bswModulePduId);
     }
+#else
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(destPduId);
 #endif
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_RX_INDICATION == STD_ON)
 /**
  * PduR interface receive indication implement
  */
-/* PRQA S 1532, 6070 ++ */ /* VL_QAC_OneFunRef, VL_MTR_PduR_STCAL */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1532, 6070, 6010 ++ */ /* VL_QAC_OneFunRef, VL_MTR_PduR_STCAL, VL_MTR_PduR_STCYC */
 void PduR_PduRIfRxIndication(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
-/* PRQA S 1532, 6070 -- */
+/* PRQA S 1532, 6070, 6010 -- */
 {
     PduR_RouteType routeType = PduR_GetRouteTypeOfDestPdu(destPduId);
 
@@ -222,20 +305,74 @@ void PduR_PduRIfRxIndication(PduIdType srcPduId, PduIdType destPduId, const PduI
     {
 #if (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON)
     case PDUR_ROUTE_IF_RX_NOBUFFERED:
-        PduR_IfRxIndicationForward(srcPduId, destPduId, pduInfoPtr);
+        if (PduR_DestinationRouteStatus[destPduId] == PDUR_RES_INITIAL)
+        {
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+            PduR_IfRxIndicationForward(srcPduId, destPduId, pduInfoPtr);
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
+        }
+        else
+        {
+            /* SWS_PduR_00903 In n:1,the most recent request has not returned,the PDU Router shall return immediately */
+            PduR_Det_ReportRuntimeError(PDUR_IFRXINDICATION_ID, PDUR_E_PDU_INSTANCES_LOST);
+        }
         break;
+#if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
+    case PDUR_ROUTE_IF_RX_BUFFERED:
+    {
+        PduR_QueueRuntimeType* queuePtr;
+        uint8                  metaDataLength;
+        if (PduR_DestinationRouteStatus[destPduId] == PDUR_RES_INITIAL)
+        {
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+            PduR_IfRxIndicationForward(srcPduId, destPduId, pduInfoPtr);
+
+            queuePtr       = PduR_GetQueuePtrOfDestPdu(destPduId);
+            metaDataLength = PduR_GetMetaDataLengthOfDestPdu(destPduId);
+            while (!PduR_QueueIsEmpty(queuePtr)) /* PRQA S 2487 */ /* VL_PduR_2487 */
+            {
+                PduInfoType pduInfoNext;
+                SchM_Enter_PduR_ExclusiveArea_Route();
+                const PduR_BufferType* headBufferPtr = PduR_QueueGetHead(queuePtr);
+                PduR_Buffer2PduInfo(headBufferPtr, &pduInfoNext, metaDataLength, 0u);
+                PduR_QueuePopFront(queuePtr);
+                SchM_Exit_PduR_ExclusiveArea_Route();
+                PduR_IfRxIndicationForward(srcPduId, destPduId, &pduInfoNext);
+            }
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
+        }
+        else
+        {
+            queuePtr       = PduR_GetQueuePtrOfDestPdu(destPduId);
+            metaDataLength = PduR_GetMetaDataLengthOfDestPdu(destPduId);
+            SchM_Enter_PduR_ExclusiveArea_Route();
+            (void)PduR_QueueStorePduInfo(queuePtr, metaDataLength, pduInfoPtr, PDUR_IFRXINDICATION_ID);
+            SchM_Exit_PduR_ExclusiveArea_Route();
+        }
+        break;
+    }
+#endif
 #endif
 #if (PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON)
     case PDUR_ROUTE_IF_GW_NOBUFFERED:
     {
-        PduInfoType pduInfoPtrVar = *pduInfoPtr;
-        /* The rest of the received I-PDU shall be dropped if the configured length of the destination I-PDU is smaller
-           than the received data length (PduLength of received I-PDU)(SWS_PduR_00783) */
-        if (PduR_GetConfiguredLengthOfDestPdu(destPduId) < pduInfoPtrVar.SduLength)
+        if (PduR_DestinationRouteStatus[destPduId] == PDUR_RES_INITIAL)
         {
-            pduInfoPtrVar.SduLength = PduR_GetConfiguredLengthOfDestPdu(destPduId);
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_PENDING;
+            PduInfoType pduInfoPtrVar              = *pduInfoPtr;
+            /* The rest of the received I-PDU shall be dropped if the configured length of the destination I-PDU is
+            smaller than the received data length (PduLength of received I-PDU)(SWS_PduR_00783) */
+            pduInfoPtrVar.SduLength = (PduR_GetConfiguredLengthOfDestPdu(destPduId) < pduInfoPtrVar.SduLength)
+                                          ? PduR_GetConfiguredLengthOfDestPdu(destPduId)
+                                          : pduInfoPtrVar.SduLength;
+            (void)PduR_IfTransmitForward(srcPduId, destPduId, &pduInfoPtrVar);
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
         }
-        (void)PduR_IfTransmitForward(srcPduId, destPduId, &pduInfoPtrVar);
+        else
+        {
+            /* SWS_PduR_00903 In n:1,the most recent request has not returned,the PDU Router shall return immediately */
+            PduR_Det_ReportRuntimeError(PDUR_IFRXINDICATION_ID, PDUR_E_PDU_INSTANCES_LOST);
+        }
         break;
     }
 #if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
@@ -244,10 +381,9 @@ void PduR_PduRIfRxIndication(PduIdType srcPduId, PduIdType destPduId, const PduI
         PduInfoType pduInfoPtrVar = *pduInfoPtr;
         /* The rest of the received I-PDU shall be dropped if the configured length of the destination I-PDU is smaller
            than the received data length (PduLength of received I-PDU) (SWS_PduR_00746) */
-        if (PduR_GetConfiguredLengthOfDestPdu(destPduId) < pduInfoPtrVar.SduLength)
-        {
-            pduInfoPtrVar.SduLength = PduR_GetConfiguredLengthOfDestPdu(destPduId);
-        }
+        pduInfoPtrVar.SduLength = (PduR_GetConfiguredLengthOfDestPdu(destPduId) < pduInfoPtrVar.SduLength)
+                                      ? PduR_GetConfiguredLengthOfDestPdu(destPduId)
+                                      : pduInfoPtrVar.SduLength;
         if (PduR_GetDataProvisionOfDestPdu(destPduId) == PDUR_TRIGGERTRANSMIT)
         {
             PduR_QueueRuntimeType* queuePtr       = PduR_GetQueuePtrOfDestPdu(destPduId);
@@ -256,7 +392,7 @@ void PduR_PduRIfRxIndication(PduIdType srcPduId, PduIdType destPduId, const PduI
             SchM_Enter_PduR_ExclusiveArea_Route();
             PduR_QueueStoreType retval =
                 PduR_QueueStorePduInfo(queuePtr, metaDataLength, &pduInfoPtrVar, PDUR_IFRXINDICATION_ID);
-            const PduR_BufferType* tailBufferPtr = PduR_QueueGetTail(queuePtr);
+            const PduR_BufferType* tailBufferPtr = PduR_QueueGetTail(PDUR_PDU_ID_INVALID, queuePtr);
             const PduR_BufferType* headBufferPtr = PduR_QueueGetHead(queuePtr);
             SchM_Exit_PduR_ExclusiveArea_Route();
             if ((retval != PDUR_QUEUESTORE_NOT_OK) && (headBufferPtr == tailBufferPtr))
@@ -277,13 +413,19 @@ void PduR_PduRIfRxIndication(PduIdType srcPduId, PduIdType destPduId, const PduI
         /* do nothing */
         break;
     }
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(pduInfoPtr);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if ((PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
 /**
  * PduR interface receive indication implement for IF gateWay with PDUR_DIRECT
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_PduR_STCAL */
 static void PduR_IfRxIndBufferedDirect(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfo)
 /* PRQA S 6070 -- */
@@ -338,12 +480,16 @@ static void PduR_IfRxIndBufferedDirect(PduIdType srcPduId, PduIdType destPduId, 
         SchM_Exit_PduR_ExclusiveArea_Route();
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TX_CONFIRMATION == STD_ON)
 /**
  * PduR interface transmit confirmation implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532, 6030 ++ */ /* VL_QAC_OneFunRef, VL_MTR_PduR_STMIF */
 void PduR_PduRIfTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 /* PRQA S 1532, 6030 -- */
@@ -361,14 +507,15 @@ void PduR_PduRIfTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
     {
         PduR_DestinationRouteStatus[destPduId] = (result == E_OK) ? PDUR_RES_OK : PDUR_RES_NOT_OK;
 
-        PduR_RouteStatusType srcRouteStatus;
-        boolean              finishFlag;
         switch (routeType)
         {
 #if (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON)
         case PDUR_ROUTE_IF_TX_NOBUFFERED:
-            finishFlag     = PduR_EvaluateUpLayerConfirmationStatus(srcPduId);
-            srcRouteStatus = PduR_SourceRouteStatus[srcPduId];
+        {
+            SchM_Enter_PduR_ExclusiveArea_Route();
+            boolean              finishFlag     = PduR_EvaluateUpLayerConfirmationStatus(srcPduId);
+            PduR_RouteStatusType srcRouteStatus = PduR_SourceRouteStatus[srcPduId];
+            SchM_Exit_PduR_ExclusiveArea_Route();
             if ((finishFlag) && ((srcRouteStatus == PDUR_RES_OK) || (srcRouteStatus == PDUR_RES_NOT_OK)))
             {
                 /* The last transmit confirmation coming(SWS_PduR_00589) */
@@ -386,6 +533,7 @@ void PduR_PduRIfTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
                 }
             }
             break;
+        }
 #endif
 #if ((PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
         case PDUR_ROUTE_IF_GW_BUFFERED:
@@ -408,10 +556,15 @@ void PduR_PduRIfTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
             PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
         }
     }
+    PDUR_NOUSED(srcPduId);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if ((PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED == STD_ON) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_PduR_STCAL */
 static void PduR_IfTxConfBufferedDirect(PduIdType srcPduId, PduIdType destPduId)
 /* PRQA S 6070 -- */
@@ -449,12 +602,16 @@ static void PduR_IfTxConfBufferedDirect(PduIdType srcPduId, PduIdType destPduId)
         }
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TRIGGER_TRANSMIT == STD_ON)
 /**
  * PduR trigger transmit implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532, 6070 ++ */ /* VL_QAC_OneFunRef, VL_MTR_PduR_STCAL */
 Std_ReturnType PduR_PduRTriggerTransmit(PduIdType srcPduId, PduIdType destPduId, PduInfoType* pduInfoPtr)
 /* PRQA S 1532, 6070 -- */
@@ -536,8 +693,12 @@ Std_ReturnType PduR_PduRTriggerTransmit(PduIdType srcPduId, PduIdType destPduId,
         /* do nothing */
         break;
     }
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(pduInfoPtr);
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
@@ -545,6 +706,8 @@ Std_ReturnType PduR_PduRTriggerTransmit(PduIdType srcPduId, PduIdType destPduId,
 /**
  * PduR StartOfReception with buffered implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532, 2889, 6070, 6060 ++ */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn, VL_MTR_PduR_STCAL, VL_MTR_PduR_STM19 */
 BufReq_ReturnType PduR_PduRStartOfReceptionBuffered(
     PduIdType          srcPduId,
@@ -582,6 +745,7 @@ BufReq_ReturnType PduR_PduRStartOfReceptionBuffered(
             PduR_DestinationRouteStatus[destPduId] = PDUR_RES_NOT_OK;
         }
     }
+    bufferPtr->SrcPduId   = srcPduId;
     bufferPtr->WriteState = PDUR_BUFFER_WRITE_PENDING;
     PduR_BufferStoreSduLength(bufferPtr, tpSduLength);
     if (pduInfoPtr != NULL_PTR)
@@ -596,9 +760,15 @@ BufReq_ReturnType PduR_PduRStartOfReceptionBuffered(
     PduR_TpDestinationProcess(srcPduId, destPduId, PDUR_TPSTARTOFRECEPTION_ID);
     return bufReqReturn;
 }
+/* PRQA S 1532, 2889, 6070, 6060 -- */
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * PduR CopyRxData with buffered implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1532, 2889, 6070, 6060 ++ */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn, VL_MTR_PduR_STCAL, VL_MTR_PduR_STM19 */
 BufReq_ReturnType PduR_PduRCopyRxDataBuffered(
     PduIdType          srcPduId,
     PduIdType          destPduId,
@@ -608,7 +778,7 @@ BufReq_ReturnType PduR_PduRCopyRxDataBuffered(
     BufReq_ReturnType            bufReqReturn = BUFREQ_E_NOT_OK;
     const PduR_QueueRuntimeType* queuePtr     = PduR_GetQueuePtrOfDestPdu(destPduId);
     SchM_Enter_PduR_ExclusiveArea_Route();
-    PduR_BufferType* bufferPtr = PduR_QueueGetTail(queuePtr);
+    PduR_BufferType* bufferPtr = PduR_QueueGetTail(srcPduId, queuePtr);
     if ((bufferPtr == NULL_PTR) || (bufferPtr->WriteState != PDUR_BUFFER_WRITE_PENDING))
     {
         SchM_Exit_PduR_ExclusiveArea_Route();
@@ -641,16 +811,20 @@ BufReq_ReturnType PduR_PduRCopyRxDataBuffered(
     return bufReqReturn;
 }
 /* PRQA S 1532, 2889, 6070, 6060 -- */
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * PduR TpRxIndication with buffered implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void PduR_PduRTpRxIndicationBuffered(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 /* PRQA S 1532 -- */
 {
     const PduR_QueueRuntimeType* queuePtr = PduR_GetQueuePtrOfDestPdu(destPduId);
     SchM_Enter_PduR_ExclusiveArea_Route();
-    PduR_BufferType* tailPtr = PduR_QueueGetTail(queuePtr);
+    PduR_BufferType* tailPtr = PduR_QueueGetTail(srcPduId, queuePtr);
     if ((tailPtr != NULL_PTR) && (tailPtr->WriteState != PDUR_BUFFER_WRITE_OK))
     {
         tailPtr->WriteState = (result == E_OK) ? PDUR_BUFFER_WRITE_OK : PDUR_BUFFER_WRITE_NOT_OK;
@@ -660,19 +834,23 @@ void PduR_PduRTpRxIndicationBuffered(PduIdType srcPduId, PduIdType destPduId, St
             if ((tailPtr != PduR_QueueGetHead(queuePtr))
                 || (PduR_DestinationRouteStatus[destPduId] != PDUR_RES_PENDING))
             {
-                PduR_QueuePopBack(queuePtr);
+                PduR_QueuePopBack(srcPduId, queuePtr);
             }
         }
     }
     SchM_Exit_PduR_ExclusiveArea_Route();
     PduR_TpDestinationProcess(srcPduId, destPduId, PDUR_TPCOPYRXDATA_ID);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif /* end of PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED and PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED */
 
 #if (PDUR_TP_COPYTXDATA == STD_ON)
 /**
  * PduR CopyTxData implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532, 6070 ++ */ /* VL_QAC_OneFunRef, VL_MTR_PduR_STCAL */
 BufReq_ReturnType PduR_PduRCopyTxData(
     PduIdType            srcPduId,
@@ -688,12 +866,67 @@ BufReq_ReturnType PduR_PduRCopyTxData(
     switch (routeType)
     {
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
-    case PDUR_ROUTE_TP_TX_NOBUFFERED:
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST:
+    {
         bufReqReturn = PduR_CopyTxDataForward(srcPduId, destPduId, pduInfoPtr, retryInfoPtr, availableDataPtr);
         break;
+    }
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST:
+    {
+        const RetryInfoType* retryPtr;
+        SchM_Enter_PduR_ExclusiveArea_Route();
+        if ((retryInfoPtr != NULL_PTR) && (retryInfoPtr->TpDataState == TP_DATARETRY))
+        {
+            /* SWS_PduR_00871 */
+            SchM_Exit_PduR_ExclusiveArea_Route();
+            break; /* PRQA S 3333 */ /* VL_PduR_Logical */
+        }
+
+        RetryInfoType localRetryInfo;
+        if (PduR_SourceMultiCastTpTransmittedCnt[srcPduId] == 0u)
+        {
+            /* SWS_PduR_00631 */
+            localRetryInfo.TpDataState = TP_CONFPENDING;
+            localRetryInfo.TxTpDataCnt = 0u;
+            retryPtr                   = &localRetryInfo;
+        }
+        else
+        {
+            if (PduR_SourceMultiCastTpTransmittedCnt[srcPduId] < PduR_DestinationMultiCastTpTransmittedCnt[destPduId])
+            {
+                /* SWS_PduR_00872 */
+                bufReqReturn = BUFREQ_E_BUSY;
+                SchM_Exit_PduR_ExclusiveArea_Route();
+                break; /* PRQA S 3333 */ /* VL_PduR_Logical */
+            }
+            else
+            {
+                /* SWS_PduR_00632*/
+                localRetryInfo.TpDataState = TP_DATARETRY;
+                localRetryInfo.TxTpDataCnt = PduR_SourceMultiCastTpTransmittedCnt[srcPduId]
+                                             - PduR_DestinationMultiCastTpTransmittedCnt[destPduId];
+                PduR_SourceMultiCastTpTransmittedCnt[srcPduId] -= localRetryInfo.TxTpDataCnt;
+                retryPtr = &localRetryInfo;
+            }
+        }
+        SchM_Exit_PduR_ExclusiveArea_Route();
+        bufReqReturn = PduR_CopyTxDataForward(srcPduId, destPduId, pduInfoPtr, retryPtr, availableDataPtr);
+
+        SchM_Enter_PduR_ExclusiveArea_Route();
+        if (bufReqReturn == BUFREQ_OK)
+        {
+            PduR_SourceMultiCastTpTransmittedCnt[srcPduId] += pduInfoPtr->SduLength;
+            PduR_DestinationMultiCastTpTransmittedCnt[destPduId] += pduInfoPtr->SduLength;
+        }
+        SchM_Exit_PduR_ExclusiveArea_Route();
+        break;
+    }
+#endif
 #endif
 #if ((PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
     case PDUR_ROUTE_TP_GW_BUFFERED:
+    {
         SchM_Enter_PduR_ExclusiveArea_Route();
         if (PduR_DestinationRouteStatus[destPduId] != PDUR_RES_PENDING)
         {
@@ -754,19 +987,28 @@ BufReq_ReturnType PduR_PduRCopyTxData(
         *availableDataPtr = pduInfo.SduLength;
         bufReqReturn      = BUFREQ_OK;
         break;
+    }
 #endif
     default:
         /* do nothing */
         break;
     }
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(pduInfoPtr);
+    PDUR_NOUSED(retryInfoPtr);
+    PDUR_NOUSED(availableDataPtr);
     return bufReqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_TXCONFIRMATION == STD_ON)
 /**
  * PduR TpTxConfirmation implement
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void PduR_PduRTpTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 /* PRQA S 1532 -- */
@@ -775,12 +1017,41 @@ void PduR_PduRTpTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
     switch (routeType)
     {
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
-    case PDUR_ROUTE_TP_TX_NOBUFFERED:
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST:
+    {
         PduR_TpTxConfirmationForward(srcPduId, destPduId, result);
         break;
+    }
+    case PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST:
+    {
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+        SchM_Enter_PduR_ExclusiveArea_Route();
+        PduR_DestinationMultiCastTpTransmittedCnt[destPduId] = 0u;
+        PduR_DestinationRouteStatus[destPduId]               = (result == E_OK) ? PDUR_RES_OK : PDUR_RES_NOT_OK;
+        boolean              finishFlag                      = PduR_EvaluateUpLayerConfirmationStatus(srcPduId);
+        PduR_RouteStatusType srcRouteStatus                  = PduR_SourceRouteStatus[srcPduId];
+        SchM_Exit_PduR_ExclusiveArea_Route();
+        if ((finishFlag) && ((srcRouteStatus == PDUR_RES_OK) || (srcRouteStatus == PDUR_RES_NOT_OK)))
+        {
+            /* SWS_PduR_00765 */
+            if (srcRouteStatus == PDUR_RES_OK)
+            {
+                PduR_TpTxConfirmationForward(srcPduId, destPduId, E_OK);
+            }
+            else
+            {
+                PduR_TpTxConfirmationForward(srcPduId, destPduId, E_NOT_OK);
+            }
+            PduR_SourceMultiCastTpTransmittedCnt[srcPduId] = 0u;
+            PduR_SourceRouteStatus[srcPduId]               = PDUR_RES_INITIAL;
+        }
+#endif
+        break;
+    }
 #endif
 #if (PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON)
     case PDUR_ROUTE_TP_GW_BUFFERED:
+    {
         SchM_Enter_PduR_ExclusiveArea_Route();
         if (PduR_DestinationRouteStatus[destPduId] == PDUR_RES_NOT_OK)
         {
@@ -794,18 +1065,22 @@ void PduR_PduRTpTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
         }
         else
         {
-            /* do nothing  */
+            /* do nothing */
         }
         SchM_Exit_PduR_ExclusiveArea_Route();
-
         PduR_TpDestinationProcess(srcPduId, destPduId, PDUR_TPTXCONFIRMATION_ID);
         break;
+    }
 #endif
     default:
         /* do nothing */
         break;
     }
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(result);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
@@ -813,6 +1088,8 @@ void PduR_PduRTpTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
 /**
  * PduR destination process for transport protocol route with buffer
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 6070 ++ */ /* VL_MTR_PduR_STCAL */
 static void PduR_TpDestinationProcess(PduIdType srcPduId, PduIdType destPduId, uint8 apiId)
 /* PRQA S 6070 -- */
@@ -864,6 +1141,7 @@ static void PduR_TpDestinationProcess(PduIdType srcPduId, PduIdType destPduId, u
             PduR_DestinationRouteStatus[destPduId] = status;
             PduR_QueuePopFront(queuePtr);
             SchM_Exit_PduR_ExclusiveArea_Route();
+            PduR_Det_ReportRuntimeError(apiId, PDUR_E_TP_GW_TX_REQ_REJECTED);
             PduR_Det_ReportRuntimeError(apiId, PDUR_E_PDU_INSTANCES_LOST);
             continue; /* PRQA S 0770 */ /* VL_PduR_0770 */
         }
@@ -875,18 +1153,21 @@ static void PduR_TpDestinationProcess(PduIdType srcPduId, PduIdType destPduId, u
         {
             PduLengthType     bufferSize;
             BufReq_ReturnType bufReqReturn =
-                PduR_StartOfReceptionForward(destPduId, &pduInfo, pduInfo.SduLength, &bufferSize);
-            PduR_TpRxIndicationForward(destPduId, (bufReqReturn == BUFREQ_OK) ? E_OK : E_NOT_OK);
+                PduR_StartOfReceptionForward(srcPduId, destPduId, &pduInfo, pduInfo.SduLength, &bufferSize);
+            PduR_TpRxIndicationForward(srcPduId, destPduId, (bufReqReturn == BUFREQ_OK) ? E_OK : E_NOT_OK);
             SchM_Enter_PduR_ExclusiveArea_Route();
             PduR_QueuePopFront(queuePtr);
             SchM_Exit_PduR_ExclusiveArea_Route();
         }
 #endif
     }
-#else
-    PDUR_NOUSED(destPduId);
 #endif
+    PDUR_NOUSED(srcPduId);
+    PDUR_NOUSED(destPduId);
+    PDUR_NOUSED(apiId);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
@@ -894,8 +1175,11 @@ static void PduR_TpDestinationProcess(PduIdType srcPduId, PduIdType destPduId, u
 /**
  * Call the target module transport protocol startofreception function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 BufReq_ReturnType PduR_StartOfReceptionForward(
+    PduIdType          srcPduId,
     PduIdType          destPduId,
     const PduInfoType* pduInfoPtr,
     PduLengthType      tpSduLength,
@@ -907,14 +1191,14 @@ BufReq_ReturnType PduR_StartOfReceptionForward(
     BufReq_ReturnType                  bufReqReturn           = BUFREQ_E_NOT_OK;
     PduR_ModuleStartOfReceptionApiType startOfReceptionApiPtr = NULL_PTR;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
-    PduIdType srcPduId  = PduR_GetSrcPduOfDestPdu(destPduId);
-    uint8     funcIndex = PduR_GetPartitionFuncIndex(bswModulePtr, srcPduId, destPduId, TRUE);
+    uint8 funcIndex = PduR_GetPartitionFuncIndex(bswModulePtr, srcPduId, destPduId, TRUE);
     if (bswModulePtr->StartOfReceptionApi != NULL_PTR)
     {
         startOfReceptionApiPtr = bswModulePtr->StartOfReceptionApi[funcIndex];
     }
 #else
     startOfReceptionApiPtr = bswModulePtr->StartOfReceptionApi;
+    PDUR_NOUSED(srcPduId);
 #endif
     if (NULL_PTR != startOfReceptionApiPtr)
     {
@@ -922,12 +1206,16 @@ BufReq_ReturnType PduR_StartOfReceptionForward(
     }
     return bufReqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON)
 /**
  * Call the target module transport protocol copyrxdata function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 BufReq_ReturnType PduR_CopyRxDataForward(
     PduIdType          srcPduId,
@@ -956,6 +1244,8 @@ BufReq_ReturnType PduR_CopyRxDataForward(
     }
     return bufReqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
@@ -963,45 +1253,59 @@ BufReq_ReturnType PduR_CopyRxDataForward(
 /**
  * Call the target module transport protocol receive indication function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-void PduR_TpRxIndicationForward(PduIdType destPduId, Std_ReturnType result)
+void PduR_TpRxIndicationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 /* PRQA S 1532 -- */
 {
     const PduR_BswModuleType*        bswModulePtr         = PduR_GetBswModulePtrOfDestPdu(destPduId);
     PduIdType                        bswModulePduId       = PduR_GetBswModulePduIdOfDestPdu(destPduId);
     PduR_ModuleTpRxIndicationApiType tpRxIndicationApiPtr = NULL_PTR;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
-    PduIdType srcPduId  = PduR_GetSrcPduOfDestPdu(destPduId);
-    uint8     funcIndex = PduR_GetPartitionFuncIndex(bswModulePtr, srcPduId, destPduId, TRUE);
+    uint8 funcIndex = PduR_GetPartitionFuncIndex(bswModulePtr, srcPduId, destPduId, TRUE);
     if (bswModulePtr->TpRxIndicationApi != NULL_PTR)
     {
         tpRxIndicationApiPtr = bswModulePtr->TpRxIndicationApi[funcIndex];
     }
 #else
     tpRxIndicationApiPtr = bswModulePtr->TpRxIndicationApi;
+    PDUR_NOUSED(srcPduId);
 #endif
     if (NULL_PTR != tpRxIndicationApiPtr)
     {
         tpRxIndicationApiPtr(bswModulePduId, result);
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 /**
  * Init all PduR_SourceRouteStatus and PduR_DestinationRouteStatus
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_RouteInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
 #if (PDUR_ROUTINGPATH_MAX > 0u)
     for (PduIdType index = 0u; index < PduR_GetPduRRoutingPathNumOfPBConfig; ++index)
     {
         PduR_DestinationRouteStatus[index] = PDUR_RES_INITIAL;
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+        PduR_DestinationMultiCastTpTransmittedCnt[index] = 0u;
+#endif
     }
     for (PduIdType index = 0u; index < PduR_GetSrcPduNumOfPBConfig; ++index)
     {
         PduR_SourceRouteStatus[index] = PDUR_RES_INITIAL;
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+        PduR_SourceMultiCastTpTransmittedCnt[index] = 0u;
+#endif
     }
 #endif
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /* ========================================== internal function definition ========================================== */
 #if (                                                           \
     (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON) \
@@ -1009,6 +1313,8 @@ void PduR_RouteInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 /**
  * Call the target module interface transmit function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_IfTransmitForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType               retval           = E_NOT_OK;
@@ -1031,12 +1337,16 @@ static Std_ReturnType PduR_IfTransmitForward(PduIdType srcPduId, PduIdType destP
     }
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED == STD_ON)
 /**
  * Call the target module trigger transmit function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_TriggerTransmitForward(PduIdType srcPduId, PduIdType destPduId, PduInfoType* pduInfoPtr)
 {
     Std_ReturnType                    retval                = E_NOT_OK;
@@ -1059,9 +1369,13 @@ static Std_ReturnType PduR_TriggerTransmitForward(PduIdType srcPduId, PduIdType 
     }
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Call the target module interface transmit confirmation function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_IfTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 {
     const PduR_BswModuleType*        bswModulePtr         = PduR_GetBswModulePtrOfSrcPdu(srcPduId);
@@ -1083,9 +1397,13 @@ static void PduR_IfTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId
         txConfirmationApiPtr(bswModulePduId, result);
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Call the target module interface receive indication function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_IfRxIndicationForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
 {
     const PduR_BswModuleType*        bswModulePtr         = PduR_GetBswModulePtrOfDestPdu(destPduId);
@@ -1106,6 +1424,8 @@ static void PduR_IfRxIndicationForward(PduIdType srcPduId, PduIdType destPduId, 
         ifRxIndicationApiPtr(bswModulePduId, pduInfoPtr);
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
@@ -1113,6 +1433,8 @@ static void PduR_IfRxIndicationForward(PduIdType srcPduId, PduIdType destPduId, 
 /**
  * Call the target module transport protocol transmit function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static Std_ReturnType PduR_TpTransmitForward(PduIdType srcPduId, PduIdType destPduId, const PduInfoType* pduInfoPtr)
 {
     const PduR_BswModuleType*    bswModulePtr     = PduR_GetBswModulePtrOfDestPdu(destPduId);
@@ -1135,12 +1457,16 @@ static Std_ReturnType PduR_TpTransmitForward(PduIdType srcPduId, PduIdType destP
     }
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
 /**
  * Call the target module transport protocol copytxdata function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static BufReq_ReturnType PduR_CopyTxDataForward(
     PduIdType            srcPduId,
     PduIdType            destPduId,
@@ -1168,9 +1494,13 @@ static BufReq_ReturnType PduR_CopyTxDataForward(
     }
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Call the target module transport protocol transmit confirmation function
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static void PduR_TpTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId, Std_ReturnType result)
 {
     const PduR_BswModuleType*          bswModulePtr           = PduR_GetBswModulePtrOfSrcPdu(srcPduId);
@@ -1191,17 +1521,21 @@ static void PduR_TpTxConfirmationForward(PduIdType srcPduId, PduIdType destPduId
         tpTxConfirmationApiPtr(bswModulePduId, result);
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 /**
  * Evaluate the PduR_SourceRouteStatus
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_EvaluateUpLayerConfirmationStatus(PduIdType srcPduId)
 {
     PduR_RouteStatusType txResult   = PduR_SourceRouteStatus[srcPduId];
     boolean              finishFlag = TRUE;
     if ((txResult == PDUR_RES_PENDING) || (txResult == PDUR_RES_OK))
     {
-        uint8 destPduSum = PduR_GetDestPduNumOfRoutingPath(srcPduId);
+        uint8 destPduSum = PduR_GetDestPduNumOfSrcPdu(srcPduId);
         for (uint8 index = 0u; index < destPduSum; ++index)
         {
             PduIdType            destPduId       = PduR_GetDestPduOfRoutingPath(srcPduId, index);
@@ -1217,7 +1551,7 @@ static boolean PduR_EvaluateUpLayerConfirmationStatus(PduIdType srcPduId)
             }
             else
             {
-                /* do nothing */
+                /* Do nothig */
             }
         }
         if ((finishFlag) && (PduR_SourceRouteStatus[srcPduId] != PDUR_RES_OK))
@@ -1227,6 +1561,8 @@ static boolean PduR_EvaluateUpLayerConfirmationStatus(PduIdType srcPduId)
     }
     return finishFlag;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Get module configuration of SrcPdu
  */
@@ -1241,7 +1577,5 @@ static inline const PduR_BswModuleType* PduR_GetBswModulePtrOfDestPdu(PduIdType 
 {
     return &PduR_BswModuleConfigData[PDUR_DESTPDU_CFG(destPduId).BswModuleIndex];
 }
-#define PDUR_STOP_SEC_CODE
-#include "PduR_MemMap.h"
-/* PRQA S 3672 -- */
+/* PRQA S 3672 -- */ /* VL_PduR_FuncPtrNonConst */
 #endif

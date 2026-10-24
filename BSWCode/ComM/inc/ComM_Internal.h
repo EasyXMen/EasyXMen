@@ -68,6 +68,10 @@ COMM_LOCAL_INLINE void ComM_ClrBit(uint8* data, uint32 bitPn)
     data[bitPn / COMM_CHAR_BIT] &= (uint8) ~(uint8)(1u << (bitPn % COMM_CHAR_BIT));
 }
 
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS ComM_GetBit
+#endif
+
 /**
  * This function shall return the logical status of the input data for the requested bit position.
  * @param[in]    data   Pointer to input data
@@ -84,14 +88,24 @@ COMM_LOCAL_INLINE boolean ComM_GetBit(const uint8* data, uint32 bitPn)
 
 /* =========================================== external data declarations =========================================== */
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#define COMM_START_SEC_CONFIG_DATA_32
+#include "ComM_MemMap.h"
 extern const ApplicationType ComM_OsApplications[COMM_PARTITION_NUMBER];
+#define COMM_STOP_SEC_CONFIG_DATA_32
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "ComM_MemMap.h"
 extern boolean ComM_PncEnabled;
+#define COMM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "ComM_MemMap.h"
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This function shall perform the processing of the AUTOSAR ComM activities that are not directly initiated by
  * the calls. e.g. from the RTE. There shall be one dedicated Main Function for each channel of ComM.
@@ -101,6 +115,8 @@ extern boolean ComM_PncEnabled;
  * @trace        CPD-61360
  */
 void ComM_MainFunction(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef __cplusplus
 }

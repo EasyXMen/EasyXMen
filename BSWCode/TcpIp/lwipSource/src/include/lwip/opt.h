@@ -3669,4 +3669,8 @@
 #include "TcpIp_PBcfg.h"
 #include "TcpIp_Lwip.h"
 
+#if defined TCPIP_IPSEC_ENABLED && (STD_ON == TCPIP_IPSEC_ENABLED)
+#define LWIP_IPSEC_ENABLED
+#endif
+
 #endif /* LWIP_HDR_OPT_H */

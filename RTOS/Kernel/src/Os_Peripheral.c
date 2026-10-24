@@ -12,855 +12,722 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Peripheral.c                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Peripheral manager                                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Peripheral.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Peripheral API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Hal_Define.h"
+#include "Os_Peripheral.h"
+#include "Os_Appl.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Sprot.h"
+#include "Os_Arti.h"
+
 #if (CFG_PERIPHERAL_MAX > 0U)
 
-/*=======[M A C R O S]========================================================*/
+/* ===================================================== macros ===================================================== */
 
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ================================================ type definitions ================================================ */
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ============================================ external data definitions =========================================== */
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/* ============================================ internal data definitions =========================================== */
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/* ========================================== internal function declarations ======================================== */
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ReadPeripheral8>
- * Service ID           <0x28>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
+/**
+ * @brief           Validates peripheral access parameters
+ * @param[in]       area: ID of the peripheral area to access
+ * @param[in]       address: Address within the peripheral area to access
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @return          StatusType
+ * @retval          E_OK: Parameters are valid and accessible
+ * @retval          E_OS_ID: Invalid area ID
+ * @retval          E_OS_VALUE: Address is outside the valid range for the area
+ * @retval          E_OS_ACCESS: Application doesn't have access rights to the area
+ * @retval          E_OS_CALLEVEL: Called from an incorrect context
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
  */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
+OS_LOCAL StatusType Os_CheckPeripheralParameters(AreaIdType area, uint32 address, const Os_SCBType* pScb);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/* ========================================== external function definitions ========================================= */
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ReadPeripheral8
+ */
+/* PRQA S 6030 ++ */ /* VL_MTR_Os_STMIF */
+OS_LOCAL StatusType Os_CheckPeripheralParameters(AreaIdType area, uint32 address, const Os_SCBType* pScb)
+/* PRQA S 6030 -- */
+{
+    StatusType status;
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ApplicationType runAppId = pScb->SysRunningAppId;
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (area >= CFG_PERIPHERAL_MAX)
+    {
+        status = E_OS_ID;
+    }
+    else if ((address < Os_PeriAreaCfg[area].PeriAreaStartAddr) || (address > Os_PeriAreaCfg[area].PeriAreaEndAddr))
+    {
+        status = E_OS_VALUE;
+    }
+    else
+#endif
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        /*the current application have access rights to the object*/
+        /* PRQA S 4397, 1258, 1840, 0582 ++ */ /* VL_Os_4397, VL_Os_1258, VL_Os_1840, VL_Os_0582 */
+        if (0U == ((Os_PeriAreaCfg[area].AccAppRef[OS_APPGETACCESS_GP(runAppId)]) & OS_APPACCESS_MASK(runAppId)))
+        /* PRQA S 4397, 1258, 1840, 0582 -- */
+        {
+            status = E_OS_ACCESS;
+        }
+        else if (TRUE != Os_WrongContext(pScb, OS_CONTEXT_OPEARTION_PERIPHERAL))
+        {
+            status = E_OS_CALLEVEL;
+        }
+        else if (OS_APPLICATION_ACCESSIBLE != Os_GetAppStateInternal(runAppId))
+        {
+            status = E_OS_ACCESS;
+        }
+        else
+#endif
+        {
+            status = E_OK;
+        }
+
+    UNUSED_PARAMETER(address);
+    UNUSED_PARAMETER(area);
+    UNUSED_PARAMETER(pScb);
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ReadPeripheral8
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
 StatusType ReadPeripheral8(AreaIdType Area, const uint8* Address, uint8* ReadValue)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address;/* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if (NULL_PTR == ReadValue)
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL) != TRUE)
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-            OS_ARCH_ENTRY_CRITICAL();
-            /* PRQA S 3120,2985 ++ */ /* VL_QAC_MagicNum, VL_Os_2985 */
-            *ReadValue = *Address & 0xFFU;
-            /* PRQA S 3120,2985 -- */
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141, 0311 ++ */ /* VL_Os_3138, VL_Os_3141, VL_Os_0311 */
-        Os_TraceErrorHook(
-            OSError_Save_ReadPeripheral8(Area, (uint8*)Address, 0u),
-            OSServiceId_ReadPeripheral8,
-            status);
-        /* PRQA S 3138, 3141, 0311 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ReadPeripheral16>
- * Service ID           <0x29>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 4152, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_Os_4152, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType ReadPeripheral16(AreaIdType Area, const uint16* Address, uint16* ReadValue)
-/* PRQA S 3006, 4152, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address;/* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if (NULL_PTR == ReadValue)
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            *ReadValue = *Address;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141, 0311 ++ */ /* VL_Os_3138, VL_Os_3141, VL_Os_0311 */
-        Os_TraceErrorHook(
-            OSError_Save_ReadPeripheral16(Area, (uint16*)Address, 0u),
-            OSServiceId_ReadPeripheral16,
-            status);
-        /* PRQA S 3138, 3141, 0311 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ReadPeripheral32>
- * Service ID           <0x2a>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType ReadPeripheral32(AreaIdType Area, const uint32* Address, uint32* ReadValue)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address;/* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if (NULL_PTR == ReadValue)
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            *ReadValue = *Address;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141, 0311 ++ */ /* VL_Os_3138, VL_Os_3141, VL_Os_0311 */
-        Os_TraceErrorHook(
-            OSError_Save_ReadPeripheral32(Area, (uint32*)Address, 0u),
-            OSServiceId_ReadPeripheral32,
-            status);
-        /* PRQA S 3138, 3141, 0311 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <WritePeripheral8>
- * Service ID           <0x2b>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType WritePeripheral8(AreaIdType Area, uint8* Address, uint8 WriteValue)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address;/* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-            /* PRQA S 3120,2985 ++ */ /* VL_QAC_MagicNum, VL_Os_2985 */
-            *Address = (WriteValue & 0xFFU);
-            /* PRQA S 3120,2985 -- */
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_WritePeripheral8(Area, Address, WriteValue),
-            OSServiceId_WritePeripheral8,
-            status);
-        /* PRQA S 3138, 3141 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <WritePeripheral16>
- * Service ID           <0x2c>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 4152, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_Os_4152, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType WritePeripheral16(AreaIdType Area, uint16* Address, uint16 WriteValue)
-/* PRQA S 3006, 4152, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address;/* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            *Address = WriteValue;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_WritePeripheral16(Area, Address, WriteValue),
-            OSServiceId_WritePeripheral16,
-            status);
-        /* PRQA S 3138, 3141 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <WritePeripheral32>
- * Service ID           <0x2d>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType WritePeripheral32(AreaIdType Area, uint32* Address, uint32 WriteValue)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            *Address = WriteValue;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_WritePeripheral32(Area, Address, WriteValue),
-            OSServiceId_WritePeripheral32,
-            status);
-        /* PRQA S 3138, 3141 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ModifyPeripheral8>
- * Service ID           <0x2e>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType ModifyPeripheral8(AreaIdType Area, uint8* Address, uint8 Clearmask, uint8 Setmask)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            /* modify the value to address. */
-            /* PRQA S 3120,2985 ++ */ /* VL_QAC_MagicNum, VL_Os_2985 */
-            *Address = (((*Address) & Clearmask) | Setmask) & 0xFFU;
-            /* PRQA S 3120,2985 -- */
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_ModifyPeripheral8(Area, Address, Clearmask, Setmask),
-            OSServiceId_ModifyPeripheral8,
-            status);
-        /* PRQA S 3138, 3141 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ModifyPeripheral16>
- * Service ID           <0x35>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 4152, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_Os_4152, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType ModifyPeripheral16(AreaIdType Area, uint16* Address, uint16 Clearmask, uint16 Setmask)
-/* PRQA S 3006, 4152, 6030, 6010, 6070 -- */
-{
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
-    {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            /*modify the value to address*/
-            *Address = ((*Address) & Clearmask) | Setmask;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
-        Os_TraceErrorHook(
-            OSError_Save_ModifyPeripheral16(Area, Address, Clearmask, Setmask),
-            OSServiceId_ModifyPeripheral16,
-            status);
-        /* PRQA S 3138, 3141 -- */
-    }
-#endif
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ModifyPeripheral32>
- * Service ID           <0x2f>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-StatusType ModifyPeripheral32(AreaIdType Area, uint32* Address, uint32 Clearmask, uint32 Setmask)
-/* PRQA S 3006, 6030, 6010, 6070 -- */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
     StatusType status = E_OK;
-
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ReadPeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral8_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
-
-    if (Area >= CFG_PERIPHERAL_MAX)
+    if (NULL_PTR == ReadValue)
     {
-        status = E_OS_ID;
-    }
-    else if ((cmpAddr < Os_PeriAreaCfg[Area].periAreaStartAddr) || (cmpAddr > Os_PeriAreaCfg[Area].periAreaEndAddr))
-    {
-        status = E_OS_VALUE;
+        status = E_OS_ILLEGAL_ADDRESS;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*the current application have access rights to the object*/
-        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
-        if (0U == ((Os_PeriAreaCfg[Area].periAreaAppAccMask) & ((uint64)1u << Os_SCB.sysRunningAppID)))
-        /* PRQA S 1258 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else if (TRUE != Os_WrongContext(OS_CONTEXT_OPEARTION_PERIPHERAL))
-        {
-            status = E_OS_CALLEVEL;
-        }
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState)
-        /* PRQA S 3442 -- */
-        {
-            status = E_OS_ACCESS;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-            OS_ARCH_DECLARE_CRITICAL();
+#endif
+    {
+        uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+        status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+    }
 
-            OS_ARCH_ENTRY_CRITICAL();
-
-            /*modify the value to address*/
-            *Address = ((*Address) & Clearmask) | Setmask;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *ReadValue = *Address;
+        OS_HAL_EXIT_CRITICAL();
+    }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
+        /* PRQA S 0311 ++ */       /* VL_Os_0311 */
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
         Os_TraceErrorHook(
-            OSError_Save_ModifyPeripheral32(Area, Address, Clearmask, Setmask),
-            OSServiceId_ModifyPeripheral32,
-            status);
+            OSError_Save_ReadPeripheral8(Area, (uint8*)Address, ReadValue),
+            OSServiceId_ReadPeripheral8,
+            status,
+            pScb);
         /* PRQA S 3138, 3141 -- */
+        /* PRQA S 0311 -- */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */       /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_ReadPeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral8_Return, 0);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
 
     return status;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#endif /* CFG_PERIPHERAL_MAX > 0U */
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ReadPeripheral16
+ */
+/* PRQA S 1503, 3408, 3006 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006 */
+/* PRQA S 6070, 4152, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_4152, VL_Os_1512 */
+StatusType ReadPeripheral16(AreaIdType Area, const uint16* Address, uint16* ReadValue)
+/* PRQA S 6070, 4152, 1512 -- */
+/* PRQA S 1503, 3408, 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ReadPeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral16_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (NULL_PTR == ReadValue)
+    {
+        status = E_OS_ILLEGAL_ADDRESS;
+    }
+    else
+#endif
+    {
+        uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+        status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+    }
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *ReadValue = *Address;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 0311 ++ */       /* VL_Os_0311 */
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_ReadPeripheral16(Area, (uint16*)Address, ReadValue),
+            OSServiceId_ReadPeripheral16,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+        /* PRQA S 0311 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */       /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_ReadPeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral16_Return, 0);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ReadPeripheral32
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType ReadPeripheral32(AreaIdType Area, const uint32* Address, uint32* ReadValue)
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ReadPeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral32_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (NULL_PTR == ReadValue)
+    {
+        status = E_OS_ILLEGAL_ADDRESS;
+    }
+    else
+#endif
+    {
+        uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+        status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+    }
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *ReadValue = *Address;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 0311 ++ */       /* VL_Os_0311 */
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_ReadPeripheral32(Area, (uint32*)Address, ReadValue),
+            OSServiceId_ReadPeripheral32,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+        /* PRQA S 0311 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */       /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_ReadPeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReadPeripheral32_Return, 0);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * WritePeripheral8
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType WritePeripheral8(AreaIdType Area, uint8* Address, uint8 WriteValue)
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_WritePeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral8_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *Address = WriteValue;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 0311 ++ */       /* VL_Os_0311 */
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_WritePeripheral8(Area, Address, WriteValue),
+            OSServiceId_WritePeripheral8,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+        /* PRQA S 0311 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_WritePeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral8_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * WritePeripheral16
+ */
+/* PRQA S 1503, 3408, 3006 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006 */
+/* PRQA S 6070, 4152, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_4152, VL_Os_1512 */
+StatusType WritePeripheral16(AreaIdType Area, uint16* Address, uint16 WriteValue)
+/* PRQA S 6070, 4152, 1512 -- */
+/* PRQA S 1503, 3408, 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_WritePeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral16_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *Address = WriteValue;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_WritePeripheral16(Area, Address, WriteValue),
+            OSServiceId_WritePeripheral16,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_WritePeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral16_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * WritePeripheral32
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType WritePeripheral32(AreaIdType Area, uint32* Address, uint32 WriteValue)
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_WritePeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral32_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        *Address = WriteValue;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_WritePeripheral32(Area, Address, WriteValue),
+            OSServiceId_WritePeripheral32,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_WritePeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WritePeripheral32_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ModifyPeripheral8
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType ModifyPeripheral8(AreaIdType Area, uint8* Address, uint8 Clearmask, uint8 Setmask)
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ModifyPeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral8_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+
+        OS_HAL_ENTRY_CRITICAL();
+        /* modify the value to address. */
+        *Address = ((*Address) & Clearmask) | Setmask;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_ModifyPeripheral8(Area, Address, Clearmask, Setmask),
+            OSServiceId_ModifyPeripheral8,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ModifyPeripheral8);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral8_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ModifyPeripheral16
+ */
+/* PRQA S 1503, 3408, 3006 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006 */
+/* PRQA S 6070, 4152, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_4152, VL_Os_1512 */
+StatusType ModifyPeripheral16(AreaIdType Area, uint16* Address, uint16 Clearmask, uint16 Setmask)
+/* PRQA S 6070, 4152, 1512 -- */
+/* PRQA S 1503, 3408, 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ModifyPeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral16_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        /*modify the value to address*/
+        *Address = ((*Address) & Clearmask) | Setmask;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_ModifyPeripheral16(Area, Address, Clearmask, Setmask),
+            OSServiceId_ModifyPeripheral16,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ModifyPeripheral16);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral16_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ModifyPeripheral32
+ */
+/* PRQA S 1503, 3408, 3006, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType ModifyPeripheral32(AreaIdType Area, uint32* Address, uint32 Clearmask, uint32 Setmask)
+/* PRQA S 1503, 3408, 3006, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */                         /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */     /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType* pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */                   /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521 */
+    OSRtiEnterApi(pScb, OSApiId_ModifyPeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral32_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    uint32 cmpAddr = (uint32)Address; /* PRQA S 0306 */ /* VL_Os_0306 */
+    status         = Os_CheckPeripheralParameters(Area, cmpAddr, pScb);
+
+    if (E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        /*modify the value to address*/
+        *Address = ((*Address) & Clearmask) | Setmask;
+        OS_HAL_EXIT_CRITICAL();
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        Os_TraceErrorHook(
+            OSError_Save_ModifyPeripheral32(Area, Address, Clearmask, Setmask),
+            OSServiceId_ModifyPeripheral32,
+            status,
+            pScb);
+        /* PRQA S 3138, 3141 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ModifyPeripheral32);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ModifyPeripheral32_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif /*(CFG_PERIPHERAL_MAX > 0U)*/ /* PRQA S 2053 */ /* VL_Os_2053 */
 
 /*=======[E N D   O F   F I L E]==============================================*/
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

@@ -35,19 +35,16 @@
 /* ============================================ external data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
-
-#define COMM_START_SEC_CODE
-#include "ComM_MemMap.h"
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 /* ========================================== external function definitions ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 Std_ReturnType ComM_InternalSM_RequestComMode(NetworkHandleType Channel, ComM_ModeType ComMode)
 {
     ComM_ChannelBusSMModeIndication(Channel, ComMode);
     return E_OK;
 }
-
-/* ========================================== internal function definitions ========================================= */
-/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
-
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"
+/* ========================================== internal function definitions ========================================= */
+/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */

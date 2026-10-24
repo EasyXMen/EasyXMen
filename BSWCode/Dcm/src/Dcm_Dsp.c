@@ -90,8 +90,11 @@ void DspInternal_DcmConfirmation(uint8 protocolId, uint16 connectionId)
         Dcm_SessionCtrl.SessionTimer = DCM_S3_TIMEOUT;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle roeEvents related to DTC */
 void DspInternal_handleDTCRoe(Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew)
 {
@@ -121,6 +124,6 @@ void DspInternal_handleDTCRoe(Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusB
         }
     }
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif

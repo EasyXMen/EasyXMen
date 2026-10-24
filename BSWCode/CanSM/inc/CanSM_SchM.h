@@ -41,6 +41,9 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#if CANSM_TX_OFFLINE_ACTIVE_SUPPORT == STD_ON
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This function can be used to set all CanSM channels of the network to a receive only mode.
  * @param[in]   controllerIds            controller ids of the network
@@ -50,7 +53,9 @@ extern "C" {
  * @trace       CPD-54839
  */
 void CanSM_SetNetworkPassive(const uint8* controllerIds, uint8 networkControllerNumber);
-
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
+#endif /* CANSM_TX_OFFLINE_ACTIVE_SUPPORT == STD_ON */
 #ifdef __cplusplus
 }
 #endif

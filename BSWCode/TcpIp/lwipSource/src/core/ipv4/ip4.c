@@ -56,6 +56,7 @@
 #include "lwip/autoip.h"
 #include "lwip/stats.h"
 #include "lwip/prot/iana.h"
+#include "lwip/ipsec.h"
 
 #include <string.h>
 
@@ -105,12 +106,20 @@
 
 /** The IP header ID of the next outgoing IP packet */
 #define TCPIP_VAR_IP_ID(coreIndex)    ip_id[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t ip_id[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if LWIP_MULTICAST_TX_OPTIONS
 /** The default netif used for multicast */
 #define TCPIP_VAR_IP4_DEFAULT_MULTICAST_NETIF(coreIndex)    ip4_default_multicast_netif[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct netif *ip4_default_multicast_netif[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /**
  * @ingroup ip4
@@ -141,6 +150,8 @@ ip4_route_src(const ip4_addr_t *src, const ip4_addr_t *dest)
 }
 #endif /* LWIP_HOOK_IP4_ROUTE_SRC */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Finds the appropriate network interface for a given IP address. It
  * searches the list of network interfaces linearly. A match is found
@@ -228,6 +239,8 @@ ip4_route(const ip4_addr_t *dest)
 
   return TCPIP_VAR_NETIF_DEFAULT(TcpIp_MulticoreIndex);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if IP_FORWARD
 /**
@@ -405,6 +418,8 @@ return_noroute:
 }
 #endif /* IP_FORWARD */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Return true if the current input packet should be accepted on this netif */
 static int
 ip4_input_accept(struct netif *netif)
@@ -443,7 +458,11 @@ ip4_input_accept(struct netif *netif)
   }
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * This function is called by the network interface device driver when
  * an IP packet is received. The function does the basic checks of the
@@ -726,6 +745,14 @@ ip4_input(struct pbuf *p, struct netif *inp)
   TCPIP_VAR_IP_DATA(TcpIp_MulticoreIndex).current_ip4_header = iphdr;
   TCPIP_VAR_IP_DATA(TcpIp_MulticoreIndex).current_ip_header_tot_len = IPH_HL_BYTES(iphdr);
 
+#ifdef LWIP_IPSEC_ENABLED
+  if (ERR_OK != ipsec_rx_process(p))
+  {
+    pbuf_free(p);
+    return ERR_VAL;
+  }
+#endif
+
 #if LWIP_RAW
   /* raw input did not eat the packet? */
   raw_status = raw_input(p, inp);
@@ -798,7 +825,11 @@ ip4_input(struct pbuf *p, struct netif *inp)
 
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Sends an IP packet on a network interface. This function constructs
  * the IP header and calculates the IP header checksum. If the source
@@ -859,7 +890,11 @@ ip4_output_if_opt(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
   return ip4_output_if_src(p, src_used, dest, ttl, tos, proto, netif);
 #endif /* IP_OPTIONS_SEND */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Same as ip_output_if() but 'src' address is not replaced by netif address
  * when it is 'any'.
@@ -1037,6 +1072,11 @@ ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *d
   }
 #endif /* LWIP_MULTICAST_TX_OPTIONS */
 #endif /* ENABLE_LOOPBACK */
+
+#ifdef LWIP_IPSEC_ENABLED
+  ipsec_tx_process(&p);
+#endif
+
 #if IP_FRAG
   /* don't fragment if interface has mtu set to 0 [loopif] */
   if (netif->mtu && (p->tot_len > netif->mtu)) {
@@ -1047,7 +1087,11 @@ ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *d
   LWIP_DEBUGF(IP_DEBUG, ("ip4_output_if: call netif->output()\n"));
   return netif->output(netif, p, dest);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Simple interface to ip_output_if. It finds the outgoing network
  * interface and calls upon ip_output_if to do the actual work.
@@ -1082,8 +1126,12 @@ ip4_output(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
 
   return ip4_output_if(p, src, dest, ttl, tos, proto, netif);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_NETIF_USE_HINTS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Like ip_output, but takes and addr_hint pointer that is passed on to netif->addr_hint
  *  before calling ip_output_if.
  *
@@ -1124,6 +1172,8 @@ ip4_output_hinted(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *dest,
 
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_NETIF_USE_HINTS*/
 
 #if IP_DEBUG

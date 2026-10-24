@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -49,8 +49,12 @@
  * @trace       CPD-69088
  */
 ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt);
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_MODE_HANDING == STD_ON)
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Main function for handling mode transitions.
  * @param[in] pRt : Pointer to the runtime configuration structure.
@@ -64,9 +68,9 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt);
  * @trace       CPD-64801
  */
 ECUM_LOCAL void EcuM_ModeHandingMainFunction(EcuM_RunTimeLcType* pRt);
-#endif /*ECUM_MODE_HANDING == STD_ON*/
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+#endif /*ECUM_MODE_HANDING == STD_ON*/
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
@@ -74,7 +78,6 @@ ECUM_LOCAL void EcuM_ModeHandingMainFunction(EcuM_RunTimeLcType* pRt);
 /* ========================================== external function definitions ========================================= */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-
 /* PRQA S 1503, 1532, 2814 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 /**
  * Main function for the ECU Manager.
@@ -86,6 +89,8 @@ ECUM_LOCAL void EcuM_ModeHandingMainFunction(EcuM_RunTimeLcType* pRt);
  */
 void EcuM_MainFunction(void)
 {
+    EcuM_ArtiApiStart(1, ECUM_SID_MAINFUNCTION);
+
     EcuM_RunTimeLcType* pRt;
     if (EcuM_isInitState(&pRt))
     {
@@ -122,10 +127,13 @@ void EcuM_MainFunction(void)
 #endif /*ECUM_MODE_HANDING == STD_ON*/
         }
     }
+
+    EcuM_ArtiApiStop(1, ECUM_SID_MAINFUNCTION);
 }
 /* PRQA S 1503, 1532, 2814 -- */
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
@@ -158,12 +166,12 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt)
         /* Check that a wakeup occurred but no wakeup event set timeout */
         if ((pWks->checkWkupTimeout != 0uL) && (pRt->Wks.timerState[wksIdx] == ECUM_TIMER_CHECKING)
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
-            && (pRt->coreId == pRt->Wks.coreId)
+            && (pRt->coreId == pRt->Wks.coreId[wksIdx])
 #endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
         )
         {
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
-            ret = Tm_GetTimeSpan100us32bit(&(pRt->Wks.wkTime[wksIdx]), &spanTime);
+            ret = Tm_GetTimeSpan(pWks->tmTimerInstanceRef, &spanTime);
 #else
             spanTime = EcuM_CalculateElapsedMS(pRt->Wks.wkTime[wksIdx]);
 #endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
@@ -191,13 +199,13 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt)
         /* Check if the wake-up source is valid */
         if (((pWks->wkSource & pendingWkup) != 0uL)
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
-            && (pRt->coreId == pRt->Wks.coreId)
+            && (pRt->coreId == pRt->Wks.coreId[wksIdx])
 #endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
         )
         {
             EcuM_CheckValidation(pWks->wkSource);
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
-            ret = Tm_GetTimeSpan100us32bit(&(pRt->Wks.wkTime[wksIdx]), &spanTime);
+            ret = Tm_GetTimeSpan(pWks->tmTimerInstanceRef, &spanTime);
 #else
             spanTime = EcuM_CalculateElapsedMS(pRt->Wks.wkTime[wksIdx]);
 #endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
@@ -222,8 +230,12 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt)
     }
 }
 /* PRQA S 2814 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_MODE_HANDING == STD_ON)
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Handles mode transitions for the ECU Manager.
@@ -249,6 +261,6 @@ ECUM_LOCAL void EcuM_ModeHandingMainFunction(EcuM_RunTimeLcType* pRt)
     }
 }
 /* PRQA S 2814 -- */
-#endif /*ECUM_MODE_HANDING == STD_ON*/
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+#endif /*ECUM_MODE_HANDING == STD_ON*/

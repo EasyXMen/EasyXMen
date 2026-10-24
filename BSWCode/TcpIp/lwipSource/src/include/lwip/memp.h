@@ -45,12 +45,18 @@ extern "C" {
 #endif
 
 /* run once with empty definition to handle all custom includes in lwippools.h */
-#define LWIP_MEMPOOL(name,num,size,desc)
+#define LWIP_MEMPOOL_0(name,num,size,desc)
+#define LWIP_MEMPOOL_1(name,num,size,desc)
+#define LWIP_MEMPOOL_2(name,num,size,desc)
+#define LWIP_MEMPOOL_3(name,num,size,desc)
 #include "lwip/priv/memp_std.h"
 
 /** Create the list of all memory pools managed by memp. MEMP_MAX represents a NULL pool at the end */
 typedef enum {
-#define LWIP_MEMPOOL(name,num,size,desc)  MEMP_##name,
+#define LWIP_MEMPOOL_0(name,num,size,desc)  MEMP_##name,
+#define LWIP_MEMPOOL_1(name,num,size,desc)
+#define LWIP_MEMPOOL_2(name,num,size,desc)
+#define LWIP_MEMPOOL_3(name,num,size,desc)
 #include "lwip/priv/memp_std.h"
   MEMP_MAX
 } memp_t;
@@ -58,7 +64,11 @@ typedef enum {
 #include "lwip/priv/memp_priv.h"
 #include "lwip/stats.h"
 
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern const struct memp_desc* const memp_pools[MEMP_MAX];
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /**
  * @ingroup mempool
@@ -94,23 +104,42 @@ extern const struct memp_desc* const memp_pools[MEMP_MAX];
  * To relocate a pool, declare it as extern in cc.h. Example for GCC:
  *   extern u8_t \_\_attribute\_\_((section(".onchip_mem"))) memp_memory_my_private_pool_base[];
  */
-#define _LWIP_MEMPOOL_DECLARE(name_base, name_stats, name_tab, name_desc, num, size, desc) \
-  LWIP_DECLARE_MEMORY_ALIGNED(name_base[TCPIP_MULTICORE_NUMBER], ((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))); \
-    \
-  LWIP_MEMPOOL_DECLARE_STATS_INSTANCE(name_stats[TCPIP_MULTICORE_NUMBER]) \
-    \
-  static struct memp *name_tab[TCPIP_MULTICORE_NUMBER]; \
-    \
+#define _LWIP_MEMPOOL_DECLARE_0(name_base, name_stats, name_tab, name_desc, num, size, desc) \
+  LWIP_DECLARE_MEMORY_ALIGNED(name_base[TCPIP_MULTICORE_NUMBER], ((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size))));
+
+#define _LWIP_MEMPOOL_DECLARE_1(name_base, name_stats, name_tab, name_desc, num, size, desc) \
+  LWIP_MEMPOOL_DECLARE_STATS_INSTANCE(name_stats[TCPIP_MULTICORE_NUMBER])
+
+#define _LWIP_MEMPOOL_DECLARE_2(name_base, name_stats, name_tab, name_desc, num, size, desc) \
+  static struct memp *name_tab[TCPIP_MULTICORE_NUMBER];
+
+#define _LWIP_MEMPOOL_DECLARE_3(name_base, name_stats, name_tab, name_desc, num, size, desc) \
   const struct memp_desc name_desc = { \
     DECLARE_LWIP_MEMPOOL_DESC(desc) \
     LWIP_MEMPOOL_DECLARE_STATS_REFERENCE(&name_stats[0]) \
     LWIP_MEM_ALIGN_SIZE(size), \
     (num), \
-    (u8_t**)&name_base[0], \
+    (u8_t**)(void*)&name_base[0], \
     &name_tab[0] \
   };
+
+#define LWIP_MEMPOOL_DECLARE_0(name, num, size, desc) \
+  _LWIP_MEMPOOL_DECLARE_0(memp_memory_ ## name ## _base, memp_stats_ ## name, memp_tab_ ## name, memp_ ## name, num, size, desc)
+
+#define LWIP_MEMPOOL_DECLARE_1(name, num, size, desc) \
+  _LWIP_MEMPOOL_DECLARE_1(memp_memory_ ## name ## _base, memp_stats_ ## name, memp_tab_ ## name, memp_ ## name, num, size, desc)
+
+#define LWIP_MEMPOOL_DECLARE_2(name, num, size, desc) \
+  _LWIP_MEMPOOL_DECLARE_2(memp_memory_ ## name ## _base, memp_stats_ ## name, memp_tab_ ## name, memp_ ## name, num, size, desc)
+
+#define LWIP_MEMPOOL_DECLARE_3(name, num, size, desc) \
+  _LWIP_MEMPOOL_DECLARE_3(memp_memory_ ## name ## _base, memp_stats_ ## name, memp_tab_ ## name, memp_ ## name, num, size, desc)
+
 #define LWIP_MEMPOOL_DECLARE(name, num, size, desc) \
-  _LWIP_MEMPOOL_DECLARE(memp_memory_ ## name ## _base, memp_stats_ ## name, memp_tab_ ## name, memp_ ## name, num, size, desc)
+  LWIP_MEMPOOL_DECLARE_0(name, num, size, desc) \
+  LWIP_MEMPOOL_DECLARE_1(name, num, size, desc) \
+  LWIP_MEMPOOL_DECLARE_2(name, num, size, desc) \
+  LWIP_MEMPOOL_DECLARE_3(name, num, size, desc)
 
 #endif /* MEMP_MEM_MALLOC */
 
@@ -142,15 +171,31 @@ struct memp_malloc_helper
 };
 #endif /* MEM_USE_POOLS */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  memp_init(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if MEMP_OVERFLOW_CHECK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *memp_malloc_fn(memp_t type, const char* file, const int line);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define memp_malloc(t) memp_malloc_fn((t), __FILE__, __LINE__)
 #else
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *memp_malloc(memp_t type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  memp_free(memp_t type, void *mem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

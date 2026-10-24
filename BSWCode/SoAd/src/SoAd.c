@@ -30,6 +30,7 @@
 #include "SoAd.h"
 #include "SoAd_Cbk.h"
 #include "Det.h"
+#include "SoAd_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
@@ -37,7 +38,7 @@
  * Defines the local variable or function scope as static.
  */
 #if !defined(SOAD_LOCAL)
-#define SOAD_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
+#define SOAD_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
 #endif
 
 /**
@@ -59,7 +60,7 @@
 /**
  * Defines the size of the PDU header data.
  */
-#define SOAD_HEADER_DATA_SIZE (4UL)
+#define SOAD_HEADER_DATA_SIZE   (4UL)
 /**
  * Defines the size of the PDU header length.
  */
@@ -499,6 +500,11 @@ SOAD_LOCAL uint8 SoAd_IfPduBuffer[SOAD_MAX_IF_PDU_SIZE];
  * The total number of socket transmit buffers.
  */
 SOAD_LOCAL uint16 SoAd_TxBufferNum;
+#define SOAD_STOP_SEC_VAR_CLEARED_16
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_VAR_CLEARED_16
+#include "SoAd_MemMap.h"
 /**
  * The total number of socket receive buffers.
  */
@@ -517,6 +523,11 @@ SOAD_LOCAL SoAd_InnerSocketConManageType** SoAd_SoConManagerPtr;
 #else
         SOAD_LOCAL SoAd_InnerSocketConManageType* SoAd_SoConManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the socket connection group manager.
  */
@@ -525,7 +536,12 @@ SOAD_LOCAL SoAd_InnerSocketConGroupManageType** SoAd_SoConGroupManagerPtr;
 #else
         SOAD_LOCAL SoAd_InnerSocketConGroupManageType* SoAd_SoConGroupManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
 #if (SOAD_ROUTING_GROUP_MAX > 0u)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the routing group manager.
  */
@@ -534,8 +550,13 @@ SOAD_LOCAL SoAd_InnerRoutingGroupManageType** SoAd_RoutGroupManagerPtr;
 #else
 SOAD_LOCAL SoAd_InnerRoutingGroupManageType* SoAd_RoutGroupManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
+
 #if (SOAD_SOCKET_ROUTE_DEST_MAX > 0u)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the socket route destination manager.
  */
@@ -544,8 +565,13 @@ SOAD_LOCAL SoAd_InnerSocketRouteDestManagerType** SoAd_SoRouteDestManagerPtr;
 #else
 SOAD_LOCAL SoAd_InnerSocketRouteDestManagerType* SoAd_SoRouteDestManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
+
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0u)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the PDU route destination manager.
  */
@@ -554,8 +580,13 @@ SOAD_LOCAL SoAd_InnerPduRouteDestManagerType** SoAd_PduRouteDestManagerPtr;
 #else
 SOAD_LOCAL SoAd_InnerPduRouteDestManagerType* SoAd_PduRouteDestManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
+
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the socket transmit buffer manager.
  */
@@ -564,8 +595,14 @@ SOAD_LOCAL SoAd_SoTxBufManType** SoAd_SoTxBuffManagerPtr;
 #else
 SOAD_LOCAL SoAd_SoTxBufManType* SoAd_SoTxBuffManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
 #endif
+
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the socket receive buffer manager.
  */
@@ -574,9 +611,13 @@ SOAD_LOCAL SoAd_SoRxBufferManType** SoAd_SoRxBuffManagerPtr;
 #else
 SOAD_LOCAL SoAd_SoRxBufferManType* SoAd_SoRxBuffManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
 
 #if (SOAD_PDU_ROUTE_MAX > 0u)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * Pointer to the PDU route manager.
  */
@@ -585,63 +626,116 @@ SOAD_LOCAL SoAd_InnerPduRoutManageType** SoAd_PduRouteManagerPtr;
 #else
 SOAD_LOCAL SoAd_InnerPduRoutManageType* SoAd_PduRouteManagerPtr;
 #endif
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a socket connection.
  */
 SOAD_LOCAL const SoAd_SocketConnectionType* SoAd_SoConCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a socket connection group.
  */
 SOAD_LOCAL const SoAd_SocketConnectionGroupType* SoAd_SoConGroupCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the start index of PDU route destinations for a PDU route.
  */
 SOAD_LOCAL const SoAd_PduRouteType* SoAd_PduRouteCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a socket route destination.
  */
 SOAD_LOCAL const SoAd_SocketRouteDestType* SoAd_SoRouteDestCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a PDU route destination.
  */
 SOAD_LOCAL const SoAd_PduRouteDestType* SoAd_PduRouteDestCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the upper layer configuration for a module.
  */
 SOAD_LOCAL const SoAd_UpLayerFuncType* SoAd_UpperLayerPCCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a routing group.
  */
 SOAD_LOCAL const SoAd_RoutingGroupType* SoAd_RouteGroupCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a socket buffer.
  */
 SOAD_LOCAL const SoAd_SoBufferCfgType* SoAd_SocketBufferCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
 /**
  * @brief         Retrieves the configuration of a socket route.
  */
 SOAD_LOCAL const SoAd_SocketRouteType* SoAd_SocketRouteCfgPtr;
+#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#include "SoAd_MemMap.h"
+
+#if (0x100u > SOAD_SO_CON_MAX)
+#define SOAD_START_SEC_VAR_CLEARED_8
+#include "SoAd_MemMap.h"
 /**
  * The total number of socket connections.
  */
 SOAD_LOCAL SoAd_SoConIdType SoAd_SoConNum;
-#define SOAD_STOP_SEC_VAR_CLEARED_PTR
+#define SOAD_STOP_SEC_VAR_CLEARED_8
 #include "SoAd_MemMap.h"
+#else
+#define SOAD_START_SEC_VAR_CLEARED_16
+#include "SoAd_MemMap.h"
+        /**
+         * The total number of socket connections.
+         */
+        SOAD_LOCAL SoAd_SoConIdType SoAd_SoConNum;
+#define SOAD_STOP_SEC_VAR_CLEARED_16
+#include "SoAd_MemMap.h"
+#endif
 
 /* ============================================ external data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
-
-#define SOAD_START_SEC_CODE
-#include "SoAd_MemMap.h"
 
 /**
  * @brief         Check if TCP TP is transmiting
@@ -671,10 +765,15 @@ SOAD_LOCAL_INLINE boolean SoAd_CheckTCPTpTransmiting(SoAd_SoConIdType soConId, b
  */
 SOAD_LOCAL_INLINE boolean SoAd_CheckUDPSoConOnlyListen(SoAd_SoConIdType soConId)
 {
+#if (STD_ON == SOAD_SUPPORT_UDP)
     return (
         (SOAD_UDP == SoAd_SoConCfgPtr[soConId].TcpUdpProtocol)
         && SOAD_UDPTYPE_CFG(SoAd_SoConCfgPtr[soConId].SocketConnectionGroupRef)->SocketUdpListenOnly);
+#else
+            return FALSE;
+#endif
 }
+
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
 /**
  * @brief         Get socket connection id from PDU route metadata
@@ -717,6 +816,8 @@ SOAD_LOCAL_INLINE void SoAd_UpdateTcpReceived(SoAd_SoConIdType soConId, TcpIp_So
 }
 
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Fill metadata to SDU
  * @param[in] SoConId: The ID of the socket connection.
@@ -728,7 +829,12 @@ SOAD_LOCAL_INLINE void SoAd_UpdateTcpReceived(SoAd_SoConIdType soConId, TcpIp_So
  * @trace       CPD-74664
  */
 SOAD_LOCAL uint8* SoAd_MetaDataFillHandle(SoAd_SoConIdType SoConId, boolean metaDataEnable, uint8* DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Sets up the automatic socket connection for transmission.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -743,8 +849,12 @@ SOAD_LOCAL void SoAd_SocnTransmitAutomaticSoConSetupHandle(
     SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     TcpIp_ProtocolType             Protocol);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Opens a TCP server socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -760,6 +870,11 @@ SOAD_LOCAL void SoAd_OpenTcpServerSoConHandle(
     SoAd_uintx                          SoConGroup,
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Opens a TCP client socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -774,9 +889,13 @@ SOAD_LOCAL void SoAd_OpenTcpClientSoConHandle(
     SoAd_SoConIdType               SoConId,
     SoAd_uintx                     SoConGroup,
     SoAd_InnerSocketConManageType* soConMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for transmission confirmation.
  * @param[in]     partIndex: The partition index.
@@ -786,8 +905,13 @@ SOAD_LOCAL void SoAd_OpenTcpClientSoConHandle(
  * @trace       CPD-74668
  */
 SOAD_LOCAL void SoAd_MainFunctionTxConfirmationHandle(void);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (STD_ON == SOAD_SUPPORT_NPDUUDPTXBUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for NPDU UDP transmission.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -798,9 +922,13 @@ SOAD_LOCAL void SoAd_MainFunctionTxConfirmationHandle(void);
  * @trace       CPD-74669
  */
 SOAD_LOCAL void SoAd_MainFunctionNPduUdpTxHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (SOAD_PDU_ROUTE_DEST_MAX > 0))
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Gets the IF PDU data.
  * @param[in]     partIndex: The partition index.
@@ -815,9 +943,13 @@ SOAD_LOCAL Std_ReturnType SoAd_GetIfPduData(
     const SoAd_PduRouteType*     pduRouteCfgPtr,
     SoAd_InnerPduRoutManageType* pduRouteMgmtPtr,
     const PduInfoType*           pduInfoPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_NPDUUDPTXBUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Handles the "trigger always" operation for UDP transmission.
  * @param [in]    TxPduId:The ID of the PDU to be transmitted.
@@ -834,7 +966,11 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandleTriggerAlways(
     const SoAd_PduRouteDestType*   pduRouteDestCfgPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoConIdType               SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Handles the "trigger never" operation for UDP transmission.
  * @param [in]    TxPduId: The ID of the PDU to be transmitted.
@@ -851,6 +987,11 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandleTriggerNever(
     const SoAd_PduRouteDestType*   pduRouteDestCfgPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoConIdType               SoConI);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the transmission of NPDU UDP.
  * @param[in]     TxPduId: The ID of the transmit PDU.
@@ -867,9 +1008,13 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandle(
     const SoAd_PduRouteDestType*   pduRouteDestCfgPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoConIdType               SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (SOAD_PDU_ROUTE_DEST_MAX > 0))
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Transmits an IF PDU on a specific socket connection.
  * @param[in]     TxPduId: The ID of the transmit PDU.
@@ -887,9 +1032,13 @@ SOAD_LOCAL Std_ReturnType SoAd_IfTransmitSoCon(
     SoAd_uintx                     PduRouteDestId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoConIdType               SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the error for a TP PDU transmission.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -907,8 +1056,12 @@ SOAD_LOCAL void SoAd_TpPduTxErrorHandle(
     SoAd_uintx             TxBufferId,
     SoAd_UpLayerModuleType UpModule,
     PduIdType              UpPduId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Checks if the remote address of a socket connection is locked.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -920,8 +1073,12 @@ SOAD_LOCAL void SoAd_TpPduTxErrorHandle(
  */
 SOAD_LOCAL boolean
     SoAd_SoConRemoteAddrLocked(SoAd_SoConIdType SoConId, const SoAd_InnerSocketConManageType* soConMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for TP PDU transmission.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -932,7 +1089,12 @@ SOAD_LOCAL boolean
  * @trace       CPD-74675
  */
 SOAD_LOCAL void SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Releases the remote address for a socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -947,7 +1109,12 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrHandle(
     SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_uintx                     SoConGroupId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the PDU route manager.
  * @param[in]     TxPduId: The ID of the transmit PDU.
@@ -958,8 +1125,12 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrHandle(
  * @trace       CPD-74677
  */
 SOAD_LOCAL void SoAd_PduRouteManagerInit(PduIdType TxPduId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Releases the remote address in the main function for a socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -970,8 +1141,12 @@ SOAD_LOCAL void SoAd_PduRouteManagerInit(PduIdType TxPduId);
  * @trace       CPD-74678
  */
 SOAD_LOCAL void SoAd_ReleaseRemoteAddrMainFunctionHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the transmit buffer.
  * @param[in]     TxBufferId: The ID of the transmit buffer.
@@ -982,9 +1157,13 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrMainFunctionHandle(SoAd_SoConIdType SoConI
  * @trace       CPD-74679
  */
 SOAD_LOCAL void SoAd_TxBufferInit(SoAd_uintx TxBufferId, uint16 partIndex);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the receive buffer.
  * @param[in]     RxBufferId: The ID of the receive buffer.
@@ -995,10 +1174,14 @@ SOAD_LOCAL void SoAd_TxBufferInit(SoAd_uintx TxBufferId, uint16 partIndex);
  * @trace       CPD-74680
  */
 SOAD_LOCAL void SoAd_RxBufferInit(SoAd_uintx RxBufferId, uint16 partIndex);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the new PDU for header enable.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1013,6 +1196,11 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the old PDU for header enable.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1027,6 +1215,11 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the TP PDU for header enable.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1042,9 +1235,13 @@ SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     PduLengthType                  UpBufferSize,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (STD_ON == SOAD_SUPPORT_HEADERID))
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the IF PDU for header enable.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1059,8 +1256,12 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
     const SoAd_InnerSocketConManageType* soConMgmtPtr,
     const SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*              soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception data in the main function with header disable.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1075,7 +1276,11 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception data in the main function for a socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1086,11 +1291,16 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
  * @trace       CPD-74686
  */
 SOAD_LOCAL void SoAd_SoConRxDataMainFunctionHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handle received TP PDU for a UDP Header enable socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1109,7 +1319,12 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxTpPduHandle(
     SoAd_uintx                     SocketRouteId,
     PduLengthType*                 DataPosition,
     uint8*                         DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception of a UDP socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1126,11 +1341,15 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     uint16                         RxMessageLength,
     uint8*                         DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception of a TCP socket connection for a TP PDU.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1149,6 +1368,11 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxTpPduHandle(
     SoAd_uintx                     SocketRouteId,
     PduLengthType                  RxMessageLength,
     uint8*                         DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the full TP PDU reception.
  * @param[in]     Parameter: Pointer to the reception handle parameters.
@@ -1162,7 +1386,12 @@ SOAD_LOCAL void SoAd_RxFullTpPduHandle(
     const SoAd_RxFullTpPduHandleType* Parameter,
     SoAd_InnerSocketConManageType*    soConMgmtPtr,
     SoAd_SoRxBufferManType*           soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received TP PDU with disabled header
  * @param[in] SoConId: The ID of the socket connection.
@@ -1181,8 +1410,12 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxTpPduHandle(
     SoAd_uintx                     SocketRouteId,
     PduLengthType                  RxMessageLength,
     uint8*                         DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received PDU with enabled header for TCP socket connection
  * @param[in] SoConId: The ID of the socket connection.
@@ -1199,8 +1432,12 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxHandle(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     PduLengthType                  RxMessageLength,
     uint8*                         DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Copy received data to SoAd Rx Buffer
  * @param[in] SoConId: The ID of the socket connection.
@@ -1218,8 +1455,12 @@ SOAD_LOCAL boolean SoAd_CopyDataToRxBuffer(
     const uint8*                   DataPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received IF PDU with disabled header for socket connection
  * @param[in] SoConId: The ID of the socket connection.
@@ -1237,8 +1478,13 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxIfPduHandle(
     SoAd_uintx       SocketRouteId,
     PduLengthType    RxMessageLength,
     uint8*           DataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the valid socket connection based on the socket ID and remote address.
  * @param[in]     SocketId: The ID of the socket.
@@ -1257,10 +1503,14 @@ SOAD_LOCAL boolean SoAd_FindTheValidSoCon(
     SoAd_FindTheValidSoConType* UdpParaPtr,
 #endif
     SoAd_SoConIdType* SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Performs a strict header length check for UDP.
  * @param[in]     SoConGroupId: The ID of the socket connection group.
@@ -1272,8 +1522,12 @@ SOAD_LOCAL boolean SoAd_FindTheValidSoCon(
  * @trace       CPD-74696
  */
 SOAD_LOCAL boolean SoAd_UdpStrictHeaderLenCheck(SoAd_uintx SoConGroupId, const uint8* BufPtr, uint16 Length);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the UDP alive supervision time for a socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1284,8 +1538,12 @@ SOAD_LOCAL boolean SoAd_UdpStrictHeaderLenCheck(SoAd_uintx SoConGroupId, const u
  * @trace       CPD-74697
  */
 SOAD_LOCAL void SoAd_UdpAliveSupervisionTimeHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the best match algorithm socket connection.
  * @param[in]     SoConGroupId: The ID of the socket connection group.
@@ -1303,7 +1561,11 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
     const TcpIp_SockAddrType* RemoteAddrPtr,
     SoAd_SoConIdType*         SoConId,
     SoAd_BestMatchStateType   CheckSoConState);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Change socket parameters
  * @param[in] SocketId: The ID of the TCP/IP socket.
@@ -1314,7 +1576,12 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
  * @trace       CPD-74699
  */
 SOAD_LOCAL void SoAd_ChangeSocketParameter(TcpIp_SocketIdType SocketId, SoAd_uintx SoConGroup);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Change TCP socket parameters
  * @param[in] SocketId: The ID of the TCP/IP socket.
@@ -1325,9 +1592,13 @@ SOAD_LOCAL void SoAd_ChangeSocketParameter(TcpIp_SocketIdType SocketId, SoAd_uin
  * @trace       CPD-74700
  */
 SOAD_LOCAL void SoAd_ChangeTcpSocketParameter(TcpIp_SocketIdType SocketId, SoAd_uintx SoConGroup);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Open UDP socket connection
  * @param[in] SoConId: The ID of the socket connection.
@@ -1343,7 +1614,12 @@ SOAD_LOCAL void SoAd_OpenUdpSoConHandle(
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_uintx                          SoConGroup,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Notify socket connection mode change and TP start reception
  * @param[in] SoConId: The ID of the socket connection.
@@ -1358,7 +1634,11 @@ SOAD_LOCAL void SoAd_SoConModeChgNotificationAndTpStartOfReception(
     SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_uintx                     SoConGroup);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Notify socket connection IP address assignment change
  * @param[in] SoConId: The ID of the socket connection.
@@ -1371,7 +1651,11 @@ SOAD_LOCAL void SoAd_SoConModeChgNotificationAndTpStartOfReception(
  */
 SOAD_LOCAL void
     SoAd_SoConLocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, SoAd_uintx SoConGroup, TcpIp_IpAddrStateType State);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle socket connection mode change
  * @param[in] SoConId: The ID of the socket connection.
@@ -1382,8 +1666,12 @@ SOAD_LOCAL void
  * @trace       CPD-74704
  */
 SOAD_LOCAL void SoAd_SoConModeChangeHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received TP PDU after socket connection is closed
  * @param[in] SoConId: The ID of the socket connection.
@@ -1394,6 +1682,11 @@ SOAD_LOCAL void SoAd_SoConModeChangeHandle(SoAd_SoConIdType SoConId);
  * @trace       CPD-74705
  */
 SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check if the received TP PDU has been processed when TCP received FIN
  * @param[in] SoConId: The ID of the socket connection.
@@ -1405,8 +1698,12 @@ SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId);
  * @trace       CPD-74706
  */
 SOAD_LOCAL boolean SoAd_CheckRxTpPduDataHandle(SoAd_SoConIdType SoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Close socket connection
  * @param[in] SoConId: The ID of the socket connection.
@@ -1423,7 +1720,11 @@ SOAD_LOCAL void SoAd_SoConCloseHandle(
     boolean                             CloseSocket,
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle socket connection disconnection and recovery
  * @param[in] SoConId: The ID of the socket connection.
@@ -1439,7 +1740,11 @@ SOAD_LOCAL void SoAd_DisconnectionAndRecoveryHandle(
     SoAd_uintx                          SoConGroup,
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes Routing group runtime variable
  * @param[in]     TxPduId: The ID of the transmit PDU.
@@ -1450,12 +1755,16 @@ SOAD_LOCAL void SoAd_DisconnectionAndRecoveryHandle(
  * @trace       CPD-74709
  */
 SOAD_LOCAL void SoAd_RoutingGroupInit(void);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 /* id: routing group identifier specifying the routing group
 enFlag: group control enable shall be set TRUE otherwise is FALSE
 soConIdPtr:socket connection index specifying the socket connection on
 which the routing group  */
 #if (0u < SOAD_ROUTING_GROUP_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Controls the routing group.
  * @param[in]     id: The ID of the routing group.
@@ -1467,10 +1776,14 @@ which the routing group  */
  * @trace       CPD-74710
  */
 SOAD_LOCAL Std_ReturnType SoAd_RoutingGroupControl(SoAd_RoutingGroupIdType id, boolean enFlag);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 /* TpTransmit to specification socket connection id */
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Transmits a TP PDU on a specific socket connection.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1488,9 +1801,13 @@ SOAD_LOCAL Std_ReturnType SoAd_TpTransmitSoCon(
     SoAd_uintx                         PduRouteDestId,
     const PduInfoType*                 SoAdSrcPduInfoPtr,
     SoAd_InnerPduRouteDestManagerType* pduRouteDestMPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Closes a UDP socket connection group.Called by SoAd_TcpIpEvent.
  * @param[in]     Event: The TCP/IP event.
@@ -1502,12 +1819,16 @@ SOAD_LOCAL Std_ReturnType SoAd_TpTransmitSoCon(
  * @trace       CPD-74712
  */
 SOAD_LOCAL void SoAd_CloseUdpSoConGroup(TcpIp_EventType Event, SoAd_uintx soConGroupId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 /*Called by SoAd_TxConfirmation.
  *Tcp TxConfirmation handle*/
 #if (STD_ON == SOAD_SUPPORT_TCP)
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the TCP transmission confirmation.
  * @param[in]     soConId: The ID of the socket connection.
@@ -1520,10 +1841,14 @@ SOAD_LOCAL void SoAd_CloseUdpSoConGroup(TcpIp_EventType Event, SoAd_uintx soConG
  * @trace       CPD-74713
  */
 SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Length, SoAd_uintx pduRouteDestId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the header ID and socket route ID.
  * @param[in]     SoConId: The ID of the socket connection.
@@ -1536,9 +1861,13 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
  */
 SOAD_LOCAL boolean
     SoAd_FindHeaderIDAndSocketRouteId(SoAd_SoConIdType SoConId, uint32 HeaderId, SoAd_uintx* SocketRouteID);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER) || (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the transmit and receive buffers.
  * @param[in]     partIndex: The partition index.
@@ -1548,8 +1877,12 @@ SOAD_LOCAL boolean
  * @trace       CPD-74715
  */
 SOAD_LOCAL void SoAd_TxRxBufferInit(uint16 partIndex);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Match TCP socket ID
  * @param[in] socketId: The ID of the TCP/IP socket.
@@ -1562,7 +1895,12 @@ SOAD_LOCAL void SoAd_TxRxBufferInit(uint16 partIndex);
  */
 SOAD_LOCAL boolean
     SoAd_MatchTCPSocketId(TcpIp_SocketIdType socketId, SoAd_SoConIdType* soConIdPtr, boolean tpPduTransmitting);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Match TCP socket group socket ID
  * @param[in] socketId: The ID of the TCP/IP socket.
@@ -1573,9 +1911,13 @@ SOAD_LOCAL boolean
  * @trace       CPD-74717
  */
 SOAD_LOCAL boolean SoAd_MatchTCPSoConGroupSocketId(TcpIp_SocketIdType socketId, SoAd_uintx* soConGroupIdPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check initialization status of the SoAd module.
  * @param[in] apiId: The API ID.
@@ -1586,6 +1928,11 @@ SOAD_LOCAL boolean SoAd_MatchTCPSoConGroupSocketId(TcpIp_SocketIdType socketId, 
  * @trace       CPD-74718
  */
 SOAD_LOCAL boolean SoAd_DetCheckInitStatus(uint8 apiId, ApplicationType* applicationIdPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check TX PDU ID
  * @param[in] apiId: The API ID.
@@ -1598,6 +1945,11 @@ SOAD_LOCAL boolean SoAd_DetCheckInitStatus(uint8 apiId, ApplicationType* applica
  * @trace       CPD-74719
  */
 SOAD_LOCAL boolean SoAd_DetCheckTxPduId(uint8 apiId, PduIdType txPduId, boolean checkULType, SoAd_UpperLayerType type);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check socket route destination ID
  * @param[in] apiId: The API ID.
@@ -1611,6 +1963,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTxPduId(uint8 apiId, PduIdType txPduId, boolean 
  */
 SOAD_LOCAL boolean
     SoAd_DetCheckSocketRouteDestId(uint8 apiId, PduIdType pduId, boolean checkULType, SoAd_UpperLayerType type);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check routing group ID
  * @param[in] apiId: The API ID.
@@ -1621,6 +1978,11 @@ SOAD_LOCAL boolean
  * @trace       CPD-74721
  */
 SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupId(uint8 apiId, SoAd_RoutingGroupIdType routingGroupId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check routing group ID
  * @param[in] apiId: The API ID.
@@ -1631,6 +1993,11 @@ SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupId(uint8 apiId, SoAd_RoutingGroupIdT
  * @trace       CPD-74722
  */
 SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupTxTriggerable(uint8 apiId, SoAd_RoutingGroupIdType routingGroupId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check socket connection ID
  * @param[in] apiId: The API ID.
@@ -1641,6 +2008,11 @@ SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupTxTriggerable(uint8 apiId, SoAd_Rout
  * @trace       CPD-74723
  */
 SOAD_LOCAL boolean SoAd_DetCheckSoConId(uint8 apiId, SoAd_SoConIdType soConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if automatic socket connection setup is enabled for a given socket connection.
  * @param[in] apiId: The API identifier.
@@ -1651,6 +2023,11 @@ SOAD_LOCAL boolean SoAd_DetCheckSoConId(uint8 apiId, SoAd_SoConIdType soConId);
  * @trace       CPD-74724
  */
 SOAD_LOCAL boolean SoAd_DetCheckAutoSoConSetup(uint8 apiId, SoAd_SoConIdType soConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a pointer parameter is valid (not NULL).
  * @param[in] apiId: The API identifier.
@@ -1661,6 +2038,11 @@ SOAD_LOCAL boolean SoAd_DetCheckAutoSoConSetup(uint8 apiId, SoAd_SoConIdType soC
  * @trace       CPD-74725
  */
 SOAD_LOCAL boolean SoAd_DetCheckPtrParameter(uint8 apiId, const void* parameterPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a length parameter is valid (not zero).
  * @param[in] apiId: The API identifier.
@@ -1671,6 +2053,11 @@ SOAD_LOCAL boolean SoAd_DetCheckPtrParameter(uint8 apiId, const void* parameterP
  * @trace       CPD-74726
  */
 SOAD_LOCAL boolean SoAd_DetCheckLength(uint8 apiId, uint16 length);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the length of data to be transmitted without acknowledgment is valid.
  * @param[in] apiId: The API identifier.
@@ -1682,6 +2069,11 @@ SOAD_LOCAL boolean SoAd_DetCheckLength(uint8 apiId, uint16 length);
  * @trace       CPD-74727
  */
 SOAD_LOCAL boolean SoAd_DetCheckTCPTxNoAckLength(uint8 apiId, uint16 length, PduLengthType txNoAckLength);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a TCP event is valid.
  * @param[in] apiId: The API identifier.
@@ -1692,6 +2084,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTCPTxNoAckLength(uint8 apiId, uint16 length, Pdu
  * @trace       CPD-74728
  */
 SOAD_LOCAL boolean SoAd_DetCheckTCPEvent(uint8 apiId, TcpIp_EventType Event);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a socket ID is valid.
  * @param[in] apiId: The API identifier.
@@ -1702,6 +2099,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTCPEvent(uint8 apiId, TcpIp_EventType Event);
  * @trace       CPD-74729
  */
 SOAD_LOCAL boolean SoAd_DetCheckSocketIdValid(uint8 apiId, boolean socketIdValid);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the domain type of a socket is valid.
  * @param[in] apiId: The API identifier.
@@ -1713,6 +2115,12 @@ SOAD_LOCAL boolean SoAd_DetCheckSocketIdValid(uint8 apiId, boolean socketIdValid
  * @trace       CPD-74730
  */
 SOAD_LOCAL boolean SoAd_DetCheckTcpIpDomainType(uint8 apiId, TcpIp_DomainType domainType, SoAd_SoConIdType soConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the partition of a transmit PDU ID is valid.
  * @param[in] apiId: The API identifier.
@@ -1723,9 +2131,12 @@ SOAD_LOCAL boolean SoAd_DetCheckTcpIpDomainType(uint8 apiId, TcpIp_DomainType do
  * @synchronous   TRUE
  * @trace       CPD-74731
  */
-#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
 SOAD_LOCAL boolean SoAd_DetCheckTxPduIdPartition(uint8 apiId, PduIdType txPduId, ApplicationType curAppId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the partition of a receive PDU ID is valid.
  * @param[in] apiId: The API identifier.
@@ -1737,7 +2148,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTxPduIdPartition(uint8 apiId, PduIdType txPduId,
  * @trace       CPD-74732
  */
 SOAD_LOCAL boolean SoAd_DetCheckRxPduIdPartition(uint8 apiId, PduIdType pduId, ApplicationType curAppId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the partition of a routing group ID is valid.
  * @param[in] apiId: The API identifier.
@@ -1750,7 +2165,9 @@ SOAD_LOCAL boolean SoAd_DetCheckRxPduIdPartition(uint8 apiId, PduIdType pduId, A
  */
 SOAD_LOCAL boolean
     SoAd_DetCheckRoutingGroupIdPartition(uint8 apiId, SoAd_RoutingGroupIdType routingGroupId, ApplicationType curAppId);
-#endif
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 /**
  * @brief Checks if the partition of a socket connection group ID is valid.
  * @param[in] apiId: The API identifier.
@@ -1761,12 +2178,17 @@ SOAD_LOCAL boolean
  * @synchronous   TRUE
  * @trace       CPD-74734
  */
-#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_DetCheckSoConIdPartition(uint8 apiId, SoAd_uintx soConGroupId, ApplicationType curAppId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief match soConid of metadata in configuration txPdu
  * @param[in] txPduId: The API identifier.
@@ -1780,9 +2202,13 @@ SOAD_LOCAL boolean SoAd_DetCheckSoConIdPartition(uint8 apiId, SoAd_uintx soConGr
  * @trace         CPD-78701
  */
 SOAD_LOCAL boolean SoAd_MatchMetaDataSoConId(PduIdType txPduId, SoAd_uintx pduRouteDestId, SoAd_SoConIdType txSoConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief handle TCP event
  * @param[in] soConId: socket connection id.
@@ -1798,9 +2224,13 @@ SOAD_LOCAL void SoAd_HandleTcpIpEventTCP(
     SoAd_SoConIdType               soConId,
     TcpIp_EventType                Event,
     SoAd_InnerSocketConManageType* soConMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID) && (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief handle enable header reception message
  * @param[in] soConId: socket connection id.
@@ -1819,8 +2249,13 @@ SOAD_LOCAL boolean SoAd_HandleRxIndicationEnableHeader(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     uint8*                         bufPtr,
     uint16                         length);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief handle disable header reception message
  * @param[in] soConId: socket connection id.
@@ -1839,9 +2274,13 @@ SOAD_LOCAL boolean SoAd_HandleRxIndicationDisableHeader(
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     uint8*                         bufPtr,
     uint16                         length);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief find valid udp socket connection
  * @param[in] soConGroupId: socket connection group id.
@@ -1861,9 +2300,13 @@ SOAD_LOCAL boolean SoAd_FindUdpValidSoCon(
     const TcpIp_SockAddrType*   RemoteAddrPtr,
     SoAd_FindTheValidSoConType* UdpParaPtr,
     SoAd_SoConIdType*           soConIdPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief handle open TCP socket connection
  * @param[in] soConId: socket connection id.
@@ -1880,9 +2323,13 @@ SOAD_LOCAL void SoAd_OpenTCPSoConHandle(
     SoAd_uintx                          soConGroup,
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Attempt open UDP socket connection
  * @param[in] soConId: socket connection id.
@@ -1898,8 +2345,12 @@ SOAD_LOCAL void SoAd_AttemptOpenUDPSoCon(
     SoAd_uintx                          soConGroup,
     SoAd_InnerSocketConManageType*      soConMgmtPtr,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief close socket connection socket
  * @param[in] soConId: socket connection id.
@@ -1917,7 +2368,11 @@ SOAD_LOCAL void SoAd_CloseSoConTcpIpSocket(
     boolean                             closeSocket,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr,
     SoAd_InnerSocketConManageType*      soConMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief control routing group specific socket connection
  * @param[in] id: routing group id.
@@ -1931,8 +2386,12 @@ SOAD_LOCAL void SoAd_CloseSoConTcpIpSocket(
  */
 SOAD_LOCAL Std_ReturnType
     SoAd_RoutingGroupControlSpcificSoCon(SoAd_RoutingGroupIdType id, boolean enFlag, SoAd_SoConIdType soConId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Close  TCP socket connection group.Called by SoAd_TcpIpEvent.
  * @param[in]     Event: The TCP/IP event.
@@ -1947,10 +2406,14 @@ SOAD_LOCAL void SoAd_CloseTcpSoConGroup(
     TcpIp_EventType                     event,
     SoAd_uintx                          soConGroupId,
     SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handle Header Enable received Tp Pdu.
  * @param[in]     pduLength: Length of Pdu.
@@ -1968,8 +2431,13 @@ SOAD_LOCAL void SoAd_RxTpPduHeaderEnableHandle(
     const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initialize socket connection manager.
  * @param[in]     partIndex: partition id.
@@ -1993,6 +2461,8 @@ SOAD_LOCAL void SoAd_SoConManagerInit(void);
 void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr)
 /* PRQA S 6010,6030,1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x01, SoAdConfigPtr);
+
     uint16 partIndex = 0u;
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
     ApplicationType curAppId = GetApplicationID();
@@ -2107,13 +2577,21 @@ void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr)
             SoAd_InitStatus = SOAD_STATE_INIT;
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x01);
+}
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  *  Returns socket connection index related to the specified TxPduId.
  */
 Std_ReturnType SoAd_GetSoConId(PduIdType TxPduId, SoAd_SoConIdType* SoConIdPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x07, TxPduId, SoConIdPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2132,15 +2610,24 @@ Std_ReturnType SoAd_GetSoConId(PduIdType TxPduId, SoAd_SoConIdType* SoConIdPtr)
             result                    = E_OK;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x07, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 /**
  * Returns the version information.
  */
 #if (STD_ON == SOAD_VERSION_INFO_API)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 void SoAd_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x02, versioninfo);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
 
     if (NULL_PTR == versioninfo)
@@ -2156,9 +2643,15 @@ void SoAd_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = (uint8)SOAD_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = (uint8)SOAD_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x02);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Requests transmission of an IF I-PDU.
  */
@@ -2166,6 +2659,8 @@ void SoAd_GetVersionInfo(Std_VersionInfoType* versioninfo)
 Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 6030,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x03, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (0u < SOAD_MAX_IF_PDU_SIZE)
@@ -2219,7 +2714,8 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                     {
                         result = E_NOT_OK;
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
-                        if (!SoAd_MatchMetaDataSoConId(TxPduId, pduRouteDestId, pduRouteMgmtPtr->TxSoConId))
+                        boolean match = SoAd_MatchMetaDataSoConId(TxPduId, pduRouteDestId, pduRouteMgmtPtr->TxSoConId);
+                        if (!match)
                         {
                             result = E_NOT_OK;
                             break;
@@ -2253,6 +2749,13 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                             else
                             {
                                 result = E_OK;
+#if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
+                                if ((pduRouteCfgPtr->MetaDataEnable) && (match)
+                                    && (SOAD_NO_TXMETADATA != pduRouteMgmtPtr->TxSoConId))
+                                {
+                                    break;
+                                }
+#endif
                             }
                         }
                     }
@@ -2265,9 +2768,16 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 #endif
     SOAD_NOUSED(TxPduId);
     SOAD_NOUSED(PduInfoPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x03, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Triggers the transmission of all If-TxPDUs identified by the parameter id after requesting the data from the
  * related upper layer.
@@ -2276,6 +2786,8 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id)
 /* PRQA S 1503,6030,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x1D, id);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if ((0u < SOAD_ROUTING_GROUP_MAX) && (0u < SOAD_MAX_IF_PDU_SIZE))
@@ -2362,9 +2874,16 @@ Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id)
     }
 #endif
     SOAD_NOUSED(id);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1D, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Triggers the transmission of all If-TxPDUs identified by the parameter id on the socket connection specified by
  *  SoConId after requesting the data from the related upper layer.
@@ -2373,6 +2892,8 @@ Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id)
 Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId)
 /* PRQA S 1532,6030,6070 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x1F, id, SoConId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if ((0u < SOAD_ROUTING_GROUP_MAX) && (0u < SOAD_MAX_IF_PDU_SIZE))
@@ -2464,14 +2985,23 @@ Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, S
 #endif
     SOAD_NOUSED(id);
     SOAD_NOUSED(SoConId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1F, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Requests cancellation of the transmission via TP for a specific I-PDU.
  */
 Std_ReturnType SoAd_TpCancelTransmit(PduIdType TxPduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x05, TxPduId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2510,14 +3040,23 @@ Std_ReturnType SoAd_TpCancelTransmit(PduIdType TxPduId)
 #endif
     }
     SOAD_NOUSED(TxPduId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x05, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Requests cancellation of the reception via TP for a specific I-PDU.
  */
 Std_ReturnType SoAd_TpCancelReceive(PduIdType RxPduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x06, RxPduId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2576,9 +3115,16 @@ Std_ReturnType SoAd_TpCancelReceive(PduIdType RxPduId)
 #endif
     }
     SOAD_NOUSED(RxPduId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x06, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Requests transmission of an I-PDU.
  */
@@ -2586,6 +3132,8 @@ Std_ReturnType SoAd_TpCancelReceive(PduIdType RxPduId)
 Std_ReturnType SoAd_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x04, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2644,9 +3192,16 @@ Std_ReturnType SoAd_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
     }
     SOAD_NOUSED(TxPduId);
     SOAD_NOUSED(PduInfoPtr);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x04, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * This service opens the socket connection specified by SoConId.
  */
@@ -2654,6 +3209,8 @@ Std_ReturnType SoAd_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 Std_ReturnType SoAd_OpenSoCon(SoAd_SoConIdType SoConId)
 /* PRQA S 6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x08, SoConId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2700,9 +3257,16 @@ Std_ReturnType SoAd_OpenSoCon(SoAd_SoConIdType SoConId)
         }
         result = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x08, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * This service closes the socket connection specified by SoConId.
  */
@@ -2710,6 +3274,8 @@ Std_ReturnType SoAd_OpenSoCon(SoAd_SoConIdType SoConId)
 Std_ReturnType SoAd_CloseSoCon(SoAd_SoConIdType SoConId, boolean abort)
 /* PRQA S 6030,4603,3334 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x09, SoConId, abort);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2765,9 +3331,16 @@ Std_ReturnType SoAd_CloseSoCon(SoAd_SoConIdType SoConId, boolean abort)
         }
         result = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x09, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Returns current state of the socket connection specified by SoConId.
  */
@@ -2775,6 +3348,8 @@ Std_ReturnType SoAd_CloseSoCon(SoAd_SoConIdType SoConId, boolean abort)
 void SoAd_GetSoConMode(SoAd_SoConIdType SoConId, SoAd_SoConModeType* ModePtr)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x22, SoConId, ModePtr);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     ApplicationType curAppId;
     if (SoAd_DetCheckInitStatus(SOAD_SID_GETSOCONMODE, &curAppId)
@@ -2794,8 +3369,14 @@ void SoAd_GetSoConMode(SoAd_SoConIdType SoConId, SoAd_SoConModeType* ModePtr)
                 *ModePtr = SoAd_SoConManagerPtr[SoConId].SoConMode;
 #endif
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x22);
+}
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service the local IP address assignment which shall be used for the socket connection specified by
  * SoConId is initiated.
@@ -2807,6 +3388,20 @@ Std_ReturnType SoAd_RequestIpAddrAssignment(
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        SoAd,
+        0,
+        Bsw_Start,
+        6,
+        0x0A,
+        SoConId,
+        Type,
+        LocalIpAddrPtr,
+        Netmask,
+        DefaultRouterPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2826,14 +3421,23 @@ Std_ReturnType SoAd_RequestIpAddrAssignment(
         TcpIp_LocalAddrIdType localAddrId = SOAD_SOCKETLOCALADDR_CFG(soConGroup).LocalAddrId;
         result = TcpIp_RequestIpAddrAssignment(localAddrId, Type, LocalIpAddrPtr, Netmask, DefaultRouterPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0A, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service the local IP address assignment used for the socket connection specified by SoConId is released.
  */
 Std_ReturnType SoAd_ReleaseIpAddrAssignment(SoAd_SoConIdType SoConId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x0B, SoConId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2853,9 +3457,16 @@ Std_ReturnType SoAd_ReleaseIpAddrAssignment(SoAd_SoConIdType SoConId)
         TcpIp_LocalAddrIdType localAddrId = SOAD_SOCKETLOCALADDR_CFG(soConGroup).LocalAddrId;
         result                            = TcpIp_ReleaseIpAddrAssignment(localAddrId);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0B, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Retrieves the local address (IP address and port) actually used for the SoAd socket connection specified by SoConId,
  * the netmask and default router
@@ -2868,6 +3479,8 @@ Std_ReturnType SoAd_GetLocalAddr(
     TcpIp_SockAddrType* DefaultRouterPtr)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 5, 0x0C, SoConId, LocalAddrPtr, NetmaskPtr, DefaultRouterPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2888,9 +3501,16 @@ Std_ReturnType SoAd_GetLocalAddr(
         LocalAddrPtr->port                = SoAd_SoConGroupCfgPtr[soConGroup].SocketLocalPort;
         result                            = TcpIp_GetIpAddr(localAddrId, LocalAddrPtr, NetmaskPtr, DefaultRouterPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0C, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Retrieves the physical source address of the EthIf controller used by the SoAd socket connection specified by
  * SoConId.
@@ -2899,6 +3519,8 @@ Std_ReturnType SoAd_GetLocalAddr(
 Std_ReturnType SoAd_GetPhysAddr(SoAd_SoConIdType SoConId, uint8* PhysAddrPtr)
 /* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x0D, SoConId, PhysAddrPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2917,14 +3539,23 @@ Std_ReturnType SoAd_GetPhysAddr(SoAd_SoConIdType SoConId, uint8* PhysAddrPtr)
         TcpIp_LocalAddrIdType localAddrId = SOAD_SOCKETLOCALADDR_CFG(soConGroup).LocalAddrId;
         result                            = TcpIp_GetPhysAddr(localAddrId, PhysAddrPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0D, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Retrieves the remote address (IP address and port) actually used for the SoAdsocket connection specified by SoConId
  */
 Std_ReturnType SoAd_GetRemoteAddr(SoAd_SoConIdType SoConId, TcpIp_SockAddrType* IpAddrPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x1C, SoConId, IpAddrPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2968,9 +3599,16 @@ Std_ReturnType SoAd_GetRemoteAddr(SoAd_SoConIdType SoConId, TcpIp_SockAddrType* 
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1C, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Enables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter id.
  */
@@ -2978,6 +3616,8 @@ Std_ReturnType SoAd_GetRemoteAddr(SoAd_SoConIdType SoConId, TcpIp_SockAddrType* 
 Std_ReturnType SoAd_EnableRouting(SoAd_RoutingGroupIdType id)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x0E, id);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -2998,9 +3638,16 @@ Std_ReturnType SoAd_EnableRouting(SoAd_RoutingGroupIdType id)
 #endif
     }
     SOAD_NOUSED(id);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0E, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Enables routing of a group of PDUs in the SoAd related to the RoutingGroupspecified by parameter id only on the
  * socket connection identified by SoConId.
@@ -3009,6 +3656,8 @@ Std_ReturnType SoAd_EnableRouting(SoAd_RoutingGroupIdType id)
 Std_ReturnType SoAd_EnableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x20, id, SoConId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3032,9 +3681,16 @@ Std_ReturnType SoAd_EnableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCon
     }
     SOAD_NOUSED(id);
     SOAD_NOUSED(SoConId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x20, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Disables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter id.
  */
@@ -3042,6 +3698,8 @@ Std_ReturnType SoAd_EnableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCon
 Std_ReturnType SoAd_DisableRouting(SoAd_RoutingGroupIdType id)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x0F, id);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3062,9 +3720,16 @@ Std_ReturnType SoAd_DisableRouting(SoAd_RoutingGroupIdType id)
 #endif
     }
     SOAD_NOUSED(id);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x0F, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * Disables routing of a group of PDUs in the SoAd related to the RoutingGroup specified by parameter id only on the
  * socket connection identified by SoConId.
@@ -3073,6 +3738,8 @@ Std_ReturnType SoAd_DisableRouting(SoAd_RoutingGroupIdType id)
 Std_ReturnType SoAd_DisableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoConIdType SoConId)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x21, id, SoConId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3096,9 +3763,16 @@ Std_ReturnType SoAd_DisableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCo
     }
     SOAD_NOUSED(id);
     SOAD_NOUSED(SoConId);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x21, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service the remote address (IP address and port) of the specified socket connection shall be set.
  */
@@ -3106,6 +3780,8 @@ Std_ReturnType SoAd_DisableSpecificRouting(SoAd_RoutingGroupIdType id, SoAd_SoCo
 Std_ReturnType SoAd_SetRemoteAddr(SoAd_SoConIdType SoConId, const TcpIp_SockAddrType* RemoteAddrPtr)
 /* PRQA S 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x10, SoConId, RemoteAddrPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3159,9 +3835,16 @@ Std_ReturnType SoAd_SetRemoteAddr(SoAd_SoConIdType SoConId, const TcpIp_SockAddr
             result = E_OK;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x10, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * This API service shall either return the socket connection index of the SoAdSocketConnectionGroup where the
  * specified remote address (IP address and port) is set or assign the remote address to an unused socket connection
@@ -3174,6 +3857,8 @@ Std_ReturnType SoAd_SetUniqueRemoteAddr(
     SoAd_SoConIdType*         AssignedSoConIdPtr)
 /* PRQA S 1532,6070 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x1E, SoConId, RemoteAddrPtr, AssignedSoConIdPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3224,15 +3909,24 @@ Std_ReturnType SoAd_SetUniqueRemoteAddr(
             result = E_NOT_OK;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1E, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service the remote address (IP address and port) of the specified socket connection shall be released,
  * i.e. set back to the configured remote address setting.
  */
 void SoAd_ReleaseRemoteAddr(SoAd_SoConIdType SoConId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x23, SoConId);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     /*similar to SWS_SoAd_00744*/
     ApplicationType curAppId;
@@ -3264,8 +3958,14 @@ void SoAd_ReleaseRemoteAddr(SoAd_SoConIdType SoConId)
             soConMgmtPtr->RemoteAddrNeedRelease = TRUE;
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x23);
+}
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service the SoAd or TCP/IP stack is requested to change a connection parameter. E.g. the Nagle algorithm
  * may be controlled by this API.
@@ -3274,15 +3974,24 @@ void SoAd_ReleaseRemoteAddr(SoAd_SoConIdType SoConId)
 Std_ReturnType SoAd_TpChangeParameter(PduIdType id, TPParameterType parameter, uint16 value)
 /* PRQA S 1503 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x11, id, parameter, value);
+
     /*follow AUTOSAR_R19_11:SWS_SoAd_00730
       not follow AUTOSAR4.2.2:SWS_SoAd_00629,SWS_SoAd_00630,SWS_SoAd_00631
     */
     SOAD_NOUSED(id);
     SOAD_NOUSED(parameter);
     SOAD_NOUSED(value);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x11, E_NOT_OK);
+
     return E_NOT_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service an upper layer of the SoAd can read the currently configured hostname, i.e. FQDN option in the
  * DHCP submodule of the TCP/IP stack.
@@ -3291,6 +4000,8 @@ Std_ReturnType SoAd_TpChangeParameter(PduIdType id, TPParameterType parameter, u
 Std_ReturnType SoAd_ReadDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8* length, uint8* data)
 /* PRQA S 1503 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x1A, SoConId, length, data);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3325,9 +4036,16 @@ Std_ReturnType SoAd_ReadDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8* leng
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1A, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * By this API service an upper layer of the SoAd can set the hostname, i.e. FQDN option in the DHCP submodule of the
  * TCP/IP stack.
@@ -3336,6 +4054,8 @@ Std_ReturnType SoAd_ReadDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8* leng
 Std_ReturnType SoAd_WriteDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8 length, const uint8* data)
 /* PRQA S 1503 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x1B, SoConId, length, data);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3366,8 +4086,16 @@ Std_ReturnType SoAd_WriteDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8 leng
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x1B, result);
+
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * API check if a communication over this socket connection is possible for a dedicated remote address.
  */
@@ -3375,6 +4103,8 @@ Std_ReturnType SoAd_WriteDhcpHostNameOption(SoAd_SoConIdType SoConId, uint8 leng
 TcpIp_ReturnType SoAd_IsConnectionReady(SoAd_SoConIdType SoConId, const TcpIp_SockAddrType* RemoteAddrPtr)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x55, SoConId, RemoteAddrPtr);
+
     TcpIp_ReturnType result = TCPIP_E_NOT_OK;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3405,18 +4135,20 @@ TcpIp_ReturnType SoAd_IsConnectionReady(SoAd_SoConIdType SoConId, const TcpIp_So
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x55, result);
+
     return result;
 }
 
 #define SOAD_STOP_SEC_CODE
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * The TCP/IP stack calls this primitive after the reception of data on a socket. Thesocket identifier along with
  * configuration information determines which module is to be called.
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532,6070,6030 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL,VL_MTR_SoAd_STMIF */
 void SoAd_RxIndication(
     TcpIp_SocketIdType        SocketId,
@@ -3425,6 +4157,8 @@ void SoAd_RxIndication(
     uint16                    Length)
 /* PRQA S 1532,6070,6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 5, 0x12, SocketId, RemoteAddrPtr, BufPtr, Length);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     /*SWS_SoAd_00264*/
     ApplicationType curAppId;
@@ -3511,20 +4245,24 @@ void SoAd_RxIndication(
         SOAD_NOUSED(Length);
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x12);
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * This service requests to copy data for transmission to the buffer indicated.This call is triggered by
  * TcpIp_Transmit(). Note: The call to <Up>_CopyTxData()may happen in the context of TcpIp_Transmit().
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532,6030 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STMIF */
 BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, uint16 BufLength)
 /* PRQA S 1532,6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x13, SocketId, BufPtr, BufLength);
+
     BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
     SoAd_SoConIdType  soConId;
 
@@ -3587,6 +4325,7 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
                     SoAd_PduRouteDestManagerPtr[pduRouteDestId].TxPendingLength = soConMgmtPtr->TxNoAckLength;
 #endif
                     SchM_Exit_SoAd_ExclusiveArea();
+#if (STD_ON == SOAD_SUPPORT_TCP)
                     if (SOAD_SOCONGROUP_TCPIMME_TXCONF(SOAD_SOCON_REFGORUP(soConId))
                         && (soTxBuffMgmtPtr->TxPduTotalLength == soTxBuffMgmtPtr->UpCopyLength))
                     {
@@ -3599,6 +4338,7 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
 
                         SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(upPduId, E_OK);
                     }
+#endif
                 }
                 else
                 {
@@ -3615,91 +4355,100 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x13, ret);
+
     return ret;
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * The TCP/IP stack calls this function after the data has been acknowledged by the peer for TCP.
  * Caveats: The upper layer might not be able to determine exactly which data bytes have been confirmed.
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
-/* PRQA S 1532,6070 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL */
+/* PRQA S 1532,6070,6030 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL,VL_MTR_SoAd_STMIF */
 void SoAd_TxConfirmation(TcpIp_SocketIdType SocketId, uint16 Length)
-/* PRQA S 1532,6070 --*/
+/* PRQA S 1532,6070,6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x14, SocketId, Length);
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
     SoAd_SoConIdType soConId = SOAD_NO_TXMETADATA;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     ApplicationType curAppId;
-    if (SoAd_DetCheckInitStatus(SOAD_SID_TXCONFIRMATION, &curAppId))
+    if ((SoAd_DetCheckInitStatus(SOAD_SID_TXCONFIRMATION, &curAppId))
+        && SoAd_DetCheckLength(SOAD_SID_TXCONFIRMATION, Length))
 #endif
     {
-#if (SOAD_PARTITION_NUM > 1u)
-        uint16 partIndex;
-#endif
-
-        SoAd_InnerSocketConManageType* soConMgmtPtr;
-        boolean                        socketIdValid = SoAd_MatchTCPSocketId(SocketId, &soConId, FALSE);
+        boolean socketIdValid = SoAd_MatchTCPSocketId(SocketId, &soConId, FALSE);
+#if (STD_ON == SOAD_DEV_ERROR_DETECT)
+        if (SoAd_DetCheckSocketIdValid(SOAD_SID_TXCONFIRMATION, socketIdValid))
+#else
         if (socketIdValid)
+#endif
         {
+            SoAd_InnerSocketConManageType* soConMgmtPtr;
 #if (SOAD_PARTITION_NUM > 1u)
-            partIndex    = SoAd_GetPartitionIndex(SoAd_SoConGroupCfgPtr[SOAD_SOCON_REFGORUP(soConId)].PartitionId);
-            soConMgmtPtr = &SoAd_SoConManagerPtr[partIndex][SoAd_SoConCfgPtr[soConId].PartitionSoConId];
+            uint16 partIndex = SoAd_GetPartitionIndex(SoAd_SoConGroupCfgPtr[SOAD_SOCON_REFGORUP(soConId)].PartitionId);
+            soConMgmtPtr     = &SoAd_SoConManagerPtr[partIndex][SoAd_SoConCfgPtr[soConId].PartitionSoConId];
 #else
             soConMgmtPtr = &SoAd_SoConManagerPtr[soConId];
 #endif
-        }
-#if (STD_ON == SOAD_DEV_ERROR_DETECT)
-        if (SoAd_DetCheckSocketIdValid(SOAD_SID_TXCONFIRMATION, socketIdValid)
-            && SoAd_DetCheckLength(SOAD_SID_TXCONFIRMATION, Length)
-            && SoAd_DetCheckTCPTxNoAckLength(SOAD_SID_TXCONFIRMATION, Length, soConMgmtPtr->TxNoAckLength)
-#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
-            && SoAd_DetCheckSoConIdPartition(SOAD_SID_TXCONFIRMATION, SOAD_SOCON_REFGORUP(soConId), curAppId)
-#endif
-        )
-#endif
-        {
-#if (SOAD_PDU_ROUTE_DEST_MAX > 0u)
-            const SoAd_SocketConnectionType* soConCfgPtr        = &SoAd_SoConCfgPtr[soConId];
-            SoAd_uintx                       refPduRouteDestNum = soConCfgPtr->RefPduRouteDestNum;
 
-            soConMgmtPtr->TxNoAckLength -= Length;
-            for (SoAd_uintx cnt = 0u; cnt < refPduRouteDestNum; cnt++)
+#if (STD_ON == SOAD_DEV_ERROR_DETECT)
+            if (SoAd_DetCheckTCPTxNoAckLength(SOAD_SID_TXCONFIRMATION, Length, soConMgmtPtr->TxNoAckLength)
+#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+                && SoAd_DetCheckSoConIdPartition(SOAD_SID_TXCONFIRMATION, SOAD_SOCON_REFGORUP(soConId), curAppId)
+#endif
+            )
+#endif
             {
-                SoAd_uintx pduRouteDestId = soConCfgPtr->RefPduRouteDestPtr[cnt];
-#if (SOAD_PARTITION_NUM > 1u)
-                SoAd_uintx startId = SoAd_PduRouteDestCfgPtr[pduRouteDestId].PartitionPduRouteDestId;
-                if (0u < SoAd_PduRouteDestManagerPtr[partIndex][startId].TxPendingLength)
-#else
-                if (0u < SoAd_PduRouteDestManagerPtr[pduRouteDestId].TxPendingLength)
-#endif
+#if (SOAD_PDU_ROUTE_DEST_MAX > 0u)
+                const SoAd_SocketConnectionType* soConCfgPtr        = &SoAd_SoConCfgPtr[soConId];
+                SoAd_uintx                       refPduRouteDestNum = soConCfgPtr->RefPduRouteDestNum;
+
+                if (soConMgmtPtr->TxNoAckLength >= Length)
                 {
-                    SoAd_TxConfirmationHandle(soConId, Length, pduRouteDestId);
+                    soConMgmtPtr->TxNoAckLength -= Length;
                 }
-            }
+                for (SoAd_uintx cnt = 0u; cnt < refPduRouteDestNum; cnt++)
+                {
+                    SoAd_uintx pduRouteDestId = soConCfgPtr->RefPduRouteDestPtr[cnt];
+#if (SOAD_PARTITION_NUM > 1u)
+                    SoAd_uintx startId = SoAd_PduRouteDestCfgPtr[pduRouteDestId].PartitionPduRouteDestId;
+                    if (0u < SoAd_PduRouteDestManagerPtr[partIndex][startId].TxPendingLength)
+#else
+                    if (0u < SoAd_PduRouteDestManagerPtr[pduRouteDestId].TxPendingLength)
 #endif
+                    {
+                        SoAd_TxConfirmationHandle(soConId, Length, pduRouteDestId);
+                    }
+                }
+#endif
+            }
         }
     }
 #else
             SOAD_NOUSED(SocketId);
             SOAD_NOUSED(Length);
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x14);
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * This service gets called if the stack put a socket into the listen mode before (as server) and a peer connected to
  * it (as client).
  * In detail: The TCP/IP stack calls this function after a socket was set into the listen state with TcpIp_TcpListen()
  * and a TCP connection is requested by the peer.
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532,6070,6030 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL,VL_MTR_SoAd_STMIF */
 Std_ReturnType SoAd_TcpAccepted(
     TcpIp_SocketIdType        SocketId,
@@ -3707,6 +4456,8 @@ Std_ReturnType SoAd_TcpAccepted(
     const TcpIp_SockAddrType* RemoteAddrPtr)
 /* PRQA S 1532,6070,6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 4, 0x15, SocketId, SocketIdConnected, RemoteAddrPtr);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == SOAD_SUPPORT_TCP)
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
@@ -3725,6 +4476,8 @@ Std_ReturnType SoAd_TcpAccepted(
             && (SoAd_DetCheckSoConIdPartition(SOAD_SID_TCPACCEPTED, soConGroupId, curAppId))
 #endif
         )
+#else
+        if (soConGroupValid)
 #endif
         {
             SoAd_InnerSocketConManageType*        soConMgmtPtr;
@@ -3800,11 +4553,16 @@ Std_ReturnType SoAd_TcpAccepted(
             SOAD_NOUSED(SocketIdConnected);
             SOAD_NOUSED(RemoteAddrPtr);
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 2, 0x15, result);
+
     return result;
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * This service gets called if the stack initiated a TCP connection before (as client) and the peer (the server)
  * acknowledged the connection set up.
@@ -3812,12 +4570,12 @@ Std_ReturnType SoAd_TcpAccepted(
  * a TCP connection is confirmed by the peer.
  * The parameter value of SocketId equals the SocketId value of the preceeding TcpIp_TcpConnect() call.
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_TcpConnected(TcpIp_SocketIdType SocketId)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x16, SocketId);
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     /*SWS_SoAd_00274*/
@@ -3864,24 +4622,30 @@ void SoAd_TcpConnected(TcpIp_SocketIdType SocketId)
         }
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
         (void)SoAd_DetCheckSocketIdValid(SOAD_SID_TCPCONNECTED, socketIdValid);
+#else
+        SOAD_NOUSED(socketIdValid);
 #endif
     }
 #else
             SOAD_NOUSED(SocketId);
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x16);
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * This service gets called if the stack encounters a condition described by the values in Event.
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_TcpIpEvent(TcpIp_SocketIdType SocketId, TcpIp_EventType Event)
 /* PRQA S 1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x17, SocketId, Event);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     /**
      * SWS_SoAd_00276,SWS_SoAd_00278
@@ -3956,20 +4720,24 @@ void SoAd_TcpIpEvent(TcpIp_SocketIdType SocketId, TcpIp_EventType Event)
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x17);
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE_FAST
+#include "SoAd_MemMap.h"
 /**
  * This service gets called by the TCP/IP stack if an IP address assignment changes (i.e. new address assigned or
  * assigned address becomes invalid).
  */
-#define SOAD_START_SEC_CODE_FAST
-#include "SoAd_MemMap.h"
 /* PRQA S 1532,6030 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STMIF */
 void SoAd_LocalIpAddrAssignmentChg(TcpIp_LocalAddrIdType IpAddrId, TcpIp_IpAddrStateType State)
 /* PRQA S 1532,6030 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 3, 0x18, IpAddrId, State);
+
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     /*SWS_SoAd_00279*/
     if (SoAd_DetCheckInitStatus(SOAD_SID_LOCALIPADDRASSIGNMENTCHG, NULL_PTR))
@@ -4022,6 +4790,8 @@ void SoAd_LocalIpAddrAssignmentChg(TcpIp_LocalAddrIdType IpAddrId, TcpIp_IpAddrS
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x18);
 }
 #define SOAD_STOP_SEC_CODE_FAST
 #include "SoAd_MemMap.h"
@@ -4046,6 +4816,8 @@ void SoAd_MainFunction(uint16 PartitionId)
 #endif
 /* PRQA S 1532,6070 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Start, 2, 0x19, PartitionId);
+
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     ApplicationType curAppId = GetApplicationID();
@@ -4058,6 +4830,7 @@ void SoAd_MainFunction(uint16 PartitionId)
     uint16 partIndex = SoAd_GetPartitionIndex(PartitionId);
 #else
     uint16 partIndex = 0u;
+    SOAD_NOUSED(PartitionId);
 #endif
 #endif
     if (SOAD_STATE_INIT == SoAd_InitStatus)
@@ -4096,13 +4869,14 @@ void SoAd_MainFunction(uint16 PartitionId)
         SoAd_MainFunctionTxConfirmationHandle();
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, SoAd, 0, Bsw_Return, 1, 0x19);
 }
 #define SOAD_STOP_SEC_CODE
 #include "SoAd_MemMap.h"
 
 #define SOAD_START_SEC_CODE
 #include "SoAd_MemMap.h"
-
 /* PRQA S 1503 ++*/ /* VL_QAC_NoUsedApi */
 void SoAd_DummyIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 1503 --*/
@@ -4110,6 +4884,11 @@ void SoAd_DummyIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
     SOAD_NOUSED(RxPduId);
     SOAD_NOUSED(PduInfoPtr);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532,3673 ++*/ /* VL_QAC_OneFunRef,VL_QAC_3673 */
 Std_ReturnType SoAd_DummyIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1532,3673 --*/
@@ -4118,12 +4897,21 @@ Std_ReturnType SoAd_DummyIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
     SOAD_NOUSED(PduInfoPtr);
     return E_NOT_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 void SoAd_DummyIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
     SOAD_NOUSED(TxPduId);
     SOAD_NOUSED(result);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532,3673 ++*/ /* VL_QAC_OneFunRef,VL_QAC_3673 */
 BufReq_ReturnType SoAd_DummyTpStartOfReception(
     PduIdType          RxPduId,
@@ -4138,6 +4926,11 @@ BufReq_ReturnType SoAd_DummyTpStartOfReception(
     SOAD_NOUSED(bufferSizePtr);
     return BUFREQ_E_NOT_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532,3673 ++*/ /* VL_QAC_OneFunRef,VL_QAC_3673 */
 BufReq_ReturnType SoAd_DummyTpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
 /* PRQA S 1532,3673 --*/
@@ -4147,6 +4940,11 @@ BufReq_ReturnType SoAd_DummyTpCopyRxData(PduIdType id, const PduInfoType* info, 
     SOAD_NOUSED(bufferSizePtr);
     return BUFREQ_E_NOT_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_DummyTpRxIndication(PduIdType RxPduId, Std_ReturnType result)
 /* PRQA S 1532 --*/
@@ -4154,6 +4952,11 @@ void SoAd_DummyTpRxIndication(PduIdType RxPduId, Std_ReturnType result)
     SOAD_NOUSED(RxPduId);
     SOAD_NOUSED(result);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532,3673 ++*/ /* VL_QAC_OneFunRef,VL_QAC_3673 */
 BufReq_ReturnType SoAd_DummyTpCopyTxData(
     PduIdType            id,
@@ -4168,6 +4971,11 @@ BufReq_ReturnType SoAd_DummyTpCopyTxData(
     SOAD_NOUSED(availableDataPtr);
     return BUFREQ_E_NOT_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_DummyTpTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 /* PRQA S 1532 --*/
@@ -4175,6 +4983,11 @@ void SoAd_DummyTpTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
     SOAD_NOUSED(TxPduId);
     SOAD_NOUSED(result);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_DummySoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode)
 /* PRQA S 1532 --*/
@@ -4182,6 +4995,11 @@ void SoAd_DummySoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode)
     SOAD_NOUSED(SoConId);
     SOAD_NOUSED(Mode);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /* PRQA S 1532 ++*/ /* VL_QAC_OneFunRef */
 void SoAd_DummyLocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType State)
 /* PRQA S 1532 --*/
@@ -4234,8 +5052,12 @@ SOAD_LOCAL void SoAd_SocnTransmitAutomaticSoConSetupHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the PDU route manager.
  */
@@ -4253,8 +5075,12 @@ SOAD_LOCAL void SoAd_PduRouteManagerInit(PduIdType TxPduId)
     pduRouteMgmtPtr->TxPendingNum = SOAD_UNUSED_UINT8;
     pduRouteMgmtPtr->TxSoConId    = SOAD_NO_TXMETADATA;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes Routing group runtime variable
  */
@@ -4379,8 +5205,12 @@ SOAD_LOCAL void SoAd_RoutingGroupInit(void)
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (SOAD_PDU_ROUTE_DEST_MAX > 0))
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Gets the IF PDU data.
  */
@@ -4447,8 +5277,12 @@ SOAD_LOCAL Std_ReturnType SoAd_GetIfPduData(
     }
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Checks if the remote address of a socket connection is locked.
  */
@@ -4517,7 +5351,11 @@ SOAD_LOCAL boolean
     }
     return remoteAddrLocked;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Releases the remote address for a socket connection.
  */
@@ -4546,7 +5384,11 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrHandle(
         SoAd_SoConModeChgNotificationAndTpStartOfReception(SoConId, soConMgmtPtr, SoConGroupId);
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Releases the remote address in the main function for a socket connection.
  */
@@ -4567,11 +5409,13 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrMainFunctionHandle(SoAd_SoConIdType SoConI
         soConMgmtPtr->RemoteAddrNeedRelease = FALSE;
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
-
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the new PDU for header enable.
  */
@@ -4693,7 +5537,11 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the old PDU for header enable.
  */
@@ -4743,7 +5591,11 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the TP PDU for header enable.
  */
@@ -4817,10 +5669,13 @@ SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (STD_ON == SOAD_SUPPORT_HEADERID))
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the IF PDU for header enable.
  */
@@ -4893,8 +5748,12 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
         soRxBuffMgmtPtr->ExitPduResidueLength = 0u;
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception data in the main function with header disable.
  */
@@ -4974,7 +5833,11 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception data in the main function for a socket connection.
  */
@@ -5041,9 +5904,13 @@ SOAD_LOCAL void SoAd_SoConRxDataMainFunctionHandle(SoAd_SoConIdType SoConId)
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Fill metadata to SDU
  */
@@ -5072,11 +5939,16 @@ SOAD_LOCAL uint8* SoAd_MetaDataFillHandle(SoAd_SoConIdType SoConId, boolean meta
 
     return metaDataPtr;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handle received TP PDU for a UDP Header enable socket connection.
  */
@@ -5198,8 +6070,12 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxTpPduHandle(
     *DataPosition += (SOAD_HEADER_SIZE + pduLength);
     return validPduData;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception of a UDP socket connection.
  */
@@ -5324,11 +6200,15 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxHandle(
 
     return validPduData;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the reception of a TCP socket connection for a TP PDU.
  */
@@ -5463,7 +6343,11 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxTpPduHandle(
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the full TP PDU reception.
  */
@@ -5539,8 +6423,12 @@ SOAD_LOCAL void SoAd_RxFullTpPduHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received TP PDU with disabled header
  */
@@ -5634,10 +6522,13 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxTpPduHandle(
         (void)SoAd_CopyDataToRxBuffer(SoConId, RxMessageLength, &DataPtr[0u], soConMgmtPtr, soRxBuffMgmtPtr);
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 /* PRQA S 6030 -- */
-
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received PDU with enabled header for TCP socket connection
  */
@@ -5790,8 +6681,12 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxHandle(
         SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, (uint32)(RxMessageLength));
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Copy received data to SoAd Rx Buffer
  */
@@ -5862,8 +6757,12 @@ SOAD_LOCAL boolean SoAd_CopyDataToRxBuffer(
     }
     return copyDataOk;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received IF PDU with disabled header for socket connection
  */
@@ -5903,10 +6802,13 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxIfPduHandle(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the valid socket connection based on the socket ID and remote address.
  */
@@ -6003,10 +6905,14 @@ SOAD_LOCAL boolean SoAd_FindTheValidSoCon(
 
     return socketIdValid;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Performs a strict header length check for UDP.
  */
@@ -6036,8 +6942,12 @@ SOAD_LOCAL boolean SoAd_UdpStrictHeaderLenCheck(SoAd_uintx SoConGroupId, const u
     }
     return udpStrictHeaderLenCheck;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the UDP alive supervision time for a socket connection.
  */
@@ -6067,8 +6977,12 @@ SOAD_LOCAL void SoAd_UdpAliveSupervisionTimeHandle(SoAd_SoConIdType SoConId)
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the best match algorithm socket connection.
  */
@@ -6151,7 +7065,11 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
 
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Change socket parameters
  */
@@ -6191,7 +7109,12 @@ SOAD_LOCAL void SoAd_ChangeSocketParameter(TcpIp_SocketIdType SocketId, SoAd_uin
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Change TCP socket parameters
  */
@@ -6258,9 +7181,13 @@ SOAD_LOCAL void SoAd_ChangeTcpSocketParameter(TcpIp_SocketIdType SocketId, SoAd_
         (void)TcpIp_ChangeParameter(SocketId, TCPIP_PARAMID_TLS_CONNECTION_ASSIGNMENT, para);
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
-#if (STD_ON == SOAD_SUPPORT_UDP)
 
+#if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Open UDP socket connection
  */
@@ -6314,8 +7241,12 @@ SOAD_LOCAL void SoAd_OpenUdpSoConHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Notify socket connection mode change and TP start reception
  */
@@ -6379,7 +7310,11 @@ SOAD_LOCAL void SoAd_SoConModeChgNotificationAndTpStartOfReception(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Notify socket connection IP address assignment change
  */
@@ -6403,7 +7338,12 @@ SOAD_LOCAL void
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Opens a TCP server socket connection.
  */
@@ -6462,7 +7402,11 @@ SOAD_LOCAL void SoAd_OpenTcpServerSoConHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Opens a TCP client socket connection.
  */
@@ -6505,8 +7449,12 @@ SOAD_LOCAL void SoAd_OpenTcpClientSoConHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle socket connection mode change
  */
@@ -6598,9 +7546,12 @@ SOAD_LOCAL void SoAd_SoConModeChangeHandle(SoAd_SoConIdType SoConId)
         SoAd_DisconnectionAndRecoveryHandle(SoConId, soConGroup, soConMgmtPtr, soConGroupMgmtPtr);
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle received TP PDU after socket connection is closed
  */
@@ -6684,7 +7635,11 @@ SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId)
     /*clear the SoCon Rx Buffer*/
     SoAd_RxBufferInit(rxBufferId, partIndex);
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check if the received TP PDU has been processed when TCP received FIN
  */
@@ -6730,8 +7685,12 @@ SOAD_LOCAL boolean SoAd_CheckRxTpPduDataHandle(SoAd_SoConIdType SoConId)
 
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Close socket connection
  */
@@ -6800,7 +7759,7 @@ SOAD_LOCAL void SoAd_SoConCloseHandle(
     soConMgmtPtr->SoConCloseAbort = FALSE;
     soConMgmtPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_NONE;
 #if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
-    soConGroupMgmtPtr->SetSocketNeedCloseLine = 0;
+    soConMgmtPtr->SetSocketNeedCloseLine = 0u;
 #endif
     soConMgmtPtr->TpPduTransmitting = FALSE;
     soConMgmtPtr->TxNoAckLength     = 0u;
@@ -6815,7 +7774,11 @@ SOAD_LOCAL void SoAd_SoConCloseHandle(
         soConMgmtPtr->RemoteAddr = *SOAD_SOCONREMOTEADDR_CFG(SoConId);
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle socket connection disconnection and recovery
  */
@@ -6854,11 +7817,15 @@ SOAD_LOCAL void SoAd_DisconnectionAndRecoveryHandle(
         /*do nothing*/
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 /**
  * control ronting group
  */
 #if (0u < SOAD_ROUTING_GROUP_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Controls the routing group.
  */
@@ -6945,9 +7912,13 @@ SOAD_LOCAL Std_ReturnType SoAd_RoutingGroupControl(SoAd_RoutingGroupIdType id, b
 
     return E_OK;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the transmit buffer.
  */
@@ -6968,9 +7939,13 @@ SOAD_LOCAL void SoAd_TxBufferInit(SoAd_uintx TxBufferId, uint16 partIndex)
     soTxBuffMgmtPtr->TxPduTotalLength = 0u;
     soTxBuffMgmtPtr->TxResidueLength  = SoAd_SocketBufferCfgPtr[TxBufferId].BuffLen;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the receive buffer.
  */
@@ -6989,10 +7964,13 @@ SOAD_LOCAL void SoAd_RxBufferInit(SoAd_uintx RxBufferId, uint16 partIndex)
     soRxBuffMgmtPtr->ExitPduResidueLength = 0x0u;
     soRxBuffMgmtPtr->SocketRouteId        = SOAD_UNUSED_UINT16;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER) || (STD_ON == SOAD_SUPPORT_RX_BUFFER)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initializes the transmit and receive buffers.
  */
@@ -7016,9 +7994,13 @@ SOAD_LOCAL void SoAd_TxRxBufferInit(uint16 partIndex)
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_NPDUUDPTXBUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Handle NPDU UDP TX PDU pending
  */
@@ -7047,7 +8029,11 @@ void SoAd_NPduUdpTxPduPendingHandle(SoAd_SoConIdType SoConId)
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for NPDU UDP transmission.
  */
@@ -7087,9 +8073,13 @@ SOAD_LOCAL void SoAd_MainFunctionNPduUdpTxHandle(SoAd_SoConIdType SoConId)
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for transmission confirmation.
  */
@@ -7123,9 +8113,13 @@ SOAD_LOCAL void SoAd_MainFunctionTxConfirmationHandle(void)
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_NPDUUDPTXBUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Handles the "trigger always" operation for UDP transmission.
  */
@@ -7185,6 +8179,11 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandleTriggerAlways(
 
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Handles the "trigger never" operation for UDP transmission.
  */
@@ -7245,6 +8244,11 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandleTriggerNever(
 
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the transmission of NPDU UDP.
  */
@@ -7288,10 +8292,13 @@ SOAD_LOCAL Std_ReturnType SoAd_NPduUdpTransmitHandle(
     }
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if ((0u < SOAD_MAX_IF_PDU_SIZE) && (SOAD_PDU_ROUTE_DEST_MAX > 0))
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Transmits an IF PDU on a specific socket connection.
  */
@@ -7406,9 +8413,13 @@ SOAD_LOCAL Std_ReturnType SoAd_IfTransmitSoCon(
     }
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the main function for TP PDU transmission.
  */
@@ -7505,10 +8516,13 @@ SOAD_LOCAL void SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType SoConId)
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the error for a TP PDU transmission.
  */
@@ -7548,10 +8562,13 @@ SOAD_LOCAL void SoAd_TpPduTxErrorHandle(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
-
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Transmits a TP PDU on a specific socket connection.
  */
@@ -7625,9 +8642,13 @@ SOAD_LOCAL Std_ReturnType SoAd_TpTransmitSoCon(
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Closes a UDP socket connection group.Called by SoAd_TcpIpEvent.
  */
@@ -7683,12 +8704,16 @@ SOAD_LOCAL void SoAd_CloseUdpSoConGroup(TcpIp_EventType Event, SoAd_uintx soConG
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 /*Called by SoAd_TxConfirmation.
  *Tcp TxConfirmation handle*/
 #if (STD_ON == SOAD_SUPPORT_TCP)
 #if (SOAD_PDU_ROUTE_DEST_MAX > 0)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Handles the TCP transmission confirmation.
  */
@@ -7780,10 +8805,14 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
         pduRouteDestMPtr->TxPendingLength -= Length;
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Finds the header ID and socket route ID.
  */
@@ -7808,8 +8837,12 @@ SOAD_LOCAL boolean
 
     return findValidHeaderId;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Match TCP socket ID
  */
@@ -7849,7 +8882,12 @@ SOAD_LOCAL boolean
     }
     return socketIdValid;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Match TCP socket group socket ID
  */
@@ -7891,9 +8929,13 @@ SOAD_LOCAL boolean SoAd_MatchTCPSoConGroupSocketId(TcpIp_SocketIdType socketId, 
 
     return soConGroupValid;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check initialization status of the SoAd module.
  */
@@ -7940,7 +8982,11 @@ SOAD_LOCAL boolean SoAd_DetCheckInitStatus(uint8 apiId, ApplicationType* applica
 #endif
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check TX PDU ID
  */
@@ -7955,7 +9001,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTxPduId(uint8 apiId, PduIdType txPduId, boolean 
 
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check socket route destination ID
  */
@@ -7972,7 +9022,11 @@ SOAD_LOCAL boolean
 
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check routing group ID
  */
@@ -7986,7 +9040,11 @@ SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupId(uint8 apiId, SoAd_RoutingGroupIdT
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check if routing group is transmit triggerable
  */
@@ -8000,8 +9058,11 @@ SOAD_LOCAL boolean SoAd_DetCheckRoutingGroupTxTriggerable(uint8 apiId, SoAd_Rout
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
-#if (STD_ON == SOAD_DEV_ERROR_DETECT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief     Check socket connection ID
  */
@@ -8015,6 +9076,11 @@ SOAD_LOCAL boolean SoAd_DetCheckSoConId(uint8 apiId, SoAd_SoConIdType soConId)
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if automatic socket connection setup is enabled for a given socket connection.
  */
@@ -8029,7 +9095,11 @@ SOAD_LOCAL boolean SoAd_DetCheckAutoSoConSetup(uint8 apiId, SoAd_SoConIdType soC
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a pointer parameter is valid (not NULL).
  */
@@ -8044,7 +9114,11 @@ SOAD_LOCAL boolean SoAd_DetCheckPtrParameter(uint8 apiId, const void* parameterP
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a length parameter is valid (not zero).
  */
@@ -8059,7 +9133,11 @@ SOAD_LOCAL boolean SoAd_DetCheckLength(uint8 apiId, uint16 length)
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the length of data to be transmitted without acknowledgment is valid.
  */
@@ -8067,14 +9145,18 @@ SOAD_LOCAL boolean SoAd_DetCheckTCPTxNoAckLength(uint8 apiId, uint16 length, Pdu
 {
     boolean ret = TRUE;
 
-    if (txNoAckLength < length)
+    if ((txNoAckLength > 0u) && (txNoAckLength < length))
     {
         SOAD_DET_REPORT(apiId, SOAD_E_INV_ARG);
         ret = FALSE;
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a TCP event is valid.
  */
@@ -8089,7 +9171,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTCPEvent(uint8 apiId, TcpIp_EventType Event)
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if a socket ID is valid.
  */
@@ -8104,7 +9190,11 @@ SOAD_LOCAL boolean SoAd_DetCheckSocketIdValid(uint8 apiId, boolean socketIdValid
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the domain type of a socket is valid.
  */
@@ -8119,11 +9209,15 @@ SOAD_LOCAL boolean SoAd_DetCheckTcpIpDomainType(uint8 apiId, TcpIp_DomainType do
     }
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 /**
  * @brief Checks if the partition of a transmit PDU ID is valid.
  */
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_DetCheckTxPduIdPartition(uint8 apiId, PduIdType txPduId, ApplicationType curAppId)
 {
     boolean ret = TRUE;
@@ -8136,7 +9230,11 @@ SOAD_LOCAL boolean SoAd_DetCheckTxPduIdPartition(uint8 apiId, PduIdType txPduId,
 
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the partition of a receive PDU ID is valid.
  */
@@ -8152,7 +9250,11 @@ SOAD_LOCAL boolean SoAd_DetCheckRxPduIdPartition(uint8 apiId, PduIdType pduId, A
 
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief Checks if the partition of a routing group ID is valid.
  */
@@ -8169,12 +9271,14 @@ SOAD_LOCAL boolean
 
     return ret;
 }
-#endif
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 /**
  * @brief Checks if the partition of a socket connection group ID is valid.
  */
-#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_DetCheckSoConIdPartition(uint8 apiId, SoAd_uintx soConGroupId, ApplicationType curAppId)
 {
     boolean ret = TRUE;
@@ -8187,11 +9291,14 @@ SOAD_LOCAL boolean SoAd_DetCheckSoConIdPartition(uint8 apiId, SoAd_uintx soConGr
 
     return ret;
 }
-#endif
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_MatchMetaDataSoConId(PduIdType txPduId, SoAd_uintx pduRouteDestId, SoAd_SoConIdType txSoConId)
 {
     boolean ret = TRUE;
@@ -8224,8 +9331,13 @@ SOAD_LOCAL boolean SoAd_MatchMetaDataSoConId(PduIdType txPduId, SoAd_uintx pduRo
 
     return ret;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL void SoAd_HandleTcpIpEventTCP(
     SoAd_SoConIdType               soConId,
     TcpIp_EventType                Event,
@@ -8300,9 +9412,13 @@ SOAD_LOCAL void SoAd_HandleTcpIpEventTCP(
         soConMgmtPtr->TcpIpSocketValid = FALSE;
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID) && (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_HandleRxIndicationEnableHeader(
     SoAd_SoConIdType               soConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
@@ -8327,9 +9443,13 @@ SOAD_LOCAL boolean SoAd_HandleRxIndicationEnableHeader(
 
     return validPduData;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_HandleRxIndicationDisableHeader(
     SoAd_SoConIdType               soConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
@@ -8383,9 +9503,13 @@ SOAD_LOCAL boolean SoAd_HandleRxIndicationDisableHeader(
 
     return validPduData;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL boolean SoAd_FindUdpValidSoCon(
     SoAd_uintx                  soConGroupId,
     const TcpIp_SockAddrType*   RemoteAddrPtr,
@@ -8464,9 +9588,13 @@ SOAD_LOCAL boolean SoAd_FindUdpValidSoCon(
 
     return socketIdValid;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL void SoAd_OpenTCPSoConHandle(
     SoAd_SoConIdType                    soConId,
     SoAd_uintx                          soConGroup,
@@ -8490,9 +9618,13 @@ SOAD_LOCAL void SoAd_OpenTCPSoConHandle(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL void SoAd_AttemptOpenUDPSoCon(
     SoAd_SoConIdType                    soConId,
     SoAd_uintx                          soConGroup,
@@ -8535,8 +9667,12 @@ SOAD_LOCAL void SoAd_AttemptOpenUDPSoCon(
         }
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * close socket connection socket
  */
@@ -8591,7 +9727,11 @@ SOAD_LOCAL void SoAd_CloseSoConTcpIpSocket(
     }
 #endif
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL Std_ReturnType
     SoAd_RoutingGroupControlSpcificSoCon(SoAd_RoutingGroupIdType id, boolean enFlag, SoAd_SoConIdType soConId)
 {
@@ -8665,8 +9805,12 @@ SOAD_LOCAL Std_ReturnType
 
     return result;
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #if (STD_ON == SOAD_SUPPORT_TCP)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL void SoAd_CloseTcpSoConGroup(
     TcpIp_EventType                     event,
     SoAd_uintx                          soConGroupId,
@@ -8688,10 +9832,14 @@ SOAD_LOCAL void SoAd_CloseTcpSoConGroup(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 SOAD_LOCAL void SoAd_RxTpPduHeaderEnableHandle(
     PduLengthType                  pduLength,
     const SoAd_HandleRxBufferType* handleRxBufferPtr,
@@ -8733,9 +9881,13 @@ SOAD_LOCAL void SoAd_RxTpPduHeaderEnableHandle(
 #endif
     }
 }
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
 #endif
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         Initialize socket connection manager.
  */
@@ -8794,7 +9946,7 @@ SOAD_LOCAL void SoAd_SoConManagerInit(void)
         soConMgmtPtr->SoConCloseAbort      = FALSE;
         soConMgmtPtr->SocketNeedClose      = SOAD_SOCKET_CLOSE_NONE;
 #if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
-        soConMgmtPtr->SetSocketNeedCloseLine = __LINE__;
+        soConMgmtPtr->SetSocketNeedCloseLine = 0u;
 #endif
         soConMgmtPtr->TcpIpSocketValid      = FALSE;
         soConMgmtPtr->TcpIpSocketId         = (TcpIp_SocketIdType)TCPIP_SOCKETID_INVALID;

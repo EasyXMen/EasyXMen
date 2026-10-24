@@ -66,6 +66,7 @@
  *  V2.1.1  2025-04-18  xiaojian.liang   CPT-14007, CanSM code size reduction.
  *          2025-04-24  xiaojian.liang   CPT-14057, Effect E_FULL_COM change pdu mode to CANIF_ONLINE if ECU is already
  in passive mode.
+ *  V2.1.2  2026-06-03  xiaojian.liang   CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  *
  ==================================================================================================================== */
 
@@ -110,12 +111,10 @@
   being above the threshold
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review, and have a clear structure and annotated code.
-
-    \li VL_CanSM_NotUsed
-      Reason: Identifier is locally declared to avoid unnecessary header inclusion and prevent
-  circular dependencies.
-      Risk: No risk
-      Prevention: No action required.
+    \li VL_CanSM_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef CANSM_H_
@@ -149,7 +148,7 @@ extern "C" {
 #define CANSM_SW_PATCH_VERSION            (1u)   /**< Software patch version */
 /** @} */
 /* ===================================================== macros ===================================================== */
-#define CANSM_INSTANCE_ID 0U /**< Instance ID of CanSM module */
+#define CANSM_INSTANCE_ID                 0U /**< Instance ID of CanSM module */
 
 /**
  * @name CANSM_DEVELOPMENT_ERRORS
@@ -231,7 +230,7 @@ typedef enum
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_DeinitPnSupported
  */
-typedef enum
+typedef enum CanSM_DeinitPnSupportedStateTypeTag
 {
     DEINITPN_S_PN_CLEAR_WUF,                /**< CANSM_BSM_DeinitPnSupported - S_PN_CLEAR_WUF @range 0 */
     DEINITPN_S_PN_CLEAR_WUF_WAIT,           /**< CANSM_BSM_DeinitPnSupported - S_PN_CLEAR_WUF_WAIT @range 1 */
@@ -397,7 +396,7 @@ typedef struct
 /**
  * @brief Reference to configured DEM event to report dem errors for this CAN network
  */
-typedef struct
+typedef struct CanSM_DemEventParameterRefTypeTag
 {
     const Dem_EventIdType*
         BusOffPara; /**< Reference to configured DEM event,CANSM_E_BUS_OFF parameter @range pointer */
@@ -431,7 +430,7 @@ typedef struct
     CanSM_ChangeBaudrateStateType
         ChangeBaudrateState; /**< sub BSM state(CANSM_BSM_S_CHANGE_BAUDRATE) @range CanSM_ChangeBaudrateStateType */
 #endif
-#if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
+#ifdef CANSM_GET_BUSOFF_DELAY_FUNCTION
     uint8 BusOffDelayTime; /**< wait additionally to L1/L2 after a BusOff occurred @range 0..255 */
 #endif
 #if (STD_ON == CANSM_PNC_SUPPORT)
@@ -452,7 +451,7 @@ typedef struct
 /**
  * @brief This type contains the CAN network specific parameters of each CAN network
  */
-typedef struct CanSM_ManagerNetworkTypeTag /* PRQA S 1536 */ /* VL_CanSM_NotUsed */
+typedef struct CanSM_ManagerNetworkTypeTag /*PRQA S 1536*/ /*VL_CanSM_1536*/
 {
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
     ApplicationType ApplicationID; /**< Application Id @range ApplicationType */
@@ -494,6 +493,8 @@ typedef struct CanSM_ManagerNetworkTypeTag /* PRQA S 1536 */ /* VL_CanSM_NotUsed
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service initializes the CanSM module
  * @param[in]   ConfigPtr   : Pointer to init structure for the post build parameters of the CanSM
@@ -502,7 +503,11 @@ typedef struct CanSM_ManagerNetworkTypeTag /* PRQA S 1536 */ /* VL_CanSM_NotUsed
  * @trace       CPD-70675
  */
 void CanSM_Init(const CanSM_ConfigType* ConfigPtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service de-initializes the CanSM module.
  * @reentrant   FALSE
@@ -510,7 +515,11 @@ void CanSM_Init(const CanSM_ConfigType* ConfigPtr);
  * @trace       CPD-70677
  */
 void CanSM_DeInit(void);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service shall change the communication mode of a CAN network to the requested one.
  * @param[in]   network   : Handle of destined communication network for request
@@ -523,7 +532,11 @@ void CanSM_DeInit(void);
  * @trace       CPD-70679
  */
 Std_ReturnType CanSM_RequestComMode(NetworkHandleType network, ComM_ModeType ComM_Mode);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service shall put out the current communication mode of a CAN network
  * @param[in]   network   : Network handle, whose current communication mode shall be put out
@@ -536,8 +549,12 @@ Std_ReturnType CanSM_RequestComMode(NetworkHandleType network, ComM_ModeType Com
  * @trace       CPD-70680
  */
 Std_ReturnType CanSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType* ComM_ModePtr);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #if (STD_ON == CANSM_VERSION_INFO_API)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service puts out the version information of this module (module ID, vendor ID, vendor specific
  * version numbers related to BSW00407)
@@ -547,9 +564,13 @@ Std_ReturnType CanSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
  * @trace       CPD-70683
  */
 void CanSM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
 #if (STD_ON == CANSM_SET_BAUDRATE_API)
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This service shall start an asynchronous process to change the baud rate for the configured
  * CAN controllers of a certain CAN network. Depending on necessary baud rate modifications the controllers might have
@@ -564,9 +585,13 @@ void CanSM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @trace       CPD-70684
  */
 Std_ReturnType CanSM_SetBaudrate(NetworkHandleType Network, uint16 BaudRateConfigID);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif /*STD_ON == CANSM_SET_BAUDRATE_API*/
 
 #if CANSM_TX_OFFLINE_ACTIVE_SUPPORT == STD_ON
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This function can be used to set all CanSM channels of the ECU to a receive only mode.
  * @param[in]   CanSM_Passive     TRUE  set all CanSM channels to passive, i.e. receive only
@@ -579,8 +604,12 @@ Std_ReturnType CanSM_SetBaudrate(NetworkHandleType Network, uint16 BaudRateConfi
  * @trace       CPD-70685
  */
 Std_ReturnType CanSM_SetEcuPassive(boolean CanSM_Passive);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 #endif
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       Scheduled function of the CanSM
  * @param[in]   netIndex   : Affected CAN network
@@ -589,7 +618,11 @@ Std_ReturnType CanSM_SetEcuPassive(boolean CanSM_Passive);
  * @trace       CPD-70694
  */
 void CanSM_MainFunction(CanSM_NetworkIndexType netIndex);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This function shall be called by EcuM when a wakeup source shall be started.
  * @param[in]   network   : Affected CAN network
@@ -601,7 +634,11 @@ void CanSM_MainFunction(CanSM_NetworkIndexType netIndex);
  * @trace       CPD-70681
  */
 Std_ReturnType CanSM_StartWakeupSource(NetworkHandleType network);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
+#define CANSM_START_SEC_CODE
+#include "CanSM_MemMap.h"
 /**
  * @brief       This function shall be called by EcuM when a wakeup source shall be stopped
  * @param[in]   network   : Affected CAN network
@@ -613,6 +650,8 @@ Std_ReturnType CanSM_StartWakeupSource(NetworkHandleType network);
  * @trace       CPD-70682
  */
 Std_ReturnType CanSM_StopWakeupSource(NetworkHandleType network);
+#define CANSM_STOP_SEC_CODE
+#include "CanSM_MemMap.h"
 
 #ifdef __cplusplus
 }

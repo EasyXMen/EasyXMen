@@ -12,24 +12,23 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
-********************************************************************************
-**                                                                            **
-**  FILENAME    : Os_ECode.h                                                  **
-**                                                                            **
-**  Created on  :                                                             **
-**  Author      : i-soft-os                                                   **
-**  Vendor      :                                                             **
-**  DESCRIPTION :                                                             **
-**                                                                            **
-**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
-**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
-**                                                                            **
-*******************************************************************************/
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_ECode.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for error code definitions
+ **
+ ***********************************************************************************************************************/
 
 #ifndef OS_ECODE_H
 #define OS_ECODE_H
-/*=======[M A C R O S]========================================================*/
-/* API services error type of STD OSEK */
+/* ===================================================== macros ===================================================== */
+/**
+ * @brief API services error type of STD OSEK.
+ */
+/* E_NOT_OK shall only be used for internal judgment within the OS, cannot be return to the user. */
 #define E_OS_ACCESS   1U
 #define E_OS_CALLEVEL 2U
 #define E_OS_ID       3U
@@ -39,7 +38,9 @@
 #define E_OS_STATE    7U
 #define E_OS_VALUE    8U
 
-/* API services error type of AUTOSAR, see 7.10 */
+/**
+ * @brief API services error type of AUTOSAR, see 7.10.
+ */
 #define E_OS_SERVICEID             9U
 #define E_OS_ILLEGAL_ADDRESS       11U
 #define E_OS_MISSINGEND            12U
@@ -54,16 +55,27 @@
 #define E_OS_INTERFERENCE_DEADLOCK 22U
 #define E_OS_NESTING_DEADLOCK      23U
 #define E_OS_SPINLOCK              24U
-#define E_OS_PARAM_POINTER         25U
 
-/* API services error type of IOC */
+/**
+ * @brief API services error type of IOC.
+ */
 #define IOC_E_OK        0U
-#define IOC_E_NOK       1U
 #define IOC_E_LOST_DATA 64U
 #define IOC_E_LIMIT     130U
 #define IOC_E_NO_DATA   131U
 #define IOC_E_LENGTH    132U
-#define E_OS_TIMEOUT    133U
 
-#endif /* OS_ECODE_H */
-/*=======[E N D   O F   F I L E]==============================================*/
+/**
+ * @brief RPC added.
+ */
+#define E_OS_TIMEOUT 133U
+
+/**
+ * @brief Barrier added.
+ */
+#define E_OS_DEADLOCK                   134U
+#define E_OS_SYS_NO_BARRIER_PARTICIPANT 135U
+
+#endif
+
+/*=======[E N D   O F   F I L E]============================================*/
